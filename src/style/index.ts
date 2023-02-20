@@ -1,1 +1,1 @@
-export default {}
+export const primaryColor ='rgb(22,93,255)';

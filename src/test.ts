@@ -1,5 +1,8 @@
 import { FASTElement, customElement, html } from '@microsoft/fast-element';
-import './components/button';
+import { provideArcoDesignSystem } from './arco-design-system';
+import { arcoButton } from  './components/button';
+
+provideArcoDesignSystem().register(arcoButton());
 
 const template = html<Test>`
   <a-button>你好</a-button>
