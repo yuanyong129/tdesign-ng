@@ -3,13 +3,15 @@ import { FoundationElement } from '@microsoft/fast-foundation';
 import { primaryColor } from '../style/index';
 
 const template = html<ArcoButton>`
-  <div class="arco-btn ${x => x.type}" style="color: ${x => x.color};"> 
+  <div class="${x => x.getClassName()}"> 
     <slot></slot>
   </div>
 `
 
+const prefix = 'arco-btn';
+
 const styles = css`
-  .arco-btn {
+  .${prefix} {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -23,25 +25,63 @@ const styles = css`
     transition: all .1s cubic-bezier(0,0,1,1);
     user-select: none;
   }
-  .primary {
+  .${prefix}-mini {
+    padding: 0 11px;
+    height: 24px;
+    border-radius: 2px;
+  }
+  .${prefix}-small {
+    padding: 0 15px;
+    height: 28px;
+    border-radius: 2px;
+  }
+  .${prefix}-medium {
     padding: 0 15px;
     height: 32px;
-    line-height: 32px;
     border-radius: 2px;
+  }
+  .${prefix}-large {
+    padding: 0 19px;
+    height: 36px;
+    border-radius: 2px;
+  }
+  
+  .${prefix}-outline  {
+    color: ${primaryColor};
+    background-color: white;
+    border: 1px solid ${primaryColor};
+  }
+
+  .${prefix}-outline:active  {
+    color: rgb(14, 66, 210);
+    border-color: rgb(14, 66, 210);
+  }
+
+  .${prefix}-primary {
     background-color: ${primaryColor};
+    color: white;
     border: 1px solid transparent;
   }
-  .primary:hover {
-    background-color: rgb(64,128,255) !important;
+  .${prefix}-primary:hover {
+    background-color: rgb(64,128,255);
+  }
+  .${prefix}-primary:active {
+    background-color: rgb(14, 66, 210);
   }
 `
 
-type ButtonType = 'primary' | 'secondary' | 'dashed' | 'outline' | 'text'
+type ButtonType = 'primary' | 'secondary' | 'dashed' | 'outline' | 'text';
+type ButtonSize = 'large' | 'medium' | 'small' | 'mini';
 
 export class ArcoButton extends FoundationElement {
-  @attr color: string = '#FFFFFF';
 
   @attr type: ButtonType = 'primary';
+
+  @attr size: ButtonSize = 'medium';
+
+  getClassName = () => {
+    return `arco-btn arco-btn-${this.type} arco-btn-${this.size}`;
+  }
 }
 
 

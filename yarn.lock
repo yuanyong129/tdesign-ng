@@ -43,6 +43,24 @@
     tabbable "^5.2.0"
     tslib "^1.13.0"
 
+"@microsoft/fast-foundation@^2.47.1-0":
+  version "2.47.1-0"
+  resolved "https://registry.yarnpkg.com/@microsoft/fast-foundation/-/fast-foundation-2.47.1-0.tgz#ccb26e45464916518e158737d3e9a37168cf5439"
+  integrity sha512-Ehl3hDClql91j/LnugpmDUzBo3pSo2KvqqAG53zghPgf70ifoWI1XJ3mKyn8FkH9/BCwvEgjbCbaezAwRs++jA==
+  dependencies:
+    "@microsoft/fast-element" "^1.11.0"
+    "@microsoft/fast-web-utilities" "^5.4.1"
+    tabbable "^5.2.0"
+    tslib "^1.13.0"
+
+"@microsoft/fast-react-wrapper@^0.3.16-0":
+  version "0.3.16-0"
+  resolved "https://registry.yarnpkg.com/@microsoft/fast-react-wrapper/-/fast-react-wrapper-0.3.16-0.tgz#908119d5b9eb1afad19fcdfe7f75a652815a63f9"
+  integrity sha512-WpkWFzzwEaY16rQKwY0QCKe8fEA83eQJP29C80uBVNtBCHLQwzZdvr0Wiq3dFkOTVGLgjv/AtQPs6mA3abVLZQ==
+  dependencies:
+    "@microsoft/fast-element" "^1.11.0"
+    "@microsoft/fast-foundation" "^2.47.1-0"
+
 "@microsoft/fast-web-utilities@^5.4.1":
   version "5.4.1"
   resolved "https://registry.yarnpkg.com/@microsoft/fast-web-utilities/-/fast-web-utilities-5.4.1.tgz#8e3082ee2ff2b5467f17e7cb1fb01b0e4906b71f"
