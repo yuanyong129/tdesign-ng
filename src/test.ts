@@ -8,6 +8,7 @@ const template = html<Test>`
   <div>
     <a-button type="outline">Outline</a-button>
     <a-button size="large">Primary</a-button>
+    <a-button href="https://cn.bing.com">Bing</a-button>
   </div>
 `;
 
