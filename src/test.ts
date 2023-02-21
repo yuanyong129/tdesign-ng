@@ -13,7 +13,7 @@ const template = html<Test>`
 
 const styles = css`
   a-button {
-    margin-top: 100px;
+    margin-top: 10px;
     margin-right: 8px;
   }
 `;
