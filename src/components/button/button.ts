@@ -1,4 +1,4 @@
-import { html, attr } from '@microsoft/fast-element';
+import { html, attr, observable, when } from '@microsoft/fast-element';
 import { FoundationElement } from '@microsoft/fast-foundation';
 import { prefixCls, styles } from './button.style';
 import { Size, Status } from '../_utils/constant';
@@ -12,37 +12,33 @@ const loadingIcon = html<ArcoButton>`
   <span></span>
 `
 
-/**
- * 超链接按钮
- **/
-const hrefButton = html<ArcoButton>`
-  <a class="${x => x.getClassName().join(' ')}"
-     href="${x => (x.disabled || x.loading ? undefined : x.href )}"
-     click="${x => x.handleClick}">
-     ${x => x.loading ? loadingIcon : '' }
-    <slot></slot>
-  </a>
-`
-/**
- * 正常按钮
- **/
-const normalButton = html<ArcoButton>`
-  <button class="${x => x.getClassName().join(' ')}"
-          type="${x => x.htmlType}"
-          disabled="${x => x.disabled}"
-          onclick="${x => x.handleClick()}">
-    ${x => x.loading ? loadingIcon : '' }
-    <slot></slot>
-  </button>
-`
-
 const template = html<ArcoButton>`
-  ${ x=> x.href ? hrefButton : normalButton } 
-`
+  <!-- 超链接按钮 -->
+  ${when(x => x.href,
+    html<ArcoButton>`
+      <a class="${x => x.getClassName()}"
+        href="${x => (x.disabled || x.loading ? undefined : x.href )}"
+        @click=${x => x.handleClick()}>
+        ${x => x.loading ? loadingIcon : '' }
+        <slot></slot>
+      </a>
+    `)}
+  <!-- 普通按钮 -->
+  ${when(x => !x.href,
+    html<ArcoButton>`
+      <button class="${x => x.getClassName()}"
+              type="${x => x.htmlType}"
+              :disabled=${x => x.disabled}
+              @click=${x => x.handleClick()}>
+        ${x => x.loading ? loadingIcon : '' }
+        <slot></slot>
+      </button>
+    `)}
+`;
 
 export class ArcoButton extends FoundationElement {
 
-  @attr type: ButtonTypes = 'primary';
+  @attr type: ButtonTypes = 'secondary';
 
   @attr shape: ButtonShapes = 'square';
 
@@ -52,7 +48,9 @@ export class ArcoButton extends FoundationElement {
    
   @attr long: Boolean = false;
 
-  @attr loading: Boolean = false;
+  @attr
+  @observable
+  loading: Boolean = false;
 
   @attr disabled: Boolean = false;
 
@@ -71,7 +69,7 @@ export class ArcoButton extends FoundationElement {
       this.loading ? `${prefixCls}-loading`: '',
       this.disabled ? `${prefixCls}-disabled` : '',
       isString(this.href) ? `${prefixCls}-link` : ''
-    ];
+    ].join(' ');
   }
 
   handleClick = () => {
@@ -84,7 +82,6 @@ export const arcoButton = ArcoButton.compose({
   template,
   styles,
   shadowOptions: {
-    mode: 'closed',
     delegatesFocus: true
   }
 })
