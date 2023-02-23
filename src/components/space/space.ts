@@ -1,17 +1,15 @@
+/**
+ * @todo 优化space为子元素嵌套父级div的渲染方式
+ */
+
 import { FoundationElement } from '@microsoft/fast-foundation';
-import { attr, html, children } from '@microsoft/fast-element';
+import { attr, html } from '@microsoft/fast-element';
 import { prefixCls, styles } from './space.style';
 import { isArray, isNumber } from '../_utils/is';
 import { Direction, Size } from '../_utils/constant';
 
 type SpaceAlign = 'start' | 'end' | 'center' | 'baseline';
 type SpaceSize = number | Size;
-
-const template = html<ArcoSpace>`
-  <div class=${x => x.cls()}>
-    ${children('getMargin')}
-  </div>
-`;
 
 class ArcoSpace extends FoundationElement {
   /**
@@ -33,16 +31,38 @@ class ArcoSpace extends FoundationElement {
   
   connectedCallback() {
     super.connectedCallback();
-    console.log('space is now connected to the DOM');
+
+    const children = this.domChildren();
+
+    this.template = html`
+      <div class="${this.cls()}">
+        ${children.map((item, index) => html`
+          <div
+            class="${prefixCls}-item"
+            style="${this.getMarginStyle(index === children.length - 1)}"
+          >
+            ${item.outerHTML}
+          </div>
+        `.html).join(' ') }
+      </div>
+    `
+  }
+
+  mergedAlign = () => {
+    return this.align ?? (this.direction === 'horizontal' ? 'center' : '');
+  }
+
+  domChildren () {
+    return Array.from(this.children);
   }
 
   cls = () => {
     return [
       prefixCls,
       this.direction && `${prefixCls}-${this.direction}`,
-      this.align && `${prefixCls}-align-${this.align}`,
-      this.wrap && `${prefixCls}-wrap`,
-      this.fill && `${prefixCls}-fill`
+      this.align ? `${prefixCls}-align-${this.align}` : '',
+      this.wrap ? `${prefixCls}-wrap` : '',
+      this.fill ? `${prefixCls}-fill` : ''
     ].join(' ');
   }
 
@@ -65,7 +85,7 @@ class ArcoSpace extends FoundationElement {
   }
 
   getMarginStyle = (isLast: boolean) => {
-    const style: { marginRight?: string, marginBottom?: string } = {};
+    let style = '';
 
     const marginRight = `${this.getMargin(
       isArray(this.size) ? this.size[0] : this.size
@@ -75,27 +95,25 @@ class ArcoSpace extends FoundationElement {
     )}px`;
 
     if (isLast) {
-      return this.wrap ? { marginBottom } : {};
+      return this.wrap ? { marginBottom } : '';
     }
 
     if (this.direction === 'horizontal') {
-      style.marginRight = marginRight;
+      style = `margin-right: ${marginRight};`;
     }
     if (this.direction === 'vertical' || this.wrap) {
-      style.marginBottom = marginBottom;
+      style = `margin-bottom: ${marginBottom};`;
     }
-    
+
     return style;
-  } 
+  }
 }
 
-export const arcoSpace  = () => {
-  return ArcoSpace.compose({
-    baseName: 'space',
-    template,
-    styles,
-    shadowOptions: {
-      delegatesFocus: true
-    }
-  }) 
-} 
+export const arcoSpace = ArcoSpace.compose({
+  baseName: 'space',
+  // template,
+  styles,
+  shadowOptions: {
+    delegatesFocus: true
+  }
+});

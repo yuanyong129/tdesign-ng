@@ -81,7 +81,7 @@ const secondaryStatusStyles = ['success', 'warning', 'danger'].map(item => css`
     background-color: ${getDefaultColor('--color-'+ item + '-light-3')};
   }
 `);
-console.log(secondaryStatusStyles)
+
 /** 次级按钮样式 */
 const secondaryBtnStyles = css`
   .${prefixCls}-secondary {

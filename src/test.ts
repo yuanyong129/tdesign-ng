@@ -1,10 +1,10 @@
-import { FASTElement, customElement, html, css } from '@microsoft/fast-element';
+import { FASTElement, customElement, html } from '@microsoft/fast-element';
 import { provideArcoDesignSystem, arcoButton, arcoSpace } from './index';
 
 provideArcoDesignSystem().register(arcoButton(), arcoSpace());
 
 const template = html<Test>`
-  <div> 测试用代码 </div>
+  <!-- <a-space> 测试用代码 </a-space> -->
   <div class="button-demo">
     <div>按钮大小</div>
     <a-button type="primary" size="mini">Primary</a-button>
@@ -20,7 +20,7 @@ const template = html<Test>`
     <a-button type="outline">Outline</a-button>
     <a-button type="text">Text</a-button>
   </div>
-  <div class="button-demo">
+  <!-- <a-space class="button-demo" direction="vertical">
     <div>按钮状态</div>
     <a-space>
       <a-button type="primary" status="success">Primary</a-button>
@@ -37,33 +37,27 @@ const template = html<Test>`
       <a-button type="text" status="warning">Text</a-button>
     </a-space>
     <a-space>
-      <a-button type="primary" status="danger">Primary</a-button>
+      <div>
+        <a-button type="primary" status="danger">Primary</a-button>
+      </div>
       <a-button status="danger" >Secondary</a-button>
       <a-button type="dashed" status="danger">Dashed</a-button>
       <a-button type="outline" status="danger">Outline</a-button>
       <a-button type="text" status="danger">Text</a-button>
     </a-space>
-  </div>
+  </a-space> -->
   <div>
     <div>间距</div>
     <a-space>
-      <a-button type="outline">Outline</a-button>
-      <a-button size="large">Primary</a-button>
+      aa
+      <a-space>b</a-space>
     </a-space>
   </div>
-`;
-
-const styles = css`
-  .button-demo a-button {
-    margin-top: 10px;
-    margin-right: 8px;
-  }
 `;
 
 @customElement({
   name: 'global-test',
   template,
-  styles
 })
 export class Test extends FASTElement {
 

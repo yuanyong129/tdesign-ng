@@ -58,6 +58,7 @@ export class ArcoButton extends FoundationElement {
 
   @attr href?: String = undefined;
 
+
   getClassName = () => {
     return [
       prefixCls,
@@ -84,4 +85,4 @@ export const arcoButton = ArcoButton.compose({
   shadowOptions: {
     delegatesFocus: true
   }
-})
+});
