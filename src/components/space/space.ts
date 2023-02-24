@@ -1,5 +1,6 @@
 /**
  * @todo 优化space为子元素嵌套父级div的渲染方式
+ * @todo 处理无法获取纯文本子元素的问题，文本无法显示
  */
 
 import { FoundationElement } from '@microsoft/fast-foundation';
@@ -7,6 +8,7 @@ import { attr, html } from '@microsoft/fast-element';
 import { prefixCls, styles } from './space.style';
 import { isArray, isNumber } from '../_utils/is';
 import { Direction, Size } from '../_utils/constant';
+import { getAllElements } from '../_utils/web-utils';
 
 type SpaceAlign = 'start' | 'end' | 'center' | 'baseline';
 type SpaceSize = number | Size;
@@ -28,11 +30,13 @@ class ArcoSpace extends FoundationElement {
   @attr wrap: boolean = false;
 
   @attr fill: boolean = false;
-  
+
   connectedCallback() {
     super.connectedCallback();
 
     const children = this.domChildren();
+
+    console.log('allchildren', getAllElements(Array.from(this.childNodes)), this.childNodes)
 
     this.template = html`
       <div class="${this.cls()}">
@@ -47,7 +51,7 @@ class ArcoSpace extends FoundationElement {
       </div>
     `
   }
-
+  
   mergedAlign = () => {
     return this.align ?? (this.direction === 'horizontal' ? 'center' : '');
   }

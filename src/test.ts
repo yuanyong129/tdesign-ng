@@ -47,11 +47,15 @@ const template = html<Test>`
     </a-space>
   </a-space> -->
   <div>
-    <div>间距</div>
+    <div>间距\/n</div>
     <a-space>
       aa
-      <a-space>b</a-space>
-    </a-space>
+      <div>bb</div>
+      cc
+      <span>dd</span>
+      ee &nbsp; \n
+      <a-button status="danger" >Secondary</a-button>
+      <a-space>b</a-space></a-space>
   </div>
 `;
 
