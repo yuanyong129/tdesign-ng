@@ -1,6 +1,5 @@
 /**
  * @todo 优化space为子元素嵌套父级div的渲染方式
- * @todo 处理无法获取纯文本子元素的问题，文本无法显示
  */
 
 import { FoundationElement } from '@microsoft/fast-foundation';
@@ -33,10 +32,11 @@ class ArcoSpace extends FoundationElement {
 
   connectedCallback() {
     super.connectedCallback();
+    this.render();
+  }
 
-    const children = this.domChildren();
-
-    console.log('allchildren', getAllElements(Array.from(this.childNodes)), this.childNodes)
+  render () {
+    const children = getAllElements(Array.from(this.childNodes), true) as Element[];
 
     this.template = html`
       <div class="${this.cls()}">
@@ -45,7 +45,7 @@ class ArcoSpace extends FoundationElement {
             class="${prefixCls}-item"
             style="${this.getMarginStyle(index === children.length - 1)}"
           >
-            ${item.outerHTML}
+            ${item.outerHTML ?? item.textContent}
           </div>
         `.html).join(' ') }
       </div>
@@ -115,7 +115,6 @@ class ArcoSpace extends FoundationElement {
 
 export const arcoSpace = ArcoSpace.compose({
   baseName: 'space',
-  // template,
   styles,
   shadowOptions: {
     delegatesFocus: true
