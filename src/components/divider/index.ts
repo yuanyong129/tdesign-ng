@@ -1,0 +1,1 @@
+export { arcoDivider } from './divider';

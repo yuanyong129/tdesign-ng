@@ -1,7 +1,7 @@
 import { FASTElement, customElement, html } from '@microsoft/fast-element';
-import { provideArcoDesignSystem, arcoButton, arcoSpace } from './index';
+import { provideArcoDesignSystem, allComponents } from './index';
 
-provideArcoDesignSystem().register(arcoButton(), arcoSpace());
+provideArcoDesignSystem().register(allComponents);
 
 const template = html<Test>`
   <a-space direction="vertical">
@@ -53,9 +53,8 @@ const template = html<Test>`
   </a-space>
 
   <div>
-    <div>间距</div>
     <a-space align="center">
-      aa
+      Space:
       <div>bb</div>
       cc
       <span>dd</span>

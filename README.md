@@ -1,2 +1,2 @@
 # arco-design-fast
-a ui library implements arco-design use microsoft's FAST
+A microsoft's FAST UI library based on Arco Design System 
