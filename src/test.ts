@@ -14,7 +14,9 @@ const template = html<Test>`
       <a-button type="primary" size="large">Primary</a-button>
     </div>
   </a-space>
-  
+  <a-divider>
+    <div> aa </div>
+  </a-divider>
   <a-space>
     <div>按钮样式</div>
     <a-button type="primary">Primary</a-button>
