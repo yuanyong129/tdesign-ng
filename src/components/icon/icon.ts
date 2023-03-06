@@ -1,20 +1,45 @@
+import { attr, ViewTemplate } from '@microsoft/fast-element';
 import { FoundationElement } from '@microsoft/fast-foundation';
-import { html } from '@microsoft/fast-element';
-import { styles } from './icon.style';
-
-const template = html<ArcoIcon>`
-  <div></div>
-`;
+import { isNumber } from '../_utils/is';
+import { prefixCls, styles } from './icon.style';
 
 export class ArcoIcon extends FoundationElement {
+  @attr
+  type?: string = undefined;
+  @attr
+  size?: number | string = undefined;
+  @attr
+  rotate?: number = 0;
+  @attr
+  spin?: boolean = false;
 
+  cls = () => {
+    return [
+      prefixCls,
+      this.spin ? `${prefixCls}-loading` : '',
+      this.type || ''
+    ].join(' ');
+  }
+
+  innerStyle = () => {
+    let styles = '';
+
+    if (this.size) {
+      styles += `font-size: ${isNumber(this.size) ? `${this.size}px` : this.size};`;
+    }
+    if (this.rotate) {
+      styles += `transform: rotate(${this.rotate}deg);`;
+    }
+
+    return styles;
+  }
 }
 
-export const arcoIcon = ArcoIcon.compose({
-  baseName: 'icon',
-  template,
+export const arcoIcon = (baseName: string, template: ViewTemplate) =>  ArcoIcon.compose({
+  baseName,
   styles,
+  template,
   shadowOptions: {
     delegatesFocus: false
   }
-})
+});

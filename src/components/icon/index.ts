@@ -1,13 +1,16 @@
 
 import type { Container } from '@microsoft/fast-foundation';
+import { loadingTemplate } from './icon.templates';
 import { arcoIcon } from './icon';
 
+const iconLoading = arcoIcon('loading', loadingTemplate);
+
 export {
-  arcoIcon
+  iconLoading
 }
 
 export const allIcons: Record<string, Function> = {
-  arcoIcon,
+  iconLoading,
   register(container?: Container, ...rest: any[]) {
     if (!container) {
       return;

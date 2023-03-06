@@ -15,6 +15,9 @@ export const styles = css`
   .${prefixCls}-vertical {
     flex-direction: column;
   }
+  .${prefixCls}-vertical .${prefixCls}-item {
+    width: 100%;
+  }
   .${prefixCls}-fill {
     display: flex;
   }

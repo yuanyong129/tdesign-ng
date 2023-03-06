@@ -11,6 +11,58 @@ const colorFill2 = cssPartial`background-color: ${getDefaultColor('--color-fill-
 const colorFill3 = cssPartial`background-color: ${getDefaultColor('--color-fill-3')};`;
 const colorFill4 = cssPartial`background-color: ${getDefaultColor('--color-fill-4')};`;
 
+/** 带状态的主要按钮样式 */
+const primaryStatusStyles = ['success', 'warning', 'danger'].map(item => css`
+  .${prefixCls}-primary.${prefixCls}-status-${item} {
+    background-color: ${getTypeColors('--'+ item + '-6')};
+  }
+  .${prefixCls}-primary.${prefixCls}-status-${item}:hover {
+    background-color: ${getTypeColors('--'+ item + '-5')};
+  }
+  .${prefixCls}-primary.${prefixCls}-status-${item}:active {
+    background-color: ${getTypeColors('--'+ item + '-7')};
+  }
+`);
+
+/** 带状态的次级按钮样式 */
+const secondaryStatusStyles = ['success', 'warning', 'danger'].map(item => css`
+  .${prefixCls}-secondary.${prefixCls}-status-${item} {
+    color: ${getTypeColors('--'+ item + '-6')};
+    background-color: ${getDefaultColor('--color-'+ item + '-light-1')};
+  }
+  .${prefixCls}-secondary.${prefixCls}-status-${item}:hover {
+    background-color: ${getDefaultColor('--color-'+ item + '-light-2')};
+  }
+  .${prefixCls}-secondary.${prefixCls}-status-${item}:active {
+    background-color: ${getDefaultColor('--color-'+ item + '-light-3')};
+  }
+`);
+
+/** 带状态的虚线按钮样式 */
+const dashedStatusStyles = ['success', 'warning', 'danger'].map(item => css`
+  .${prefixCls}-dashed.${prefixCls}-status-${item} {
+    color: ${getTypeColors('--'+ item + '-6')};
+    background-color: ${getDefaultColor('--color-'+ item + '-light-1')};
+    border-color: ${ getDefaultColor('--color-'+ item + '-light-2') };
+  }
+  .${prefixCls}-dashed.${prefixCls}-status-${item}:hover {
+    background-color: ${getDefaultColor('--color-'+ item + '-light-2')};
+    border-color: ${ getDefaultColor('--color-'+ item + '-light-3') };
+  }
+  .${prefixCls}-dashed.${prefixCls}-status-${item}:active {
+    background-color: ${getDefaultColor('--color-'+ item + '-light-3')};
+    border-color: ${ getDefaultColor('--color-'+ item + '-light-4') };
+  }
+`);
+
+/** 带状态的文字按钮样式 */
+const textStatusStyles = ['success', 'warning', 'danger'].map(item => css`
+  .${prefixCls}-text.${prefixCls}-status-${item} {
+    color: ${getTypeColors('--'+ item + '-6')};
+  }
+`);
+
+
 /** 按钮大小样式表 */
 const btnSizeStyles = css`
   .${prefixCls}-size-mini {
@@ -39,17 +91,7 @@ const btnSizeStyles = css`
   }
 `;
 
-const primaryStatusStyles = ['success', 'warning', 'danger'].map(item => css`
-  .${prefixCls}-primary.${prefixCls}-status-${item} {
-    background-color: ${getTypeColors('--'+ item + '-6')};
-  }
-  .${prefixCls}-primary.${prefixCls}-status-${item}:hover {
-    background-color: ${getTypeColors('--'+ item + '-5')};
-  }
-  .${prefixCls}-primary.${prefixCls}-status-${item}:active {
-    background-color: ${getTypeColors('--'+ item + '-7')};
-  }
-`);
+
 
 /** 普通按钮样式 */
 const primaryBtnStyles = css`
@@ -69,19 +111,6 @@ const primaryBtnStyles = css`
   ${primaryStatusStyles[2]}
 `
 
-const secondaryStatusStyles = ['success', 'warning', 'danger'].map(item => css`
-  .${prefixCls}-secondary.${prefixCls}-status-${item} {
-    color: ${getTypeColors('--'+ item + '-6')};
-    background-color: ${getDefaultColor('--color-'+ item + '-light-1')};
-  }
-  .${prefixCls}-secondary.${prefixCls}-status-${item}:hover {
-    background-color: ${getDefaultColor('--color-'+ item + '-light-2')};
-  }
-  .${prefixCls}-secondary.${prefixCls}-status-${item}:active {
-    background-color: ${getDefaultColor('--color-'+ item + '-light-3')};
-  }
-`);
-
 /** 次级按钮样式 */
 const secondaryBtnStyles = css`
   .${prefixCls}-secondary {
@@ -100,7 +129,23 @@ const secondaryBtnStyles = css`
   ${secondaryStatusStyles[0]}
   ${secondaryStatusStyles[1]}
   ${secondaryStatusStyles[2]}
-`
+`;
+
+const outlineStatusStyles = ['success', 'warning', 'danger'].map(item => css`
+  .${prefixCls}-outline.${prefixCls}-status-${item} {
+    color: ${getTypeColors('--'+ item + '-6')};
+    border-color: ${getTypeColors('--'+ item + '-6')};
+  }
+  .${prefixCls}-outline.${prefixCls}-status-${item}:hover {
+    color: ${getTypeColors('--'+ item + '-5')};
+    border-color: ${getTypeColors('--'+ item + '-5')};
+  }
+  .${prefixCls}-outline.${prefixCls}-status-${item}:active {
+    color: ${getTypeColors('--'+ item + '-7')};
+    border-color: ${getTypeColors('--'+ item + '-7')};
+  }
+`);
+
 /** 边框按钮样式 */
 const outlineBtnStyles = css`
   .${prefixCls}-outline  {
@@ -117,7 +162,13 @@ const outlineBtnStyles = css`
     color: ${getTypeColors('--primary-7')};
     border-color: ${getTypeColors('--primary-7')};
   }
+
+  ${outlineStatusStyles[0]}
+  ${outlineStatusStyles[1]}
+  ${outlineStatusStyles[2]}
 `;
+
+
 /** 虚线按钮样式 */
 const dashedBtnStyles = css`
   .${prefixCls}-dashed {
@@ -133,6 +184,9 @@ const dashedBtnStyles = css`
     ${colorFill4}
     border-color: ${getDefaultColor('--color-neutral-5')};
   }
+  ${dashedStatusStyles[0]}
+  ${dashedStatusStyles[1]}
+  ${dashedStatusStyles[2]}
 `;
 /** 文字按钮样式 */
 const textBtnStyles = css`
@@ -149,6 +203,9 @@ const textBtnStyles = css`
     ${colorFill3}
     border-color: transparent;
   }
+  ${textStatusStyles[0]}
+  ${textStatusStyles[1]}
+  ${textStatusStyles[2]}
 `;
 
 export const styles = css`

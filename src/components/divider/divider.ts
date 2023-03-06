@@ -1,3 +1,6 @@
+/**
+ * @todo 增加文字slot
+ */
 import { FoundationElement } from '@microsoft/fast-foundation';
 import { html, slotted, attr, observable } from '@microsoft/fast-element';
 import { styles, prefixCls } from './divider.style';
@@ -18,9 +21,9 @@ export class ArcoDivider extends FoundationElement {
 
   @attr type: 'solid' | 'dashed' | 'dotted' | 'double' = 'solid';
 
-  @attr size: Number = 2;
+  @attr size: Number = 1;
 
-  @attr margin: number | string = '';
+  @attr margin: number | string = 20;
 
   @observable isHorizontal: boolean = false;
 
@@ -34,12 +37,12 @@ export class ArcoDivider extends FoundationElement {
   mergedStyles () {
     let styles: string = '';
     const size = isNumber(this.size) ? `${this.size}px` : this.size;
-    styles += this.isHorizontal ? `border-left-width: ${size};` : `border-bottom-width: ${size};`
-    styles += this.isHorizontal ? `border-left-style: ${this.type}` : `border-bottom-style: ${this.type}`;
+    styles += this.isHorizontal ? `border-bottom-width: ${size};` : `border-left-width: ${size};`;
+    styles += this.isHorizontal ? `border-bottom-style: ${this.type};` :  `border-left-style: ${this.type};`;
     const margin = isNumber(this.margin)
           ? `${this.margin}px`
           : this.margin;
-    styles += this.isHorizontal ? `${margin} 0` : `0 ${margin}`;
+    styles += this.isHorizontal ? `margin: ${margin} 0;` : `margin: 0 ${margin};`;
 
     return styles
   }
@@ -48,7 +51,7 @@ export class ArcoDivider extends FoundationElement {
     return [
       prefixCls,
       `${prefixCls}-${this.direction}`,
-    ].join('')
+    ].join(' ');
   }
 }
 

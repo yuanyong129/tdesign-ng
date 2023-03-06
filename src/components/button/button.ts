@@ -1,3 +1,9 @@
+/**
+ * @todo 按钮disabled功能+样式
+ * @todo icon-按钮
+ * @todo 加载中按钮
+ * @todo 按钮形状
+ */
 import { html, attr, observable, when } from '@microsoft/fast-element';
 import { FoundationElement } from '@microsoft/fast-foundation';
 import { prefixCls, styles } from './button.style';

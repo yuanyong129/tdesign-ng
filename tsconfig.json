@@ -16,6 +16,7 @@
       "skipLibCheck": true,
       "experimentalDecorators": true,
     },
+    "types": ["node"],
     "include": ["src"]
   }
   

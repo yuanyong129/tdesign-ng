@@ -64,7 +64,7 @@ class ArcoSpace extends FoundationElement {
     return [
       prefixCls,
       this.direction && `${prefixCls}-${this.direction}`,
-      this.align ? `${prefixCls}-align-${this.align}` : '',
+      this.align ? `${prefixCls}-align-${this.mergedAlign()}` : '',
       this.wrap ? `${prefixCls}-wrap` : '',
       this.fill ? `${prefixCls}-fill` : ''
     ].join(' ');
