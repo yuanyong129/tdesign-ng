@@ -25,7 +25,8 @@ export class ArcoIcon extends FoundationElement {
     let styles = '';
 
     if (this.size) {
-      styles += `font-size: ${isNumber(this.size) ? `${this.size}px` : this.size};`;
+      const size = isNumber(this.size) ? `${this.size}px` : this.size;
+      styles += `width: ${size}; height: ${size}`;
     }
     if (this.rotate) {
       styles += `transform: rotate(${this.rotate}deg);`;

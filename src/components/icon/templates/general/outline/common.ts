@@ -1,8 +1,8 @@
 import { html } from '@microsoft/fast-element';
-import { ArcoIcon } from './icon';
+import { ArcoIcon } from '../../../icon';
 
-export const loadingTemplate = html<ArcoIcon>`
+export const commonTemplate = html<ArcoIcon>`
   <svg class="${x => x.cls()}" style="${x => x.innerStyle()}" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="4">
-    <path d="M42 24C42 33.9411 33.9411 42 24 42C14.0589 42 6 33.9411 6 24C6 14.0589 14.0589 6 24 6" stroke-linecap="butt"></path>
+    <path d="M24 23L7.65207 14.3452M24 23L40.3656 14.3358M24 23V42.438M7 14V34L24 43L41 34V14L24 5L7 14Z" stroke-linecap="butt"></path>
   </svg>
 `;

@@ -4,5 +4,7 @@ import { getPrefixCls } from '../_utils/global-config';
 export const prefixCls = getPrefixCls('icon');
 
 export const styles = css`
-
+  .${prefixCls} {
+    color: #4e5969;
+  }
 `;
