@@ -16,6 +16,26 @@ import { commonTemplate } from './outline/common';
 import { compassTemplate } from './outline/compass';
 import { computerTemplate } from './outline/computer';
 import { copyrightTemplate } from './outline/copyright';
+import { dashboardTemplate } from './outline/dashboard';
+import { desktopTemplate } from './outline/desktop';
+import { diceTemplate } from './outline/dice';
+import { dragDotTemplate } from './outline/drag-dot';
+import { dragDotVerticalTemplate } from './outline/drag-dot-vertical';
+import { driveFileTemplate } from './outline/drive-file';
+import { earTemplate } from './outline/ear';
+import { emailTemplate } from './outline/email';
+import { emptyTemplate } from './outline/empty';
+import { experimentTemplate } from './outline/experiment';
+import { fileTemplate } from './outline/file';
+import { fileAudioTemplate } from './outline/file-audio';
+import { fileImageTemplate } from './outline/file-image';
+import { filePdfTemplate } from './outline/file-pdf';
+import { fileVideoTemplate } from './outline/file-video';
+import { fireTemplate } from './outline/fire';
+import { folderTemplate } from './outline/folder';
+import { folderAddTemplate } from './outline/folder-add';
+import { folderDeleteTemplate } from './outline/folder-delete';
+import { giftTemplate } from './outline/gift';
 import { loadingTemplate } from './outline/loading';
 
 const iconApps = arcoIcon('apps', appsTemplate);
@@ -35,6 +55,26 @@ const iconCommon = arcoIcon('common', commonTemplate);
 const iconCompass = arcoIcon('compass', compassTemplate);
 const iconComputer = arcoIcon('computer', computerTemplate);
 const iconCopyright = arcoIcon('copyright', copyrightTemplate);
+const iconDashboard = arcoIcon('dashboard', dashboardTemplate);
+const iconDesktop = arcoIcon('desktop', desktopTemplate);
+const iconDice = arcoIcon('dice', diceTemplate);
+const iconDragDotVertical = arcoIcon('drag-dot-vertical', dragDotVerticalTemplate);
+const iconDragDot = arcoIcon('drag-dot', dragDotTemplate);
+const iconDriveFile = arcoIcon('drive-file', driveFileTemplate);
+const iconEar = arcoIcon('ear', earTemplate);
+const iconEmail = arcoIcon('email', emailTemplate);
+const iconEmpty = arcoIcon('empty', emptyTemplate);
+const iconExperiment = arcoIcon('experiment', experimentTemplate);
+const iconFileAudio = arcoIcon('file-audio', fileAudioTemplate);
+const iconFileImage = arcoIcon('file-image', fileImageTemplate);
+const iconFilePdf = arcoIcon('file-pdf', filePdfTemplate);
+const iconFileVideo = arcoIcon('file-video', fileVideoTemplate);
+const iconFile = arcoIcon('file', fileTemplate);
+const iconFire = arcoIcon('fire', fireTemplate);
+const iconFolderAdd = arcoIcon('folder-add', folderAddTemplate);
+const iconFolderDelete = arcoIcon('folder-delete', folderDeleteTemplate);
+const iconFolder = arcoIcon('folder', folderTemplate);
+const iconGift = arcoIcon('gift', giftTemplate);
 const iconLoading = arcoIcon('loading', loadingTemplate);
 
 export {
@@ -55,5 +95,25 @@ export {
   iconCompass,
   iconComputer,
   iconCopyright,
+  iconDashboard,
+  iconDesktop,
+  iconDice,
+  iconDragDotVertical,
+  iconDragDot,
+  iconDriveFile,
+  iconEar,
+  iconEmail,
+  iconEmpty,
+  iconExperiment,
+  iconFileAudio,
+  iconFileImage,
+  iconFilePdf,
+  iconFileVideo,
+  iconFile,
+  iconFire,
+  iconFolderAdd,
+  iconFolderDelete,
+  iconFolder,
+  iconGift,
   iconLoading
 }

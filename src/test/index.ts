@@ -1,7 +1,7 @@
 import { FASTElement, customElement, html, css } from '@microsoft/fast-element';
 import { provideArcoDesignSystem, provideArcoIconDesignSystem, allComponents, allIcons } from '../index';
 import './icon';
-import { FASTRouter } from '@microsoft/fast-router';
+import { RouterConfiguration } from '@microsoft/fast-router';
 // import { fastDivider, provideFASTDesignSystem } from '@microsoft/fast-components';
 
 provideArcoDesignSystem().register(allComponents);

@@ -71,6 +71,86 @@ const template = html`
       <span>icon-copyright</span>
     </div>
     <div class="icon-item">
+      <icon-dashboard></icon-dashboard>
+      <span>icon-dashboard</span>
+    </div>
+    <div class="icon-item">
+      <icon-desktop></icon-desktop>
+      <span>icon-desktop</span>
+    </div>
+    <div class="icon-item">
+      <icon-dice></icon-dice>
+      <span>icon-dice</span>
+    </div>
+    <div class="icon-item">
+      <icon-drag-dot-vertical></icon-drag-dot-vertical>
+      <span>icon-drag-dot-vertical</span>
+    </div>
+    <div class="icon-item">
+      <icon-drag-dot></icon-drag-dot>
+      <span>icon-drag-dot</span>
+    </div>
+    <div class="icon-item">
+      <icon-drive-file></icon-drive-file>
+      <span>icon-drive-file</span>
+    </div>
+    <div class="icon-item">
+      <icon-ear></icon-ear>
+      <span>icon-ear</span>
+    </div>
+    <div class="icon-item">
+      <icon-email></icon-email>
+      <span>icon-email</span>
+    </div>
+    <div class="icon-item">
+      <icon-empty></icon-empty>
+      <span>icon-empty</span>
+    </div>
+    <div class="icon-item">
+      <icon-experiment></icon-experiment>
+      <span>icon-experiment</span>
+    </div>
+    <div class="icon-item">
+      <icon-file-audio></icon-file-audio>
+      <span>icon-file-audio</span>
+    </div>
+    <div class="icon-item">
+      <icon-file-image></icon-file-image>
+      <span>icon-file-image</span>
+    </div>
+    <div class="icon-item">
+      <icon-file-pdf></icon-file-pdf>
+      <span>icon-file-pdf</span>
+    </div>
+    <div class="icon-item">
+      <icon-file-video></icon-file-video>
+      <span>icon-file-video</span>
+    </div>
+    <div class="icon-item">
+      <icon-file></icon-file>
+      <span>icon-file</span>
+    </div>
+    <div class="icon-item">
+      <icon-fire></icon-fire>
+      <span>icon-fire</span>
+    </div>
+    <div class="icon-item">
+      <icon-folder-add></icon-folder-add>
+      <span>icon-folder-add</span>
+    </div>
+    <div class="icon-item">
+      <icon-folder-delete></icon-folder-delete>
+      <span>icon-folder-delete</span>
+    </div>
+    <div class="icon-item">
+      <icon-folder></icon-folder>
+      <span>icon-folder</span>
+    </div>
+    <div class="icon-item">
+      <icon-gift></icon-gift>
+      <span>icon-gift</span>
+    </div>
+    <div class="icon-item">
       <icon-loading></icon-loading>
       <span>icon-loading</span>
     </div>
