@@ -33,6 +33,11 @@
   resolved "https://registry.yarnpkg.com/@microsoft/fast-element/-/fast-element-1.11.0.tgz#494f6c87057bcbb42406982d68a92887d6b5acb1"
   integrity sha512-VKJYMkS5zgzHHb66sY7AFpYv6IfFhXrjQcAyNgi2ivD65My1XOhtjfKez5ELcLFRJfgZNAxvI8kE69apXERTkw==
 
+"@microsoft/fast-element@^1.12.0":
+  version "1.12.0"
+  resolved "https://registry.npmmirror.com/@microsoft/fast-element/-/fast-element-1.12.0.tgz#aabfc75518c3a9000710cce5f66dfc677de8c254"
+  integrity sha512-gQutuDHPKNxUEcQ4pypZT4Wmrbapus+P9s3bR/SEOLsMbNqNoXigGImITygI5zhb+aA5rzflM6O8YWkmRbGkPA==
+
 "@microsoft/fast-foundation@^2.46.2":
   version "2.47.0"
   resolved "https://registry.yarnpkg.com/@microsoft/fast-foundation/-/fast-foundation-2.47.0.tgz#a4cc8c5277e21d080215f5adcaed4266a8dd8a8e"
@@ -60,6 +65,13 @@
   dependencies:
     "@microsoft/fast-element" "^1.11.0"
     "@microsoft/fast-foundation" "^2.47.1-0"
+
+"@microsoft/fast-router@^0.4.8":
+  version "0.4.8"
+  resolved "https://registry.npmmirror.com/@microsoft/fast-router/-/fast-router-0.4.8.tgz#1185bf60bd357a3cb8f4724cb20af0289f9afe9c"
+  integrity sha512-YSEhqNqaSEbquHog01UJlLVgoOR4fHkw/m1+//S6g3turq8SjmzDMAawPUCKg8PZCbxLnQbTOGX4XKj7WsSEQg==
+  dependencies:
+    "@microsoft/fast-element" "^1.12.0"
 
 "@microsoft/fast-web-utilities@^5.4.1":
   version "5.4.1"

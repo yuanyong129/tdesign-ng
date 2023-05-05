@@ -3,5 +3,5 @@ import './test';
 
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <global-test></global-test>
+  <arco-design-fast-test></arco-design-fast-test>
 `;
