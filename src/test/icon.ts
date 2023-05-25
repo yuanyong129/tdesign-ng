@@ -151,8 +151,48 @@ const template = html`
       <span>icon-gift</span>
     </div>
     <div class="icon-item">
+      <icon-idcard></icon-idcard>
+      <span>icon-idcard</span>
+    </div>
+    <div class="icon-item">
+      <icon-image-close></icon-image-close>
+      <span>icon-image-close</span>
+    </div>
+    <div class="icon-item">
+      <icon-image></icon-image>
+      <span>icon-image</span>
+    </div>
+    <div class="icon-item">
+      <icon-interaction></icon-interaction>
+      <span>icon-interaction</span>
+    </div>
+    <div class="icon-item">
+      <icon-language></icon-language>
+      <span>icon-language</span>
+    </div>
+    <div class="icon-item">
+      <icon-layers></icon-layers>
+      <span>icon-layers</span>
+    </div>
+    <div class="icon-item">
+      <icon-layout></icon-layout>
+      <span>icon-layout</span>
+    </div>
+    <div class="icon-item">
       <icon-loading></icon-loading>
       <span>icon-loading</span>
+    </div>
+    <div class="icon-item">
+      <icon-location></icon-location>
+      <span>icon-location</span>
+    </div>
+    <div class="icon-item">
+      <icon-lock></icon-lock>
+      <span>icon-lock</span>
+    </div>
+    <div class="icon-item">
+      <icon-loop></icon-loop>
+      <span>icon-loop</span>
     </div>
   </div>
 `;

@@ -64,6 +64,9 @@ export class ArcoButton extends FoundationElement {
 
   @attr href?: String = undefined;
 
+  connectedCallback () {
+    super.connectedCallback();
+  }
 
   getClassName = () => {
     return [
@@ -80,7 +83,7 @@ export class ArcoButton extends FoundationElement {
   }
 
   handleClick = () => {
-    console.log('click')
+    console.log('click', this.type);
   }
 }
 

@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "./src/index.ts",
   "scripts": {
     "dev": "vite --port 8801 --host",
     "build": "tsc && vite build",
@@ -15,7 +16,7 @@
   "dependencies": {
     "@microsoft/fast-components": "^2.30.6",
     "@microsoft/fast-element": "^1.11.0",
-    "@microsoft/fast-react-wrapper": "^0.3.16-0",
+    "@microsoft/fast-react-wrapper": "^0.3.18",
     "@microsoft/fast-router": "^0.4.8",
     "@types/node": "^18.14.6",
     "@types/three": "^0.146.0",

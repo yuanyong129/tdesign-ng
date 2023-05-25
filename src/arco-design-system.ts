@@ -7,3 +7,11 @@ export function provideArcoDesignSystem(element?: Element) {
 export function provideArcoIconDesignSystem(element?: Element) {
   return DesignSystem.getOrCreate(element).withPrefix('icon');
 }
+
+// export function provideReactComponents(react: any) {
+//   const { wrap } = provideReactWrapper(react, provideFASTDesignSystem());
+//   const FastButton = wrap(fastButton());
+//   return {
+//     FastButton
+//   }
+// } 

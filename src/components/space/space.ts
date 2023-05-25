@@ -1,5 +1,6 @@
 /**
  * @todo 优化space为子元素嵌套父级div的渲染方式
+ * @tofix space在vue和react中无法正常工作
  */
 
 import { FoundationElement } from '@microsoft/fast-foundation';
@@ -11,6 +12,7 @@ import { getAllElements } from '../_utils/web-utils';
 
 type SpaceAlign = 'start' | 'end' | 'center' | 'baseline';
 type SpaceSize = number | Size;
+
 
 class ArcoSpace extends FoundationElement {
   /**
@@ -32,13 +34,13 @@ class ArcoSpace extends FoundationElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.render();
   }
 
-  render () {
+  resolveTemplate () {
+
     const children = getAllElements(Array.from(this.childNodes), true) as Element[];
 
-    this.template = html`
+    return html`
       <div class="${this.cls()}">
         ${children.map((item, index) => html`
           <div

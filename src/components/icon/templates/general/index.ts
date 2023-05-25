@@ -36,7 +36,17 @@ import { folderTemplate } from './outline/folder';
 import { folderAddTemplate } from './outline/folder-add';
 import { folderDeleteTemplate } from './outline/folder-delete';
 import { giftTemplate } from './outline/gift';
+import { idcardTemplate } from './outline/idcard';
+import { imageCloseTemplate } from './outline/image-close';
+import { imageTemplate } from './outline/image';
+import { interactionTemplate } from './outline/interaction';
+import { languageTemplate } from './outline/language';
+import { layersTemplate } from './outline/layers';
+import { layoutTemplate } from './outline/layout';
 import { loadingTemplate } from './outline/loading';
+import { locationTemplate } from './outline/location';
+import { lockTemplate } from './outline/lock';
+import { loopTemplate } from './outline/loop';
 
 const iconApps = arcoIcon('apps', appsTemplate);
 const iconArchive = arcoIcon('archive', archiveTemplate);
@@ -75,7 +85,17 @@ const iconFolderAdd = arcoIcon('folder-add', folderAddTemplate);
 const iconFolderDelete = arcoIcon('folder-delete', folderDeleteTemplate);
 const iconFolder = arcoIcon('folder', folderTemplate);
 const iconGift = arcoIcon('gift', giftTemplate);
+const iconIdcard = arcoIcon('idcard', idcardTemplate);
+const iconImageClose = arcoIcon('image-close', imageCloseTemplate);
+const iconImage = arcoIcon('image', imageTemplate);
+const iconInteraction = arcoIcon('interaction', interactionTemplate);
+const iconLanguage = arcoIcon('language', languageTemplate);
+const iconLayers = arcoIcon('layers', layersTemplate);
+const iconLayout = arcoIcon('layout', layoutTemplate);
 const iconLoading = arcoIcon('loading', loadingTemplate);
+const iconLocation = arcoIcon('location', locationTemplate);
+const iconLock = arcoIcon('lock', lockTemplate);
+const iconLoop = arcoIcon('loop', loopTemplate);
 
 export {
   iconApps,
@@ -115,5 +135,15 @@ export {
   iconFolderDelete,
   iconFolder,
   iconGift,
-  iconLoading
+  iconIdcard,
+  iconImageClose,
+  iconImage,
+  iconInteraction,
+  iconLanguage,
+  iconLayers,
+  iconLayout,
+  iconLoading,
+  iconLocation,
+  iconLock,
+  iconLoop
 }
