@@ -1,6 +1,6 @@
 import { FASTElement, html, css, customElement } from '@microsoft/fast-element';
 
-const template = html`
+const template = html<IconTest>`
   <div style="display: grid; width: 100%; grid-template-columns: repeat(18, 1fr);">
     <div class="icon-item">
       <icon-apps></icon-apps>

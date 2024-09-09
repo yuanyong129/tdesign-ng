@@ -1,5 +1,6 @@
 import { RouterConfiguration, Route } from '@microsoft/fast-router';
 import { Button } from './button';
+import { IconTest } from './icon';
 
 type RouteSettings = {
   public?: boolean
@@ -12,6 +13,7 @@ export class AppRouterConfiguration extends RouterConfiguration<RouteSettings> {
     this.routes.map(
       { path: '', redirect: 'button' },
       { path: 'button', title: 'button', element: new Button() },
+      { path: 'icons', title: 'icons', element: new IconTest() },
     //   { 
     //     path: 'account', 
     //     layout: anonymousLayout, 
