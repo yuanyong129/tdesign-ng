@@ -1,7 +1,7 @@
 // import './style.css'
-import './test';
+import './document';
 
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <arco-design-fast-test></arco-design-fast-test>
+  <arco-design-fast-doucment></arco-design-fast-test>
 `;

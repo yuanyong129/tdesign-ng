@@ -1,13 +1,7 @@
 import { FASTElement, customElement, html, css } from '@microsoft/fast-element';
-import { provideArcoDesignSystem, provideArcoIconDesignSystem, allComponents, allIcons } from '../index';
 import './icon';
-import { RouterConfiguration } from '@microsoft/fast-router';
-// import { fastDivider, provideFASTDesignSystem } from '@microsoft/fast-components';
 
-provideArcoDesignSystem().register(allComponents);
-provideArcoIconDesignSystem().register(allIcons);
-
-const template = html<Test>`
+const template = html<Button>`
   <a-space direction="vertical" fill="true">
     测试用代码
     <fast-divider></fast-divider>
@@ -76,10 +70,10 @@ const styles = css`
 `;
 
 @customElement({
-  name: 'arco-design-fast-test',
+  name: 'button-test',
   template,
   styles
 })
-export class Test extends FASTElement {
+export class Button extends FASTElement {
 
 }
