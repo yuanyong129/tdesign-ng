@@ -1,1 +1,0 @@
-export { arcoButton } from './button';

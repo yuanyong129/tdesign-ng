@@ -1,1 +1,0 @@
-export { arcoDivider } from './divider';

@@ -1,7 +1,6 @@
-// import './style.css'
-import './document';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { AppComponent } from './app/app.component';
 
-
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <arco-design-fast-doucment></arco-design-fast-test>
-`;
+bootstrapApplication(AppComponent, appConfig)
+  .catch((err) => console.error(err));

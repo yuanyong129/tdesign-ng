@@ -1,1 +1,0 @@
-export { arcoSpace } from './space';
