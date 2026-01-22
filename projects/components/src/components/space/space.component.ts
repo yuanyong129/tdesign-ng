@@ -4,7 +4,8 @@ import {
   Renderer2,
   computed,
   Input,
-  ContentChild
+  AfterViewChecked,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { getPrefixCls } from '../../utils/global-config';
@@ -20,16 +21,18 @@ type SpaceSize = number | 'mini' | 'small' | 'medium' | 'large';
     <div [class]="cls()" [style]="getSpaceStyle()" id="host">
       <ng-content></ng-content>
     </div>
-    <ng-content #splitContent select="[split]" hidden></ng-content>
+    <div id="splitContent" style="display: none;">
+      <ng-content select="[split]"></ng-content>
+    </div>
   `,
 })
-export class ArcoSpace {
+export class ArcoSpace implements AfterViewChecked, OnDestroy {
   /**
    * @zh 对齐方式
    * @en Alignment
    * @values 'start', 'end', 'center', 'baseline'
    */
-  @Input() align: 'start' | 'end' | 'center' | 'baseline' = 'center';
+  @Input() align?: 'start' | 'end' | 'center' | 'baseline';
   /**
    * @zh 间距方向
    * @en Spacing direction
@@ -56,7 +59,8 @@ export class ArcoSpace {
   private wrapperList: HTMLElement[] = [];
   private splitCloneList: HTMLElement[] = [];
 
-  @ContentChild('splitContent') splitContentRef!: ElementRef<HTMLElement>;
+  hostRef!: HTMLElement;
+  splitContentRef!: HTMLElement;
 
    getSize(size: SpaceSize) {
     if (isNumber(size)) {
@@ -109,47 +113,65 @@ export class ArcoSpace {
 
   constructor(private elRef: ElementRef, private renderer: Renderer2) { }
 
-  ngAfterContentInit(): void {
+  ngAfterViewChecked(): void {
     this.wrapChildren();
   }
 
   private wrapChildren(): void {
-     // 1. 获取容器
-    const container = this.elRef.nativeElement.querySelector('#host');
-    if (!container) return; // 容错：容器不存在则直接返回
+    const container  = this.elRef?.nativeElement;
+    if (!container) return;
+    this.hostRef = container.querySelector('#host') as HTMLElement;
+    this.splitContentRef = container.querySelector('#splitContent') as HTMLElement;
 
-    // 2. 关键：将动态 NodeList 转为静态数组，避免遍历错乱
-    const children = Array.from(container.childNodes) as Node[];
+    // 先清理旧的节点（避免重复渲染）
+    this.clearOldNodes(this.hostRef);
 
-    // 3. 先清理旧的wrapper（避免重复包裹）
-    this.clearOldWrappers(container);
+    // 获取有效子元素（过滤空文本节点）
+    const originalChildren = Array.from(this.hostRef?.childNodes).filter(
+      (node) => !this.isEmptyTextNode(node)
+    );
+    if (originalChildren.length === 0) return;
 
-    // 4. 遍历静态数组，避免DOM变化影响遍历
-    for (const child of children) {
-      // 过滤空文本节点（换行/空格/制表符）
-      if (this.isEmptyTextNode(child)) continue;
+    // 获取 split 有效模板（非 null 时才插入分隔符）
+    const splitTemplate = this.getSplitTemplate();
+    const hasSplit = !!splitTemplate;
 
-      // 5. 创建wrapper
+    // 遍历子元素，包裹 + 插入分隔符
+    originalChildren.forEach((child, index) => {
+      // 1. 保留原有包裹逻辑
       const wrapper = this.renderer.createElement('div');
       this.renderer.addClass(wrapper, `${this.prefixCls}-item`);
-
-      // 6. 保存child的原位置信息（避免插入错乱）
-      const nextSibling = child.nextSibling; // 下一个兄弟节点
-
-      // 7. 先将child从容器中移除，再加入wrapper
-      this.renderer.removeChild(container, child);
+      this.renderer.removeChild(this.hostRef, child);
       this.renderer.appendChild(wrapper, child);
-
-      // 8. 将wrapper插入到child原来的位置（保持原有顺序）
-      if (nextSibling) {
-        this.renderer.insertBefore(container, wrapper, nextSibling);
-      } else {
-        this.renderer.appendChild(container, wrapper);
-      }
-
-      // 9. 保存wrapper引用，用于后续清理
+      this.renderer.appendChild(this.hostRef, wrapper);
       this.wrapperList.push(wrapper);
-    }
+
+      // 2. 插入 split 分隔符（非最后一个元素 + 有 split 模板）
+      if (hasSplit && index < originalChildren.length - 1) {
+        // 修复：使用原生 cloneNode 克隆 split 模板
+        const splitWrapper = this.renderer.createElement('div');
+        this.renderer.addClass(splitWrapper, `${this.prefixCls}-item-split`);
+        const splitClone = splitTemplate.cloneNode(true) as HTMLElement;
+        // 插入到当前 wrapper 后方
+        this.renderer.appendChild(splitWrapper, splitClone);
+        this.renderer.appendChild(this.hostRef, splitWrapper);
+        this.splitCloneList.push(splitWrapper);
+      }
+    });
+  }
+
+   /**
+   * 辅助：获取 split 插槽的有效内容（过滤空节点）
+   */
+  private getSplitTemplate(): Node | null {
+    if (!this.splitContentRef) return null;
+
+    // 获取 split 插槽的第一个有效子节点（过滤空文本）
+    const validSplitNode = Array.from(this.splitContentRef?.childNodes).find(
+      (node) => !this.isEmptyTextNode(node)
+    );
+
+    return validSplitNode || null;
   }
 
   /** 辅助：判断是否是空文本节点 */
@@ -157,30 +179,33 @@ export class ArcoSpace {
     return node.nodeType === Node.TEXT_NODE && !node.textContent?.trim();
   }
 
-  /** 清理旧的wrapper，恢复原元素 */
-  private clearOldWrappers(container: HTMLElement): void {
-    if (this.wrapperList.length === 0) return;
+   /**
+   * 清理所有动态创建的节点（wrapper + split克隆体）
+   */
+  private clearOldNodes(host: HTMLElement): void {
+    // 清理 split 克隆体
+    this.splitCloneList.forEach((clone) => {
+      this.renderer.removeChild(host, clone);
+    });
+    this.splitCloneList = [];
 
+    // 清理 wrapper，恢复原元素
     this.wrapperList.forEach((wrapper) => {
-      // 取出wrapper中的原元素
       const originalChild = wrapper.firstChild;
       if (originalChild) {
-        // 将原元素移回wrapper的原位置
-        this.renderer.insertBefore(container, originalChild, wrapper);
+        this.renderer.insertBefore(host, originalChild, wrapper);
       }
-      // 移除旧wrapper
-      this.renderer.removeChild(container, wrapper);
+      this.renderer.removeChild(host, wrapper);
     });
-
-    // 清空wrapper列表
     this.wrapperList = [];
   }
 
-  /** 组件销毁时清理，防止内存泄漏 */
+  /**
+   * 组件销毁时清理资源
+   */
   ngOnDestroy(): void {
-    const container = this.elRef.nativeElement.querySelector('#host');
-    if (container) {
-      this.clearOldWrappers(container);
+    if (this.hostRef) {
+      this.clearOldNodes(this.hostRef);
     }
   }
 }
