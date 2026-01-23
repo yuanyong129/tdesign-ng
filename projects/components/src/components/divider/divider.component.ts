@@ -55,9 +55,8 @@ export class ArcoDivider {
     return [
       this.prefixCls,
       `${this.prefixCls}-${this.direction}`,
-      {
-        [`${this.prefixCls}-with-text`]: this.children
-      },
+      this.children?.length > 0 && this.isHorizontal()
+        ? `${this.prefixCls}-with-text` : '',
     ];
   });
 

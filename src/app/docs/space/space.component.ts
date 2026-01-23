@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { ArcoButtonModule, ArcoSpaceModule, ArcoDividerModule } from "../../../../projects/components/src";
+import { ArcoButtonModule, ArcoSpaceModule, ArcoDividerModule } from "@arco-design-ng/index";
 
 @Component({
   selector: 'button-docs',
@@ -10,6 +10,7 @@ import { ArcoButtonModule, ArcoSpaceModule, ArcoDividerModule } from "../../../.
   ],
   template: `
     <h2>间距 Space</h2>
+    <div>设置组件之间的间距</div>
     <a-divider />
     <h3 class="description">垂直间距</h3>
     <p class="description">可以设置垂直方向排列的间距。</p>

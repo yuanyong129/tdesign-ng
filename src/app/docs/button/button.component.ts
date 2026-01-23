@@ -1,7 +1,5 @@
 import { Component } from "@angular/core";
-import { ArcoButtonModule } from "../../../../projects/components/src";
-import { ArcoSpaceModule } from "../../../../projects/components/src";
-import { ArcoButtonGroupModule } from "../../../../projects/components/src";
+import { ArcoButtonModule, ArcoSpaceModule, ArcoButtonGroupModule } from "@arco-design-ng/index";
 
 @Component({
   selector: 'button-docs',
