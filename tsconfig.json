@@ -8,7 +8,7 @@
         "./dist/components"
       ],
       "@arco-design-ng/*": [
-        "./projects/components/src/*"
+        "./web-ng/src/*"
       ]
     },
     "outDir": "./dist/out-tsc",
