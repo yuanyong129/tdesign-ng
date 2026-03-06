@@ -1,1 +1,1 @@
-export * from './space.module';
+export { ArcoSpaceModule } from './space.module';

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { ArcoButtonModule, ArcoButtonGroupModule, ArcoSpaceModule } from '@arco-design-ng/index';
+
 @Component({
   selector: 'app-root',
   imports: [
@@ -14,6 +15,7 @@ import { ArcoButtonModule, ArcoButtonGroupModule, ArcoSpaceModule } from '@arco-
       <div class="docs-left">
         <div>通用</div>
         <a-button [long]="true" (click)="viewDocs('button')">按钮 Button</a-button>
+        <a-button [long]="true" (click)="viewDocs('link')">链接 Link</a-button>
         <div>布局</div>
         <a-button [long]="true" (click)="viewDocs('divider')">分割线 Divider</a-button>
         <a-button [long]="true" (click)="viewDocs('space')">间距 Space</a-button>
