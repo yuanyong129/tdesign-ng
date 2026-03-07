@@ -1,8 +1,8 @@
 import { CommonModule } from "@angular/common";
 import { Component, computed, Input } from "@angular/core";
-import { Direction } from "../../utils/constant";
-import { getPrefixCls } from "../../utils/global-config";
-import { isNumber, isUndefined } from "../../utils";
+import { Direction } from "../../_utils/constant";
+import { getPrefixCls } from "../../_utils/global-config";
+import { isNumber, isUndefined } from "../../_utils";
 
 @Component({
   selector: 'a-divider',

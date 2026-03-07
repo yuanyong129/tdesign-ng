@@ -19,6 +19,8 @@ import { ArcoButtonModule, ArcoButtonGroupModule, ArcoSpaceModule } from '@web-n
         <div>布局</div>
         <a-button [long]="true" (click)="viewDocs('divider')">分割线 Divider</a-button>
         <a-button [long]="true" (click)="viewDocs('space')">间距 Space</a-button>
+
+        <a-button [long]="true" (click)="viewDocs('scrollbar')">滚动条 Scrollbar</a-button>
       </div>
       <div class="docs-right">
         <router-outlet></router-outlet>

@@ -1,9 +1,9 @@
 import { Component, InjectionToken, Input, forwardRef } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
-import { getPrefixCls } from "../../utils/global-config";
+import { getPrefixCls } from "../../_utils/global-config";
 import { ButtonTypes } from './button.types';
-import { BorderShape, Size, Status } from "../../utils/constant";
+import { BorderShape, Size, Status } from "../../_utils/constant";
 
 export const ARCO_BUTTON_GROUP = new InjectionToken<ArcoButtonGroup>(
   'ArcoButtonGroup',

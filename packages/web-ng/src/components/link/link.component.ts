@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, computed } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { getPrefixCls } from "../../utils/global-config";
-import { Status } from "../../utils/constant";
+import { getPrefixCls } from "../../_utils/global-config";
+import { Status } from "../../_utils/constant";
 // <!-- <span v-if="loading || showIcon" :class="`${prefixCls}-icon`">
 //       <icon-loading v-if="loading" />
 //       <slot v-else name="icon">

@@ -6,9 +6,10 @@
 export * from './components/button';
 export * from './components/divider';
 export * from './components/link';
+export * from './components/scrollbar';
 export * from './components/space';
 
 // Core
 export * from './types';
-export * from './utils';
+export * from './_utils';
 

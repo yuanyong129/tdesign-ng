@@ -1,9 +1,9 @@
 import { Component, Input, Output, computed, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonTypes } from './button.types';
-import { BorderShape, Status, Size } from '../../utils/constant';
-import { getPrefixCls } from '../../utils/global-config';
-import { isString } from '../../utils';
+import { BorderShape, Status, Size } from '../../_utils/constant';
+import { getPrefixCls } from '../../_utils/global-config';
+import { isString } from '../../_utils';
 import { ArcoButtonGroup, ARCO_BUTTON_GROUP } from './button-group.component';
 
 @Component({

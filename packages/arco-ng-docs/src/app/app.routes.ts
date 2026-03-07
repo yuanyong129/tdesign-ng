@@ -23,6 +23,10 @@ export const routes: Routes = [
     component: LinkDocs
   },
   {
+    path: 'scrollbar',
+    loadComponent: () => import('./docs/scrollbar/scrollbar.component').then(m => m.ScrollbarDocs)
+  },
+  {
     path: 'space',
     component: SpaceDocs
   }

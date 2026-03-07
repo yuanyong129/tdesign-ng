@@ -8,8 +8,8 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { getPrefixCls } from '../../utils/global-config';
-import { isArray, isNumber } from '../../utils/is';
+import { getPrefixCls } from '../../_utils/global-config';
+import { isArray, isNumber } from '../../_utils/is';
 
 type SpaceSize = number | 'mini' | 'small' | 'medium' | 'large';
 
