@@ -1,0 +1,36 @@
+/*
+ * 桥接层：把 Angular 组件宿主与上游 tdesign-common 样式对齐。
+ *
+ * 上游样式是按「组件根元素本身就是 .t-button」写的，而 Angular 组件多一层
+ * 宿主元素（<t-button>），因此需要少量规则把两者接上。凡是能靠上游样式解决的
+ * 问题都写进这里，组件自身不写视觉样式，避免与上游产生漂移。
+ */
+
+// 1) 组件宿主不参与布局
+//    真正的 .t-button 在模板内部，这样上游的相邻选择器
+//    `.t-button > svg + .t-button__text` 才能按原样命中；
+//    同时宿主不产生盒子，flex 容器（如 t-space）的 gap 才会作用到按钮本体上。
+t-button {
+  display: contents;
+}
+
+// 2) 图标与文字之间的间距
+//    上游用裸 <svg> 作为图标，靠 `svg + .t-button__text:not(:empty)` 提供间距；
+//    我们用的是 <t-icon> 宿主元素，相邻选择器不匹配，这里补一条等价规则。
+//    8px 来自上游 `@spacer`（vendor/tdesign-common/style/web/_variables.less）。
+.t-button > t-icon + .t-button__text:not(:empty) {
+  margin-left: 8px;
+}
+
+// 3) Space 的分隔符
+//    上游在两个子元素之间插入 `.t-space-item-separator` 节点；Angular 的内容投影
+//    无法在插槽之间插入兄弟节点，因此改用伪元素 + CSS 变量实现（仅支持字符串分隔符）。
+.t-space--separator > *:not(:first-child)::before {
+  content: var(--td-space-separator, '');
+  margin: 0 8px;
+}
+
+.t-space--separator.t-space-vertical > *:not(:first-child)::before {
+  display: block;
+  margin: 8px 0 0;
+}

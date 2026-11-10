@@ -10,6 +10,14 @@
 // 3) 归一化样式
 @import '../../../vendor/tdesign-common/style/web/_reset.less';
 
-// 4) 迁移期存量样式（基于旧 Arco 主题，与 --td-* 令牌无命名冲突）。
-//    P1 每重写一个组件，就从这里去掉一条，直至整个文件只剩上面三行。
-@import '../components/src/index.less';
+// 4) 组件样式：文档站用到的组件按需引入（对应 @tdesign-ng/styles 的单组件入口）。
+//    真实项目里可以直接 `@import '~@tdesign-ng/styles/components/button.less';`
+@import '../../styles/src/components/button.less';
+@import '../../styles/src/components/divider.less';
+@import '../../styles/src/components/link.less';
+@import '../../styles/src/components/space.less';
+@import '../../styles/src/components/icon.less';
+@import '../../styles/src/components/loading.less';
+
+// 5) 桥接层：把 Angular 宿主元素与上游样式接起来
+@import '../ng-components/src/index.less';

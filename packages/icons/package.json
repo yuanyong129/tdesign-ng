@@ -1,0 +1,12 @@
+{
+  "name": "@tdesign-ng/icons",
+  "version": "0.0.1",
+  "description": "TDesign icons for Angular",
+  "peerDependencies": {
+    "@angular/core": ">=19.0.0 <24.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

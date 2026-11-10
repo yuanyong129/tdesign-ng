@@ -10,12 +10,15 @@
   ],
   "scripts": {
     "start": "pnpm --filter @tdesign-ng/docs run start",
-    "build": "pnpm run gen:api && pnpm run build:lib && pnpm run build:styles && pnpm run build:docs",
-    "build:lib": "ng-packagr -p packages/components/ng-package.json",
+    "build": "pnpm run gen:api && pnpm run build:icons && pnpm run build:lib && pnpm run build:styles && pnpm run build:docs",
+    "build:lib": "ng-packagr -p packages/ng-components/ng-package.json",
+    "build:icons": "ng-packagr -p packages/icons/ng-package.json",
     "build:styles": "node scripts/build-styles.mjs",
     "build:docs": "pnpm --filter @tdesign-ng/docs run build",
     "gen:api": "node scripts/gen-api-docs.mjs",
+    "gen:icons": "node scripts/gen-icons.mjs",
     "check:api": "node scripts/gen-api-docs.mjs --check",
+    "check:icons": "node scripts/gen-icons.mjs --check",
     "check:align": "node scripts/align-check.mjs",
     "vendor:styles": "node scripts/vendor-tdesign-common.mjs"
   },

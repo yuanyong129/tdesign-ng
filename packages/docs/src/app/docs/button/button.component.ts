@@ -1,131 +1,133 @@
-import { Component } from "@angular/core";
-import { TButtonModule, TSpaceModule, TButtonGroupModule } from "@tdesign-ng/components";
+﻿import { Component } from '@angular/core';
+import { TButtonModule, TSpaceModule } from '@tdesign-ng/components';
+import { TIcon } from '@tdesign-ng/icons';
 import { ApiTable } from '../../api/api-table.component';
 
 @Component({
   selector: 'button-docs',
-  imports: [
-    TButtonModule,
-    TSpaceModule,
-    TButtonGroupModule,
-    ApiTable
-  ],
+  imports: [TButtonModule, TSpaceModule, TIcon, ApiTable],
   template: `
-    <h2>Button 组件</h2>
+    <h2>按钮 Button</h2>
+    <p class="description">按钮用于开始一个即时操作，标记了一个（或封装一组）操作命令。</p>
 
-    <h3 class="description">基本用法</h3>
-    <p class="description">按钮分为 primary - 主要按钮、secondary - 次要按钮（默认）、dashed - 虚线按钮、outline - 线形按钮、text - 文本按钮五种类型。</p>
-    <t-space>
-      <t-button type="primary">Primary</t-button>
-      <t-button>Secondary</t-button>
-      <t-button type="dashed">Dashed</t-button>
-      <t-button type="outline">Outline</t-button>
-      <t-button type="text">Text</t-button>
-      456 456
-    </t-space>
+    <h3 class="description">基础按钮</h3>
+    <p class="description">按钮的四种变体：base（基础）、outline（描边）、dashed（虚线）、text（文本）。</p>
+    <div class="docs-block">
+      <t-space break-line>
+        <t-button variant="base" theme="default">基础按钮</t-button>
+        <t-button variant="outline" theme="default">描边按钮</t-button>
+        <t-button variant="dashed" theme="default">虚线按钮</t-button>
+        <t-button variant="text" theme="default">文本按钮</t-button>
+      </t-space>
+    </div>
+
+    <h3 class="description">按钮主题</h3>
+    <p class="description">按钮支持五种主题：default、primary、danger、warning、success。</p>
+    <div class="docs-block">
+      <t-space break-line>
+        <t-button theme="default">默认</t-button>
+        <t-button theme="primary">主要</t-button>
+        <t-button theme="danger">危险</t-button>
+        <t-button theme="warning">警告</t-button>
+        <t-button theme="success">成功</t-button>
+      </t-space>
+    </div>
+
+    <h3 class="description">不同主题的变体</h3>
+    <p class="description">theme 与 variant 可以自由组合。</p>
+    <div class="docs-block">
+      @for (theme of themes; track theme) {
+        <t-space break-line>
+          <t-button variant="base" [theme]="theme">{{ theme }}</t-button>
+          <t-button variant="outline" [theme]="theme">{{ theme }}</t-button>
+          <t-button variant="dashed" [theme]="theme">{{ theme }}</t-button>
+          <t-button variant="text" [theme]="theme">{{ theme }}</t-button>
+        </t-space>
+      }
+    </div>
 
     <h3 class="description">按钮形状</h3>
-    <p class="description">按钮分为 round - 圆角按钮、square - 方形按钮（默认）两种形状。</p>
-    <t-space>
-      <t-button type="primary">Square</t-button>
-      <t-button type="primary" shape="round">Round</t-button>
-    </t-space>
+    <div class="docs-block">
+      <t-space break-line>
+        <t-button shape="rectangle" theme="primary">矩形按钮</t-button>
+        <t-button shape="square" theme="primary">方</t-button>
+        <t-button shape="round" theme="primary">圆角按钮</t-button>
+        <t-button shape="circle" theme="primary">圆</t-button>
+      </t-space>
+    </div>
 
     <h3 class="description">按钮尺寸</h3>
-    <p class="description">按钮分为 mini、small、medium、large 四种尺寸。高度分别为：24px、28px、32px、36px。推荐（默认）尺寸为 medium。可在不同场景及不同业务需求选择适合尺寸。</p>
-    <t-space>
-      <t-button type="primary" size="mini">Mini</t-button>
-      <t-button type="primary" size="small">Small</t-button>
-      <t-button type="primary">Medium</t-button>
-      <t-button type="primary" size="large">Large</t-button>
-    </t-space>
+    <div class="docs-block">
+      <t-space align="center" break-line>
+        <t-button size="small" theme="primary">小尺寸</t-button>
+        <t-button size="medium" theme="primary">中尺寸</t-button>
+        <t-button size="large" theme="primary">大尺寸</t-button>
+      </t-space>
+    </div>
 
-    <h3 class="description">按钮状态</h3>
-    <p class="description">按钮的状态分为 normal - 正常（默认）、success - 成功、warning - 警告、danger - 危险四种，可以与按钮类型同时使用。</p>
-    <t-space direction="vertical">
-      <t-space>
-        <t-button type="primary" status="success">Primary</t-button>
-        <t-button status="success">Default</t-button>
-        <t-button type="dashed" status="success">Dashed</t-button>
-        <t-button type="outline" status="success">Outline</t-button>
-        <t-button type="text" status="success">Text</t-button>
-      </t-space>
-      <t-space>
-        <t-button type="primary" status="warning">Primary</t-button>
-        <t-button status="warning">Default</t-button>
-        <t-button type="dashed" status="warning">Dashed</t-button>
-        <t-button type="outline" status="warning">Outline</t-button>
-        <t-button type="text" status="warning">Text</t-button>
-      </t-space>
-      <t-space>
-        <t-button type="primary" status="danger">Primary</t-button>
-        <t-button status="danger">Default</t-button>
-        <t-button type="dashed" status="danger">Dashed</t-button>
-        <t-button type="outline" status="danger">Outline</t-button>
-        <t-button type="text" status="danger">Text</t-button>
-      </t-space>
-    </t-space>
+    <h3 class="description">块级按钮</h3>
+    <div class="docs-block">
+      <t-button [block]="true" theme="primary">块级按钮</t-button>
+    </div>
 
-    <h3 class="description">禁用状态</h3>
-    <p class="description">按钮的禁用状态。</p>
-    <t-space direction="vertical">
-      <t-space>
-        <t-button type="primary" [disabled]="true">Primary</t-button>
-        <t-button [disabled]="true">Default</t-button>
-        <t-button type="dashed" [disabled]="true">Dashed</t-button>
-        <t-button type="outline" [disabled]="true">Outline</t-button>
-        <t-button type="text" [disabled]="true">Text</t-button>
+    <h3 class="description">幽灵按钮</h3>
+    <p class="description">幽灵按钮背景透明，通常用于深色背景。</p>
+    <div class="docs-block docs-block--dark">
+      <t-space break-line>
+        <t-button [ghost]="true" variant="outline">幽灵按钮</t-button>
+        <t-button [ghost]="true" variant="base" theme="primary">幽灵按钮</t-button>
       </t-space>
-      <t-space>
-        <t-button type="primary" status="success" [disabled]="true">Primary</t-button>
-        <t-button status="success" [disabled]="true">Default</t-button>
-        <t-button type="dashed" status="success" [disabled]="true">Dashed</t-button>
-        <t-button type="outline" status="success" [disabled]="true">Outline</t-button>
-        <t-button type="text" status="success" [disabled]="true">Text</t-button>
-      </t-space>
-      <t-space>
-        <t-button type="primary" status="warning" [disabled]="true">Primary</t-button>
-        <t-button status="warning" [disabled]="true">Default</t-button>
-        <t-button type="dashed" status="warning" [disabled]="true">Dashed</t-button>
-        <t-button type="outline" status="warning" [disabled]="true">Outline</t-button>
-        <t-button type="text" status="warning" [disabled]="true">Text</t-button>
-      </t-space>
-      <t-space>
-        <t-button type="primary" status="danger" [disabled]="true">Primary</t-button>
-        <t-button status="danger" [disabled]="true">Default</t-button>
-        <t-button type="dashed" status="danger" [disabled]="true">Dashed</t-button>
-        <t-button type="outline" status="danger" [disabled]="true">Outline</t-button>
-        <t-button type="text" status="danger" [disabled]="true">Text</t-button>
-      </t-space>
-    </t-space>
+    </div>
 
+    <h3 class="description">带图标的按钮</h3>
+    <div class="docs-block">
+      <t-space break-line align="center">
+        <t-button theme="primary"><t-icon name="add" tButtonIcon />新建</t-button>
+        <t-button variant="outline">下载<t-icon name="download" tButtonSuffix /></t-button>
+        <t-button shape="square" theme="primary"><t-icon name="search" tButtonIcon /></t-button>
+      </t-space>
+    </div>
 
-    <h3 class="description">组合按钮</h3>
-    <p class="description">通过 &lt;t-button-group&gt; 组件使按钮以组合方式出现。可用在同级多项操作中。</p>
-    <t-button-group type="primary">
-      <t-button shape="round"> copy </t-button>
-      <t-button shape="round"> cut </t-button>
-      <t-button shape="round"> find </t-button>
-    </t-button-group>
-    <t-button-group type="outline" [disabled]="true">
-      <t-button shape="round"> copy </t-button>
-      <t-button shape="round"> cut </t-button>
-      <t-button shape="round"> find </t-button>
-    </t-button-group>
-    <t-button-group type="dashed">
-      <t-button shape="round"> copy </t-button>
-      <t-button shape="round"> cut </t-button>
-      <t-button shape="round"> find </t-button>
-    </t-button-group>
+    <h3 class="description">禁用与加载</h3>
+    <div class="docs-block">
+      <t-space break-line>
+        <t-button [disabled]="true">禁用按钮</t-button>
+        <t-button [disabled]="true" theme="primary">禁用按钮</t-button>
+        <t-button [loading]="true" theme="primary">加载中</t-button>
+        <t-button [loading]="true" variant="outline">加载中</t-button>
+      </t-space>
+    </div>
+
+    <h3 class="description">链接按钮</h3>
+    <p class="description">设置 href 或 tag="a" 后渲染为 &lt;a&gt; 元素。</p>
+    <div class="docs-block">
+      <t-space break-line>
+        <t-button href="https://tdesign.tencent.com/" target="_blank" variant="text" theme="primary">跳转链接</t-button>
+        <t-button tag="div" variant="outline">div 按钮</t-button>
+      </t-space>
+    </div>
 
     <h3 class="description">API</h3>
     <api-table component="TButton" />
-    <api-table component="TButtonGroup" />
   `,
-  styles: [
+  styles: `
+    :host {
+      display: block;
+    }
 
-  ]
+    .docs-block {
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--td-component-border, #e7e7e7);
+      border-radius: 3px;
+      background: var(--td-bg-color-container, #fff);
+    }
+
+    .docs-block--dark {
+      background: #333;
+    }
+  `,
 })
 export class ButtonDocs {
-
+  protected readonly themes = ['default', 'primary', 'danger', 'warning', 'success'] as const;
 }

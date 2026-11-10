@@ -1,0 +1,48 @@
+@if (isLink()) {
+  <a
+    [class]="classes()"
+    [attr.href]="href() ?? null"
+    [attr.aria-disabled]="mergedDisabled() || null"
+    [attr.tabindex]="mergedDisabled() ? -1 : null"
+    (click)="handleClick($event)"
+  >
+    <ng-container [ngTemplateOutlet]="inner" />
+  </a>
+} @else if (tag() === 'div') {
+  <div [class]="classes()" [attr.aria-disabled]="mergedDisabled() || null" (click)="handleClick($event)">
+    <ng-container [ngTemplateOutlet]="inner" />
+  </div>
+} @else {
+  <button
+    [class]="classes()"
+    [attr.type]="type()"
+    [attr.form]="form() ?? null"
+    [disabled]="mergedDisabled()"
+    (click)="handleClick($event)"
+  >
+    <ng-container [ngTemplateOutlet]="inner" />
+  </button>
+}
+
+<ng-template #inner>
+  @if (loading()) {
+    <span class="t-loading">
+      <svg
+        class="t-loading__gradient t-icon-loading"
+        viewBox="0 0 12 12"
+        version="1.1"
+        width="1em"
+        height="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <foreignObject x="0" y="0" width="12" height="12">
+          <span class="t-loading__gradient-conic"></span>
+        </foreignObject>
+      </svg>
+    </span>
+  } @else {
+    <ng-content select="[tButtonIcon]" />
+  }
+  <span class="t-button__text"><ng-content select=":not([tButtonIcon]):not([tButtonSuffix])" /></span>
+  <span class="t-button__suffix"><ng-content select="[tButtonSuffix]" /></span>
+</ng-template>

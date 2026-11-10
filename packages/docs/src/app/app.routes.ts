@@ -8,26 +8,22 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: 'button',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'button',
-    component: ButtonDocs
+    loadComponent: () => import('./docs/button/button.component').then((m) => m.ButtonDocs),
   },
   {
     path: 'divider',
-    component: DividerDocs
+    component: DividerDocs,
   },
   {
     path: 'link',
-    component: LinkDocs
-  },
-  {
-    path: 'scrollbar',
-    loadComponent: () => import('./docs/scrollbar/scrollbar.component').then(m => m.ScrollbarDocs)
+    component: LinkDocs,
   },
   {
     path: 'space',
-    component: SpaceDocs
-  }
+    component: SpaceDocs,
+  },
 ];

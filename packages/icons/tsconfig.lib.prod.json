@@ -1,0 +1,7 @@
+/* Development (non-production) configuration for @tdesign-ng/icons. */
+{
+  "extends": "./tsconfig.lib.json",
+  "compilerOptions": {
+    "compilationMode": "partial"
+  }
+}

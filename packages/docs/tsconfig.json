@@ -5,8 +5,12 @@
     // API 文档表格直接 import 生成好的 JSON，避免运行时再发一次请求。
     "resolveJsonModule": true,
     "paths": {
-      "@tdesign-ng/components": ["../components/src/index.ts"],
-      "@tdesign-ng/components/*": ["../components/src/*"]
+      "@tdesign-ng/components": ["../ng-components/src/index.ts"],
+      "@tdesign-ng/components/*": ["../ng-components/src/*"],
+      "@tdesign-ng/icons": ["../icons/src/index.ts"],
+      "@tdesign-ng/icons/*": ["../icons/src/*"],
+      "@tdesign-ng/styles": ["../styles/src/index.less"],
+      "@tdesign-ng/styles/*": ["../styles/src/*"]
     }
   }
 }

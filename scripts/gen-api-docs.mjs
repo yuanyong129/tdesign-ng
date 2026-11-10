@@ -28,7 +28,7 @@ import ts from 'typescript';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
-const SRC_DIR = path.join(ROOT, 'packages/components/src/components');
+const SRC_DIR = path.join(ROOT, 'packages/ng-components/src/components');
 const OUT_FILE = path.join(ROOT, 'packages/docs/src/app/api/api.generated.json');
 
 const argv = process.argv.slice(2);
@@ -331,7 +331,7 @@ function validate(components) {
 async function main() {
   const files = await listTsFiles(SRC_DIR);
   // 可选值常量（SIZES / BORDER_SHAPES 等）定义在 src/_utils 下，收集范围要比解析范围大。
-  const valueTuples = collectValueTuples(await listTsFiles(path.join(ROOT, 'packages/components/src')));
+  const valueTuples = collectValueTuples(await listTsFiles(path.join(ROOT, 'packages/ng-components/src')));
 
   const components = [];
   for (const file of files) {

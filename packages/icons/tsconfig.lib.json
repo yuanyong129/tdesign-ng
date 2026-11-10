@@ -1,0 +1,12 @@
+/* TypeScript configuration used by ng-packagr when building @tdesign-ng/icons. */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/icons",
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "types": []
+  },
+  "exclude": ["**/*.spec.ts"]
+}
