@@ -250,3 +250,47 @@ tdesign-ng/
 | D4 | `tdesign-common` 引入方式 | git submodule / npm 依赖 / 复制源码 | 先 spike 验证 npm 是否可用，否则 submodule |
 | D5 | 测试框架 | Karma 保留 / Vitest | 新组件 Vitest，存量逐步迁 |
 | D6 | 首发范围 | P1 打样先发 / 一次到 P5 | 分阶段发版，每阶段可独立发布 |
+
+---
+
+## 12. P0 执行记录（已完成）
+
+| 任务 | 结果 | 验证方式 |
+| --- | --- | --- |
+| P0-1 改名 | 目录、包名、类名、选择器、CSS 变量全部切到 TDesign 命名 | `pnpm build` 全绿 |
+| P0-1 构建 | 库 `packages/dist/components`、文档站 `packages/docs/dist/docs` | `ng-packagr` + `ng build` |
+| P0-2 样式 | `vendor/tdesign-common`（72 组件，上游 `develop` 快照）+ `@tdesign-ng/styles` | `pnpm build:styles` 产物断言 |
+| P0-3 API 文档 | `scripts/gen-api-docs.mjs` → JSON → `<api-table>` | 7 组件 41 属性，`--check` 校验注释完备 |
+| P0-4 对齐检查 | `scripts/align-check.mjs`，比对上游 props 契约 | 见 §13 |
+
+**D4 结论**：`tdesign-common` 的 npm 包只有 `0.0.1-alpha.0` 占位版，不可用；改为 vendor 上游源码快照，用 `pnpm vendor:styles` 一条命令重新同步（默认 `develop` 分支，`main` 已停滞于 2021 年）。
+
+**踩过的坑（避免重复）**
+- 原 `tsconfig.lib.json` 继承不存在的 `../tsconfig.json`，这个库此前从未构建成功过。
+- 各组件 `index.ts` 只导出 module、不导出组件类 → ng-packagr 报 `NG3001`。
+- 上游 `style/web/components/a-template/` 是脚手架（选择器为 `<name>` 占位符），不能直接编译，同步时排除。
+- 文档站的 `anyComponentStyle` 预算默认 4kB，组件库样式天然超限，已放宽到 20kB/32kB。
+
+---
+
+## 13. P1 起步：与上游的 API 差距
+
+`node scripts/align-check.mjs` 当前输出（上游 `tdesign-vue-next@1.20.11`）：
+
+| 组件 | 已对齐 | 缺失 | 多余 |
+| --- | --- | --- | --- |
+| Button | 6/18 | 8 | 4 |
+| Divider | 1/6 | 3 | 4 |
+| Link | 2/13 | 8 | 4 |
+| Space | 3/5 | 2 | 2 |
+| ButtonGroup | — | TDesign 无此组件 | 建议移除 |
+| Scrollbar | — | TDesign 无此组件 | 建议移除 |
+
+**关键语义差异**（P1 重写必须处理的）
+- Button：上游用 `theme`（default/primary/danger/warning/success）+ `variant`（base/outline/dashed/text）两个正交维度；存量代码用单个 `type`（primary/secondary/dashed/outline/text）把两者混在一起。由于尚未发布、无外部用户，P1 直接采用上游两个属性，不做兼容层。
+- Button：上游 `type` 是原生 `submit/reset/button`，对应我们的 `htmlType`；`loading` 还需支持 `loadingProps`。
+- Divider：上游是 `layout`（horizontal/vertical）+ `align` + `dashed`；我们是 `direction` + `orientation` + `type`。
+- Link：上游区分 `theme`/`hover`/`underline`/`size`/`prefixIcon`/`suffixIcon`/`target`/`download`。
+- Space：上游是 `breakLine`/`separator`，我们是 `wrap`/`fill`。
+
+结论：P1 不是「改注释」，而是按上游契约重写这 5 个组件的输入属性与样式类名（`.t-button--variant-*` / `.t-button--theme-*` 已经在 vendor 里，必须对得上）。

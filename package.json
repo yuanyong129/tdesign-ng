@@ -16,6 +16,7 @@
     "build:docs": "pnpm --filter @tdesign-ng/docs run build",
     "gen:api": "node scripts/gen-api-docs.mjs",
     "check:api": "node scripts/gen-api-docs.mjs --check",
+    "check:align": "node scripts/align-check.mjs",
     "vendor:styles": "node scripts/vendor-tdesign-common.mjs"
   },
   "devDependencies": {
