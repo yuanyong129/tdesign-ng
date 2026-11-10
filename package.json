@@ -1,12 +1,22 @@
 {
-  "name": "arco-design-ng-monorepo",
-  "description": "Arco Design Angular 2.0 Monorepo",
+  "name": "tdesign-ng-monorepo",
+  "version": "0.0.0",
+  "description": "TDesign for Angular",
   "private": true,
-  "scripts": {
-    "start": "pnpm --filter @arco-design/arco-ng-docs run start"
-  },
+  "license": "MIT",
+  "packageManager": "pnpm@12.11.2",
   "workspaces": [
     "packages/*"
   ],
-  "license": "MIT"
+  "scripts": {
+    "start": "pnpm --filter @tdesign-ng/docs run start",
+    "build": "pnpm run build:lib && pnpm run build:docs",
+    "build:lib": "ng-packagr -p packages/components/ng-package.json",
+    "build:docs": "pnpm --filter @tdesign-ng/docs run build"
+  },
+  "devDependencies": {
+    "@angular/compiler-cli": "^19.2.0",
+    "ng-packagr": "^19.2.0",
+    "typescript": "~5.7.2"
+  }
 }

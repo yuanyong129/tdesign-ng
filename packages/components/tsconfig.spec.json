@@ -1,0 +1,9 @@
+/* TypeScript configuration used by the unit test runner for @tdesign-ng/components. */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/spec",
+    "types": ["jasmine"]
+  },
+  "include": ["**/*.spec.ts", "**/*.d.ts"]
+}

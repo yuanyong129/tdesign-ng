@@ -1,0 +1,10 @@
+/* TypeScript configuration for the documentation site (@tdesign-ng/docs). */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@tdesign-ng/components": ["../components/src/index.ts"],
+      "@tdesign-ng/components/*": ["../components/src/*"]
+    }
+  }
+}
