@@ -294,3 +294,40 @@ tdesign-ng/
 - Space：上游是 `breakLine`/`separator`，我们是 `wrap`/`fill`。
 
 结论：P1 不是「改注释」，而是按上游契约重写这 5 个组件的输入属性与样式类名（`.t-button--variant-*` / `.t-button--theme-*` 已经在 vendor 里，必须对得上）。
+
+## 14. P1 执行记录（打样阶段已交付）
+
+### 14.1 包结构
+
+| 包 | 路径 | 说明 |
+| --- | --- | --- |
+| `@tdesign-ng/components` | `packages/ng-components` | 组件库。原名 `packages/components`，因目录 ACL 损坏迁到新路径，包名不变 |
+| `@tdesign-ng/icons` | `packages/icons` | 图标组件 `TIcon` + 内置图标表（生成） |
+| `@tdesign-ng/styles` | `packages/styles` | 上游 less 的单组件入口，全部由脚本生成 |
+| `@tdesign-ng/docs` | `packages/docs` | 文档站，端口 4280 |
+
+`vendor/tdesign-common` 保存上游 `style/web` 源码快照（72 个组件，`VERSION.json` 记录 ref 与同步日期），由 `pnpm vendor:styles` 更新。
+
+### 14.2 已按上游契约重写的组件
+
+| 组件 | 上游属性 | 关键实现点 |
+| --- | --- | --- |
+| Button | `variant` / `theme` / `shape` / `size` / `block` / `ghost` / `disabled` / `loading` / `tag` / `href` / `type` / `form` | `buildClasses()` 直接拼上游类名；`tag` 决定渲染 `<button>` / `<a>` / `<div>`；loading 用上游 `.t-loading__gradient` + `foreignObject` 纯 CSS 环 |
+| Divider | `layout` / `align` / `dashed` / `size` | 是否带文字只能在运行期判断投影内容，故在 `ngAfterContentInit` 里补 `t-divider--with-text-*` |
+| Link | `theme` / `size` / `hover` / `underline` / `disabled` / `target` / `download` / `href` / `hasPrefixIcon` / `hasSuffixIcon` | 前后缀图标用带属性的 `ng-content` 槽（`[tLinkPrefixIcon]` / `[tLinkSuffixIcon]`） |
+| Space | `direction` / `size` / `align` / `breakLine` / `separator` | 用原生 flex `gap` 实现间距，不依赖上游 JS 计算的类名；`separator` 用伪元素 + `--td-space-separator` |
+
+已删除 TDesign 不存在的 `button-group` 与 `scrollbar`。
+
+### 14.3 样式接入
+
+- 组件的视觉 100% 来自 `vendor/tdesign-common`，本仓库不写组件级 less。
+- `packages/ng-components/src/bridge.less` 只做两件事：`t-button { display: contents; }`（消除宿主盒子，让上游相邻选择器与 `flex gap` 生效）、`<t-icon>` 与 `.t-button__text` 之间的 8px 桥接间距（上游用 `svg + .t-button__text` 相邻选择器，宿主元素隔断了它）。
+- 文档站 `packages/docs/src/styles.less` 按需引入：主题变量 → 全局工具类 → 重置 → 用到的组件 → 桥接层。
+
+### 14.4 待办（进入 P2 前）
+
+- 图标：目前内置 65 个精选图标，`pnpm gen:icons --all` 可生成全量 2358 个；需要决定发布策略（精选 vs 全量 vs 两者）。
+- `TIcon` 目前用 `DOMParser` 渲染，未做 SSR 兼容（`document` 直取），上 SSR 前需换成 `isPlatformBrowser` 分支。
+- 文档站示例的视觉密度还可以再贴近官网（间距、代码块、右侧锚点导航）。
+- 单测：P1 组件尚无 spec，P2 起新组件用 Vitest，存量 Karma 待迁移。
