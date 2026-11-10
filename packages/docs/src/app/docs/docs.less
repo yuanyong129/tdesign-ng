@@ -1,0 +1,233 @@
+/* 文档站自己的排版样式（全局，因为代码高亮的 span 由 innerHTML 注入，
+   组件级样式的属性选择器作用不到它们）。 */
+
+// ---------------------------------------------------------------------------
+// 页面骨架
+// ---------------------------------------------------------------------------
+.docs-page {
+  max-width: 900px;
+}
+
+.docs-page__title {
+  margin: 0 0 8px;
+  font: var(--td-font-headline-medium);
+  color: var(--td-text-color-primary);
+}
+
+.docs-page__lead {
+  margin: 0 0 32px;
+  font: var(--td-font-body-medium);
+  color: var(--td-text-color-secondary);
+}
+
+.docs-section__title {
+  margin: 40px 0 8px;
+  font: var(--td-font-title-large);
+  color: var(--td-text-color-primary);
+}
+
+// ---------------------------------------------------------------------------
+// 示例容器
+// ---------------------------------------------------------------------------
+.demo {
+  margin-bottom: 24px;
+  border: 1px solid var(--td-component-border);
+  border-radius: var(--td-radius-default);
+  background: var(--td-bg-color-container);
+  overflow: hidden;
+}
+
+.demo__title {
+  margin: 0;
+  padding: 0 24px;
+  font: var(--td-font-title-small);
+  color: var(--td-text-color-primary);
+  scroll-margin-top: 80px;
+}
+
+.demo__title:first-child {
+  padding-top: 20px;
+}
+
+.demo__anchor {
+  margin-right: 8px;
+  color: var(--td-text-color-placeholder);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.demo__title:hover .demo__anchor {
+  opacity: 1;
+}
+
+.demo__anchor:hover {
+  color: var(--td-brand-color);
+}
+
+.demo__desc {
+  margin: 4px 0 0;
+  padding: 0 24px;
+  font: var(--td-font-body-small);
+  color: var(--td-text-color-secondary);
+}
+
+.demo__stage {
+  padding: 24px;
+  color: var(--td-text-color-primary);
+}
+
+// 演示区里的示例本身用什么排布（横向/纵向）由示例决定，
+// 需要横排的示例自己用 t-space，容器不预设方向。
+.demo__stage > * {
+  min-width: 0;
+}
+
+.demo__stage--dark {
+  background: var(--td-gray-color-13);
+}
+
+.demo__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 4px 16px;
+  border-top: 1px dashed var(--td-component-stroke);
+}
+
+.demo__action {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--td-radius-small);
+  background: transparent;
+  font: var(--td-font-body-small);
+  color: var(--td-text-color-secondary);
+  cursor: pointer;
+}
+
+.demo__action:hover {
+  background: var(--td-bg-color-container-hover);
+  color: var(--td-brand-color);
+}
+
+.demo__code {
+  margin: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--td-component-stroke);
+  background: var(--td-bg-color-secondarycontainer);
+  overflow: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--td-text-color-primary);
+}
+
+.demo__code code {
+  font-family: inherit;
+}
+
+// ---------------------------------------------------------------------------
+// highlight.js 配色（浅色，取 TDesign 调色板）
+// ---------------------------------------------------------------------------
+.hljs-comment,
+.hljs-quote {
+  color: var(--td-text-color-placeholder);
+  font-style: italic;
+}
+
+.hljs-tag,
+.hljs-punctuation {
+  color: var(--td-gray-color-9);
+}
+
+.hljs-name,
+.hljs-selector-tag {
+  color: var(--td-brand-color);
+}
+
+.hljs-attr,
+.hljs-attribute {
+  color: var(--td-warning-color-7);
+}
+
+.hljs-string,
+.hljs-doctag {
+  color: var(--td-success-color-7);
+}
+
+.hljs-keyword,
+.hljs-selector-class,
+.hljs-literal,
+.hljs-type {
+  color: var(--td-error-color-7);
+}
+
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet {
+  color: var(--td-brand-color-8);
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-built_in {
+  color: var(--td-brand-color-9);
+}
+
+.hljs-variable,
+.hljs-template-variable {
+  color: var(--td-gray-color-10);
+}
+
+/* 页面底部的上一页 / 下一页 */
+.page-nav {
+  display: flex;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--td-component-border);
+}
+
+.page-nav__link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--td-component-border);
+  border-radius: var(--td-radius-default);
+  background: var(--td-bg-color-container);
+  text-decoration: none;
+  color: var(--td-text-color-primary);
+  transition: border-color 0.2s;
+}
+
+.page-nav__link:hover {
+  border-color: var(--td-brand-color);
+}
+
+.page-nav__link--next {
+  text-align: right;
+}
+
+.page-nav__label {
+  font: var(--td-font-body-small, 12px/20px sans-serif);
+  color: var(--td-text-color-placeholder);
+}
+
+.page-nav__title {
+  font: var(--td-font-body-medium, 14px/22px sans-serif);
+  color: var(--td-brand-color);
+}
+
+/* API 表格在窄屏下横向滚动，不撑破页面 */
+.api-table__scroll {
+  overflow-x: auto;
+}
+
+@media (max-width: 960px) {
+  .page-nav {
+    flex-direction: column;
+  }
+}

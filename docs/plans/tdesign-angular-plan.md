@@ -335,8 +335,36 @@ tdesign-ng/
 ## 15. 文档站部署（GitHub Pages）
 
 - 仓库：`https://github.com/yuanyong129/tdesign-ng`，站点地址为 `https://yuanyong129.github.io/tdesign-ng/`。
-- `packages/docs/angular.json` 的 `production` 配置里 `baseHref` 为 `/tdesign-ng/`；开发服务器（`pnpm start`，端口 4280）不受影响，仍以 `/` 为根。
-- `.github/workflows/pages.yml`：push 到 `main` 或手动 `workflow_dispatch` 时，安装依赖 → `pnpm run build:docs` → 复制 `index.html` 为 `404.html` → 用官方 Pages actions 上传并部署。产物目录是 `packages/docs/dist/docs/browser`（Angular 19 application builder 会多一层 `browser/`）。
-- **首次启用（只需一次，必须人工操作）**：仓库 Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**。之后推送即自动部署。
-- SPA 深链接依赖 `404.html` 回退：GitHub Pages 不支持 history fallback，直接用 `index.html` 顶替 404 页，Angular 启动后按 `baseHref` 解析路径并路由到目标页面。
-- 本地复现 Pages 行为：`pnpm build:docs && pnpm preview:pages`，然后访问 `http://127.0.0.1:4281/tdesign-ng/`。
+- 部署在子路径 `/tdesign-ng/`，所以构建必须带 `--base-href=/tdesign-ng/`：由 `packages/docs` 的 `build:pages` 脚本（`ng build --base-href=/tdesign-ng/`）负责，根脚本是 `pnpm build:docs:pages`。开发服务器（`pnpm start`，端口 4280）不受影响，仍以 `/` 为根。
+- `.github/workflows/pages.yml`：push 到 `main` 或手动 `workflow_dispatch` 时，安装依赖 → `pnpm run build:docs:pages` → 复制 `index.html` 为 `404.html` → 用官方 Pages actions 上传并部署。产物目录是 `packages/docs/dist/docs/browser`（Angular 19 application builder 会多一层 `browser/`）。
+- **首次启用**：`actions/configure-pages@v5` 加了 `enablement: true`，重跑工作流时 Pages 站点被自动创建，无需人工点；若将来因权限失败，再让管理员到 Settings → Pages → Build and deployment → Source 选 **GitHub Actions**。
+- SPA 深链接依赖 `404.html` 回退：GitHub Pages 不支持 history fallback，直接用 `index.html` 顶替 404 页，Angular 启动后按 `baseHref` 解析路径并路由到目标页面。因此深链接能正常渲染，但 HTTP 状态码是 404（对 SEO 不友好；要彻底解决需预渲染或改用 hash 路由）。
+- 本地复现 Pages 行为：`pnpm build:docs:pages && pnpm preview:pages`，然后访问 `http://127.0.0.1:4281/tdesign-ng/`。
+
+## 16. 文档站打磨（示例即代码）
+
+目标是把文档站从「手写示例堆砌」升级成 TDesign 官网那种结构：每个示例一个卡片，可展开看源码、可复制。
+
+### 16.1 示例源码自动提取
+
+- `scripts/gen-demo-sources.mjs`：扫描 `packages/docs/src/app/docs/**/demos/*.ts`，从每个组件的 `template: \`…\`` 里取出模板文本（逐字符扫描处理 `\\` 转义、遇到未转义的 `${` 直接报错、遇到未转义的反引号收尾），去公共缩进后写成 `packages/docs/src/app/docs/demo-sources.generated.json`（键是文件名去掉 `.ts`，即 demo id）。
+- 好处：示例的「渲染」和「展示的代码」是同一份源码，不会像手抄代码块那样和示例脱节。`pnpm check:demos` 可在 CI 里校验 JSON 是否过期。
+
+### 16.2 示例容器 `<docs-demo>`
+
+`packages/docs/src/app/docs/demo-block.ts` 的 `DemoBlock`：标题（带 `#` 锚点）、描述、演示区（`dark` 可选深色底）、工具栏（查看代码 / 收起代码 / 复制代码）、代码块。
+
+- 代码高亮按需加载：第一次点「查看代码」时才 `import('highlight.js/lib/core')` + `xml` + `typescript`，三个块都是独立的懒加载 chunk，不进首屏。
+- 高亮结果用 `[innerHTML]` 注入，所以配色类（`.hljs-*`）必须写在**全局**样式里（`packages/docs/src/app/docs/docs.less`），组件级样式作用不到动态插入的 span。
+
+### 16.3 页面与导航
+
+- 四个页面（button / divider / link / space）全部拆成 `demos/*.ts` 示例组件，页面文件只负责排列 `<docs-demo>` 与 `<api-table>`。
+- 路由全部改为 `loadComponent` 懒加载，未知路径回退到按钮页；首屏 `main.js` 约 14 KB。
+- `packages/docs/src/app/docs/nav.ts` 是导航单一数据源（`DOCS_NAV` + `groupNav()`），侧边栏、页内上一页/下一页都从它派生，新增页面只改一处。
+- API 表格包在 `.api-table__scroll` 里，窄屏横向滚动而不撑破页面；桌面端布局在 960px 以下把侧边栏变横向滚动条。
+
+### 16.4 验证方式
+
+- 页面渲染与交互用 CDP 驱动真实 Edge 验证（统计 `<docs-demo>` 数量、点击「查看代码」后 `.hljs-*` token 数、API 表格行数、控制台错误为零），避免只看截图猜。
+- 视觉检查用 Edge 无头截图：`--headless=old`（`--headless=new` 在本机不产出文件）、`--virtual-time-budget=9000`，截图后再按需放大局部核对颜色与间距。

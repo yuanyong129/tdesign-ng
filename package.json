@@ -17,6 +17,8 @@
     "build:docs": "pnpm --filter @tdesign-ng/docs run build",
     "build:docs:pages": "pnpm --filter @tdesign-ng/docs run build:pages",
     "gen:api": "node scripts/gen-api-docs.mjs",
+    "gen:demos": "node scripts/gen-demo-sources.mjs",
+    "check:demos": "node scripts/gen-demo-sources.mjs --check",
     "gen:icons": "node scripts/gen-icons.mjs",
     "check:api": "node scripts/gen-api-docs.mjs --check",
     "check:icons": "node scripts/gen-icons.mjs --check",

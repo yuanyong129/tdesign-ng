@@ -1,66 +1,61 @@
 ﻿import { Component } from '@angular/core';
-import { TDividerModule, TSpaceModule } from '@tdesign-ng/components';
 import { ApiTable } from '../../api/api-table.component';
+import { DemoBlock } from '../demo-block';
+import { PageNav } from '../page-nav';
+import { DemoDividerAlign } from './demos/divider-align';
+import { DemoDividerHorizontal } from './demos/divider-horizontal';
+import { DemoDividerMargin } from './demos/divider-margin';
+import { DemoDividerVertical } from './demos/divider-vertical';
 
 @Component({
   selector: 'divider-docs',
-  imports: [TDividerModule, TSpaceModule, ApiTable],
+  imports: [ApiTable, DemoBlock, PageNav, DemoDividerAlign, DemoDividerHorizontal, DemoDividerMargin, DemoDividerVertical],
   template: `
-    <h2>分割线 Divider</h2>
-    <p class="description">分割线用于将内容分块，支持水平、垂直、虚线与带文字四种形态。</p>
+    <article class="docs-page">
+      <h1 class="docs-page__title">分割线 Divider</h1>
+      <p class="docs-page__lead">
+        分割线用于将内容分块，支持水平、垂直、虚线与带文字等多种形态。
+      </p>
 
-    <h3 class="description">水平分割线</h3>
-    <div class="docs-block">
-      <p>通过设置内容区块的分割线，让结构更清晰。</p>
-      <t-divider />
-      <p>使用虚线分割线。</p>
-      <t-divider [dashed]="true" />
-      <p>分割线可以带文字。</p>
-      <t-divider>文字分割线</t-divider>
-    </div>
+      <docs-demo
+        id="divider-horizontal"
+        title="水平分割线"
+        description="默认是水平分割线，可以设置 dashed 变为虚线，也可以放置文字。"
+      >
+        <demo-divider-horizontal />
+      </docs-demo>
 
-    <h3 class="description">带文字的分割线</h3>
-    <p class="description">通过 align 控制文字位置：left、center、right。</p>
-    <div class="docs-block">
-      <t-divider align="left">左侧文字</t-divider>
-      <t-divider align="center">居中文字</t-divider>
-      <t-divider align="right">右侧文字</t-divider>
-    </div>
+      <docs-demo
+        id="divider-align"
+        title="带文字的分割线"
+        description="通过 align 控制文字位置：left、center、right。"
+      >
+        <demo-divider-align />
+      </docs-demo>
 
-    <h3 class="description">垂直分割线</h3>
-    <div class="docs-block">
-      <t-space align="center">
-        <span>文本</span>
-        <t-divider layout="vertical" />
-        <span>文本</span>
-        <t-divider layout="vertical" />
-        <span>文本</span>
-      </t-space>
-    </div>
+      <docs-demo
+        id="divider-vertical"
+        title="垂直分割线"
+        description="把 layout 设为 vertical，用于行内元素之间的分隔。"
+      >
+        <demo-divider-vertical />
+      </docs-demo>
 
-    <h3 class="description">自定义间距</h3>
-    <div class="docs-block">
-      <p>上下间距 32px。</p>
-      <t-divider [size]="32" />
-      <p>上下间距 8px。</p>
-      <t-divider [size]="8" />
-    </div>
+      <docs-demo
+        id="divider-margin"
+        title="自定义间距"
+        description="通过 size 设置分割线上下（垂直时为左右）的间距，数字单位为像素。"
+      >
+        <demo-divider-margin />
+      </docs-demo>
 
-    <h3 class="description">API</h3>
-    <api-table component="TDivider" />
-  `,
-  styles: `
-    :host {
-      display: block;
-    }
+      <h2 class="docs-section__title" id="divider-api">API</h2>
+      <div class="api-table__scroll">
+        <api-table component="TDivider" />
+      </div>
 
-    .docs-block {
-      padding: 16px;
-      margin-bottom: 16px;
-      border: 1px solid var(--td-component-border, #e7e7e7);
-      border-radius: 3px;
-      background: var(--td-bg-color-container, #fff);
-    }
+      <docs-page-nav current="/divider" />
+    </article>
   `,
 })
 export class DividerDocs {}
