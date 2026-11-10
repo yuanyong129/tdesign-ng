@@ -20,7 +20,8 @@
     "check:api": "node scripts/gen-api-docs.mjs --check",
     "check:icons": "node scripts/gen-icons.mjs --check",
     "check:align": "node scripts/align-check.mjs",
-    "vendor:styles": "node scripts/vendor-tdesign-common.mjs"
+    "vendor:styles": "node scripts/vendor-tdesign-common.mjs",
+    "preview:pages": "node scripts/preview-pages.mjs"
   },
   "devDependencies": {
     "@angular/compiler-cli": "^19.2.0",

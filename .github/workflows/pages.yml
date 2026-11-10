@@ -1,0 +1,68 @@
+name: Deploy docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 只保留最新一次部署，避免连续推送时互相取消
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.11.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 文档站直接消费 @tdesign-ng/components 与 @tdesign-ng/icons 的源码
+      # （tsconfig paths），因此只需构建文档站本身。
+      - name: Build docs
+        run: pnpm run build:docs
+
+      # GitHub Pages 不支持 SPA 回退，把 index.html 复制成 404.html，
+      # 这样直接访问 /tdesign-ng/button 这类深链接也能正确加载应用。
+      - name: Add SPA fallback
+        run: cp packages/docs/dist/docs/browser/index.html packages/docs/dist/docs/browser/404.html
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/docs/dist/docs/browser
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
