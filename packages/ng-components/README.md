@@ -1,141 +1,66 @@
-# TDesign Angular 组件库
+# @tdesign-ng/components
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.0.
+[TDesign](https://tdesign.tencent.com/) 的 Angular 组件库。
 
-## 介绍
+> **状态：早期开发中（pre-alpha），尚未发布到 npm。**
+> 属性命名与取值对齐 [tdesign-vue-next](https://github.com/Tencent/tdesign-vue-next)，样式直接消费 [tdesign-common](https://github.com/Tencent/tdesign-common) 源码。
 
-TDesign Angular 是一套企业级 UI 组件库，基于 Angular 框架开发，提供了丰富的组件和工具，帮助开发者快速构建高质量的 Web 应用。
+## 已实现组件
 
-## 特性
+| 组件 | 选择器 | 说明 |
+| --- | --- | --- |
+| Button | `t-button` | 支持 `variant` × `theme` 自由组合、`shape`、`size`、`block`、`ghost`、`loading`、`tag="a"` 等 |
+| Divider | `t-divider` | 水平/垂直、虚线、带文字（左中右对齐）、自定义间距 |
+| Link | `t-link` | 主题色、尺寸、下划线、hover 效果、前后缀图标、禁用、下载 |
+| Space | `t-space` | 水平/垂直、预设与自定义间距、分隔符、自动换行、对齐 |
 
-- **组件丰富**：提供了按钮、表单、弹窗、导航等常用组件
-- **主题定制**：支持自定义主题，满足不同品牌需求
-- **易于使用**：提供详细的文档和示例
-- **质量保证**：完善的单元测试和集成测试
-- **响应式设计**：适配不同屏幕尺寸
+图标请配合 [`@tdesign-ng/icons`](../icons) 使用。
 
-## 快速开始
+## 使用
 
-### 安装
+组件都是 standalone 的，可以直接 import 单个组件：
 
-```bash
-npm install @arco-design/ng
-```
+```ts
+import { Component } from '@angular/core';
+import { TButton } from '@tdesign-ng/components';
 
-### 引入
-
-在 `app.module.ts` 中引入组件库模块：
-
-```typescript
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { ButtonModule } from '@arco-design/ng/button';
-import { AppComponent } from './app.component';
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, ButtonModule],
-  providers: [],
-  bootstrap: [AppComponent]
+@Component({
+  selector: 'app-demo',
+  imports: [TButton],
+  template: `
+    <t-button theme="primary" variant="base">主要按钮</t-button>
+    <t-button theme="danger" variant="outline" [ghost]="true">危险按钮</t-button>
+  `,
 })
-export class AppModule {}
+export class DemoComponent {}
 ```
 
-### 使用
+也可以按模块引入（适合 NgModule 项目）：
 
-在组件模板中使用：
-
-```html
-<arco-button type="primary">按钮</arco-button>
+```ts
+import { TButtonModule } from '@tdesign-ng/components';
 ```
 
-## Code scaffolding
+### 引入样式
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+组件的视觉来自上游 less，需要通过样式入口引入一次：
 
-```bash
-ng generate component component-name
+```less
+// 全量引入
+@import '@tdesign-ng/styles/index.less';
+
+// 或按需引入单个组件
+@import '@tdesign-ng/styles/components/button.less';
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+> 这些入口由 `scripts/build-styles.mjs` 从 `vendor/tdesign-common` 生成；包内 `src/` 还包含一层 `bridge.less`，用于让 Angular 宿主元素（`<t-button>` 等）与上游的类名选择器正确衔接，样式入口已自动带上，无需额外处理。
 
-```bash
-ng generate --help
-```
+## 文档
 
-## Building
+- 在线文档（GitHub Pages）：https://yuanyong129.github.io/tdesign-ng/
+- 本地开发：`pnpm start` → http://localhost:4280/
+- 改造计划与设计决策：见仓库根目录 [`docs/plans`](../../docs/plans)
 
-To build the library, run:
+## 许可
 
-```bash
-ng build components
-```
-
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
-
-### Publishing the Library
-
-Once the project is built, you can publish your library by following these steps:
-
-1. Navigate to the `dist` directory:
-   ```bash
-   cd dist/components
-   ```
-
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## 组件列表
-
-- Button 按钮
-- Input 输入框（待开发）
-- Select 选择器（待开发）
-- DatePicker 日期选择器（待开发）
-- Modal 弹窗（待开发）
-- Table 表格（待开发）
-- Form 表单（待开发）
-- Tree 树（待开发）
-- ...
-
-## 目录结构
-
-```
-src/
-├── components/     # 组件目录
-│   └── button/    # 按钮组件
-├── styles/        # 样式文件
-├── types/         # 类型定义
-├── utils/         # 工具函数
-└── public-api.ts  # 公共 API 入口
-```
-
-## 浏览器支持
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+MIT。样式与设计规范来自 TDesign（Copyright 2021-present TDesign, MIT License）。

@@ -49,6 +49,11 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # 仓库尚未开启 Pages 时自动开启（来源设为 GitHub Actions）。
+          # 需要仓库允许 GITHUB_TOKEN 调用 Pages API；若失败，请在
+          # Settings → Pages → Source 手动选择 "GitHub Actions" 后重跑。
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

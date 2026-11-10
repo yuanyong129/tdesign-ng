@@ -1,59 +1,77 @@
-# ArcoDesignNg
+# TDesign Angular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.8.
+[TDesign](https://tdesign.tencent.com/) 的 Angular 实现。
 
-## Development server
+> **状态：早期开发中（pre-alpha）。** 组件数量与 API 仍在快速变动，尚未发布到 npm。
 
-To start a local development server, run:
+本项目的两条硬性原则：
 
-```bash
-ng serve
-```
+1. **API 以官方为准。** 组件的属性名、取值、默认值一律对齐 [tdesign-vue-next](https://github.com/Tencent/tdesign-vue-next)，不发明 Angular 特有的替代品。`pnpm check:align` 会拿上游 `type.d.ts` 与本仓库的 API 清单做机器比对，差异会被直接列出来。
+2. **样式零自研。** 组件 CSS 100% 来自 [tdesign-common](https://github.com/Tencent/tdesign-common) 的 less 源码（以 `vendor/tdesign-common` 快照形式引入），本仓库只写必要的宿主元素桥接层。这样视觉与官方逐像素一致，也让上游样式更新可以直接同步。
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## 组件进度
 
-## Code scaffolding
+| 组件 | 状态 |
+| --- | --- |
+| Button | ✅ 已按上游契约实现 |
+| Divider | ✅ |
+| Link | ✅ |
+| Space | ✅ |
+| Icon | ✅（`@tdesign-ng/icons`，内置 65 个精选图标） |
+| Input / Textarea / Select / Checkbox / Radio / Switch / Form | 🚧 计划中（P2） |
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+`ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
 
-```bash
-ng generate component component-name
-```
+## 仓库结构
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+| 路径 | 说明 |
+| --- | --- |
+| `packages/ng-components` | 组件库 `@tdesign-ng/components` |
+| `packages/icons` | 图标包 `@tdesign-ng/icons`，图标数据由脚本从 `tdesign-icons-svg` 生成 |
+| `packages/styles` | 样式包 `@tdesign-ng/styles`，把上游 less 拆成单组件入口 |
+| `packages/docs` | 文档站 `@tdesign-ng/docs`（Angular 应用） |
+| `vendor/tdesign-common` | 上游样式源码快照，`VERSION.json` 记录同步版本 |
+| `scripts` | 代码生成与校验脚本（API 文档、图标、样式构建、上游对齐） |
+| `docs/plans` | 改造计划与技术决策记录 |
 
-```bash
-ng generate --help
-```
+## 本地开发
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+需要 Node 22 与 pnpm 12（仓库 `packageManager` 字段已声明版本）。
 
 ```bash
-ng test
+pnpm install
+pnpm start          # 文档站开发服务器 → http://localhost:4280/
 ```
 
-## Running end-to-end tests
+### 常用脚本
 
-For end-to-end (e2e) testing, run:
+| 命令 | 作用 |
+| --- | --- |
+| `pnpm start` | 启动文档站（端口 4280，热重载） |
+| `pnpm build` | 完整流水线：API 文档 → 图标 → 组件库 → 样式 → 文档站 |
+| `pnpm build:lib` | 只构建组件库（ng-packagr） |
+| `pnpm build:icons` | 只构建图标包 |
+| `pnpm build:styles` | 把上游 less 编译成 CSS 产物并做内容断言 |
+| `pnpm gen:api` | 从组件源码的 TSDoc 生成 API 表格数据 |
+| `pnpm gen:icons` | 生成内置图标表，`--all` 可生成全量 2358 个图标 |
+| `pnpm check:api` | 校验每个输入属性都有中英文描述 |
+| `pnpm check:align` | 比对组件 API 与 tdesign-vue-next 的差异 |
+| `pnpm vendor:styles` | 重新同步 `vendor/tdesign-common` 到上游最新 |
+| `pnpm preview:pages` | 本地预览 GitHub Pages 产物 |
 
-```bash
-ng e2e
-```
+## 文档站
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- 开发：`http://localhost:4280/`
+- 线上：`https://yuanyong129.github.io/tdesign-ng/`
 
-## Additional Resources
+文档站的 API 表格不是手写的：`scripts/gen-api-docs.mjs` 用 TypeScript 编译器 API 扫描组件源码，读取 `@Input` / `@Output` 上的 `@zh`、`@en`、`@defaultValue`、`@values` 注释生成。所以**给属性写注释就是在写文档**，漏写会被 `pnpm check:api` 拦下。
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 参与贡献
+
+目前处于打样阶段，API 仍会变动，暂不接受新增组件类 PR。组件实现请参考 `packages/ng-components/src/components/button/` 的写法（standalone、信号输入、OnPush、`ViewEncapsulation.None`、类名直接使用上游的 `.t-*` 约定）。
+
+## 许可
+
+[MIT](./LICENSE)
+
+样式与设计规范来自 TDesign（Copyright 2021-present TDesign, MIT License），图标来自 [tdesign-icons](https://github.com/Tencent/tdesign-icons)。
