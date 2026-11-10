@@ -331,3 +331,12 @@ tdesign-ng/
 - `TIcon` 目前用 `DOMParser` 渲染，未做 SSR 兼容（`document` 直取），上 SSR 前需换成 `isPlatformBrowser` 分支。
 - 文档站示例的视觉密度还可以再贴近官网（间距、代码块、右侧锚点导航）。
 - 单测：P1 组件尚无 spec，P2 起新组件用 Vitest，存量 Karma 待迁移。
+
+## 15. 文档站部署（GitHub Pages）
+
+- 仓库：`https://github.com/yuanyong129/tdesign-ng`，站点地址为 `https://yuanyong129.github.io/tdesign-ng/`。
+- `packages/docs/angular.json` 的 `production` 配置里 `baseHref` 为 `/tdesign-ng/`；开发服务器（`pnpm start`，端口 4280）不受影响，仍以 `/` 为根。
+- `.github/workflows/pages.yml`：push 到 `main` 或手动 `workflow_dispatch` 时，安装依赖 → `pnpm run build:docs` → 复制 `index.html` 为 `404.html` → 用官方 Pages actions 上传并部署。产物目录是 `packages/docs/dist/docs/browser`（Angular 19 application builder 会多一层 `browser/`）。
+- **首次启用（只需一次，必须人工操作）**：仓库 Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**。之后推送即自动部署。
+- SPA 深链接依赖 `404.html` 回退：GitHub Pages 不支持 history fallback，直接用 `index.html` 顶替 404 页，Angular 启动后按 `baseHref` 解析路径并路由到目标页面。
+- 本地复现 Pages 行为：`pnpm build:docs && pnpm preview:pages`，然后访问 `http://127.0.0.1:4281/tdesign-ng/`。
