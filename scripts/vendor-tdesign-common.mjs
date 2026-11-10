@@ -83,6 +83,11 @@ async function regenerateEntries(componentDirs) {
   const compEntryDir = path.join(srcDir, 'components');
   await fs.mkdir(compEntryDir, { recursive: true });
 
+  // 先清空旧的入口文件，避免上游删掉某个组件后本地残留孤儿文件。
+  for (const entry of await fs.readdir(compEntryDir)) {
+    if (entry.endsWith('.less')) await fs.rm(path.join(compEntryDir, entry), { force: true });
+  }
+
   const banner = (name) =>
     `// 由 scripts/vendor-tdesign-common.mjs 生成，请勿手改。\n// 入口：TDesign ${name} 组件样式。\n\n`;
 
@@ -138,9 +143,11 @@ async function main() {
     const meta = {
       repo: REPO,
       ref,
-      styleDir: STYLE_SUBDIR,
-      syncedAt: new Date().toISOString(),
-      tarballBytes: size,
+      // 元数据里统一用正斜杠，避免 Windows/macOS 同步时产生 diff。
+      styleDir: STYLE_SUBDIR.split(path.sep).join('/'),
+      // 只保留日期，避免同一天重复同步产生无意义的 diff。
+      syncedAt: new Date().toISOString().slice(0, 10),
+      ...(size === null ? {} : { tarballBytes: size }),
       componentCount: componentDirs.length,
       note: 'vendor 目录是上游源码的逐字节快照，请勿手改；用 node scripts/vendor-tdesign-common.mjs 重新同步。',
     };

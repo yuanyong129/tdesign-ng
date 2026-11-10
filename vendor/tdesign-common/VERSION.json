@@ -1,9 +1,8 @@
 {
   "repo": "Tencent/tdesign-common",
   "ref": "develop",
-  "styleDir": "style\\web",
-  "syncedAt": "2026-11-10T07:49:36.005Z",
-  "tarballBytes": null,
+  "styleDir": "style/web",
+  "syncedAt": "2026-11-10",
   "componentCount": 72,
   "note": "vendor 目录是上游源码的逐字节快照，请勿手改；用 node scripts/vendor-tdesign-common.mjs 重新同步。"
 }
