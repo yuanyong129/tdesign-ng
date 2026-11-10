@@ -10,10 +10,12 @@
   ],
   "scripts": {
     "start": "pnpm --filter @tdesign-ng/docs run start",
-    "build": "pnpm run build:lib && pnpm run build:styles && pnpm run build:docs",
+    "build": "pnpm run gen:api && pnpm run build:lib && pnpm run build:styles && pnpm run build:docs",
     "build:lib": "ng-packagr -p packages/components/ng-package.json",
     "build:styles": "node scripts/build-styles.mjs",
     "build:docs": "pnpm --filter @tdesign-ng/docs run build",
+    "gen:api": "node scripts/gen-api-docs.mjs",
+    "check:api": "node scripts/gen-api-docs.mjs --check",
     "vendor:styles": "node scripts/vendor-tdesign-common.mjs"
   },
   "devDependencies": {

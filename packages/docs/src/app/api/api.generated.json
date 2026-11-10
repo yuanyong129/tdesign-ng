@@ -1,0 +1,537 @@
+{
+  "generatedBy": "scripts/gen-api-docs.mjs",
+  "components": {
+    "TButton": {
+      "className": "TButton",
+      "selector": "t-button",
+      "file": "packages/components/src/components/button/button.component.ts",
+      "inputs": [
+        {
+          "name": "type",
+          "type": "ButtonTypes",
+          "default": "'secondary'",
+          "required": false,
+          "zh": "按钮的类型，分为五种：次要按钮、主要按钮、虚框按钮、线性按钮、文字按钮。",
+          "en": "Button types are divided into five types: secondary, primary, dashed, outline and text.",
+          "values": [
+            "primary",
+            "secondary",
+            "outline",
+            "dashed",
+            "text"
+          ]
+        },
+        {
+          "name": "shape",
+          "type": "BorderShape",
+          "default": "undefined",
+          "required": false,
+          "zh": "按钮的形状",
+          "en": "Button shape",
+          "values": [
+            "square",
+            "round",
+            "circle"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "default": "'normal'",
+          "required": false,
+          "zh": "按钮的状态",
+          "en": "Button state",
+          "values": [
+            "normal",
+            "warning",
+            "success",
+            "danger"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "Size",
+          "default": "'medium'",
+          "required": false,
+          "zh": "按钮的尺寸",
+          "en": "Button size",
+          "values": [
+            "mini",
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "long",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "按钮的宽度是否随容器自适应。",
+          "en": "Whether the width of the button adapts to the container.",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "按钮是否为加载中状态",
+          "en": "Whether the button is in the loading state",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "按钮是否禁用",
+          "en": "Whether the button is disabled",
+          "values": []
+        },
+        {
+          "name": "htmlType",
+          "type": "HTMLButtonElement['type']",
+          "default": "'button'",
+          "required": false,
+          "zh": "设置 `button` 的原生 `type` 属性，可选值参考 [HTML标准](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#attr-type \"_blank\")",
+          "en": "Set the native `type` attribute of `button`, optional values refer to [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#attr-type \"_blank\")",
+          "values": []
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "设置 `button` 的原生 `autofocus` 属性，可选值参考 [HTML标准](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#attr-type \"_blank\")",
+          "en": "Set the native `autofocus` attribute of `button`, optional values refer to [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#attr-type \"_blank\")",
+          "values": []
+        },
+        {
+          "name": "href",
+          "type": "string",
+          "default": "undefined",
+          "required": false,
+          "zh": "设置跳转链接。设置此属性时，按钮渲染为a标签。",
+          "en": "Set up a jump link. When this property is set, the button is rendered as `<a>`",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "click",
+          "type": "EventEmitter",
+          "zh": "",
+          "en": ""
+        }
+      ]
+    },
+    "TButtonGroup": {
+      "className": "TButtonGroup",
+      "selector": "t-button-group",
+      "file": "packages/components/src/components/button/button-group.component.ts",
+      "inputs": [
+        {
+          "name": "type",
+          "type": "ButtonTypes",
+          "default": "undefined",
+          "required": false,
+          "zh": "按钮的类型，分为五种：次要按钮、主要按钮、虚框按钮、线性按钮、文字按钮。",
+          "en": "Children button types are divided into five types: secondary, primary, dashed, outline and text.",
+          "values": [
+            "primary",
+            "secondary",
+            "outline",
+            "dashed",
+            "text"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "default": "undefined",
+          "required": false,
+          "zh": "按钮的状态",
+          "en": "Children button state",
+          "values": [
+            "normal",
+            "warning",
+            "success",
+            "danger"
+          ]
+        },
+        {
+          "name": "shape",
+          "type": "BorderShape",
+          "default": "undefined",
+          "required": false,
+          "zh": "按钮的形状",
+          "en": "Button shape",
+          "values": [
+            "square",
+            "round",
+            "circle"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "Size",
+          "default": "undefined",
+          "required": false,
+          "zh": "按钮的尺寸",
+          "en": "Children button size",
+          "values": [
+            "mini",
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "undefined",
+          "required": false,
+          "zh": "全部子按钮是否禁用",
+          "en": "All children whether the button is disabled",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TDivider": {
+      "className": "TDivider",
+      "selector": "t-divider",
+      "file": "packages/components/src/components/divider/divider.component.ts",
+      "inputs": [
+        {
+          "name": "direction",
+          "type": "Direction",
+          "default": "'horizontal'",
+          "required": false,
+          "zh": "分割线的方向，是水平还是竖直",
+          "en": "The direction of the dividing line. Can be horizontal or vertical",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "orientation",
+          "type": "'left' | 'center' | 'right'",
+          "default": "'center'",
+          "required": false,
+          "zh": "分割线文字的位置",
+          "en": "The position of the dividing line text",
+          "values": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        {
+          "name": "type",
+          "type": "'solid' | 'dashed' | 'dotted' | 'double'",
+          "default": "'solid'",
+          "required": false,
+          "zh": "分割线样式类型",
+          "en": "Dividing line style type",
+          "values": [
+            "solid",
+            "dashed",
+            "dotted",
+            "double"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "default": "undefined",
+          "required": false,
+          "zh": "分割线宽度/高度",
+          "en": "The wide/height of the dividing line",
+          "values": []
+        },
+        {
+          "name": "margin",
+          "type": "number | string",
+          "default": "undefined",
+          "required": false,
+          "zh": "分割线上下 margin (垂直方向时为左右 margin)",
+          "en": "Margin up and down the split line (left and right margin in vertical direction)",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TLink": {
+      "className": "TLink",
+      "selector": "t-link",
+      "file": "packages/components/src/components/link/link.component.ts",
+      "inputs": [
+        {
+          "name": "href",
+          "type": "string",
+          "default": "undefined",
+          "required": false,
+          "zh": "链接地址",
+          "en": "Link address",
+          "values": []
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "default": "'normal'",
+          "required": false,
+          "zh": "链接的状态",
+          "en": "Link status",
+          "values": [
+            "normal",
+            "warning",
+            "success",
+            "danger"
+          ]
+        },
+        {
+          "name": "hoverable",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "鼠标悬浮时存在底色",
+          "en": "Whether to hide background when hover",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "图标",
+          "en": "icon",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "链接是否为加载中状态",
+          "en": "Whether the link is in the loading state",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "链接是否禁用",
+          "en": "Whether the link is disabled",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "click",
+          "type": "EventEmitter",
+          "zh": "",
+          "en": ""
+        }
+      ]
+    },
+    "TScrollbar": {
+      "className": "TScrollbar",
+      "selector": "t-scrollbar",
+      "file": "packages/components/src/components/scrollbar/scrollbar.component.ts",
+      "inputs": [
+        {
+          "name": "type",
+          "type": "'track' | 'embed'",
+          "default": "'embed'",
+          "required": false,
+          "zh": "类型",
+          "en": "Type",
+          "values": [
+            "track",
+            "embed"
+          ]
+        },
+        {
+          "name": "outerClass",
+          "type": "string",
+          "default": "undefined",
+          "required": false,
+          "zh": "外层的类名",
+          "en": "Outer class",
+          "values": []
+        },
+        {
+          "name": "outerStyle",
+          "type": "string",
+          "default": "undefined",
+          "required": false,
+          "zh": "外层的样式",
+          "en": "Outer style",
+          "values": []
+        },
+        {
+          "name": "hide",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否隐藏滚动条，仅供内部使用",
+          "en": "Whether to hide the scrollbar, for internal use only",
+          "values": [],
+          "internal": true
+        },
+        {
+          "name": "disableHorizontal",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用横向滚动条，仅供内部使用",
+          "en": "Whether to disable the horizontal scrollbar, for internal use only",
+          "values": [],
+          "internal": true
+        },
+        {
+          "name": "disableVertical",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用纵向滚动条，仅供内部使用",
+          "en": "Whether to disable the vertical scrollbar, for internal use only",
+          "values": [],
+          "internal": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "scroll",
+          "type": "EventEmitter",
+          "zh": "滚动时触发",
+          "en": "Emits on scroll"
+        }
+      ]
+    },
+    "TSpace": {
+      "className": "TSpace",
+      "selector": "t-space",
+      "file": "packages/components/src/components/space/space.component.ts",
+      "inputs": [
+        {
+          "name": "align",
+          "type": "'start' | 'end' | 'center' | 'baseline'",
+          "default": "undefined",
+          "required": false,
+          "zh": "对齐方式",
+          "en": "Alignment",
+          "values": [
+            "start",
+            "end",
+            "center",
+            "baseline"
+          ]
+        },
+        {
+          "name": "direction",
+          "type": "'vertical' | 'horizontal'",
+          "default": "'horizontal'",
+          "required": false,
+          "zh": "间距方向",
+          "en": "Spacing direction",
+          "values": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "number | 'mini' | 'small' | 'medium' | 'large' | [SpaceSize, SpaceSize]",
+          "default": "'small'",
+          "required": false,
+          "zh": "间距大小，支持分别制定横向和竖向的间距",
+          "en": "Spacing size, support for setting horizontal and vertical spacing separately",
+          "values": [
+            "mini",
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "wrap",
+          "type": "boolean",
+          "default": "undefined",
+          "required": false,
+          "zh": "环绕类型的间距，用于折行的场景。",
+          "en": "The spacing of the wrapping type, used in the scene of wrapping.",
+          "values": []
+        },
+        {
+          "name": "fill",
+          "type": "boolean",
+          "default": "undefined",
+          "required": false,
+          "zh": "充满整行",
+          "en": "fill the block",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TThumb": {
+      "className": "TThumb",
+      "selector": "t-thumb",
+      "file": "packages/components/src/components/scrollbar/thumb.component.ts",
+      "inputs": [
+        {
+          "name": "data",
+          "type": "ThumbData",
+          "default": "undefined",
+          "required": false,
+          "zh": "滚动条滑块的位置与尺寸数据，由 `TScrollbar` 内部计算后传入",
+          "en": "Thumb position and size data, computed internally by `TScrollbar`",
+          "values": []
+        },
+        {
+          "name": "direction",
+          "type": "Direction",
+          "default": "'horizontal'",
+          "required": false,
+          "zh": "滚动条的方向",
+          "en": "Scroll direction",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "alwaysShow",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否始终显示滚动条",
+          "en": "Whether the scrollbar is always visible",
+          "values": []
+        },
+        {
+          "name": "both",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否同时显示横向与纵向滚动条",
+          "en": "Whether to show both horizontal and vertical scrollbars",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "scroll",
+          "type": "EventEmitter",
+          "zh": "滚动时触发，参数为滚动距离",
+          "en": "Emits on scroll, with the scroll offset as the argument"
+        }
+      ]
+    }
+  }
+}

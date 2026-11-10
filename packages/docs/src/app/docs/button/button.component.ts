@@ -1,12 +1,14 @@
 import { Component } from "@angular/core";
 import { TButtonModule, TSpaceModule, TButtonGroupModule } from "@tdesign-ng/components";
+import { ApiTable } from '../../api/api-table.component';
 
 @Component({
   selector: 'button-docs',
   imports: [
     TButtonModule,
     TSpaceModule,
-    TButtonGroupModule
+    TButtonGroupModule,
+    ApiTable
   ],
   template: `
     <h2>Button 组件</h2>
@@ -115,6 +117,10 @@ import { TButtonModule, TSpaceModule, TButtonGroupModule } from "@tdesign-ng/com
       <t-button shape="round"> cut </t-button>
       <t-button shape="round"> find </t-button>
     </t-button-group>
+
+    <h3 class="description">API</h3>
+    <api-table component="TButton" />
+    <api-table component="TButtonGroup" />
   `,
   styles: [
 

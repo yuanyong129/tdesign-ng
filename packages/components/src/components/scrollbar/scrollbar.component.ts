@@ -22,22 +22,22 @@ const TRACK_SIZE = 15;
       >
         <ng-content></ng-content>
       </div>
-    <a-thumb
+    <t-thumb
       v-if="!hide && hasHorizontalScrollbar"
       #horizontalThumb
       [data]="horizontalData()"
       direction="horizontal"
       [both]="isBoth()"
       (scroll)="handleHorizontalScroll($event)"
-    ></a-thumb>
-    <a-thumb
+    ></t-thumb>
+    <t-thumb
       v-if="!hide && hasVerticalScrollbar"
       #verticalThumb
       [data]="verticalData()"
       direction="vertical"
       [both]="isBoth()"
       (scroll)="handleVerticalScroll($event)"
-    ></a-thumb>
+    ></t-thumb>
   </div>
   `,
   standalone: true,
@@ -46,6 +46,8 @@ export class TScrollbar {
   /**
    * @zh 类型
    * @en Type
+   * @values 'track' | 'embed'
+   * @defaultValue 'embed'
    */
   @Input() type: 'track' | 'embed' = 'embed';
   /**
@@ -58,11 +60,32 @@ export class TScrollbar {
    * @en Outer style
    */
   @Input() outerStyle?: string;
-  // private
+  /**
+   * @zh 是否隐藏滚动条，仅供内部使用
+   * @en Whether to hide the scrollbar, for internal use only
+   * @defaultValue false
+   * @internal
+   */
   @Input() hide: boolean = false;
+  /**
+   * @zh 是否禁用横向滚动条，仅供内部使用
+   * @en Whether to disable the horizontal scrollbar, for internal use only
+   * @defaultValue false
+   * @internal
+   */
   @Input() disableHorizontal: boolean = false;
+  /**
+   * @zh 是否禁用纵向滚动条，仅供内部使用
+   * @en Whether to disable the vertical scrollbar, for internal use only
+   * @defaultValue false
+   * @internal
+   */
   @Input() disableVertical: boolean = false;
 
+  /**
+   * @zh 滚动时触发
+   * @en Emits on scroll
+   */
   @Output() scroll = new EventEmitter<Event>();
 
   prefixCls = getPrefixCls('scrollbar');

@@ -2,6 +2,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // API 文档表格直接 import 生成好的 JSON，避免运行时再发一次请求。
+    "resolveJsonModule": true,
     "paths": {
       "@tdesign-ng/components": ["../components/src/index.ts"],
       "@tdesign-ng/components/*": ["../components/src/*"]

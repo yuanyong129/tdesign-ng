@@ -5,7 +5,7 @@ import { getPrefixCls } from "../../_utils/global-config";
 import { Direction } from "../../_utils/constant";
 
 @Component({
-  selector: 'a-thumb',
+  selector: 't-thumb',
   template: `
      <div
         #track
@@ -26,15 +26,38 @@ import { Direction } from "../../_utils/constant";
   styles: []
 })
 export class TThumb {
-
+  /**
+   * @zh 滚动条滑块的位置与尺寸数据，由 `TScrollbar` 内部计算后传入
+   * @en Thumb position and size data, computed internally by `TScrollbar`
+   */
   @Input() data?: ThumbData;
 
+  /**
+   * @zh 滚动条的方向
+   * @en Scroll direction
+   * @values 'horizontal' | 'vertical'
+   * @defaultValue 'horizontal'
+   */
   @Input() direction: Direction = 'horizontal';
 
+  /**
+   * @zh 是否始终显示滚动条
+   * @en Whether the scrollbar is always visible
+   * @defaultValue false
+   */
   @Input() alwaysShow: boolean = false;
 
+  /**
+   * @zh 是否同时显示横向与纵向滚动条
+   * @en Whether to show both horizontal and vertical scrollbars
+   * @defaultValue false
+   */
   @Input() both: boolean = false;
 
+  /**
+   * @zh 滚动时触发，参数为滚动距离
+   * @en Emits on scroll, with the scroll offset as the argument
+   */
   @Output() scroll = new EventEmitter<number>();
 
   visible = signal(false);
