@@ -1,3 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
-// 导入组件库的全局样式
+/* 文档站全局样式 */
+
+// 1) 设计令牌：--td-* CSS 变量（浅色/深色/圆角/字号/尺寸）
+//    直接引用 vendor 下的上游源码，保证与 tdesign-common 逐字节一致。
+@import '../../../vendor/tdesign-common/style/web/theme/_index.less';
+
+// 2) 全局工具类与基础过渡（.narrow-scrollbar、.t-fake-arrow、弹层动画…）
+@import '../../../vendor/tdesign-common/style/web/_global.less';
+
+// 3) 归一化样式
+@import '../../../vendor/tdesign-common/style/web/_reset.less';
+
+// 4) 迁移期存量样式（基于旧 Arco 主题，与 --td-* 令牌无命名冲突）。
+//    P1 每重写一个组件，就从这里去掉一条，直至整个文件只剩上面三行。
 @import '../components/src/index.less';

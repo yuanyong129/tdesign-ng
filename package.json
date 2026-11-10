@@ -10,12 +10,15 @@
   ],
   "scripts": {
     "start": "pnpm --filter @tdesign-ng/docs run start",
-    "build": "pnpm run build:lib && pnpm run build:docs",
+    "build": "pnpm run build:lib && pnpm run build:styles && pnpm run build:docs",
     "build:lib": "ng-packagr -p packages/components/ng-package.json",
-    "build:docs": "pnpm --filter @tdesign-ng/docs run build"
+    "build:styles": "node scripts/build-styles.mjs",
+    "build:docs": "pnpm --filter @tdesign-ng/docs run build",
+    "vendor:styles": "node scripts/vendor-tdesign-common.mjs"
   },
   "devDependencies": {
     "@angular/compiler-cli": "^19.2.0",
+    "less": "^4.5.1",
     "ng-packagr": "^19.2.0",
     "typescript": "~5.7.2"
   }

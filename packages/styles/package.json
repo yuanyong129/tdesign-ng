@@ -1,0 +1,22 @@
+{
+  "name": "@tdesign-ng/styles",
+  "version": "0.0.1",
+  "description": "TDesign styles for Angular, a thin assembly layer on top of the upstream tdesign-common less sources",
+  "license": "MIT",
+  "sideEffects": [
+    "**/*.less",
+    "**/*.css"
+  ],
+  "files": [
+    "src",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuanyong129/tdesign-ng.git",
+    "directory": "packages/styles"
+  }
+}

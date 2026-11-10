@@ -169,6 +169,9 @@ importers:
       '@angular/compiler-cli':
         specifier: ^19.2.0
         version: 19.2.19(@angular/compiler@19.2.19)(supports-color@8.1.1)(typescript@5.7.3)
+      less:
+        specifier: ^4.5.1
+        version: 4.5.1
       ng-packagr:
         specifier: ^19.2.0
         version: 19.2.2(@angular/compiler-cli@19.2.19(@angular/compiler@19.2.19)(supports-color@8.1.1)(typescript@5.7.3))(tslib@2.8.1)(typescript@5.7.3)
@@ -264,6 +267,8 @@ importers:
       typescript:
         specifier: ~5.7.2
         version: 5.7.3
+
+  packages/styles: {}
 
 packages:
 
