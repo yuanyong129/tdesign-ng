@@ -57,7 +57,8 @@ pnpm start          # 文档站开发服务器 → http://localhost:4280/
 | `pnpm check:api` | 校验每个输入属性都有中英文描述 |
 | `pnpm check:align` | 比对组件 API 与 tdesign-vue-next 的差异 |
 | `pnpm vendor:styles` | 重新同步 `vendor/tdesign-common` 到上游最新 |
-| `pnpm preview:pages` | 本地预览 GitHub Pages 产物 |
+| `pnpm build:docs:pages` | 构建文档站并把 `base-href` 设为 `/tdesign-ng/`（Pages 部署用） |
+| `pnpm preview:pages` | 本地预览 GitHub Pages 产物（需先执行上一条） |
 
 ## 文档站
 

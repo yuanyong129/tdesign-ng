@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "node ../../scripts/gen-api-docs.mjs && ng serve",
     "build": "node ../../scripts/gen-api-docs.mjs && ng build",
+    "build:pages": "node ../../scripts/gen-api-docs.mjs && ng build --base-href=/tdesign-ng/",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

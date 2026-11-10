@@ -5,7 +5,7 @@
  *   - 站点根路径是 /tdesign-ng/（与 angular.json 的 baseHref 一致）
  *   - 未知路径回退到 index.html（对应部署时复制的 404.html）
  *
- * 用法：pnpm run build:docs && node scripts/preview-pages.mjs
+ * 用法：pnpm run build:docs:pages && node scripts/preview-pages.mjs
  */
 import { createServer } from 'node:http';
 import { existsSync, readFileSync, statSync } from 'node:fs';

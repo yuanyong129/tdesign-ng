@@ -39,8 +39,11 @@ jobs:
 
       # 文档站直接消费 @tdesign-ng/components 与 @tdesign-ng/icons 的源码
       # （tsconfig paths），因此只需构建文档站本身。
+      # 用 build:docs:pages，它会把 base-href 设成 /tdesign-ng/ —— 项目页
+      # 挂在 https://<user>.github.io/tdesign-ng/ 下，不设 base-href 时
+      # 打包出的绝对资源路径会 404。
       - name: Build docs
-        run: pnpm run build:docs
+        run: pnpm run build:docs:pages
 
       # GitHub Pages 不支持 SPA 回退，把 index.html 复制成 404.html，
       # 这样直接访问 /tdesign-ng/button 这类深链接也能正确加载应用。

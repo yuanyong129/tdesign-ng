@@ -15,6 +15,7 @@
     "build:icons": "ng-packagr -p packages/icons/ng-package.json",
     "build:styles": "node scripts/build-styles.mjs",
     "build:docs": "pnpm --filter @tdesign-ng/docs run build",
+    "build:docs:pages": "pnpm --filter @tdesign-ng/docs run build:pages",
     "gen:api": "node scripts/gen-api-docs.mjs",
     "gen:icons": "node scripts/gen-icons.mjs",
     "check:api": "node scripts/gen-api-docs.mjs --check",
