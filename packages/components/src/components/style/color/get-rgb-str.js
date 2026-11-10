@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { getRgbStr } = require('@td-design/color');
+const { getRgbStr } = require('@arco-design/color');
 
 module.exports = {
   install(_, __, functions) {
