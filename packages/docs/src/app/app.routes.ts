@@ -48,6 +48,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/radio/radio.component').then((m) => m.RadioDocs),
   },
   {
+    path: 'select',
+    loadComponent: () => import('./docs/select/select.component').then((m) => m.SelectDocs),
+  },
+  {
     path: 'form',
     loadComponent: () => import('./docs/form/form.component').then((m) => m.FormDocs),
   },

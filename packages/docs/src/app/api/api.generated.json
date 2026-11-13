@@ -1263,6 +1263,253 @@
         }
       ]
     },
+    "TSelect": {
+      "className": "TSelect",
+      "selector": "t-select",
+      "file": "packages/ng-components/src/components/select/select.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "SelectSingleValue | SelectMultipleValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "已选中的值，多选时是数组",
+          "en": "Selected value, an array when multiple",
+          "values": []
+        },
+        {
+          "name": "options",
+          "type": "SelectOptionInput[]",
+          "default": "[]",
+          "required": false,
+          "zh": "选项列表，支持直接给值、选项对象与分组",
+          "en": "Options, supports raw values, option objects and groups",
+          "values": []
+        },
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否多选",
+          "en": "Whether multiple selection is allowed",
+          "values": []
+        },
+        {
+          "name": "filterable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可搜索",
+          "en": "Whether the options can be filtered",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空",
+          "en": "Whether the value can be cleared",
+          "values": []
+        },
+        {
+          "name": "creatable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许创建新选项",
+          "en": "Whether new options can be created",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the select is disabled",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读",
+          "en": "Whether the select is readonly",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否加载中",
+          "en": "Whether the options are loading",
+          "values": []
+        },
+        {
+          "name": "loadingText",
+          "type": "string",
+          "default": "'加载中'",
+          "required": false,
+          "zh": "加载中的提示文字",
+          "en": "Loading text",
+          "values": []
+        },
+        {
+          "name": "empty",
+          "type": "string",
+          "default": "'暂无数据'",
+          "required": false,
+          "zh": "没有选项时的提示文字",
+          "en": "Text shown when there is no option",
+          "values": []
+        },
+        {
+          "name": "placeholder",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "占位文字",
+          "en": "Placeholder text",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "SelectSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "选择器尺寸",
+          "en": "Size of the select",
+          "values": [
+            "small medium large"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "SelectStatus",
+          "default": "'default'",
+          "required": false,
+          "zh": "选择器状态",
+          "en": "Status of the select",
+          "values": [
+            "default success warning error"
+          ]
+        },
+        {
+          "name": "tips",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选择框下方的提示文字",
+          "en": "Tips below the select",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "左侧标签文字",
+          "en": "Label text",
+          "values": []
+        },
+        {
+          "name": "showArrow",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示下拉箭头",
+          "en": "Whether to show the dropdown arrow",
+          "values": []
+        },
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否无边框",
+          "en": "Whether the select is borderless",
+          "values": []
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "自动聚焦",
+          "en": "Whether to focus automatically",
+          "values": []
+        },
+        {
+          "name": "max",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "多选时最多能选中的数量",
+          "en": "Maximum number of selected options",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "SelectSingleValue | SelectMultipleValue",
+          "zh": "值变化事件，用于双向绑定",
+          "en": "Value change event, used for two-way binding"
+        },
+        {
+          "name": "change",
+          "type": "SelectChangeEvent",
+          "zh": "值变化事件，携带触发来源与选项",
+          "en": "Change event with trigger and option"
+        },
+        {
+          "name": "popupVisibleChange",
+          "type": "boolean",
+          "zh": "下拉面板展开状态变化",
+          "en": "Popup visibility change"
+        },
+        {
+          "name": "create",
+          "type": "string",
+          "zh": "创建新选项",
+          "en": "Emitted when a new option is created"
+        },
+        {
+          "name": "clear",
+          "type": "MouseEvent",
+          "zh": "清空已选值",
+          "en": "Emitted when the value is cleared"
+        },
+        {
+          "name": "remove",
+          "type": "{ value: SelectValue; option?: SelectOptionObj; event: Event }",
+          "zh": "移除一个已选标签",
+          "en": "Emitted when a selected tag is removed"
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "zh": "搜索关键词变化",
+          "en": "Emitted when the search keyword changes"
+        },
+        {
+          "name": "focus",
+          "type": "FocusEvent",
+          "zh": "获得焦点",
+          "en": "Focus event"
+        },
+        {
+          "name": "blur",
+          "type": "FocusEvent",
+          "zh": "失去焦点",
+          "en": "Blur event"
+        }
+      ]
+    },
     "TSpace": {
       "className": "TSpace",
       "selector": "t-space",

@@ -382,8 +382,11 @@ tdesign-ng/
 | CheckboxGroup | `t-checkbox-group` | 6/10，missing 0 | 投影与 `options` 两种子项来源统一收集 |
 | Radio | `t-radio` | 7/12，missing 0 | `allowUncheck`、按钮式形态 |
 | RadioGroup | `t-radio-group` | 10/13，missing 0 | `theme`/`variant`/`direction`/`size`，填充变体的色块跟随 |
+| Form | `t-form` | 15/21，missing 0 | 内置 TDesign `rules` 校验引擎（required/type/len/min/max/enum/pattern/validator），兼容 `ngModel` 与 `formControl` |
+| FormItem | `t-form-item` | 13/13 | 标签布局、必填星号、冒号、help/tips/错误提示、blur 与 change 时机校验 |
+| Select | `t-select` | 20/55，missing 0 | CDK Overlay 面板、单选/多选、搜索过滤、分组、创建项、键盘导航、标签增删 |
 
-`missing` 为 0 表示上游每个属性都有对应物或被显式记录为「Angular 侧不需要」；`extra` 为 0 表示没有引入 TDesign 之外的输入属性。
+`missing` 为 0 表示上游每个属性都有对应物或被显式记录为「Angular 侧不需要」；`extra` 为 0 表示没有引入 TDesign 之外的输入属性。截至 2026-11-13，全部 13 个已实现组件的 `align-check` 合计 missing 0 / extra 0。
 
 ### 17.2 表单类组件的三条约定
 
@@ -400,6 +403,22 @@ tdesign-ng/
 
 ### 17.4 待办
 
-- Form / FormItem：校验、布局（纵向/内联）、`status`/`tips` 贯通；Input 的 `__status`、`__tips` 需要表单容器提供定位上下文，届时可回收桥接层里的 static 覆盖。
-- Select：需要 CDK overlay，是 P2 里唯一涉及浮层的组件。
-- `align-check` 已支持按接口名精确比对（`upstreamInterface`），Radio/Checkbox 这类「单项与分组共用一个 type.d.ts」的组件不会再互相误判。
+- ~~Form / FormItem~~、~~Select~~ 已在 §17.5、§17.6 落地。
+- Input 的 `__status`、`__tips` 现在由组件级 `[status]`/`[tips]` 承担；表单容器下仍走 `.t-form__controls` 的状态类。
+- 后续 P3 组件（弹层与反馈）复用 Select 的 overlay 方案：`Overlay` + `TemplatePortal` + `flexibleConnectedTo(host)`，宽度取触发器实测宽度。
+
+### 17.5 Form 的三个实现要点
+
+1. **校验引擎**：`form-rule.ts` 按顺序执行 required → whitespace → type → len → min → max → enum → pattern → validator，空值只触发 required，其余规则跳过；`validator` 可返回布尔、`{result, message, type}` 或 Promise，因此异步校验天然可用。
+2. **取值来源**：`TFormItem` 通过 `contentChild(NgControl)` 找到投影进来的控件，读 `control.value`、订阅 `control.valueChanges`。这意味着表单里的控件必须注册为 `NgControl`（`ngModel` 或 `formControl`），单纯 `[(value)]` 不会被表单感知。
+3. **原生 submit 隔离**：模板内层是真正的 `<form (submit)">`，事件会冒泡到宿主并与 `TForm` 的 `(submit)` 输出同名；`handleNativeSubmit` 先 `stopPropagation()` 再 `preventDefault()`，否则订阅者拿到的是原生 `Event` 而不是 `FormSubmitResult`。
+
+### 17.6 Select 的实现要点
+
+- **面板**：`@angular/cdk` 的 `Overlay` + `TemplatePortal`，`flexibleConnectedTo(host)` 优先向下、空间不足翻向上，`width` 取触发器 `getBoundingClientRect().width`，因此与触发器严格同宽；`outsidePointerEvents()` 关闭面板时会忽略落在宿主内部的点击。
+- **面板宽度**：上游 `.t-popup` 是 `inline-block`，会收缩到内容宽度；桥接层因此给 `.t-select__dropdown` 补 `display: block; width: 100%`。
+- **多选**：选中项以 `.t-tag` 形式回显在触发器内，标签关闭图标内联 SVG；面板内的多选项渲染真实 Checkbox 结构（`t-checkbox` + `t-checkbox__input` + `t-checkbox__label`），以便复用上游样式。
+- **键盘**：`ArrowDown`/`ArrowUp` 移动高亮、`Enter` 选中、`Escape` 关闭、`Backspace`（搜索词为空时）删除最后一个标签、`Tab` 关闭。
+- **占位文字**：已有选中值时不渲染 `placeholder`，否则多选标签后面会紧跟占位符。
+
+

@@ -53,13 +53,15 @@ const ANGULAR_EVENT_IGNORES = {
 const CONFIG = {
   TButton: {
     upstream: 'button',
-    // 上游的 type 是原生 button 的 submit/reset/button，对应我们的 htmlType；
-    // 我们的 type（primary/secondary…）是 Arco 语义，P1 要拆成 TDesign 的 theme + variant。
-    renames: { type: 'htmlType' },
+    // 上游的 type 是原生 button 的 submit/reset/button，我们的 type 语义一致；
+    // TDesign 的主题与形态分别是 theme / variant，P1 已按上游拆分。
+    renames: {},
     angularOnly: [],
     ignoreUpstream: {
       content: 'Angular 用 <ng-content> 承载插槽内容，不是输入属性',
       default: '同 content，Vue 的默认插槽',
+      icon: 'Angular 用 <t-icon tButtonIcon> 投影，不是输入属性',
+      suffix: 'Angular 用 <span tButtonSuffix> 投影，不是输入属性',
       onClick: 'Angular 用 (click) 输出，不是输入属性',
       'loadingProps': 'Angular 侧用 [loading] 搭配 t-loading 指令实现，P1 定',
     },
@@ -77,10 +79,14 @@ const CONFIG = {
   TLink: {
     upstream: 'link',
     renames: {},
-    angularOnly: [],
+    // 上游用 prefixIcon / suffixIcon 插槽判断是否渲染图标占位，
+    // Angular 侧投影内容无法在模板里判断空，改用显式布尔开关。
+    angularOnly: ['hasPrefixIcon', 'hasSuffixIcon'],
     ignoreUpstream: {
       content: 'Angular 用 <ng-content> 承载链接文字',
       default: '同 content，Vue 的默认插槽',
+      prefixIcon: 'Angular 用 <t-icon tLinkPrefixIcon> 投影，配合 [hasPrefixIcon] 留出间距',
+      suffixIcon: 'Angular 用 <t-icon tLinkSuffixIcon> 投影，配合 [hasSuffixIcon] 留出间距',
       onClick: 'Angular 用 (click) 输出，不是输入属性',
     },
   },
@@ -176,6 +182,46 @@ const CONFIG = {
       'modelValue': 'Angular 用 [(value)] 双向绑定 + ControlValueAccessor',
       'defaultValue': 'Angular 用 [value] 初始值 + ControlValueAccessor',
       'onValidate': '数值越界校验由 t-form 承担，P2 表单落地后再补',
+    },
+  },
+  TSelect: {
+    upstream: 'select',
+    upstreamInterface: 'TdSelectProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ...ANGULAR_EVENT_IGNORES,
+      'modelValue': 'Angular 用 [(value)] 双向绑定 + ControlValueAccessor',
+      'defaultValue': 'Angular 用 [value] 作为受控初始值',
+      'prefixIcon': 'Angular 用 <t-icon tSelectPrefixIcon> 投影，不是输入属性',
+      'suffixIcon': '同 prefixIcon，用 <t-icon tSelectSuffixIcon> 投影',
+      'suffix': 'Angular 用 <ng-content select="[tSelectSuffix]"> 承载任意后置内容',
+      'popupVisible': '尚未实现受控展开，先用 (popupVisibleChange) 观察状态',
+      'valueDisplay': '自定义回显内容尚未实现，先由选项 label 决定',
+      'valueType': '值类型恒为 SelectValue，不需要额外的类型声明',
+      'keys': '选项字段名固定为 label/value/disabled，不做字段映射',
+      'filter': '过滤先用内置的 label 子串匹配，暂不支持自定义过滤函数',
+      'reserveKeyword': '关闭面板即清空搜索词，暂不保留',
+      'collapsedItems': '多选标签折叠尚未实现',
+      'minCollapsedNum': '同 collapsedItems，折叠功能未实现',
+      'inputProps': '内部输入框的透传属性尚未开放',
+      'selectInputProps': '同 inputProps，暂未开放',
+      'tagInputProps': '标签输入相关属性暂未开放',
+      'tagProps': '标签透传属性暂未开放',
+      'popupProps': '面板透传属性暂未开放',
+      'panelTopContent': '面板顶部自定义内容尚未实现',
+      'panelBottomContent': '面板底部自定义内容尚未实现',
+      'scroll': '虚拟滚动尚未实现，选项不多时直接渲染',
+      'autoWidth': '宽度默认撑满父容器，需要时用 style 指定',
+      'inputValue': '受控搜索词尚未开放，搜索词由组件内部维护',
+      'defaultInputValue': '受控搜索词尚未开放，搜索词由组件内部维护',
+      'defaultPopupVisible': '尚未实现受控展开，先用 (popupVisibleChange) 观察状态',
+      'onClear': 'Angular 用 (clear) 输出',
+      'onCreate': 'Angular 用 (create) 输出',
+      'onRemove': 'Angular 用 (remove) 输出',
+      'onSearch': 'Angular 用 (search) 输出',
+      'onPopupVisibleChange': 'Angular 用 (popupVisibleChange) 输出',
+      'onInputChange': '搜索词变化统一走 (search)，不再单独暴露输入事件',
     },
   },
   TScrollbar: { upstream: null, reason: 'TDesign 没有 scrollbar 组件，属于 Arco 独有能力，P1 移除' },

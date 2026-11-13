@@ -35,7 +35,8 @@ t-textarea {
 }
 
 // 上游把提示文字绝对定位在表单容器内，单独使用时改为文档流
-t-input .t-input__tips {
+t-input .t-input__tips,
+t-select .t-input__tips {
   position: static;
   margin-top: 4px;
 }
@@ -70,4 +71,17 @@ t-form,
 t-form-item {
   display: block;
 }
+
+// 选择器：.t-select__wrap 是 width: 100% 的块级容器，宿主也必须是块级
+t-select {
+  display: block;
+}
+
+// 下拉面板：上游的 .t-popup 是 inline-block，会收缩到内容宽度；
+// 面板挂在 CDK overlay pane 上，需要撑满 pane 才能与触发器同宽。
+.t-select__dropdown {
+  display: block;
+  width: 100%;
+}
+
 

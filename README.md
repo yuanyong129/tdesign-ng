@@ -18,7 +18,12 @@
 | Link | ✅ |
 | Space | ✅ |
 | Icon | ✅（`@tdesign-ng/icons`，内置 65 个精选图标） |
-| Input / Textarea / Select / Checkbox / Radio / Switch / Form | 🚧 计划中（P2） |
+| Input / Textarea | ✅ 清空、字数限制、前后缀投影、autosize |
+| Switch / Checkbox / CheckboxGroup / Radio / RadioGroup | ✅ 受控值 + `ControlValueAccessor` |
+| Form / FormItem | ✅ 内置 TDesign `rules` 校验引擎，兼容 `ngModel` 与 `formControl` |
+| Select | ✅ CDK Overlay 面板，单选/多选/搜索/分组/创建项/键盘导航 |
+
+P3 及之后的组件（弹层、数据展示、复杂录入）按 `docs/plans/tdesign-angular-plan.md` 的分期推进。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
 

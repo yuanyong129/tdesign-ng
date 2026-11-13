@@ -10,6 +10,7 @@ export * from './components/form';
 export * from './components/input';
 export * from './components/link';
 export * from './components/radio';
+export * from './components/select';
 export * from './components/space';
 export * from './components/switch';
 export * from './components/textarea';
