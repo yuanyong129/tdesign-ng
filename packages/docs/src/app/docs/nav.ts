@@ -20,6 +20,7 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/textarea', label: '文本域 Textarea', group: '数据录入' },
   { path: '/switch', label: '开关 Switch', group: '数据录入' },
   { path: '/checkbox', label: '多选框 Checkbox', group: '数据录入' },
+  { path: '/radio', label: '单选框 Radio', group: '数据录入' },
 ];
 
 /** 按分组统计，保持 DOCS_NAV 里的先后顺序。 */

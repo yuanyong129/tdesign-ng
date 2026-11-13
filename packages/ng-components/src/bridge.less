@@ -10,9 +10,10 @@
  *   在脱离表单单独使用时需要补上等价的定位方式。
  */
 
-// Button、Checkbox：宿主不产生盒子，避免破坏布局与相邻选择器
+// Button、Checkbox、Radio：宿主不产生盒子，避免破坏布局与相邻选择器
 t-button,
-t-checkbox {
+t-checkbox,
+t-radio {
   display: contents;
 }
 

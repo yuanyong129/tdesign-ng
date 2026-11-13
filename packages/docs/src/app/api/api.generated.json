@@ -745,6 +745,215 @@
         }
       ]
     },
+    "TRadio": {
+      "className": "TRadio",
+      "selector": "t-radio",
+      "file": "packages/ng-components/src/components/radio/radio.component.ts",
+      "inputs": [
+        {
+          "name": "checked",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否选中，独立使用时生效",
+          "en": "Whether the radio is checked, used when standalone",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "RadioValue",
+          "default": "true",
+          "required": false,
+          "zh": "单选框的值，在单选框组中用于匹配",
+          "en": "The value of the radio, matched inside a radio group",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the radio is disabled",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读",
+          "en": "Whether the radio is readonly",
+          "values": []
+        },
+        {
+          "name": "allowUncheck",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "再次点击已选中的单选框时是否允许取消选中",
+          "en": "Whether to allow unchecking when clicking a checked radio again",
+          "values": []
+        },
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生 name 属性，未设置时继承单选框组的 name",
+          "en": "Native name attribute, inherits from the radio group when unset",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "单选框文字",
+          "en": "The label of the radio",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "checkedChange",
+          "type": "boolean",
+          "zh": "选中状态变化事件",
+          "en": "Checked change event"
+        },
+        {
+          "name": "change",
+          "type": "RadioChangeEvent",
+          "zh": "值变化事件",
+          "en": "Change event"
+        }
+      ]
+    },
+    "TRadioGroup": {
+      "className": "TRadioGroup",
+      "selector": "t-radio-group",
+      "file": "packages/ng-components/src/components/radio/radio-group.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "RadioValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中的值",
+          "en": "The selected value",
+          "values": []
+        },
+        {
+          "name": "options",
+          "type": "RadioOption[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选项列表，也可以用内容投影声明单选框",
+          "en": "Option list, radios can also be declared by content projection",
+          "values": []
+        },
+        {
+          "name": "direction",
+          "type": "RadioDirection",
+          "default": "horizontal",
+          "required": false,
+          "zh": "排列方向",
+          "en": "The layout direction",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "theme",
+          "type": "RadioTheme",
+          "default": "radio",
+          "required": false,
+          "zh": "形态：普通单选框或按钮式单选框",
+          "en": "The theme: plain radios or button style",
+          "values": [
+            "radio",
+            "button"
+          ]
+        },
+        {
+          "name": "variant",
+          "type": "RadioVariant",
+          "default": "outline",
+          "required": false,
+          "zh": "按钮式单选框的样式变体",
+          "en": "The variant of button style radios",
+          "values": [
+            "outline",
+            "primary-filled",
+            "default-filled"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "RadioSize",
+          "default": "medium",
+          "required": false,
+          "zh": "尺寸，只在按钮式形态下生效",
+          "en": "The size, only works with the button theme",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用整组",
+          "en": "Whether the whole group is disabled",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读整组",
+          "en": "Whether the whole group is readonly",
+          "values": []
+        },
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生 name 属性，会下发给组内的单选框",
+          "en": "Native name attribute, passed down to radios in the group",
+          "values": []
+        },
+        {
+          "name": "allowUncheck",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "再次点击已选中的单选框时是否允许取消选中",
+          "en": "Whether to allow unchecking when clicking a checked radio again",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "RadioValue | undefined",
+          "zh": "选中值变化事件，用于双向绑定",
+          "en": "Value change event, used for two-way binding"
+        },
+        {
+          "name": "change",
+          "type": "RadioGroupChangeEvent",
+          "zh": "值变化事件",
+          "en": "Change event"
+        }
+      ]
+    },
     "TSpace": {
       "className": "TSpace",
       "selector": "t-space",

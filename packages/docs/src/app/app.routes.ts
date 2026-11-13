@@ -44,6 +44,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/checkbox/checkbox.component').then((m) => m.CheckboxDocs),
   },
   {
+    path: 'radio',
+    loadComponent: () => import('./docs/radio/radio.component').then((m) => m.RadioDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

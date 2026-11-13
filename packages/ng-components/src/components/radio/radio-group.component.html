@@ -1,0 +1,7 @@
+<ng-content />
+@for (option of normalizedOptions(); track $index) {
+  <t-radio [value]="option.value" [disabled]="option.disabled ?? false">{{ option.label }}</t-radio>
+}
+@if (isFilled()) {
+  <div #bgBlock class="t-radio-group__bg-block" aria-hidden="true"></div>
+}

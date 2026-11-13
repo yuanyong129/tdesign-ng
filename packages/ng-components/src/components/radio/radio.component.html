@@ -1,0 +1,21 @@
+<label
+  [class]="classes()"
+  [attr.tabindex]="isDisabled() ? null : 0"
+  (click)="handleClick($event)"
+  (keydown)="handleKeydown($event)"
+>
+  <input
+    type="radio"
+    [class]="prefixClass() + '__former'"
+    [attr.name]="mergedName()"
+    [attr.value]="value()"
+    [checked]="isChecked()"
+    [disabled]="isDisabled()"
+    tabindex="-1"
+    [attr.aria-checked]="isChecked()"
+  />
+  <span [class]="prefixClass() + '__input'"></span>
+  <span [class]="prefixClass() + '__label'"
+    >{{ label() }}<ng-content
+  /></span>
+</label>

@@ -368,3 +368,38 @@ tdesign-ng/
 
 - 页面渲染与交互用 CDP 驱动真实 Edge 验证（统计 `<docs-demo>` 数量、点击「查看代码」后 `.hljs-*` token 数、API 表格行数、控制台错误为零），避免只看截图猜。
 - 视觉检查用 Edge 无头截图：`--headless=old`（`--headless=new` 在本机不产出文件）、`--virtual-time-budget=9000`，截图后再按需放大局部核对颜色与间距。
+
+## 17. P2 基础表单组件（进行中）
+
+### 17.1 已完成组件与对齐情况
+
+| 组件 | 选择器 | 上游契约对齐 | 说明 |
+| --- | --- | --- | --- |
+| Input | `t-input` | 22/46，missing 0 | 清空、字数限制、前后缀投影、四种状态、`t-input` 内建 label |
+| Textarea | `t-textarea` | 12/21，missing 0 | 固定高 + `autosize`（minRows/maxRows）自适应 |
+| Switch | `t-switch` | 7/10，missing 0 | 宿主即 `.t-switch`，支持 `beforeChange` 异步确认与 loading |
+| Checkbox | `t-checkbox` | 9/14，missing 0 | 半选、全选开关、`options` 渲染 |
+| CheckboxGroup | `t-checkbox-group` | 6/10，missing 0 | 投影与 `options` 两种子项来源统一收集 |
+| Radio | `t-radio` | 7/12，missing 0 | `allowUncheck`、按钮式形态 |
+| RadioGroup | `t-radio-group` | 10/13，missing 0 | `theme`/`variant`/`direction`/`size`，填充变体的色块跟随 |
+
+`missing` 为 0 表示上游每个属性都有对应物或被显式记录为「Angular 侧不需要」；`extra` 为 0 表示没有引入 TDesign 之外的输入属性。
+
+### 17.2 表单类组件的三条约定
+
+1. **表单集成**：所有输入类组件实现 `ControlValueAccessor`，`[(value)]`/`[(checked)]` 与 `ngModel`、`formControl` 同时可用；`disabled` 取模板输入与表单下发的并集。
+2. **状态归属**：`value`/`checked` 输入为受控值，外部变化经 `effect` 同步到内部信号；组件内部交互直接改内部信号并 emit，不回写输入，避免双向绑定时打断输入。
+3. **组与子项通信**：**投影内容拿不到组提供的 DI**（Angular 中投影内容使用的是声明处的 injector），因此 checkbox-group / radio-group 改用内容查询 + 视图查询收集子项，再统一下发选中态、半选态、禁用与只读。这是本轮排查出的最大架构坑。
+
+### 17.3 样式桥接
+
+- 组件宿主不产生盒子（`display: contents`）时，上游的 `.t-checkbox + .t-checkbox`、`.t-radio + .t-radio` 等相邻选择器才能命中真实元素；目前 `t-button`、`t-checkbox`、`t-radio` 采用该方式，`t-switch` 则把类名直接放在宿主上。
+- 上游把 `.t-input__tips` 绝对定位在 `.t-form__item` 内，单独使用时由桥接层改为文档流。
+- 上游纵向 `.t-space` 依赖 `.t-space-item` 撑满宽度，Angular 侧改用块级 flex + `align-items: stretch`。
+- 组件自身需要的小图标（勾选、半选、清空、loading 环）内联为 `<svg>`，组件库不依赖 `@tdesign-ng/icons`，图标始终可以由使用方投影。
+
+### 17.4 待办
+
+- Form / FormItem：校验、布局（纵向/内联）、`status`/`tips` 贯通；Input 的 `__status`、`__tips` 需要表单容器提供定位上下文，届时可回收桥接层里的 static 覆盖。
+- Select：需要 CDK overlay，是 P2 里唯一涉及浮层的组件。
+- `align-check` 已支持按接口名精确比对（`upstreamInterface`），Radio/Checkbox 这类「单项与分组共用一个 type.d.ts」的组件不会再互相误判。
