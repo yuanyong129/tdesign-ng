@@ -85,6 +85,16 @@ const CONFIG = {
     },
   },
   TSpace: { upstream: 'space', renames: {}, angularOnly: [], ignoreUpstream: {} },
+  TSwitch: {
+    upstream: 'switch',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ...ANGULAR_EVENT_IGNORES,
+      'modelValue': 'Angular 用 [(value)] 双向绑定 + ControlValueAccessor',
+      'defaultValue': 'Angular 用 [value] 初始值 + ControlValueAccessor',
+    },
+  },
   TInput: {
     upstream: 'input',
     renames: {},

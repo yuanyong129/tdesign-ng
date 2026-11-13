@@ -8,6 +8,7 @@ export * from './components/divider';
 export * from './components/input';
 export * from './components/link';
 export * from './components/space';
+export * from './components/switch';
 export * from './components/textarea';
 
 // Core

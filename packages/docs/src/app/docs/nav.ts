@@ -18,6 +18,7 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/space', label: '间距 Space', group: '布局' },
   { path: '/input', label: '输入框 Input', group: '数据录入' },
   { path: '/textarea', label: '文本域 Textarea', group: '数据录入' },
+  { path: '/switch', label: '开关 Switch', group: '数据录入' },
 ];
 
 /** 按分组统计，保持 DOCS_NAV 里的先后顺序。 */

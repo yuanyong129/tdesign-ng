@@ -633,6 +633,94 @@
       ],
       "outputs": []
     },
+    "TSwitch": {
+      "className": "TSwitch",
+      "selector": "t-switch",
+      "file": "packages/ng-components/src/components/switch/switch.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "SwitchValue",
+          "default": "false",
+          "required": false,
+          "zh": "开关的值",
+          "en": "Value of the switch",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "SwitchSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "开关尺寸",
+          "en": "Size of the switch",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the switch is disabled",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否加载中",
+          "en": "Whether the switch is loading",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | [string, string] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "开关文字，传数组时第一项是选中态、第二项是未选中态",
+          "en": "Label of the switch, an array means [on, off]",
+          "values": []
+        },
+        {
+          "name": "customValue",
+          "type": "[SwitchValue, SwitchValue] | undefined",
+          "default": "[true, false]",
+          "required": false,
+          "zh": "自定义开关值，`[选中值, 未选中值]`",
+          "en": "Custom values as `[on, off]`",
+          "values": []
+        },
+        {
+          "name": "beforeChange",
+          "type": "(() => boolean | Promise<boolean>) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "切换前拦截，返回 false 或 resolve 为 false 时不切换",
+          "en": "Callback before switching, return false to prevent it",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "SwitchValue",
+          "zh": "值变化事件，用于双向绑定",
+          "en": "Value change event, used for two-way binding"
+        },
+        {
+          "name": "change",
+          "type": "SwitchChangeEvent",
+          "zh": "值变化事件，携带原始事件",
+          "en": "Change event with the raw event"
+        }
+      ]
+    },
     "TTextarea": {
       "className": "TTextarea",
       "selector": "t-textarea",

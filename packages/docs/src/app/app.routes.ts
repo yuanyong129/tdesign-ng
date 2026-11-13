@@ -36,6 +36,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/textarea/textarea.component').then((m) => m.TextareaDocs),
   },
   {
+    path: 'switch',
+    loadComponent: () => import('./docs/switch/switch.component').then((m) => m.SwitchDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },
