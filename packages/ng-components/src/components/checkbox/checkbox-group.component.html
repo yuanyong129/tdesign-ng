@@ -1,0 +1,7 @@
+@if (items().length) {
+  @for (item of items(); track item.value) {
+    <t-checkbox [value]="item.value" [label]="item.label" [disabled]="!!item.disabled" />
+  }
+} @else {
+  <ng-content />
+}

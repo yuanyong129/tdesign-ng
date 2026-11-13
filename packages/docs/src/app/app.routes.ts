@@ -40,6 +40,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/switch/switch.component').then((m) => m.SwitchDocs),
   },
   {
+    path: 'checkbox',
+    loadComponent: () => import('./docs/checkbox/checkbox.component').then((m) => m.CheckboxDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

@@ -136,6 +136,183 @@
         }
       ]
     },
+    "TCheckbox": {
+      "className": "TCheckbox",
+      "selector": "t-checkbox",
+      "file": "packages/ng-components/src/components/checkbox/checkbox.component.ts",
+      "inputs": [
+        {
+          "name": "checked",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否选中，独立使用时生效",
+          "en": "Whether the checkbox is checked, used when standalone",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "CheckboxValue",
+          "default": "true",
+          "required": false,
+          "zh": "复选框的值，在复选框组中用于匹配",
+          "en": "The value of the checkbox, matched inside a checkbox group",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the checkbox is disabled",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读",
+          "en": "Whether the checkbox is readonly",
+          "values": []
+        },
+        {
+          "name": "indeterminate",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示为半选状态",
+          "en": "Whether to display the indeterminate state",
+          "values": []
+        },
+        {
+          "name": "checkAll",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "作为全选开关使用，只对复选框组有效",
+          "en": "Use as a check-all switch, only works inside a checkbox group",
+          "values": []
+        },
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生 name 属性",
+          "en": "Native name attribute",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "复选框文字",
+          "en": "The label of the checkbox",
+          "values": []
+        },
+        {
+          "name": "title",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生 title 属性",
+          "en": "Native title attribute",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "checkedChange",
+          "type": "boolean",
+          "zh": "选中状态变化事件，用于双向绑定",
+          "en": "Checked change event, used for two-way binding"
+        },
+        {
+          "name": "change",
+          "type": "CheckboxChangeEvent",
+          "zh": "值变化事件",
+          "en": "Change event"
+        }
+      ]
+    },
+    "TCheckboxGroup": {
+      "className": "TCheckboxGroup",
+      "selector": "t-checkbox-group",
+      "file": "packages/ng-components/src/components/checkbox/checkbox-group.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "CheckboxGroupValue",
+          "default": "[]",
+          "required": false,
+          "zh": "选中的值集合",
+          "en": "The checked values",
+          "values": []
+        },
+        {
+          "name": "options",
+          "type": "CheckboxOption[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选项列表，配置后用 options 渲染；不配置时使用内容投影",
+          "en": "Options to render; when omitted, projected content is used",
+          "values": []
+        },
+        {
+          "name": "max",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "最多可选中个数",
+          "en": "Maximum number of checked items",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用整组",
+          "en": "Whether the whole group is disabled",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读整组",
+          "en": "Whether the whole group is readonly",
+          "values": []
+        },
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生 name 属性",
+          "en": "Native name attribute",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "CheckboxGroupValue",
+          "zh": "值变化事件，用于双向绑定",
+          "en": "Value change event, used for two-way binding"
+        },
+        {
+          "name": "change",
+          "type": "CheckboxGroupChangeEvent",
+          "zh": "变更事件，附带本次变化的选项信息",
+          "en": "Change event with the changed option"
+        }
+      ]
+    },
     "TDivider": {
       "className": "TDivider",
       "selector": "t-divider",

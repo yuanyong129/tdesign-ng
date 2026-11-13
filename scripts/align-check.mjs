@@ -95,6 +95,31 @@ const CONFIG = {
       'defaultValue': 'Angular 用 [value] 初始值 + ControlValueAccessor',
     },
   },
+  TCheckbox: {
+    upstream: 'checkbox',
+    upstreamInterface: 'TdCheckboxProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ...ANGULAR_EVENT_IGNORES,
+      'modelValue': 'Angular 用 [(checked)] 双向绑定 + ControlValueAccessor',
+      'defaultChecked': 'Angular 用 [checked] 作为受控初始值',
+      'default': '内容通过 ng-content 投影，无需 default 插槽属性',
+      'lazyLoad': 'Angular 组件按需渲染，没有延迟加载的等价概念',
+    },
+  },
+  TCheckboxGroup: {
+    upstream: 'checkbox',
+    upstreamInterface: 'TdCheckboxGroupProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ...ANGULAR_EVENT_IGNORES,
+      'modelValue': 'Angular 用 [(value)] 双向绑定 + ControlValueAccessor',
+      'defaultValue': 'Angular 用 [value] 作为受控初始值',
+      'lazyLoad': 'Angular 组件按需渲染，没有延迟加载的等价概念',
+    },
+  },
   TInput: {
     upstream: 'input',
     renames: {},
@@ -156,9 +181,12 @@ async function fetchUpstreamTypes(componentDir) {
 }
 
 /** 从 .d.ts 里解析出 props 接口的成员。 */
-function parseProps(text, componentDir) {
+function parseProps(text, componentDir, interfaceName) {
   const source = ts.createSourceFile('type.d.ts', text, ts.ScriptTarget.Latest, true);
   const members = new Map();
+  // 部分上游组件把单个与分组的 props 放在同一个 type.d.ts 里（如 checkbox、radio），
+  // 这时必须按接口名精确取值，否则会把另一组件的属性算成 missing。
+  const matches = (name) => (/^Td.*Props$/.test(name) ? !interfaceName || name === interfaceName : false);
 
   const collectFromTypeLiteral = (literal) => {
     for (const m of literal.members) {
@@ -175,7 +203,7 @@ function parseProps(text, componentDir) {
   const visit = (node) => {
     if (ts.isInterfaceDeclaration(node)) {
       // 约定：props 接口名形如 TdXxxProps
-      if (/^Td.*Props$/.test(node.name.text)) {
+      if (matches(node.name.text)) {
         for (const m of node.members) {
           if (!ts.isPropertySignature(m) || !m.name) continue;
           const name = ts.isIdentifier(m.name) || ts.isStringLiteral(m.name) ? m.name.text : m.name.getText(source);
@@ -187,7 +215,7 @@ function parseProps(text, componentDir) {
         }
       }
     }
-    if (ts.isTypeAliasDeclaration(node) && /^Td.*Props$/.test(node.name.text) && ts.isTypeLiteralNode(node.type)) {
+    if (ts.isTypeAliasDeclaration(node) && matches(node.name.text) && ts.isTypeLiteralNode(node.type)) {
       collectFromTypeLiteral(node.type);
     }
     ts.forEachChild(node, visit);
@@ -223,7 +251,7 @@ async function main() {
 
     let upstream;
     try {
-      upstream = parseProps(await fetchUpstreamTypes(cfg.upstream), cfg.upstream);
+      upstream = parseProps(await fetchUpstreamTypes(cfg.upstream), cfg.upstream, cfg.upstreamInterface);
     } catch (err) {
       rows.push({ className, status: 'error', note: err.message });
       continue;
