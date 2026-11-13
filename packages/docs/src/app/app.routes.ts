@@ -48,6 +48,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/radio/radio.component').then((m) => m.RadioDocs),
   },
   {
+    path: 'form',
+    loadComponent: () => import('./docs/form/form.component').then((m) => m.FormDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

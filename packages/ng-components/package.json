@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "TDesign components for Angular",
   "peerDependencies": {
+    "@angular/cdk": "19.2.0",
     "@angular/common": ">=19.0.0 <24.0.0",
     "@angular/core": ">=19.0.0 <24.0.0",
     "@angular/forms": ">=19.0.0 <24.0.0"
@@ -12,5 +13,8 @@
   },
   "sideEffects": [
     "**/*.less"
-  ]
+  ],
+  "devDependencies": {
+    "@angular/cdk": "19.2.0"
+  }
 }

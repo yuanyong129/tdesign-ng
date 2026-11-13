@@ -364,6 +364,315 @@
       ],
       "outputs": []
     },
+    "TForm": {
+      "className": "TForm",
+      "selector": "t-form",
+      "file": "packages/ng-components/src/components/form/form.component.ts",
+      "inputs": [
+        {
+          "name": "layout",
+          "type": "FormLayout",
+          "default": "vertical",
+          "required": false,
+          "zh": "表单布局：纵向或行内",
+          "en": "Form layout: vertical or inline",
+          "values": [
+            "vertical",
+            "inline"
+          ]
+        },
+        {
+          "name": "labelAlign",
+          "type": "FormLabelAlign | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签对齐方式，不设置时纵向布局为 top、行内布局为 right",
+          "en": "Label alignment, defaults to top in vertical layout and right in inline layout",
+          "values": [
+            "left",
+            "right",
+            "top"
+          ]
+        },
+        {
+          "name": "labelWidth",
+          "type": "string | number",
+          "default": "100px",
+          "required": false,
+          "zh": "标签宽度",
+          "en": "Label width",
+          "values": []
+        },
+        {
+          "name": "colon",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "标签文字后是否显示冒号",
+          "en": "Whether to show a colon after the label",
+          "values": []
+        },
+        {
+          "name": "requiredMark",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示必填标记",
+          "en": "Whether to show the required mark",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用整个表单",
+          "en": "Whether to disable the whole form",
+          "values": []
+        },
+        {
+          "name": "rules",
+          "type": "FormRules | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "表单级校验规则，按字段名匹配",
+          "en": "Form level validation rules, matched by field name",
+          "values": []
+        },
+        {
+          "name": "requiredMarkPosition",
+          "type": "'left' | 'right'",
+          "default": "left",
+          "required": false,
+          "zh": "必填标记的位置",
+          "en": "Position of the required mark",
+          "values": [
+            "left",
+            "right"
+          ]
+        },
+        {
+          "name": "errorMessage",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "统一的错误提示文案，设置后覆盖校验结果里的文案",
+          "en": "A unified error message that overrides the message from validation",
+          "values": []
+        },
+        {
+          "name": "showErrorMessage",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示错误提示",
+          "en": "Whether to show the error message",
+          "values": []
+        },
+        {
+          "name": "statusIcon",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示校验状态图标",
+          "en": "Whether to show the validation status icon",
+          "values": []
+        },
+        {
+          "name": "resetType",
+          "type": "FormResetType",
+          "default": "empty",
+          "required": false,
+          "zh": "重置时的取值方式：清空或回到初始值",
+          "en": "Reset type: clear or back to the initial value",
+          "values": [
+            "empty",
+            "initial"
+          ]
+        },
+        {
+          "name": "preventSubmitDefault",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否阻止表单的默认提交行为",
+          "en": "Whether to prevent the default submit behavior",
+          "values": []
+        },
+        {
+          "name": "scrollToFirstError",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "校验失败时是否滚动到第一个出错的表单项",
+          "en": "Whether to scroll to the first invalid field on failure",
+          "values": []
+        },
+        {
+          "name": "submitWithWarningMessage",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "存在 warning 级校验结果时是否允许提交",
+          "en": "Whether to allow submitting when there are warning results",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "submit",
+          "type": "FormSubmitResult",
+          "zh": "提交事件",
+          "en": "Submit event"
+        },
+        {
+          "name": "reset",
+          "type": "Record<string, unknown>",
+          "zh": "重置事件",
+          "en": "Reset event"
+        },
+        {
+          "name": "validate",
+          "type": "FormValidateMessage",
+          "zh": "校验事件",
+          "en": "Validate event"
+        }
+      ]
+    },
+    "TFormItem": {
+      "className": "TFormItem",
+      "selector": "t-form-item",
+      "file": "packages/ng-components/src/components/form/form-item.component.ts",
+      "inputs": [
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "字段名，用于匹配校验规则与取值",
+          "en": "Field name, used to match rules and collect values",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签文本",
+          "en": "Label text",
+          "values": []
+        },
+        {
+          "name": "rules",
+          "type": "FormRule | FormRule[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "校验规则，优先于表单级的同名规则",
+          "en": "Validation rules, take precedence over form level rules with the same name",
+          "values": []
+        },
+        {
+          "name": "help",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "帮助文字，显示在控件下方并参与布局",
+          "en": "Help text, displayed below the control and occupying layout space",
+          "values": []
+        },
+        {
+          "name": "tips",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示文字，显示在控件下方但不占位",
+          "en": "Tips text, displayed below the control without occupying layout space",
+          "values": []
+        },
+        {
+          "name": "status",
+          "type": "FormValidateStatus | '' | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "手动指定校验状态，用于服务端校验等场景",
+          "en": "Manually set the validate status, e.g. for server side validation",
+          "values": [
+            "default",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "statusIcon",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "是否显示校验状态图标",
+          "en": "Whether to show the status icon",
+          "values": []
+        },
+        {
+          "name": "successBorder",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "是否显示成功态边框",
+          "en": "Whether to show a success border",
+          "values": []
+        },
+        {
+          "name": "requiredMark",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "是否显示必填标记",
+          "en": "Whether to show the required mark",
+          "values": []
+        },
+        {
+          "name": "labelAlign",
+          "type": "FormLabelAlign | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签对齐方式",
+          "en": "Label alignment",
+          "values": [
+            "left",
+            "right",
+            "top"
+          ]
+        },
+        {
+          "name": "labelWidth",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签宽度",
+          "en": "Label width",
+          "values": []
+        },
+        {
+          "name": "showErrorMessage",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "是否显示错误信息",
+          "en": "Whether to show the error message",
+          "values": []
+        },
+        {
+          "name": "for",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签的 for 属性，指向控件 id",
+          "en": "The for attribute of the label, pointing to the control id",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TInput": {
       "className": "TInput",
       "selector": "t-input",

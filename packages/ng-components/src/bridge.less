@@ -62,3 +62,12 @@ t-space.t-space-vertical {
   content: var(--td-space-separator, '');
   margin: 8px 0;
 }
+
+// 表单：上游类名放在内层 <form> 上，宿主只需块级占位；
+// 表单项宿主带 .t-form__item，需要块级才能让 margin-bottom 生效。
+// 行内布局下上游的 .t-form-inline .t-form__item 是类选择器，优先级更高，会覆盖这里的 block。
+t-form,
+t-form-item {
+  display: block;
+}
+

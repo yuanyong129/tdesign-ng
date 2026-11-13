@@ -180,6 +180,28 @@ const CONFIG = {
   },
   TScrollbar: { upstream: null, reason: 'TDesign 没有 scrollbar 组件，属于 Arco 独有能力，P1 移除' },
   TThumb: { upstream: null, reason: '内部实现组件，不对外' },
+  TForm: {
+    upstream: 'form',
+    upstreamInterface: 'TdFormProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ...ANGULAR_EVENT_IGNORES,
+      'data': 'Angular 用 ngModel/FormGroup 承载表单数据，不需要 data 输入',
+      'id': '宿主元素的 id 交给使用方设置，框架不覆盖',
+      'readonly': '只读由各控件自身的 readonly 控制，表单级只提供 disabled',
+      'onReset': 'Angular 用 (reset) 输出',
+      'onSubmit': 'Angular 用 (submit) 输出',
+      'onValidate': 'Angular 用 (validate) 输出',
+    },
+  },
+  TFormItem: {
+    upstream: 'form',
+    upstreamInterface: 'TdFormItemProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {},
+  },
 };
 
 const argv = process.argv.slice(2);

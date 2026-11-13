@@ -1,0 +1,20 @@
+@if (label()) {
+  <div [class]="labelClasses()" [style]="labelStyle()">
+    <label [attr.for]="for() ?? null">{{ label() }}</label>
+  </div>
+}
+
+<div [class]="controlsClasses()">
+  <!-- 上游的状态样式（.input-status 混入）只作用于 .t-form__controls-content 内的控件 -->
+  <div class="t-form__controls-content">
+    <ng-content />
+  </div>
+  @if (help()) {
+    <div class="t-input__help">{{ help() }}</div>
+  }
+  @if (displayMessage(); as message) {
+    <div class="t-input__extra">{{ message }}</div>
+  } @else if (tips()) {
+    <div class="t-input__extra">{{ tips() }}</div>
+  }
+</div>
