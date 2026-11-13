@@ -1,0 +1,29 @@
+<div class="t-textarea">
+  <textarea
+    #inner
+    [class]="innerClasses()"
+    [id]="innerId"
+    [attr.name]="name()"
+    [attr.maxlength]="maxlengthValue()"
+    [attr.autofocus]="autofocus() ? '' : null"
+    [value]="text()"
+    [placeholder]="placeholder() ?? ''"
+    [disabled]="mergedDisabled()"
+    [readOnly]="readonly()"
+    (input)="handleInput($event)"
+    (focus)="handleFocus($event)"
+    (blur)="handleBlur($event)"
+    (keydown)="keydown.emit($event)"
+    (keyup)="keyup.emit($event)"
+  ></textarea>
+  @if (tips() || showLimit()) {
+    <div [class]="infoWrapperClasses()">
+      @if (tips()) {
+        <div [class]="tipsClasses()">{{ tips() }}</div>
+      }
+      @if (showLimit()) {
+        <div class="t-textarea__limit">{{ limitText() }}</div>
+      }
+    </div>
+  }
+</div>

@@ -20,12 +20,20 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/divider/divider.component').then((m) => m.DividerDocs),
   },
   {
+    path: 'input',
+    loadComponent: () => import('./docs/input/input.component').then((m) => m.InputDocs),
+  },
+  {
     path: 'link',
     loadComponent: () => import('./docs/link/link.component').then((m) => m.LinkDocs),
   },
   {
     path: 'space',
     loadComponent: () => import('./docs/space/space.component').then((m) => m.SpaceDocs),
+  },
+  {
+    path: 'textarea',
+    loadComponent: () => import('./docs/textarea/textarea.component').then((m) => m.TextareaDocs),
   },
   {
     path: '**',

@@ -187,6 +187,269 @@
       ],
       "outputs": []
     },
+    "TInput": {
+      "className": "TInput",
+      "selector": "t-input",
+      "file": "packages/ng-components/src/components/input/input.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "InputValue",
+          "default": "''",
+          "required": false,
+          "zh": "输入框的值",
+          "en": "Value of the input",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "InputSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "输入框尺寸",
+          "en": "Size of the input",
+          "values": [
+            "small medium large"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "InputStatus",
+          "default": "'default'",
+          "required": false,
+          "zh": "输入框状态",
+          "en": "Status of the input",
+          "values": [
+            "default success warning error"
+          ]
+        },
+        {
+          "name": "align",
+          "type": "InputAlign",
+          "default": "'left'",
+          "required": false,
+          "zh": "文本对齐方式",
+          "en": "Text alignment",
+          "values": [
+            "left center right"
+          ]
+        },
+        {
+          "name": "type",
+          "type": "InputType",
+          "default": "'text'",
+          "required": false,
+          "zh": "输入框类型",
+          "en": "Type of the input",
+          "values": [
+            "text number url tel password search submit hidden"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "占位文字",
+          "en": "Placeholder text",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the input is disabled",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读",
+          "en": "Whether the input is readonly",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空",
+          "en": "Whether the input is clearable",
+          "values": []
+        },
+        {
+          "name": "showClearIconOnEmpty",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "值为空时是否也显示清空图标",
+          "en": "Whether to show the clear icon when empty",
+          "values": []
+        },
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否无边框",
+          "en": "Whether the input is borderless",
+          "values": []
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "自动聚焦",
+          "en": "Whether to focus automatically",
+          "values": []
+        },
+        {
+          "name": "spellCheck",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "原生的 spellcheck 属性",
+          "en": "Native spellcheck attribute",
+          "values": []
+        },
+        {
+          "name": "autocomplete",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生的 autocomplete 属性",
+          "en": "Native autocomplete attribute",
+          "values": []
+        },
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生的 name 属性",
+          "en": "Native name attribute",
+          "values": []
+        },
+        {
+          "name": "maxcharacter",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "最大字符数，按字符（而非字节）计算，超出时截断",
+          "en": "Maximum characters, truncates when exceeded",
+          "values": []
+        },
+        {
+          "name": "maxlength",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生 maxlength，超出时浏览器直接阻止输入",
+          "en": "Native maxlength",
+          "values": []
+        },
+        {
+          "name": "allowInputOverMax",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许输入超过最大字符数",
+          "en": "Whether input over the maximum is allowed",
+          "values": []
+        },
+        {
+          "name": "showLimitNumber",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示字数统计",
+          "en": "Whether to show the character counter",
+          "values": []
+        },
+        {
+          "name": "format",
+          "type": "((value: string) => string) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "格式化函数，在写入值之前调用",
+          "en": "Formatter applied before the value is written",
+          "values": []
+        },
+        {
+          "name": "tips",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "输入框下方的提示文字",
+          "en": "Tips below the input",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "输入框左侧的标签文字",
+          "en": "Label on the left of the input",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "InputValue",
+          "zh": "值变化事件，用于双向绑定",
+          "en": "Value change event, used for two-way binding"
+        },
+        {
+          "name": "change",
+          "type": "InputChangeEvent",
+          "zh": "值变化事件，携带触发来源",
+          "en": "Change event with the trigger source"
+        },
+        {
+          "name": "focus",
+          "type": "FocusEvent",
+          "zh": "获得焦点",
+          "en": "Focus event"
+        },
+        {
+          "name": "blur",
+          "type": "FocusEvent",
+          "zh": "失去焦点",
+          "en": "Blur event"
+        },
+        {
+          "name": "enter",
+          "type": "KeyboardEvent",
+          "zh": "按下回车",
+          "en": "Enter key event"
+        },
+        {
+          "name": "keydown",
+          "type": "KeyboardEvent",
+          "zh": "键盘按下",
+          "en": "Keydown event"
+        },
+        {
+          "name": "keyup",
+          "type": "KeyboardEvent",
+          "zh": "键盘抬起",
+          "en": "Keyup event"
+        },
+        {
+          "name": "clear",
+          "type": "MouseEvent",
+          "zh": "点击清空图标",
+          "en": "Clear icon click event"
+        }
+      ]
+    },
     "TLink": {
       "className": "TLink",
       "selector": "t-link",
@@ -369,6 +632,161 @@
         }
       ],
       "outputs": []
+    },
+    "TTextarea": {
+      "className": "TTextarea",
+      "selector": "t-textarea",
+      "file": "packages/ng-components/src/components/textarea/textarea.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "TextareaValue",
+          "default": "''",
+          "required": false,
+          "zh": "输入框的值",
+          "en": "Value of the textarea",
+          "values": []
+        },
+        {
+          "name": "placeholder",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "占位文字",
+          "en": "Placeholder text",
+          "values": []
+        },
+        {
+          "name": "status",
+          "type": "TextareaStatus",
+          "default": "'default'",
+          "required": false,
+          "zh": "输入框状态",
+          "en": "Status of the textarea",
+          "values": [
+            "default success warning error"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the textarea is disabled",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读",
+          "en": "Whether the textarea is readonly",
+          "values": []
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "自动聚焦",
+          "en": "Whether to focus automatically",
+          "values": []
+        },
+        {
+          "name": "autosize",
+          "type": "boolean | TextareaAutosize",
+          "default": "false",
+          "required": false,
+          "zh": "是否根据内容自动撑高，可传 `{ minRows, maxRows }`",
+          "en": "Whether to grow with the content",
+          "values": []
+        },
+        {
+          "name": "maxcharacter",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "最大字符数，按字符（而非字节）计算，超出时截断",
+          "en": "Maximum characters, truncates when exceeded",
+          "values": []
+        },
+        {
+          "name": "maxlength",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生 maxlength，超出时浏览器直接阻止输入",
+          "en": "Native maxlength",
+          "values": []
+        },
+        {
+          "name": "allowInputOverMax",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许输入超过最大字符数",
+          "en": "Whether input over the maximum is allowed",
+          "values": []
+        },
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生的 name 属性",
+          "en": "Native name attribute",
+          "values": []
+        },
+        {
+          "name": "tips",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "输入框下方的提示文字",
+          "en": "Tips below the textarea",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "TextareaValue",
+          "zh": "值变化事件，用于双向绑定",
+          "en": "Value change event, used for two-way binding"
+        },
+        {
+          "name": "change",
+          "type": "TextareaChangeEvent",
+          "zh": "值变化事件，携带原始事件",
+          "en": "Change event with the raw event"
+        },
+        {
+          "name": "focus",
+          "type": "FocusEvent",
+          "zh": "获得焦点",
+          "en": "Focus event"
+        },
+        {
+          "name": "blur",
+          "type": "FocusEvent",
+          "zh": "失去焦点",
+          "en": "Blur event"
+        },
+        {
+          "name": "keydown",
+          "type": "KeyboardEvent",
+          "zh": "键盘按下",
+          "en": "Keydown event"
+        },
+        {
+          "name": "keyup",
+          "type": "KeyboardEvent",
+          "zh": "键盘抬起",
+          "en": "Keyup event"
+        }
+      ]
     }
   }
 }

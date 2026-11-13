@@ -13,6 +13,14 @@
   "divider-horizontal": "<p>通过设置内容区块的分割线，让结构更清晰。</p>\n<t-divider />\n<p>使用虚线分割线。</p>\n<t-divider [dashed]=\"true\" />\n<p>分割线可以带文字。</p>\n<t-divider>文字分割线</t-divider>",
   "divider-margin": "<p>上下间距 32px。</p>\n<t-divider [size]=\"32\" />\n<p>上下间距 8px。</p>\n<t-divider [size]=\"8\" />",
   "divider-vertical": "<t-space align=\"center\">\n  <span>文本</span>\n  <t-divider layout=\"vertical\" />\n  <span>文本</span>\n  <t-divider layout=\"vertical\" />\n  <span>文本</span>\n</t-space>",
+  "input-basic": "<t-input placeholder=\"请输入内容\" [(value)]=\"value\" />\n<p class=\"demo-hint\">当前值：{{ value || '（空）' }}</p>",
+  "input-clearable": "<t-input placeholder=\"输入后出现清空图标\" [(value)]=\"value\" [clearable]=\"true\" />\n<p class=\"demo-hint\">当前值：{{ value || '（空）' }}</p>",
+  "input-icon": "<t-input placeholder=\"搜索\" [(value)]=\"value\">\n  <t-icon tInputPrefixIcon name=\"search\" />\n</t-input>\n<t-input placeholder=\"请输入用户名\">\n  <t-icon tInputSuffixIcon name=\"user\" />\n</t-input>",
+  "input-label": "<t-space direction=\"vertical\" [size]=\"16\">\n  <t-input label=\"姓名\" placeholder=\"请输入姓名\" [(value)]=\"value\" />\n  <t-input label=\"邮箱\" placeholder=\"name@example.com\" tips=\"用于接收通知\" [(value)]=\"email\" />\n  <p class=\"demo-hint\">姓名：{{ value || '（空）' }}</p>\n</t-space>",
+  "input-limit": "<t-space [breakLine]=\"true\" [size]=\"16\">\n  <t-input placeholder=\"最多 10 个字符\" [maxcharacter]=\"10\" [showLimitNumber]=\"true\" [(value)]=\"short\" />\n  <t-input placeholder=\"最多 6 个字符（npm 输入会截断）\" [maxcharacter]=\"6\" [showLimitNumber]=\"true\" />\n</t-space>",
+  "input-size": "<t-space [breakLine]=\"true\" [size]=\"16\">\n  <t-input size=\"small\" placeholder=\"小尺寸\" />\n  <t-input size=\"medium\" placeholder=\"中尺寸（默认）\" />\n  <t-input size=\"large\" placeholder=\"大尺寸\" />\n</t-space>",
+  "input-state": "<t-space [breakLine]=\"true\" [size]=\"16\">\n  <t-input placeholder=\"禁用状态\" value=\"不可编辑\" [disabled]=\"true\" />\n  <t-input placeholder=\"只读状态\" value=\"只读内容\" [readonly]=\"true\" />\n  <t-input placeholder=\"无边框\" value=\"无边框输入框\" [borderless]=\"true\" />\n</t-space>",
+  "input-status": "<t-space [breakLine]=\"true\" [size]=\"16\">\n  <t-input status=\"success\" tips=\"校验通过\" value=\"TDesign\" />\n  <t-input status=\"warning\" tips=\"这个用户名不太常见\" value=\"tdesign-ng\" />\n  <t-input status=\"error\" tips=\"该用户名已被占用\" value=\"admin\" />\n</t-space>",
   "link-base": "<t-space [breakLine]=\"true\">\n  <t-link href=\"#basic\">默认链接</t-link>\n  <t-link href=\"#basic\" theme=\"primary\">主要链接</t-link>\n  <t-link href=\"#basic\" theme=\"danger\">危险链接</t-link>\n  <t-link href=\"#basic\" theme=\"warning\">警告链接</t-link>\n  <t-link href=\"#basic\" theme=\"success\">成功链接</t-link>\n</t-space>",
   "link-disabled": "<t-space [breakLine]=\"true\">\n  <t-link href=\"#disabled\" [disabled]=\"true\">禁用链接</t-link>\n  <t-link href=\"#disabled\" [disabled]=\"true\" [underline]=\"true\">禁用且带下划线</t-link>\n</t-space>",
   "link-download": "<t-link href=\"data:text/plain;charset=utf-8,hello\" download=\"hello.txt\" theme=\"primary\">\n  下载文件\n</t-link>",
@@ -24,5 +32,10 @@
   "space-horizontal": "<t-space>\n  <t-button theme=\"primary\">按钮</t-button>\n  <t-button theme=\"primary\">按钮</t-button>\n  <t-button theme=\"primary\">按钮</t-button>\n</t-space>",
   "space-separator": "<t-space separator=\"|\">\n  <span>文本</span>\n  <span>文本</span>\n  <span>文本</span>\n</t-space>",
   "space-size": "<t-space size=\"small\">\n  <t-button size=\"small\">small</t-button>\n  <t-button size=\"small\">small</t-button>\n</t-space>\n<t-divider />\n<t-space size=\"medium\">\n  <t-button size=\"small\">medium</t-button>\n  <t-button size=\"small\">medium</t-button>\n</t-space>\n<t-divider />\n<t-space size=\"large\">\n  <t-button size=\"small\">large</t-button>\n  <t-button size=\"small\">large</t-button>\n</t-space>\n<t-divider />\n<t-space [size]=\"40\">\n  <t-button size=\"small\">40px</t-button>\n  <t-button size=\"small\">40px</t-button>\n</t-space>",
-  "space-vertical": "<t-space direction=\"vertical\" align=\"start\">\n  <t-button theme=\"primary\">按钮</t-button>\n  <t-button theme=\"primary\">按钮</t-button>\n  <t-button theme=\"primary\">按钮</t-button>\n</t-space>"
+  "space-vertical": "<t-space direction=\"vertical\" align=\"start\">\n  <t-button theme=\"primary\">按钮</t-button>\n  <t-button theme=\"primary\">按钮</t-button>\n  <t-button theme=\"primary\">按钮</t-button>\n</t-space>",
+  "textarea-autosize": "<t-textarea placeholder=\"输入换行，高度自动增长，最多 6 行\" [(value)]=\"value\" [autosize]=\"{ minRows: 2, maxRows: 6 }\" />",
+  "textarea-basic": "<t-textarea placeholder=\"请输入多行内容\" [(value)]=\"value\" />",
+  "textarea-disabled": "<t-space [breakLine]=\"true\" [size]=\"16\">\n  <t-textarea value=\"禁用状态的文本域\" [disabled]=\"true\" />\n  <t-textarea value=\"只读状态的文本域\" [readonly]=\"true\" />\n</t-space>",
+  "textarea-limit": "<t-textarea placeholder=\"最多 30 个字符\" [maxcharacter]=\"30\" [(value)]=\"value\" [autosize]=\"{ minRows: 2 }\" />",
+  "textarea-status": "<t-space direction=\"vertical\" [size]=\"16\">\n  <t-textarea status=\"success\" tips=\"校验通过\" [autosize]=\"true\" value=\"内容合法\" />\n  <t-textarea status=\"warning\" tips=\"建议补充说明\" [autosize]=\"true\" value=\"内容偏短\" />\n  <t-textarea status=\"error\" tips=\"内容不能为空\" [autosize]=\"true\" />\n</t-space>"
 }

@@ -34,3 +34,36 @@ t-button {
   display: block;
   margin: 8px 0 0;
 }
+
+// 3.1) 纵向 Space 撑满可用宽度
+//      上游的 `.t-space` 是 inline-flex，靠给每个 `.t-space-item` 设 `width: inherit`
+//      让子项撑满；Angular 直接投影子节点、没有 item 包裹层，所以把纵向容器改成
+//      块级 flex，子项靠 `align-items: stretch` 自然占满宽度（如表单类组件）。
+t-space.t-space-vertical {
+  display: flex;
+}
+
+// 4) 表单类组件的宿主
+//    上游的 `.t-input` / `.t-textarea` 自带 `width: 100%`，宿主需要是块级元素，
+//    否则作为行内元素会被内容宽度撑开。
+t-input,
+t-textarea {
+  display: block;
+}
+
+// 5) 提示文字回到文档流
+//    上游把 `.t-input__tips` 设为绝对定位，靠表单容器（.t-form__item）提供定位上下文；
+//    这里没有表单容器，直接脱离文档流会盖住下方内容，因此改为静态定位。
+//    等 t-form 落地后这条可以只保留在表单内部。
+t-input .t-input__tips {
+  position: static;
+  margin-top: 4px;
+}
+
+// 6) 输入框自带 label
+//    上游 `label` 属性由表单容器负责排版，单独使用时需要一点最小样式。
+t-input .t-input__label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--td-text-color-primary, #000000e6);
+}
