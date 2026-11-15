@@ -421,4 +421,31 @@ tdesign-ng/
 - **键盘**：`ArrowDown`/`ArrowUp` 移动高亮、`Enter` 选中、`Escape` 关闭、`Backspace`（搜索词为空时）删除最后一个标签、`Tab` 关闭。
 - **占位文字**：已有选中值时不渲染 `placeholder`，否则多选标签后面会紧跟占位符。
 
+## 18. P3 弹层与反馈（进行中）
+
+### 18.1 已交付：Popup / Tooltip
+
+| 组件 | 选择器 | 上游契约对齐 | 说明 |
+| --- | --- | --- | --- |
+| Popup | `t-popup` | 12/24，missing 0 | 五种触发方式、12 个方向、箭头、延迟、受控显隐 |
+| Tooltip | `t-tooltip` | 6/6，missing 0 | 六种主题、延迟与自动消失，复用 Popup 的定位实现 |
+
+### 18.2 定位实现（与 Select 不同的地方）
+
+- **必须自己写 `data-popper-placement`**。上游 less 用 `.t-popup[data-popper-placement^='top'] .t-popup__content { margin-bottom: 16px }` 这类规则控制间距与箭头位置，而 CDK 只负责摆放，不写这个属性。`connectPopup()` 会把 CDK 的 `ConnectedPosition` 反查成 popper 的 placement 字符串（含 `-start` / `-end` 后缀），并订阅 `positionChanges` —— 空间不足自动翻转时属性也会跟着更新。
+- **锚点要跳过 `display: contents` 的宿主**。`<t-popup><t-button>…` 里第一个子元素是 `t-button`，它的 `getBoundingClientRect()` 恒为 0；`resolveAnchor()` 会一直往下找到第一个真正有盒子的元素。
+- **关闭但不销毁**（`destroyOnClose` 默认 false）：弹层保持 attached，只加 `.t-popup--hidden { visibility: hidden; pointer-events: none }`，这样重新打开时内容状态不丢；置为 true 才 `detach()`。
+
+### 18.3 触发与关闭
+
+- 宿主上绑定 `mouseenter` / `mouseleave` / `click` / `focusin` / `focusout` / `mousedown` / `contextmenu`，投影元素的事件冒泡到宿主即可命中，无需给投影内容加指令。
+- hover 触发时，面板自身也监听 `mouseenter` / `mouseleave`，鼠标从触发器移入面板不会收起。
+- click / mousedown / context-menu 触发时，用 document 级 `pointerdown`（捕获阶段）判断是否点在宿主与面板之外，`Escape` 关闭面板。
+
+### 18.4 待办
+
+- Dialog / Drawer：需要焦点管理（CDK `FocusTrap`）、滚动锁定（`BlockScrollStrategy`）与遮罩层。
+- Message / Notification / Loading：需要服务式调用（`provideTMessage()` 注入器 + CDK Overlay 动态创建），并支持多条堆叠。
+
+
 

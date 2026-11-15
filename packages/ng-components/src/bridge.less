@@ -84,4 +84,17 @@ t-select {
   width: 100%;
 }
 
+// 弹出层与文字提示：触发器通过默认投影提供，宿主不能产生额外的盒子
+t-popup,
+t-tooltip {
+  display: contents;
+}
+
+// 未开启 destroyOnClose 时，关闭状态只是隐藏，保留弹层内容与内部状态
+.t-popup--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+
 

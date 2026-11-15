@@ -22,8 +22,10 @@
 | Switch / Checkbox / CheckboxGroup / Radio / RadioGroup | ✅ 受控值 + `ControlValueAccessor` |
 | Form / FormItem | ✅ 内置 TDesign `rules` 校验引擎，兼容 `ngModel` 与 `formControl` |
 | Select | ✅ CDK Overlay 面板，单选/多选/搜索/分组/创建项/键盘导航 |
+| Popup | ✅ 五种触发方式、12 个方向、箭头、延迟与受控显隐 |
+| Tooltip | ✅ 六种主题、延迟与自动消失，复用 Popup 定位 |
 
-P3 及之后的组件（弹层、数据展示、复杂录入）按 `docs/plans/tdesign-angular-plan.md` 的分期推进。
+P3 剩余组件（Dialog / Drawer / Message / Notification / Loading）按 `docs/plans/tdesign-angular-plan.md` 的分期推进。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
 

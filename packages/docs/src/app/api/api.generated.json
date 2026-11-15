@@ -1054,6 +1054,154 @@
         }
       ]
     },
+    "TPopup": {
+      "className": "TPopup",
+      "selector": "t-popup",
+      "file": "packages/ng-components/src/components/popup/popup.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层内容（纯文本）",
+          "en": "Popup content as plain text",
+          "values": []
+        },
+        {
+          "name": "placement",
+          "type": "PopupPlacement",
+          "default": "'top'",
+          "required": false,
+          "zh": "弹层位置",
+          "en": "The placement of the popup",
+          "values": [
+            "top",
+            "left",
+            "right",
+            "bottom",
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+            "left-top",
+            "left-bottom",
+            "right-top",
+            "right-bottom"
+          ]
+        },
+        {
+          "name": "trigger",
+          "type": "PopupTrigger",
+          "default": "'hover'",
+          "required": false,
+          "zh": "触发方式",
+          "en": "The trigger mode",
+          "values": [
+            "hover",
+            "click",
+            "focus",
+            "mousedown",
+            "context-menu"
+          ]
+        },
+        {
+          "name": "delay",
+          "type": "number | number[]",
+          "default": "0",
+          "required": false,
+          "zh": "显示/隐藏的延迟毫秒数，数组形式为 [显示延迟, 隐藏延迟]",
+          "en": "Delay in milliseconds, an array means [show, hide]",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用弹出",
+          "en": "Whether the popup is disabled",
+          "values": []
+        },
+        {
+          "name": "showArrow",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示箭头",
+          "en": "Whether to show the arrow",
+          "values": []
+        },
+        {
+          "name": "destroyOnClose",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "关闭时是否销毁弹层内容",
+          "en": "Whether to destroy the popup content on close",
+          "values": []
+        },
+        {
+          "name": "hideEmptyPopup",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "内容为空时是否隐藏弹层",
+          "en": "Whether to hide the popup when the content is empty",
+          "values": []
+        },
+        {
+          "name": "overlayClassName",
+          "type": "string | string[] | Record<string, boolean> | null",
+          "default": "null",
+          "required": false,
+          "zh": "弹层根元素的附加类名",
+          "en": "Extra class names of the popup root",
+          "values": []
+        },
+        {
+          "name": "overlayInnerClassName",
+          "type": "string | string[] | Record<string, boolean> | null",
+          "default": "null",
+          "required": false,
+          "zh": "弹层内容元素的附加类名",
+          "en": "Extra class names of the popup content",
+          "values": []
+        },
+        {
+          "name": "visible",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控的展开状态",
+          "en": "Controlled visible state",
+          "values": []
+        },
+        {
+          "name": "zIndex",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层层级",
+          "en": "The z-index of the popup",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "visibleChange",
+          "type": "boolean",
+          "zh": "展开状态变化，用于双向绑定",
+          "en": "Visible change event, used for two-way binding"
+        },
+        {
+          "name": "overlayClick",
+          "type": "MouseEvent",
+          "zh": "点击弹层内容",
+          "en": "Emitted when the popup content is clicked"
+        }
+      ]
+    },
     "TRadio": {
       "className": "TRadio",
       "selector": "t-radio",
@@ -1815,6 +1963,132 @@
           "type": "KeyboardEvent",
           "zh": "键盘抬起",
           "en": "Keyup event"
+        }
+      ]
+    },
+    "TTooltip": {
+      "className": "TTooltip",
+      "selector": "t-tooltip",
+      "file": "packages/ng-components/src/components/tooltip/tooltip.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示内容（纯文本）",
+          "en": "Tooltip content as plain text",
+          "values": []
+        },
+        {
+          "name": "placement",
+          "type": "TooltipPlacement",
+          "default": "'top'",
+          "required": false,
+          "zh": "提示出现的位置，mouse 表示跟随鼠标",
+          "en": "The placement of the tooltip, mouse means following the cursor",
+          "values": [
+            "mouse",
+            "top",
+            "left",
+            "right",
+            "bottom",
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+            "left-top",
+            "left-bottom",
+            "right-top",
+            "right-bottom"
+          ]
+        },
+        {
+          "name": "theme",
+          "type": "TooltipTheme",
+          "default": "'default'",
+          "required": false,
+          "zh": "提示主题。",
+          "en": "提示主题。",
+          "values": [
+            "default",
+            "primary",
+            "success",
+            "danger",
+            "warning",
+            "light"
+          ]
+        },
+        {
+          "name": "showArrow",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示箭头",
+          "en": "Whether to show the arrow",
+          "values": []
+        },
+        {
+          "name": "delay",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "延迟显示的毫秒数",
+          "en": "Delay in milliseconds before showing",
+          "values": []
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "自动消失的毫秒数，0 表示不自动消失",
+          "en": "Duration in milliseconds before hiding, 0 means never",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the tooltip is disabled",
+          "values": []
+        },
+        {
+          "name": "destroyOnClose",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "关闭时是否销毁弹层内容",
+          "en": "Whether to destroy the tooltip content on close",
+          "values": []
+        },
+        {
+          "name": "visible",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控的展开状态",
+          "en": "Controlled visible state",
+          "values": []
+        },
+        {
+          "name": "zIndex",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层层级",
+          "en": "The z-index of the tooltip",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "visibleChange",
+          "type": "boolean",
+          "zh": "展开状态变化，用于双向绑定",
+          "en": "Visible change event, used for two-way binding"
         }
       ]
     }

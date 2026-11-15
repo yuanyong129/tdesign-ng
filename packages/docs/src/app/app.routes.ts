@@ -56,6 +56,14 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/form/form.component').then((m) => m.FormDocs),
   },
   {
+    path: 'popup',
+    loadComponent: () => import('./docs/popup/popup.component').then((m) => m.PopupDocs),
+  },
+  {
+    path: 'tooltip',
+    loadComponent: () => import('./docs/tooltip/tooltip.component').then((m) => m.TooltipDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

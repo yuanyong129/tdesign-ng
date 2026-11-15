@@ -9,11 +9,13 @@ export * from './components/divider';
 export * from './components/form';
 export * from './components/input';
 export * from './components/link';
+export * from './components/popup';
 export * from './components/radio';
 export * from './components/select';
 export * from './components/space';
 export * from './components/switch';
 export * from './components/textarea';
+export * from './components/tooltip';
 
 // Core
 export * from './types';

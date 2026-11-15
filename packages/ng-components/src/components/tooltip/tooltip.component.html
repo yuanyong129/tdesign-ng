@@ -1,0 +1,19 @@
+<ng-content />
+
+<ng-template #overlayTemplate>
+  <div
+    [class]="popupClasses()"
+    [attr.data-popper-placement]="popperPlacement()"
+    [style.z-index]="zIndex() ?? null"
+  >
+    <div [class]="contentClasses()">
+      @if (content()) {
+        {{ content() }}
+      }
+      <ng-content select="[tTooltipContent]" />
+      @if (showArrow()) {
+        <div class="t-popup__arrow"></div>
+      }
+    </div>
+  </div>
+</ng-template>
