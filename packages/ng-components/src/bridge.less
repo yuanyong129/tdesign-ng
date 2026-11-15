@@ -96,5 +96,29 @@ t-tooltip {
   pointer-events: none;
 }
 
+// 对话框与抽屉：宿主不产生盒子，内容自带 position: fixed
+t-dialog,
+t-drawer {
+  display: contents;
+}
+
+// 抽屉的位移由 JS 写在 --open 状态上，上游 less 只定义了关闭时的偏移量，
+// 这里补上打开时的归零，否则面板会停在屏幕外（虽然已经 visibility: visible）。
+.t-drawer--open > .t-drawer__content-wrapper {
+  transform: none;
+}
+
+// 对话框与抽屉的进场动画：上游 less 里定义了 keyframes，
+// 但触发类名是 Vue transition 专用的，这里给 Angular 侧的开关类接上。
+// 时长与缓动写死，避免 bridge.less 依赖上游 dialog 的 less 变量。
+.t-dialog__ctx.t-is-visible .t-dialog {
+  animation: tDialogZoomIn 0.3s ease-out both;
+}
+
+.t-dialog__ctx.t-is-visible .t-dialog__mask {
+  animation: tDialogMaskIn 0.3s linear both;
+}
+
+
 
 

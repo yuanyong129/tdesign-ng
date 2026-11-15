@@ -1,0 +1,113 @@
+@if (shouldRender()) {
+  <div
+    #ctx
+    [class]="ctxClasses()"
+    [style.z-index]="zIndex() ?? null"
+    tabindex="-1"
+    [cdkTrapFocus]="innerVisible()"
+    (keydown)="handleKeydown($event)"
+  >
+    @if (showMask()) {
+      <div class="t-dialog__mask" (click)="handleMaskClick($event)"></div>
+    }
+    <div class="t-dialog__wrap">
+      <div [class]="positionClasses()" [style]="positionStyle()">
+        <div [class]="dialogClasses()" [style]="resolvedDialogStyle()" role="dialog" aria-modal="true">
+          @if (showHeader()) {
+            <div class="t-dialog__header">
+              <div class="t-dialog__header-content">
+                @if (theme() !== 'default') {
+                  <svg
+                    [class]="'t-icon t-is-' + (theme() === 'danger' ? 'error' : theme())"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    height="1em"
+                    aria-hidden="true"
+                  >
+                    @switch (theme()) {
+                      @case ('info') {
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-linecap="square"
+                          stroke-width="2"
+                          d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z"
+                        />
+                        <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M12 16.5L12 11M12 7.5L11.9961 7.5L11.9961 7.49609L12 7.49609L12 7.5Z" />
+                      }
+                      @case ('success') {
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-linecap="square"
+                          stroke-width="2"
+                          d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z"
+                        />
+                        <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M16.5 9L10.5 15L7.5 12" />
+                      }
+                      @default {
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-linecap="square"
+                          stroke-width="2"
+                          d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                        />
+                        <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M12 7.5V13M12 16.5H12.0039V16.5039H12V16.5Z" />
+                      }
+                    }
+                  </svg>
+                }
+                <span>{{ headerText() }}</span>
+              </div>
+              @if (closeBtn()) {
+                <span class="t-dialog__close" (click)="handleCloseBtn($event)">
+                  <svg
+                    class="t-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    height="1em"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="square"
+                      stroke-width="2"
+                      d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
+                    />
+                  </svg>
+                </span>
+              }
+            </div>
+          }
+
+          <div class="t-dialog__body">
+            @if (body()) {
+              {{ body() }}
+            }
+            <ng-content />
+          </div>
+
+          @if (footer()) {
+            <div class="t-dialog__footer">
+              <ng-content select="[tDialogFooter]" />
+              @if (showDefaultButtons()) {
+                @if (showCancel()) {
+                  <t-button theme="default" (click)="handleCancel($event)">{{ cancelText() }}</t-button>
+                }
+                @if (showConfirm()) {
+                  <t-button theme="primary" [loading]="confirmLoading()" (click)="handleConfirm($event)">
+                    {{ confirmText() }}
+                  </t-button>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

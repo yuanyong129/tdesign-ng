@@ -423,12 +423,14 @@ tdesign-ng/
 
 ## 18. P3 弹层与反馈（进行中）
 
-### 18.1 已交付：Popup / Tooltip
+### 18.1 已交付：Popup / Tooltip / Dialog / Drawer
 
 | 组件 | 选择器 | 上游契约对齐 | 说明 |
 | --- | --- | --- | --- |
 | Popup | `t-popup` | 12/24，missing 0 | 五种触发方式、12 个方向、箭头、延迟、受控显隐 |
 | Tooltip | `t-tooltip` | 6/6，missing 0 | 六种主题、延迟与自动消失，复用 Popup 的定位实现 |
+| Dialog | `t-dialog` | 22/37，missing 0 | 遮罩、Esc、焦点陷阱、滚动锁定、主题图标、自定义底部 |
+| Drawer | `t-drawer` | 18/31，missing 0 | 四个方向、尺寸、遮罩、焦点与滚动锁定、自定义底部 |
 
 ### 18.2 定位实现（与 Select 不同的地方）
 
@@ -442,10 +444,17 @@ tdesign-ng/
 - hover 触发时，面板自身也监听 `mouseenter` / `mouseleave`，鼠标从触发器移入面板不会收起。
 - click / mousedown / context-menu 触发时，用 document 级 `pointerdown`（捕获阶段）判断是否点在宿主与面板之外，`Escape` 关闭面板。
 
-### 18.4 待办
+### 18.4 Dialog / Drawer 的四个实现要点
 
-- Dialog / Drawer：需要焦点管理（CDK `FocusTrap`）、滚动锁定（`BlockScrollStrategy`）与遮罩层。
+1. **滚动锁定**用 `Overlay.scrollStrategies.block()`，但它只有 `attach()` / `enable()` / `disable()`，没有 `detach()`；打开时 `attach()+enable()`，关闭时 `disable()`，组件销毁时也要 `disable()`，否则页面会一直被锁住。
+2. **焦点陷阱**用 `A11yModule` 的 `cdkTrapFocus`，通过 `[cdkTrapFocus]="visible"` 动态开关。陷阱本身不会主动聚焦，所以打开后还要把焦点交给容器（容器带 `tabindex="-1"`），否则 Esc 监听拿不到键盘事件。
+3. **抽屉的位移**：上游 less 只在关闭态写了 `transform: translateX(±100%)`，打开态由 JS 把 `transform` 归零。Angular 侧在 `bridge.less` 里补了 `.t-drawer--open > .t-drawer__content-wrapper { transform: none }`，否则面板虽然 `visibility: visible` 仍然停在屏幕外。
+4. **自定义底部**：`[tDialogFooter]` / `[tDrawerFooter]` 需要一个真实指令才能在 `contentChild` 里被查到；指令随 `TDialogModule` / `TDrawerModule` 一起导出，检测到自定义底部时不再渲染默认的取消/确定按钮。
+
+### 18.5 待办
+
 - Message / Notification / Loading：需要服务式调用（`provideTMessage()` 注入器 + CDK Overlay 动态创建），并支持多条堆叠。
+- Dialog 的拖拽（`draggable`）、`confirmOnEnter`、`beforeOpen`/`beforeClose` 钩子暂未实现，已在 `align-check` 里写明理由。
 
 
 

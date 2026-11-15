@@ -64,6 +64,14 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/tooltip/tooltip.component').then((m) => m.TooltipDocs),
   },
   {
+    path: 'dialog',
+    loadComponent: () => import('./docs/dialog/dialog.component').then((m) => m.DialogDocs),
+  },
+  {
+    path: 'drawer',
+    loadComponent: () => import('./docs/drawer/drawer.component').then((m) => m.DrawerDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

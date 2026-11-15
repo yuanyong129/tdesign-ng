@@ -313,6 +313,257 @@
         }
       ]
     },
+    "TDialog": {
+      "className": "TDialog",
+      "selector": "t-dialog",
+      "file": "packages/ng-components/src/components/dialog/dialog.component.ts",
+      "inputs": [
+        {
+          "name": "visible",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示对话框，用于双向绑定",
+          "en": "Whether the dialog is visible, used for two-way binding",
+          "values": []
+        },
+        {
+          "name": "header",
+          "type": "string | boolean",
+          "default": "''",
+          "required": false,
+          "zh": "标题，传 false 隐藏头部",
+          "en": "Header text, false hides the header",
+          "values": []
+        },
+        {
+          "name": "body",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "内容文本",
+          "en": "Body text",
+          "values": []
+        },
+        {
+          "name": "footer",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示底部操作区",
+          "en": "Whether to show the footer",
+          "values": []
+        },
+        {
+          "name": "closeBtn",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示关闭按钮",
+          "en": "Whether to show the close button",
+          "values": []
+        },
+        {
+          "name": "confirmBtn",
+          "type": "string | null",
+          "default": "'确定'",
+          "required": false,
+          "zh": "确认按钮文案，null 隐藏",
+          "en": "Confirm button text, null hides it",
+          "values": []
+        },
+        {
+          "name": "cancelBtn",
+          "type": "string | null",
+          "default": "'取消'",
+          "required": false,
+          "zh": "取消按钮文案，null 隐藏",
+          "en": "Cancel button text, null hides it",
+          "values": []
+        },
+        {
+          "name": "confirmLoading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "确认按钮是否加载中",
+          "en": "Whether the confirm button is loading",
+          "values": []
+        },
+        {
+          "name": "closeOnEscKeydown",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否允许按 Esc 关闭",
+          "en": "Whether the dialog closes on Escape",
+          "values": []
+        },
+        {
+          "name": "closeOnOverlayClick",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否允许点击遮罩关闭",
+          "en": "Whether the dialog closes on overlay click",
+          "values": []
+        },
+        {
+          "name": "showOverlay",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示遮罩",
+          "en": "Whether to show the overlay mask",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "DialogTheme",
+          "default": "'default'",
+          "required": false,
+          "zh": "主题，非 default 时头部显示对应图标",
+          "en": "Theme, a non-default value shows an icon in the header",
+          "values": [
+            "default",
+            "info",
+            "warning",
+            "danger",
+            "success"
+          ]
+        },
+        {
+          "name": "placement",
+          "type": "DialogPlacement",
+          "default": "'top'",
+          "required": false,
+          "zh": "垂直位置",
+          "en": "Vertical placement",
+          "values": [
+            "top",
+            "center"
+          ]
+        },
+        {
+          "name": "top",
+          "type": "string | number",
+          "default": "'10vh'",
+          "required": false,
+          "zh": "距顶部的距离，placement 为 top 时生效",
+          "en": "Distance from the top, works with top placement",
+          "values": []
+        },
+        {
+          "name": "width",
+          "type": "string | number",
+          "default": "'480px'",
+          "required": false,
+          "zh": "对话框宽度",
+          "en": "Dialog width",
+          "values": []
+        },
+        {
+          "name": "mode",
+          "type": "DialogMode",
+          "default": "'modal'",
+          "required": false,
+          "zh": "展示形态",
+          "en": "Dialog mode",
+          "values": [
+            "modal",
+            "modeless",
+            "normal",
+            "full-screen"
+          ]
+        },
+        {
+          "name": "destroyOnClose",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "关闭时是否销毁内容",
+          "en": "Whether to destroy the content on close",
+          "values": []
+        },
+        {
+          "name": "lazy",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否懒渲染，首次打开前不创建 DOM",
+          "en": "Whether to render lazily until first open",
+          "values": []
+        },
+        {
+          "name": "preventScrollThrough",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否禁止背景滚动",
+          "en": "Whether to prevent scrolling the page behind",
+          "values": []
+        },
+        {
+          "name": "zIndex",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "层级",
+          "en": "The z-index of the dialog",
+          "values": []
+        },
+        {
+          "name": "dialogClassName",
+          "type": "string | string[] | Record<string, boolean> | null",
+          "default": "null",
+          "required": false,
+          "zh": "对话框元素的附加类名",
+          "en": "Extra class names of the dialog element",
+          "values": []
+        },
+        {
+          "name": "dialogStyle",
+          "type": "Record<string, string> | null",
+          "default": "null",
+          "required": false,
+          "zh": "对话框元素的行内样式",
+          "en": "Inline styles of the dialog element",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "visibleChange",
+          "type": "boolean",
+          "zh": "显示状态变化，用于双向绑定",
+          "en": "Visible change event, used for two-way binding"
+        },
+        {
+          "name": "close",
+          "type": "DialogCloseEvent",
+          "zh": "关闭事件，携带关闭来源",
+          "en": "Close event with the trigger source"
+        },
+        {
+          "name": "confirm",
+          "type": "MouseEvent",
+          "zh": "点击确认",
+          "en": "Confirm event"
+        },
+        {
+          "name": "cancel",
+          "type": "MouseEvent",
+          "zh": "点击取消",
+          "en": "Cancel event"
+        },
+        {
+          "name": "overlayClick",
+          "type": "MouseEvent",
+          "zh": "点击遮罩",
+          "en": "Overlay click event"
+        }
+      ]
+    },
     "TDivider": {
       "className": "TDivider",
       "selector": "t-divider",
@@ -363,6 +614,215 @@
         }
       ],
       "outputs": []
+    },
+    "TDrawer": {
+      "className": "TDrawer",
+      "selector": "t-drawer",
+      "file": "packages/ng-components/src/components/drawer/drawer.component.ts",
+      "inputs": [
+        {
+          "name": "visible",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示抽屉，用于双向绑定",
+          "en": "Whether the drawer is visible, used for two-way binding",
+          "values": []
+        },
+        {
+          "name": "header",
+          "type": "string | boolean",
+          "default": "''",
+          "required": false,
+          "zh": "标题，传 false 隐藏头部",
+          "en": "Header text, false hides the header",
+          "values": []
+        },
+        {
+          "name": "body",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "内容文本",
+          "en": "Body text",
+          "values": []
+        },
+        {
+          "name": "footer",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示底部操作区",
+          "en": "Whether to show the footer",
+          "values": []
+        },
+        {
+          "name": "closeBtn",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示关闭按钮",
+          "en": "Whether to show the close button",
+          "values": []
+        },
+        {
+          "name": "confirmBtn",
+          "type": "string | null",
+          "default": "'确定'",
+          "required": false,
+          "zh": "确认按钮文案，null 隐藏",
+          "en": "Confirm button text, null hides it",
+          "values": []
+        },
+        {
+          "name": "cancelBtn",
+          "type": "string | null",
+          "default": "'取消'",
+          "required": false,
+          "zh": "取消按钮文案，null 隐藏",
+          "en": "Cancel button text, null hides it",
+          "values": []
+        },
+        {
+          "name": "closeOnEscKeydown",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否允许按 Esc 关闭",
+          "en": "Whether the drawer closes on Escape",
+          "values": []
+        },
+        {
+          "name": "closeOnOverlayClick",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否允许点击遮罩关闭",
+          "en": "Whether the drawer closes on overlay click",
+          "values": []
+        },
+        {
+          "name": "showOverlay",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示遮罩",
+          "en": "Whether to show the overlay mask",
+          "values": []
+        },
+        {
+          "name": "placement",
+          "type": "DrawerPlacement",
+          "default": "'right'",
+          "required": false,
+          "zh": "出现方向",
+          "en": "The placement of the drawer",
+          "values": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "string",
+          "default": "'27.5%'",
+          "required": false,
+          "zh": "抽屉尺寸，左右方向为宽度、上下方向为高度",
+          "en": "Drawer size, width for left/right and height for top/bottom",
+          "values": []
+        },
+        {
+          "name": "mode",
+          "type": "DrawerMode",
+          "default": "'overlay'",
+          "required": false,
+          "zh": "与页面的关系",
+          "en": "The relationship with the page",
+          "values": [
+            "overlay",
+            "push"
+          ]
+        },
+        {
+          "name": "destroyOnClose",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "关闭时是否销毁内容",
+          "en": "Whether to destroy the content on close",
+          "values": []
+        },
+        {
+          "name": "lazy",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否懒渲染，首次打开前不创建 DOM",
+          "en": "Whether to render lazily until first open",
+          "values": []
+        },
+        {
+          "name": "preventScrollThrough",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否禁止背景滚动",
+          "en": "Whether to prevent scrolling the page behind",
+          "values": []
+        },
+        {
+          "name": "zIndex",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "层级",
+          "en": "The z-index of the drawer",
+          "values": []
+        },
+        {
+          "name": "drawerClassName",
+          "type": "string | string[] | Record<string, boolean> | null",
+          "default": "null",
+          "required": false,
+          "zh": "抽屉元素的附加类名",
+          "en": "Extra class names of the drawer element",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "visibleChange",
+          "type": "boolean",
+          "zh": "显示状态变化，用于双向绑定",
+          "en": "Visible change event, used for two-way binding"
+        },
+        {
+          "name": "close",
+          "type": "DrawerCloseEvent",
+          "zh": "关闭事件，携带关闭来源",
+          "en": "Close event with the trigger source"
+        },
+        {
+          "name": "confirm",
+          "type": "MouseEvent",
+          "zh": "点击确认",
+          "en": "Confirm event"
+        },
+        {
+          "name": "cancel",
+          "type": "MouseEvent",
+          "zh": "点击取消",
+          "en": "Cancel event"
+        },
+        {
+          "name": "overlayClick",
+          "type": "MouseEvent",
+          "zh": "点击遮罩",
+          "en": "Overlay click event"
+        }
+      ]
     },
     "TForm": {
       "className": "TForm",

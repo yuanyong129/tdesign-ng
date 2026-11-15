@@ -1,0 +1,62 @@
+@if (shouldRender()) {
+  <div
+    #ctx
+    [class]="drawerClasses()"
+    [style.z-index]="zIndex() ?? null"
+    tabindex="-1"
+    [cdkTrapFocus]="innerVisible()"
+    (keydown)="handleKeydown($event)"
+  >
+    @if (showMask()) {
+      <div class="t-drawer__mask" (click)="handleMaskClick($event)"></div>
+    }
+    <div [class]="wrapperClasses()" [style]="wrapperStyle()">
+      @if (showHeader()) {
+        <div class="t-drawer__header">
+          <span class="t-drawer__header-content">{{ headerText() }}</span>
+          @if (closeBtn()) {
+            <span class="t-drawer__close-btn" (click)="handleCloseBtn($event)">
+              <svg
+                class="t-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="1em"
+                height="1em"
+                aria-hidden="true"
+              >
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="square"
+                  stroke-width="2"
+                  d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
+                />
+              </svg>
+            </span>
+          }
+        </div>
+      }
+
+      <div class="t-drawer__body">
+        @if (body()) {
+          {{ body() }}
+        }
+        <ng-content />
+      </div>
+
+      @if (footer()) {
+        <div class="t-drawer__footer">
+          <ng-content select="[tDrawerFooter]" />
+          @if (showDefaultButtons()) {
+            @if (showCancel()) {
+              <t-button theme="default" (click)="handleCancel($event)">{{ cancelText() }}</t-button>
+            }
+            @if (showConfirm()) {
+              <t-button theme="primary" (click)="handleConfirm($event)">{{ confirmText() }}</t-button>
+            }
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

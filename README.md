@@ -24,8 +24,10 @@
 | Select | ✅ CDK Overlay 面板，单选/多选/搜索/分组/创建项/键盘导航 |
 | Popup | ✅ 五种触发方式、12 个方向、箭头、延迟与受控显隐 |
 | Tooltip | ✅ 六种主题、延迟与自动消失，复用 Popup 定位 |
+| Dialog | ✅ 遮罩、Esc、焦点陷阱、滚动锁定、主题图标 |
+| Drawer | ✅ 四个方向、尺寸、遮罩与焦点管理 |
 
-P3 剩余组件（Dialog / Drawer / Message / Notification / Loading）按 `docs/plans/tdesign-angular-plan.md` 的分期推进。
+P3 剩余组件（Message / Notification / Loading）按 `docs/plans/tdesign-angular-plan.md` 的分期推进。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
 
