@@ -1,0 +1,41 @@
+@if (visible()) {
+  @if (fullscreen()) {
+    <div [class]="fullscreenClasses()" [style.z-index]="zIndex() ?? null">
+      <div [class]="baseClasses()">
+        <svg
+          class="t-loading__gradient t-icon-loading"
+          viewBox="0 0 12 12"
+          width="1em"
+          height="1em"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <foreignObject x="0" y="0" width="12" height="12">
+            <div class="t-loading__gradient-conic"></div>
+          </foreignObject>
+        </svg>
+        @if (text()) {
+          <div class="t-loading__text">{{ text() }}</div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div [class]="normalClasses()">
+      <svg
+        class="t-loading__gradient t-icon-loading"
+        viewBox="0 0 12 12"
+        width="1em"
+        height="1em"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <foreignObject x="0" y="0" width="12" height="12">
+          <div class="t-loading__gradient-conic"></div>
+        </foreignObject>
+      </svg>
+      @if (text()) {
+        <div class="t-loading__text">{{ text() }}</div>
+      }
+    </div>
+  }
+}

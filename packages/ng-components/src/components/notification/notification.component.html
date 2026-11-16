@@ -1,0 +1,69 @@
+<div [class]="classes()">
+  @if (icon()) {
+    <div class="t-notification__icon">
+      @if (theme() === 'success') {
+        <svg [class]="iconClasses()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z"
+          />
+          <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M16.5 9L10.5 15L7.5 12" />
+        </svg>
+      } @else if (theme() === 'warning' || theme() === 'error') {
+        <svg [class]="iconClasses()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+          />
+          <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M12 7.5V13M12 16.5H12.0039V16.5039H12V16.5Z" />
+        </svg>
+      } @else {
+        <svg [class]="iconClasses()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z"
+          />
+          <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M12 16.5L12 11M12 7.5L11.9961 7.5L11.9961 7.49609L12 7.49609L12 7.5Z" />
+        </svg>
+      }
+    </div>
+  }
+
+  <div class="t-notification__main">
+    <div class="t-notification__title__wrap">
+      <span class="t-notification__title">{{ title() }}</span>
+      @if (closeBtn()) {
+        <svg
+          class="t-icon t-icon-close"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="1em"
+          height="1em"
+          aria-hidden="true"
+          (click)="handleCloseBtn($event)"
+        >
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
+          />
+        </svg>
+      }
+    </div>
+    <div class="t-notification__content">{{ content() }}</div>
+    @if (footer()) {
+      <div class="t-notification__footer">{{ footer() }}</div>
+    }
+  </div>
+</div>

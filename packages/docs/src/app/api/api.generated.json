@@ -127,14 +127,7 @@
           "values": []
         }
       ],
-      "outputs": [
-        {
-          "name": "click",
-          "type": "MouseEvent",
-          "zh": "点击事件",
-          "en": "Click event"
-        }
-      ]
+      "outputs": []
     },
     "TCheckbox": {
       "className": "TCheckbox",
@@ -1505,12 +1498,260 @@
           "values": []
         }
       ],
+      "outputs": []
+    },
+    "TLoading": {
+      "className": "TLoading",
+      "selector": "t-loading",
+      "file": "packages/ng-components/src/components/loading/loading.component.ts",
+      "inputs": [
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否处于加载状态",
+          "en": "Whether it is loading",
+          "values": []
+        },
+        {
+          "name": "text",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "加载提示文字",
+          "en": "Loading text",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "LoadingSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "图标尺寸",
+          "en": "Icon size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "fullscreen",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否全屏",
+          "en": "Whether to show full screen",
+          "values": []
+        },
+        {
+          "name": "showOverlay",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示遮罩，仅全屏时生效",
+          "en": "Whether to show the overlay, only works in full screen",
+          "values": []
+        },
+        {
+          "name": "inheritColor",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "图标是否继承文字颜色",
+          "en": "Whether the icon inherits the text color",
+          "values": []
+        },
+        {
+          "name": "delay",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "延迟显示的毫秒数",
+          "en": "Delay in milliseconds before showing",
+          "values": []
+        },
+        {
+          "name": "preventScrollThrough",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否禁止背景滚动，仅全屏时生效",
+          "en": "Whether to prevent scrolling the page, only works in full screen",
+          "values": []
+        },
+        {
+          "name": "zIndex",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "层级",
+          "en": "The z-index of the loading",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TMessage": {
+      "className": "TMessage",
+      "selector": "t-message",
+      "file": "packages/ng-components/src/components/message/message.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "消息文字",
+          "en": "Message content",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "MessageTheme",
+          "default": "'info'",
+          "required": false,
+          "zh": "消息主题",
+          "en": "Message theme",
+          "values": [
+            "info",
+            "success",
+            "warning",
+            "error",
+            "question",
+            "loading"
+          ]
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "default": "3000",
+          "required": false,
+          "zh": "自动关闭的毫秒数，0 表示不自动关闭",
+          "en": "Auto close duration in milliseconds, 0 means never",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示图标",
+          "en": "Whether to show the icon",
+          "values": []
+        },
+        {
+          "name": "closeBtn",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示关闭按钮",
+          "en": "Whether to show the close button",
+          "values": []
+        }
+      ],
       "outputs": [
         {
-          "name": "click",
+          "name": "close",
+          "type": "MessageCloseEvent",
+          "zh": "消息关闭",
+          "en": "Emitted when the message closes"
+        },
+        {
+          "name": "closeBtnClick",
           "type": "MouseEvent",
-          "zh": "点击事件",
-          "en": "click"
+          "zh": "点击关闭按钮",
+          "en": "Emitted when the close button is clicked"
+        }
+      ]
+    },
+    "TNotification": {
+      "className": "TNotification",
+      "selector": "t-notification",
+      "file": "packages/ng-components/src/components/notification/notification.component.ts",
+      "inputs": [
+        {
+          "name": "title",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "标题",
+          "en": "Title",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "内容",
+          "en": "Content",
+          "values": []
+        },
+        {
+          "name": "footer",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "底部补充内容",
+          "en": "Footer content",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "NotificationTheme",
+          "default": "'info'",
+          "required": false,
+          "zh": "通知主题",
+          "en": "Notification theme",
+          "values": [
+            "info",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "default": "3000",
+          "required": false,
+          "zh": "自动关闭的毫秒数，0 表示不自动关闭",
+          "en": "Auto close duration in milliseconds, 0 means never",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示图标",
+          "en": "Whether to show the icon",
+          "values": []
+        },
+        {
+          "name": "closeBtn",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示关闭按钮",
+          "en": "Whether to show the close button",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "close",
+          "type": "NotificationCloseEvent",
+          "zh": "通知关闭",
+          "en": "Emitted when the notification closes"
+        },
+        {
+          "name": "closeBtnClick",
+          "type": "MouseEvent",
+          "zh": "点击关闭按钮",
+          "en": "Emitted when the close button is clicked"
         }
       ]
     },

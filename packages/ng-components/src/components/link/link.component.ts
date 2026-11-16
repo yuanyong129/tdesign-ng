@@ -5,7 +5,6 @@ import {
   booleanAttribute,
   computed,
   input,
-  output,
 } from '@angular/core';
 
 /** 链接主题色。 */
@@ -82,9 +81,6 @@ export class TLink {
   /** 是否带后缀图标（用于决定是否渲染包裹层）。 @zh 是否带后缀图标 @en hasSuffixIcon @defaultValue false */
   hasSuffixIcon = input(false, { transform: booleanAttribute });
 
-  /** 点击事件，禁用时不会触发。 @zh 点击事件 @en click */
-  click = output<MouseEvent>();
-
   protected readonly downloadAttr = computed(() => {
     const download = this.download();
     if (download === undefined || download === false) {
@@ -111,11 +107,11 @@ export class TLink {
   });
 
   protected handleClick(event: MouseEvent): void {
+    // 禁用时拦掉事件；正常情况下让原生 click 继续冒泡到宿主，
+    // 使用方直接写 (click) 即可（不再额外提供 click 输出，避免一次点击触发两次）。
     if (this.disabled()) {
       event.preventDefault();
       event.stopPropagation();
-      return;
     }
-    this.click.emit(event);
   }
 }

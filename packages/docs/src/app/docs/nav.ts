@@ -27,6 +27,9 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/tooltip', label: '文字提示 Tooltip', group: '反馈' },
   { path: '/dialog', label: '对话框 Dialog', group: '反馈' },
   { path: '/drawer', label: '抽屉 Drawer', group: '反馈' },
+  { path: '/message', label: '全局提示 Message', group: '反馈' },
+  { path: '/notification', label: '通知 Notification', group: '反馈' },
+  { path: '/loading', label: '加载 Loading', group: '反馈' },
 ];
 
 /** 按分组统计，保持 DOCS_NAV 里的先后顺序。 */

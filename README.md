@@ -26,8 +26,11 @@
 | Tooltip | ✅ 六种主题、延迟与自动消失，复用 Popup 定位 |
 | Dialog | ✅ 遮罩、Esc、焦点陷阱、滚动锁定、主题图标 |
 | Drawer | ✅ 四个方向、尺寸、遮罩与焦点管理 |
+| Message | ✅ 服务式调用，九个位置、自动关闭与 closeAll |
+| Notification | ✅ 服务式调用，四个角、标题/内容/底部 |
+| Loading | ✅ 行内组件 + 全屏服务，延迟与滚动锁定 |
 
-P3 剩余组件（Message / Notification / Loading）按 `docs/plans/tdesign-angular-plan.md` 的分期推进。
+P3 的弹层与反馈组件已全部完成，后续按 `docs/plans/tdesign-angular-plan.md` 进入 P4 数据展示。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
 

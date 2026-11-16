@@ -72,6 +72,19 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/drawer/drawer.component').then((m) => m.DrawerDocs),
   },
   {
+    path: 'message',
+    loadComponent: () => import('./docs/message/message.component').then((m) => m.MessageDocs),
+  },
+  {
+    path: 'notification',
+    loadComponent: () =>
+      import('./docs/notification/notification.component').then((m) => m.NotificationDocs),
+  },
+  {
+    path: 'loading',
+    loadComponent: () => import('./docs/loading/loading.component').then((m) => m.LoadingDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

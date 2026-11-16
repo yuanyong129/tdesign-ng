@@ -102,6 +102,14 @@ t-drawer {
   display: contents;
 }
 
+// 服务式创建的组件（消息、通知、加载）宿主同样不产生盒子，
+// 它们在 body 上直接挂一个 <t-message> / <t-notification> / <t-loading> 宿主元素
+t-message,
+t-notification,
+t-loading {
+  display: contents;
+}
+
 // 抽屉的位移由 JS 写在 --open 状态上，上游 less 只定义了关闭时的偏移量，
 // 这里补上打开时的归零，否则面板会停在屏幕外（虽然已经 visibility: visible）。
 .t-drawer--open > .t-drawer__content-wrapper {

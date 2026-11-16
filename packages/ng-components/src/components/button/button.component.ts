@@ -5,7 +5,6 @@ import {
   booleanAttribute,
   computed,
   input,
-  output,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import type { ButtonShape, ButtonSize, ButtonTheme, ButtonType, ButtonVariant } from './button.types';
@@ -103,9 +102,6 @@ export class TButton {
   /** @zh 关联的表单 id @en Id of the associated form @defaultValue undefined */
   readonly form = input<string | undefined>(undefined);
 
-  /** @zh 点击事件 @en Click event */
-  readonly click = output<MouseEvent>();
-
   /** 加载中同样禁止再次点击，与上游行为一致。 */
   readonly mergedDisabled = computed(() => this.disabled() || this.loading());
 
@@ -126,11 +122,11 @@ export class TButton {
   );
 
   handleClick(event: MouseEvent): void {
+    // 禁用/加载中时拦掉事件；正常情况下让原生 click 继续冒泡到宿主，
+    // 使用方直接写 (click) 即可（不再额外提供 click 输出，避免一次点击触发两次）。
     if (this.mergedDisabled()) {
       event.preventDefault();
       event.stopPropagation();
-      return;
     }
-    this.click.emit(event);
   }
 }

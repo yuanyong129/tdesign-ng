@@ -1,0 +1,83 @@
+<div [class]="classes()">
+  @if (icon()) {
+    @if (isLoading()) {
+      <svg
+        class="t-loading__gradient t-icon-loading"
+        viewBox="0 0 12 12"
+        width="1em"
+        height="1em"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <foreignObject x="0" y="0" width="12" height="12">
+          <div class="t-loading__gradient-conic"></div>
+        </foreignObject>
+      </svg>
+    } @else if (isQuestion()) {
+      <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="square"
+          stroke-width="2"
+          d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+        />
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="square"
+          stroke-width="2"
+          d="M9.75 10C9.75 8.75736 10.7574 7.75 12 7.75C13.2426 7.75 14.25 8.75736 14.25 10C14.25 11.2426 13.2426 12.25 12 12.25V13.5"
+        />
+        <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M12 16.5H12.0039V16.5039H12V16.5Z" />
+      </svg>
+    } @else if (theme() === 'success') {
+      <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="square"
+          stroke-width="2"
+          d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z"
+        />
+        <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M16.5 9L10.5 15L7.5 12" />
+      </svg>
+    } @else if (theme() === 'warning' || theme() === 'error') {
+      <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="square"
+          stroke-width="2"
+          d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+        />
+        <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M12 7.5V13M12 16.5H12.0039V16.5039H12V16.5Z" />
+      </svg>
+    } @else {
+      <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="square"
+          stroke-width="2"
+          d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z"
+        />
+        <path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M12 16.5L12 11M12 7.5L11.9961 7.5L11.9961 7.49609L12 7.49609L12 7.5Z" />
+      </svg>
+    }
+  }
+  <span>{{ content() }}</span>
+  @if (closeBtn()) {
+    <span class="t-message__close" (click)="handleCloseBtn($event)">
+      <svg class="t-icon t-icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="square"
+          stroke-width="2"
+          d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
+        />
+      </svg>
+    </span>
+  }
+</div>

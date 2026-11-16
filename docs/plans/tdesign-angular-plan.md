@@ -431,6 +431,9 @@ tdesign-ng/
 | Tooltip | `t-tooltip` | 6/6，missing 0 | 六种主题、延迟与自动消失，复用 Popup 的定位实现 |
 | Dialog | `t-dialog` | 22/37，missing 0 | 遮罩、Esc、焦点陷阱、滚动锁定、主题图标、自定义底部 |
 | Drawer | `t-drawer` | 18/31，missing 0 | 四个方向、尺寸、遮罩、焦点与滚动锁定、自定义底部 |
+| Message | `t-message` | 5/8，missing 0 | 服务式调用，九个位置、自动关闭、手动关闭与 closeAll |
+| Notification | `t-notification` | 7/11，missing 0 | 服务式调用，四个角、标题/内容/底部、自动关闭 |
+| Loading | `t-loading` | 9/13，missing 0 | 行内组件 + 全屏服务，尺寸、延迟、遮罩与滚动锁定 |
 
 ### 18.2 定位实现（与 Select 不同的地方）
 
@@ -451,10 +454,18 @@ tdesign-ng/
 3. **抽屉的位移**：上游 less 只在关闭态写了 `transform: translateX(±100%)`，打开态由 JS 把 `transform` 归零。Angular 侧在 `bridge.less` 里补了 `.t-drawer--open > .t-drawer__content-wrapper { transform: none }`，否则面板虽然 `visibility: visible` 仍然停在屏幕外。
 4. **自定义底部**：`[tDialogFooter]` / `[tDrawerFooter]` 需要一个真实指令才能在 `contentChild` 里被查到；指令随 `TDialogModule` / `TDrawerModule` 一起导出，检测到自定义底部时不再渲染默认的取消/确定按钮。
 
-### 18.5 待办
+### 18.5 Message / Notification / Loading 的实现要点
 
-- Message / Notification / Loading：需要服务式调用（`provideTMessage()` 注入器 + CDK Overlay 动态创建），并支持多条堆叠。
+1. **服务式渲染**：`TMessageService` / `TNotificationService` / `TLoadingService` 都用 `createComponent` + `ApplicationRef.attachView` 动态创建组件（封装在 `_utils/dynamic-component.ts`），宿主元素由服务自己创建并挂到 body 下的定位容器里。容器按位置缓存（`.t-message__list`、`.t-notification__show--<placement>`），最后一个实例销毁时把容器一起移除。
+2. **定位常量照抄上游**：Message 的九个位置偏移（`DISTANCE=32px`、`center` 用 `translate(-50%,-50%)`、默认 z-index 6000）、Notification 的四个角（`DISTANCE=16px`）都直接来自上游 `PLACEMENT_OFFSET`，底部位置额外加 `flex-direction: column-reverse` 让新消息贴着视口边缘。
+3. **`provideTMessage()` / `provideTNotification()`** 用 `makeEnvironmentProviders` 注册服务与默认配置（`duration` / `placement` / `zIndex`），与 TDesign 的 `MessagePlugin` 插件安装方式对齐。
+4. **加载环必须用块级元素**：`<svg><foreignObject><div class="t-loading__gradient-conic">` 里的 `div` 不能写成 `span` —— span 是行内元素，`width/height: 100%` 不生效，环会缩成 0×0，只剩文字。button / switch / message / loading 四处都已改成 `div`。
+5. **`click` 输出会与原生事件重复**：在组件上绑 `(click)` 时，Angular 既订阅同名 output、又在宿主元素上挂了 DOM 监听，点一次会触发两次。TButton / TLink 因此**不再声明 `click` 输出**，直接依赖原生事件的冒泡；禁用态仍在内部 `preventDefault + stopPropagation` 拦掉。
+
+### 18.6 待办
+
 - Dialog 的拖拽（`draggable`）、`confirmOnEnter`、`beforeOpen`/`beforeClose` 钩子暂未实现，已在 `align-check` 里写明理由。
+- Message / Notification 的内容目前是纯文本，富内容（TNode）尚未支持；Loading 的自定义 `indicator` 与 `attach` 也未实现。
 
 
 
