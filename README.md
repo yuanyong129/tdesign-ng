@@ -29,8 +29,11 @@
 | Message | ✅ 服务式调用，九个位置、自动关闭与 closeAll |
 | Notification | ✅ 服务式调用，四个角、标题/内容/底部 |
 | Loading | ✅ 行内组件 + 全屏服务，延迟与滚动锁定 |
+| Tag | ✅ 主题 / 变体 / 形状 / 尺寸 / 可关闭 / 自定义颜色 |
+| Badge | ✅ 数字封顶、小红点、showZero、偏移与自定义色 |
+| Avatar / AvatarGroup | ✅ 图片/文字/图标、形状与尺寸、max 折叠 |
 
-P3 的弹层与反馈组件已全部完成，后续按 `docs/plans/tdesign-angular-plan.md` 进入 P4 数据展示。
+P4 数据展示进行中：Pagination 与 Table 尚未实现，按 `docs/plans/tdesign-angular-plan.md` 推进。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
 

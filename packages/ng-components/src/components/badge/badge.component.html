@@ -1,0 +1,10 @@
+<div #root [class]="rootClasses()">
+  <ng-content />
+  @if (!hidden()) {
+    @if (dot()) {
+      <sup class="t-badge--dot" [style]="badgeStyle()"></sup>
+    } @else {
+      <sup [class]="badgeClasses()" [style]="badgeStyle()">{{ content() ?? displayCount() }}</sup>
+    }
+  }
+</div>

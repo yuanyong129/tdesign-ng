@@ -30,6 +30,9 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/message', label: '全局提示 Message', group: '反馈' },
   { path: '/notification', label: '通知 Notification', group: '反馈' },
   { path: '/loading', label: '加载 Loading', group: '反馈' },
+  { path: '/tag', label: '标签 Tag', group: '数据展示' },
+  { path: '/badge', label: '徽标 Badge', group: '数据展示' },
+  { path: '/avatar', label: '头像 Avatar', group: '数据展示' },
 ];
 
 /** 按分组统计，保持 DOCS_NAV 里的先后顺序。 */

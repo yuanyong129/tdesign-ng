@@ -248,6 +248,48 @@ const CONFIG = {
     angularOnly: [],
     ignoreUpstream: {},
   },
+  TTag: {
+    upstream: 'tag',
+    upstreamInterface: 'TdTagProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      'default': '内容通过 ng-content 与 content 输入提供',
+      'icon': 'Angular 用 <t-icon tTagIcon> 投影，不是输入属性',
+      'onClick': 'Angular 直接监听原生 click（会冒泡到宿主），不再额外提供输出',
+      'onClose': 'Angular 用 (close) 输出',
+    },
+  },
+  TBadge: {
+    upstream: 'badge',
+    upstreamInterface: 'TdBadgeProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      'default': '内容通过 ng-content 与 content 输入提供',
+    },
+  },
+  TAvatar: {
+    upstream: 'avatar',
+    upstreamInterface: 'TdAvatarProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      'default': '内容通过 ng-content 与 content 输入提供',
+      'icon': 'Angular 用 <t-icon tAvatarIcon> 投影，不是输入属性',
+      'imageProps': '内部用原生 img，暂不透传 Image 组件属性',
+      'onError': 'Angular 用 (error) 输出',
+    },
+  },
+  TAvatarGroup: {
+    upstream: 'avatar',
+    upstreamInterface: 'TdAvatarGroupProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      'popupProps': '折叠头像的弹层列表尚未实现，只显示 +N',
+    },
+  },
   TPopup: {
     upstream: 'popup',
     upstreamInterface: 'TdPopupProps',

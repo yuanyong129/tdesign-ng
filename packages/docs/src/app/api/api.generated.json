@@ -1,6 +1,221 @@
 {
   "generatedBy": "scripts/gen-api-docs.mjs",
   "components": {
+    "TAvatar": {
+      "className": "TAvatar",
+      "selector": "t-avatar",
+      "file": "packages/ng-components/src/components/avatar/avatar.component.ts",
+      "inputs": [
+        {
+          "name": "image",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "图片地址",
+          "en": "Image URL",
+          "values": []
+        },
+        {
+          "name": "alt",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "图片的 alt 文本",
+          "en": "Alt text of the image",
+          "values": []
+        },
+        {
+          "name": "shape",
+          "type": "AvatarShape",
+          "default": "'circle'",
+          "required": false,
+          "zh": "头像形状",
+          "en": "Avatar shape",
+          "values": [
+            "circle",
+            "round",
+            "square"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "string",
+          "default": "'medium'",
+          "required": false,
+          "zh": "头像尺寸，支持 small / medium / large 或具体数值",
+          "en": "Avatar size, accepts small / medium / large or a concrete value",
+          "values": []
+        },
+        {
+          "name": "hideOnLoadFailed",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "图片加载失败时是否隐藏",
+          "en": "Whether to hide the avatar when the image fails to load",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "头像文字，图片不可用时作为降级内容",
+          "en": "Avatar text, used as fallback when the image is unavailable",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "error",
+          "type": "Event",
+          "zh": "图片加载失败",
+          "en": "Emitted when the image fails to load"
+        }
+      ]
+    },
+    "TAvatarGroup": {
+      "className": "TAvatarGroup",
+      "selector": "t-avatar-group",
+      "file": "packages/ng-components/src/components/avatar/avatar-group.component.ts",
+      "inputs": [
+        {
+          "name": "max",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "最多显示的头像个数，超出显示 +N",
+          "en": "Max visible avatars, the rest collapse into +N",
+          "values": []
+        },
+        {
+          "name": "cascading",
+          "type": "AvatarCascading",
+          "default": "'right-up'",
+          "required": false,
+          "zh": "层叠方向",
+          "en": "Cascading direction",
+          "values": [
+            "left-up",
+            "right-up"
+          ]
+        },
+        {
+          "name": "collapseAvatar",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "折叠头像的文字，默认 +N",
+          "en": "Text of the collapse avatar, defaults to +N",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "统一尺寸，会下发给组内所有头像",
+          "en": "Size applied to all avatars in the group",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TBadge": {
+      "className": "TBadge",
+      "selector": "t-badge",
+      "file": "packages/ng-components/src/components/badge/badge.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "徽标内容，传字符串时直接显示",
+          "en": "Badge content, a string is displayed as is",
+          "values": []
+        },
+        {
+          "name": "count",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "徽标数字",
+          "en": "Badge count",
+          "values": []
+        },
+        {
+          "name": "maxCount",
+          "type": "number",
+          "default": "99",
+          "required": false,
+          "zh": "封顶数字，超出显示 `${maxCount}+`",
+          "en": "Max count, shows `${maxCount}+` when exceeded",
+          "values": []
+        },
+        {
+          "name": "dot",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示为小红点",
+          "en": "Whether to show a dot",
+          "values": []
+        },
+        {
+          "name": "shape",
+          "type": "BadgeShape",
+          "default": "'circle'",
+          "required": false,
+          "zh": "徽标形状",
+          "en": "Badge shape",
+          "values": [
+            "circle",
+            "round"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "BadgeSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "徽标尺寸",
+          "en": "Badge size",
+          "values": [
+            "small",
+            "medium"
+          ]
+        },
+        {
+          "name": "showZero",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "数字为 0 时是否显示",
+          "en": "Whether to show the badge when the count is 0",
+          "values": []
+        },
+        {
+          "name": "color",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义背景色",
+          "en": "Custom background color",
+          "values": []
+        },
+        {
+          "name": "offset",
+          "type": "Array<string | number> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "徽标偏移量，[x, y]",
+          "en": "Badge offset, [x, y]",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TButton": {
       "className": "TButton",
       "selector": "t-button",
@@ -2509,6 +2724,130 @@
           "type": "SwitchChangeEvent",
           "zh": "值变化事件，携带原始事件",
           "en": "Change event with the raw event"
+        }
+      ]
+    },
+    "TTag": {
+      "className": "TTag",
+      "selector": "t-tag",
+      "file": "packages/ng-components/src/components/tag/tag.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "标签文字",
+          "en": "Tag content",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "TagTheme",
+          "default": "'default'",
+          "required": false,
+          "zh": "标签主题",
+          "en": "Tag theme",
+          "values": [
+            "default",
+            "primary",
+            "warning",
+            "danger",
+            "success"
+          ]
+        },
+        {
+          "name": "variant",
+          "type": "TagVariant",
+          "default": "'dark'",
+          "required": false,
+          "zh": "标签变体",
+          "en": "Tag variant",
+          "values": [
+            "dark",
+            "light",
+            "outline",
+            "light-outline"
+          ]
+        },
+        {
+          "name": "shape",
+          "type": "TagShape",
+          "default": "'square'",
+          "required": false,
+          "zh": "标签形状",
+          "en": "Tag shape",
+          "values": [
+            "square",
+            "round",
+            "mark"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "TagSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "标签尺寸",
+          "en": "Tag size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "closable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可关闭",
+          "en": "Whether the tag is closable",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the tag is disabled",
+          "values": []
+        },
+        {
+          "name": "maxWidth",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "文字最大宽度，超出省略",
+          "en": "Max width of the text, truncated when exceeded",
+          "values": []
+        },
+        {
+          "name": "color",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义颜色，会按亮度自动选择文字颜色",
+          "en": "Custom color, the text color is chosen by luminance",
+          "values": []
+        },
+        {
+          "name": "title",
+          "type": "string | boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "title 提示，false 关闭、true 使用文字内容",
+          "en": "Title tooltip, false disables it and true uses the content",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "close",
+          "type": "MouseEvent",
+          "zh": "关闭标签",
+          "en": "Emitted when the close icon is clicked"
         }
       ]
     },

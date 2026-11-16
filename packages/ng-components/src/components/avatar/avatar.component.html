@@ -1,0 +1,11 @@
+<div [class]="classes()" [style]="customSize()">
+  @if (showImage()) {
+    <img class="t-avatar__image" [src]="image()" [alt]="alt() ?? ''" (error)="handleImageError($event)" />
+  } @else {
+    <ng-content select="[tAvatarIcon]" />
+    @if (content()) {
+      <span class="t-avatar__text">{{ content() }}</span>
+    }
+    <ng-content />
+  }
+</div>

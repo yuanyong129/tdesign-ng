@@ -1,0 +1,6 @@
+<div [class]="classes()">
+  <ng-content />
+  @if (collapsedCount() > 0) {
+    <t-avatar [content]="collapseText()" [size]="size() ?? 'medium'" />
+  }
+</div>

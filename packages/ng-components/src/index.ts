@@ -3,6 +3,8 @@
  */
 
 // Components
+export * from './components/avatar';
+export * from './components/badge';
 export * from './components/button';
 export * from './components/checkbox';
 export * from './components/dialog';
@@ -19,6 +21,7 @@ export * from './components/radio';
 export * from './components/select';
 export * from './components/space';
 export * from './components/switch';
+export * from './components/tag';
 export * from './components/textarea';
 export * from './components/tooltip';
 

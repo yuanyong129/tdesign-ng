@@ -85,6 +85,18 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/loading/loading.component').then((m) => m.LoadingDocs),
   },
   {
+    path: 'tag',
+    loadComponent: () => import('./docs/tag/tag.component').then((m) => m.TagDocs),
+  },
+  {
+    path: 'badge',
+    loadComponent: () => import('./docs/badge/badge.component').then((m) => m.BadgeDocs),
+  },
+  {
+    path: 'avatar',
+    loadComponent: () => import('./docs/avatar/avatar.component').then((m) => m.AvatarDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

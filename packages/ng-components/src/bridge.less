@@ -110,6 +110,42 @@ t-loading {
   display: contents;
 }
 
+// 标签、徽标、头像：根元素带样式类，宿主不能产生额外盒子
+t-tag,
+t-badge,
+t-avatar,
+t-avatar-group {
+  display: contents;
+}
+
+// 头像组用 max 限制显示数量时，超出部分由组组件下发隐藏标记
+t-avatar.t-avatar--hidden {
+  display: none;
+}
+
+// 头像组的层叠：上游用 `.t-avatar:not(:last-child)` / `:nth-child()` 计算负边距与层级，
+// 但宿主是 display: contents，真实头像都是各自宿主的「第一个/最后一个」子元素，
+// 这些选择器永远命中不到，所以把规则改写到宿主元素上。
+.avatar-group-z-index(@n, @i: 1) when (@i =< @n) {
+  > t-avatar:nth-child(@{i}) {
+    z-index: (20 - @i);
+  }
+  .avatar-group-z-index(@n, (@i + 1));
+}
+
+.t-avatar-group.t-avatar--offset-right > t-avatar:not(:last-of-type) {
+  margin-right: -4px;
+}
+
+.t-avatar-group.t-avatar--offset-left {
+  .avatar-group-z-index(10);
+
+  > t-avatar:not(:first-of-type) {
+    margin-left: -4px;
+  }
+}
+
+
 // 抽屉的位移由 JS 写在 --open 状态上，上游 less 只定义了关闭时的偏移量，
 // 这里补上打开时的归零，否则面板会停在屏幕外（虽然已经 visibility: visible）。
 .t-drawer--open > .t-drawer__content-wrapper {

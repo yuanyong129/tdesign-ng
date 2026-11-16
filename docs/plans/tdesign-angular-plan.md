@@ -467,5 +467,29 @@ tdesign-ng/
 - Dialog 的拖拽（`draggable`）、`confirmOnEnter`、`beforeOpen`/`beforeClose` 钩子暂未实现，已在 `align-check` 里写明理由。
 - Message / Notification 的内容目前是纯文本，富内容（TNode）尚未支持；Loading 的自定义 `indicator` 与 `attach` 也未实现。
 
+## 19. P4 数据展示（进行中）
+
+### 19.1 已完成：Tag / Badge / Avatar
+
+| 组件 | 选择器 | 上游契约对齐 | 说明 |
+| --- | --- | --- | --- |
+| Tag | `t-tag` | 10/14，missing 0 | 五种主题、四种变体、形状、尺寸、可关闭、自定义颜色 |
+| Badge | `t-badge` | 9/10，missing 0 | 数字封顶、小红点、圆形/圆角、showZero、偏移与自定义色 |
+| Avatar | `t-avatar` | 6/10，missing 0 | 图片/文字/图标三种内容，形状与自定义尺寸 |
+| AvatarGroup | `t-avatar-group` | 4/5，missing 0 | 层叠方向、统一尺寸、max 折叠成 +N |
+
+### 19.2 三个实现要点
+
+- **Badge 的 `<sup>` 只带形状类**：`t-badge--circle` / `t-badge--dot` 写在 `sup` 上，基础类 `t-badge` 只在根 `div` 上。之前把 `t-badge` 也拼进 `sup` 的 class，导致 `sup` 继承了根元素的 `position: relative`，徽标不再绝对定位。
+- **`t-badge--static`**：没有投影内容时徽标要改成静态定位，否则会挂在一个 0×0 的盒子上。`TBadge` 在 `ngAfterContentChecked` 里数一次性子节点（排除 `sup`），只在结果变化时写信号，避免每次 CD 都触发更新。
+- **Tag 的 `[title]="true"`**：文字走内容投影时，组件自身拿不到文本，于是用 `viewChild` 拿到文字 `span` 的 `textContent`（`AfterContentChecked` 同步到信号），供 `titleAttr` 生成提示。
+
+### 19.3 待办
+
+- Pagination：契约与类名已调研完毕（`t-pagination` / `__total` / `__select` / `__btn-prev|next` / `__pager` / `__number` / `__number--more` / `__jump` / `__input`，`maxPageBtn` 默认 7、`foldedMaxPageBtn` 默认 5），尚未实现。
+- Table：单独立项（列配置、固定列、排序筛选、虚拟滚动）。
+- Avatar 的 `imageProps`、AvatarGroup 折叠头像的弹层列表、CheckTag / CheckTagGroup 暂未实现，已在 `align-check` 里写明理由。
+
+
 
 
