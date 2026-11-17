@@ -16,6 +16,7 @@ export * from './components/link';
 export * from './components/loading';
 export * from './components/message';
 export * from './components/notification';
+export * from './components/pagination';
 export * from './components/popup';
 export * from './components/radio';
 export * from './components/select';

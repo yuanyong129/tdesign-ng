@@ -477,18 +477,20 @@ tdesign-ng/
 | Badge | `t-badge` | 9/10，missing 0 | 数字封顶、小红点、圆形/圆角、showZero、偏移与自定义色 |
 | Avatar | `t-avatar` | 6/10，missing 0 | 图片/文字/图标三种内容，形状与自定义尺寸 |
 | AvatarGroup | `t-avatar-group` | 4/5，missing 0 | 层叠方向、统一尺寸、max 折叠成 +N |
+| Pagination | `t-pagination` | 16/23，missing 0 | 每页条数切换、跳转、数据统计、折叠省略号、simple 形态 |
 
 ### 19.2 三个实现要点
 
 - **Badge 的 `<sup>` 只带形状类**：`t-badge--circle` / `t-badge--dot` 写在 `sup` 上，基础类 `t-badge` 只在根 `div` 上。之前把 `t-badge` 也拼进 `sup` 的 class，导致 `sup` 继承了根元素的 `position: relative`，徽标不再绝对定位。
 - **`t-badge--static`**：没有投影内容时徽标要改成静态定位，否则会挂在一个 0×0 的盒子上。`TBadge` 在 `ngAfterContentChecked` 里数一次性子节点（排除 `sup`），只在结果变化时写信号，避免每次 CD 都触发更新。
 - **Tag 的 `[title]="true"`**：文字走内容投影时，组件自身拿不到文本，于是用 `viewChild` 拿到文字 `span` 的 `textContent`（`AfterContentChecked` 同步到信号），供 `titleAttr` 生成提示。
+- **Pagination 的首尾页单独渲染**：折叠时上游把第 1 页和最后一页固定在省略号两侧，中间的 `pages` 不含首尾；因此 `pages()` 在「靠前」时返回 `2..foldedMax`、在「靠后」时返回 `pageCount-foldedMax+1 .. pageCount-1`，模板再单独渲染 1 与 `pageCount`，否则首尾会重复。
+- **跳转框用原生 input**：上游的跳转框是 `t-input-number` + `t-input-adornment`，我们没有这两个组件，改用原生 `input.t-pagination__input`，并在 `bridge.less` 里补上等价尺寸（56×28，small 为 40×20）。分页里的 `t-select` 也要显式收窄——内部 `<input>` 的 intrinsic width 会把整块撑到 200px。
 
 ### 19.3 待办
 
-- Pagination：契约与类名已调研完毕（`t-pagination` / `__total` / `__select` / `__btn-prev|next` / `__pager` / `__number` / `__number--more` / `__jump` / `__input`，`maxPageBtn` 默认 7、`foldedMaxPageBtn` 默认 5），尚未实现。
 - Table：单独立项（列配置、固定列、排序筛选、虚拟滚动）。
-- Avatar 的 `imageProps`、AvatarGroup 折叠头像的弹层列表、CheckTag / CheckTagGroup 暂未实现，已在 `align-check` 里写明理由。
+- Avatar 的 `imageProps`、AvatarGroup 折叠头像的弹层列表、CheckTag / CheckTagGroup、Pagination 的 `simple` 形态细节（当前只显示「当前页/总页数」）暂未实现，已在 `align-check` 里写明理由。
 
 
 

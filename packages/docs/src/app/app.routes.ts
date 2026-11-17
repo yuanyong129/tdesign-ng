@@ -97,6 +97,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/avatar/avatar.component').then((m) => m.AvatarDocs),
   },
   {
+    path: 'pagination',
+    loadComponent: () => import('./docs/pagination/pagination.component').then((m) => m.PaginationDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

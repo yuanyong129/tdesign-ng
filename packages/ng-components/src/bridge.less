@@ -145,6 +145,36 @@ t-avatar.t-avatar--hidden {
   }
 }
 
+// 分页：上游的跳转框用 t-input-number 渲染，这里用原生 input 承载，
+// 补上等价尺寸与居中（less 里只有 .t-pagination .t-input-number 的选择器）
+.t-pagination__jump .t-pagination__input {
+  width: 56px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  text-align: center;
+  color: inherit;
+  background: var(--td-bg-color-container, #fff);
+}
+
+.t-pagination.t-size-s .t-pagination__jump .t-pagination__input {
+  width: 40px;
+  height: 20px;
+}
+
+// 分页里的选择器宽度由内容决定（上游用 autoWidth）。
+// 内部 input 有默认 intrinsic width（约 20 字符），必须显式收窄，否则整块会被撑到 200px。
+.t-pagination__select t-select {
+  display: inline-block;
+  width: 120px;
+}
+
+.t-pagination__select t-select .t-input__inner {
+  width: 56px;
+}
+
+
 
 // 抽屉的位移由 JS 写在 --open 状态上，上游 less 只定义了关闭时的偏移量，
 // 这里补上打开时的归零，否则面板会停在屏幕外（虽然已经 visibility: visible）。

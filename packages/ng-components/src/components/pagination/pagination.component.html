@@ -1,0 +1,130 @@
+<div [class]="classes()">
+  @if (totalText(); as totalTextValue) {
+    <div class="t-pagination__total">{{ totalTextValue }}</div>
+  }
+
+  @if (showPageSize() && selectOptions().length > 0) {
+    <div class="t-pagination__select">
+      <t-select
+        [options]="selectOptions()"
+        [value]="selectValue()"
+        [disabled]="disabled()"
+        [size]="size() === 'small' ? 'small' : 'medium'"
+        [borderless]="false"
+        (valueChange)="handlePageSizeChange($event)"
+      />
+    </div>
+  }
+
+  @if (showFirstAndLastPageBtn()) {
+    <div [class]="firstBtnClasses()" (click)="goFirst()">
+      <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M7 5L7 19M17 5L10 12L17 19" />
+      </svg>
+    </div>
+  }
+
+  @if (showPreviousAndNextBtn()) {
+    <div class="t-pagination__btn t-pagination__btn-prev" [class.t-is-disabled]="prevDisabled()" (click)="goPrev()">
+      <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M15 5L8 12L15 19" />
+      </svg>
+    </div>
+  }
+
+  @if (theme() === 'simple') {
+    <div class="t-pagination__simple">{{ innerCurrent() }}/{{ pageCount() }}</div>
+  }
+
+  @if (showPageNumber() && theme() === 'default') {
+    <ul class="t-pagination__pager">
+      @if (folded()) {
+        <li
+          class="t-pagination__number"
+          [class.t-is-current]="innerCurrent() === 1"
+          [class.t-is-disabled]="disabled()"
+          (click)="goFirst()"
+        >
+          1
+        </li>
+      }
+
+      @if (folded() && showPrevMore()) {
+        <li
+          class="t-pagination__number t-pagination__number--more"
+          [class.t-is-disabled]="disabled()"
+          (click)="goPrevMore()"
+        >
+          <svg class="t-icon t-icon-more" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+            <path fill="currentColor" d="M6 10.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+          </svg>
+        </li>
+      }
+
+      @for (page of pages(); track page) {
+        <li
+          class="t-pagination__number"
+          [class.t-is-current]="page === innerCurrent()"
+          [class.t-is-disabled]="disabled()"
+          (click)="goTo(page)"
+        >
+          {{ page }}
+        </li>
+      }
+
+      @if (folded() && showNextMore()) {
+        <li
+          class="t-pagination__number t-pagination__number--more"
+          [class.t-is-disabled]="disabled()"
+          (click)="goNextMore()"
+        >
+          <svg class="t-icon t-icon-more" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+            <path fill="currentColor" d="M6 10.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+          </svg>
+        </li>
+      }
+
+      @if (folded()) {
+        <li
+          class="t-pagination__number"
+          [class.t-is-current]="innerCurrent() === pageCount()"
+          [class.t-is-disabled]="disabled()"
+          (click)="goLast()"
+        >
+          {{ pageCount() }}
+        </li>
+      }
+    </ul>
+  }
+
+  @if (showPreviousAndNextBtn()) {
+    <div class="t-pagination__btn t-pagination__btn-next" [class.t-is-disabled]="nextDisabled()" (click)="goNext()">
+      <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M9 5L16 12L9 19" />
+      </svg>
+    </div>
+  }
+
+  @if (showFirstAndLastPageBtn()) {
+    <div [class]="lastBtnClasses()" (click)="goLast()">
+      <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M7 5L14 12L7 19M17 5L17 19" />
+      </svg>
+    </div>
+  }
+
+  @if (showJumper()) {
+    <div class="t-pagination__jump">
+      跳至
+      <input
+        class="t-pagination__input"
+        type="number"
+        [value]="jumpValue()"
+        [disabled]="disabled()"
+        (keydown.enter)="handleJump($event)"
+        (blur)="handleJump($event)"
+      />
+      页
+    </div>
+  }
+</div>

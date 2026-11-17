@@ -1970,6 +1970,186 @@
         }
       ]
     },
+    "TPagination": {
+      "className": "TPagination",
+      "selector": "t-pagination",
+      "file": "packages/ng-components/src/components/pagination/pagination.component.ts",
+      "inputs": [
+        {
+          "name": "current",
+          "type": "number",
+          "default": "1",
+          "required": false,
+          "zh": "当前页，用于双向绑定",
+          "en": "Current page, used for two-way binding",
+          "values": []
+        },
+        {
+          "name": "total",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "数据总条数",
+          "en": "Total number of items",
+          "values": []
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "default": "10",
+          "required": false,
+          "zh": "每页条数，用于双向绑定",
+          "en": "Page size, used for two-way binding",
+          "values": []
+        },
+        {
+          "name": "pageSizeOptions",
+          "type": "PaginationPageSizeOptions",
+          "default": "[10, 20, 50]",
+          "required": false,
+          "zh": "每页条数选项",
+          "en": "Page size options",
+          "values": []
+        },
+        {
+          "name": "showPageSize",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示每页条数选择器",
+          "en": "Whether to show the page size selector",
+          "values": []
+        },
+        {
+          "name": "showJumper",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示跳转输入框",
+          "en": "Whether to show the jumper",
+          "values": []
+        },
+        {
+          "name": "totalContent",
+          "type": "string | boolean",
+          "default": "true",
+          "required": false,
+          "zh": "自定义数据统计内容，false 隐藏",
+          "en": "Custom total content, false hides it",
+          "values": []
+        },
+        {
+          "name": "showFirstAndLastPageBtn",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示首页/末页按钮",
+          "en": "Whether to show the first/last page buttons",
+          "values": []
+        },
+        {
+          "name": "showPreviousAndNextBtn",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示上一页/下一页按钮",
+          "en": "Whether to show the prev/next page buttons",
+          "values": []
+        },
+        {
+          "name": "showPageNumber",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示页码",
+          "en": "Whether to show page numbers",
+          "values": []
+        },
+        {
+          "name": "maxPageBtn",
+          "type": "number",
+          "default": "7",
+          "required": false,
+          "zh": "页码最多显示个数",
+          "en": "Maximum number of page buttons",
+          "values": []
+        },
+        {
+          "name": "foldedMaxPageBtn",
+          "type": "number",
+          "default": "5",
+          "required": false,
+          "zh": "折叠时省略号两侧的页码个数",
+          "en": "Number of page buttons next to the ellipsis when folded",
+          "values": []
+        },
+        {
+          "name": "pageEllipsisMode",
+          "type": "PaginationEllipsisMode",
+          "default": "'mid'",
+          "required": false,
+          "zh": "省略号模式",
+          "en": "Ellipsis mode",
+          "values": [
+            "mid",
+            "both-ends"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "PaginationSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "分页尺寸",
+          "en": "Pagination size",
+          "values": [
+            "small",
+            "medium"
+          ]
+        },
+        {
+          "name": "theme",
+          "type": "PaginationTheme",
+          "default": "'default'",
+          "required": false,
+          "zh": "分页形态",
+          "en": "Pagination theme",
+          "values": [
+            "default",
+            "simple"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the pagination is disabled",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "currentChange",
+          "type": "number",
+          "zh": "当前页变化，用于双向绑定",
+          "en": "Current page change, used for two-way binding"
+        },
+        {
+          "name": "pageSizeChange",
+          "type": "number",
+          "zh": "每页条数变化，用于双向绑定",
+          "en": "Page size change, used for two-way binding"
+        },
+        {
+          "name": "change",
+          "type": "PageInfo",
+          "zh": "分页变化",
+          "en": "Pagination change"
+        }
+      ]
+    },
     "TPopup": {
       "className": "TPopup",
       "selector": "t-popup",

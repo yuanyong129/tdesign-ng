@@ -32,8 +32,9 @@
 | Tag | ✅ 主题 / 变体 / 形状 / 尺寸 / 可关闭 / 自定义颜色 |
 | Badge | ✅ 数字封顶、小红点、showZero、偏移与自定义色 |
 | Avatar / AvatarGroup | ✅ 图片/文字/图标、形状与尺寸、max 折叠 |
+| Pagination | ✅ 每页条数、跳转、统计、折叠省略号、simple 形态 |
 
-P4 数据展示进行中：Pagination 与 Table 尚未实现，按 `docs/plans/tdesign-angular-plan.md` 推进。
+P4 数据展示目前只剩 Table（单独立项：列配置、固定列、排序筛选、虚拟滚动）。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
 
