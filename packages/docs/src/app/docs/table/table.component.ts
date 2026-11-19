@@ -7,6 +7,7 @@ import { DemoTableCell } from './demos/table-cell';
 import { DemoTableExpand } from './demos/table-expand';
 import { DemoTableFilter } from './demos/table-filter';
 import { DemoTableFixed } from './demos/table-fixed';
+import { DemoTableGroupHeader } from './demos/table-group-header';
 import { DemoTablePagination } from './demos/table-pagination';
 import { DemoTableSelect } from './demos/table-select';
 import { DemoTableSize } from './demos/table-size';
@@ -31,13 +32,14 @@ import { DemoTableStyle } from './demos/table-style';
     DemoTableFilter,
     DemoTableFixed,
     DemoTablePagination,
+    DemoTableGroupHeader,
   ],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">表格 Table</h1>
       <p class="docs-page__lead">
-        表格用于展示结构化数据。当前版本支持列配置、模板式单元格、排序、表头筛选、固定列、行选择、展开行、分页联动、边框、斑马纹、
-        悬停高亮、尺寸、对齐、省略、加载与空态；虚拟滚动在后续版本逐步补齐。
+        表格用于展示结构化数据。当前版本支持列配置、模板式单元格、排序、表头筛选、固定列、行选择、展开行、分页联动、多级表头、边框、
+        斑马纹、悬停高亮、尺寸、对齐、省略、加载与空态；虚拟滚动在后续版本逐步补齐。
       </p>
 
       <docs-demo id="table-basic" title="基础用法" description="columns 声明列，data 提供行数据。">
@@ -102,6 +104,14 @@ import { DemoTableStyle } from './demos/table-style';
         description="传入 pagination 后表格底部显示分页；数据超过一页时自动本地切页，disableDataPage 可改为服务端分页。"
       >
         <demo-table-pagination />
+      </docs-demo>
+
+      <docs-demo
+        id="table-group-header"
+        title="多级表头"
+        description="列上声明 children 后成为分组列，表头按层级自动合并；排序、筛选写在最末级叶子列上。"
+      >
+        <demo-table-group-header />
       </docs-demo>
 
       <h2 class="docs-section__title" id="table-api">API</h2>

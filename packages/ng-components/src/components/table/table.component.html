@@ -2,10 +2,19 @@
   <div #content class="t-table__content" [style]="contentStyle()" (scroll)="handleScroll($event)">
     <table [class]="tableLayoutClass()" [style.width]="tableWidth()">
       @if (showHeader()) {
-        <thead class="t-table__header">
-          <tr>
-            @for (col of displayColumns(); track col.colKey) {
-              <th [class]="headerCellClasses(col)" [style]="columnStyle(col)" [attr.data-colkey]="col.colKey">
+        <thead class="t-table__header" [class.t-table__header--multiple]="hasMultiHeader()">
+          @for (headerRow of headerRows(); track $index) {
+            <tr>
+              @for (cell of headerRow; track cell.col.colKey) {
+                @let col = cell.col;
+                <th
+                  [class]="headerCellClasses(col)"
+                  [class.t-table__header-th--bordered]="bordered() && (cell.rowspan > 1 || cell.colspan > 1)"
+                  [style]="columnStyle(col)"
+                  [attr.data-colkey]="col.colKey"
+                  [attr.rowspan]="cell.rowspan > 1 ? cell.rowspan : null"
+                  [attr.colspan]="cell.colspan > 1 ? cell.colspan : null"
+                >
                 <div class="t-table__th-cell-inner">
                   @if (col.colKey === expandColumnKey) {
                     <!-- 展开图标列，表头留空 -->
@@ -140,8 +149,9 @@
                   }
                 </div>
               </th>
-            }
-          </tr>
+              }
+            </tr>
+          }
         </thead>
       }
 

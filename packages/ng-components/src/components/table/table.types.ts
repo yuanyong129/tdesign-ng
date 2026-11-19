@@ -229,4 +229,16 @@ export interface TableColumn<T extends TableRow = TableRow> {
   sortType?: TableSortType;
   /** 列筛选配置 */
   filter?: TableColumnFilter;
+  /** 子列，声明后该列成为多级表头的分组列，子列按层级渲染 */
+  children?: TableColumn<T>[];
+}
+
+/** 多级表头的一格：列本身 + 合并信息。 */
+export interface TableHeaderCell<T extends TableRow = TableRow> {
+  /** 该格对应的列 */
+  col: TableColumn<T>;
+  /** 横向合并的叶子列数 */
+  colspan: number;
+  /** 纵向合并的表头行数 */
+  rowspan: number;
 }

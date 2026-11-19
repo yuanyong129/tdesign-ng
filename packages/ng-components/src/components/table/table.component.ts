@@ -40,6 +40,7 @@ import {
   TableFilterChangeContext,
   TableFilterType,
   TableFilterValue,
+  TableHeaderCell,
   TableLayout,
   TablePageChangeEvent,
   TablePagination,
@@ -61,6 +62,55 @@ const SIZE_CLASS: Record<TableSize, string> = {
 
 /** 展开图标列的 colKey，与 TDesign 保持一致。 */
 const EXPAND_COLUMN_KEY = '__EXPAND_ROW_ICON_COLUMN__';
+
+/** 列的最大层级，单层表头为 1。 */
+function columnDepth(columns: TableColumn[], depth = 1): number {
+  let max = depth;
+  for (const col of columns) {
+    if (col.children?.length) max = Math.max(max, columnDepth(col.children, depth + 1));
+  }
+  return max;
+}
+
+/** 列包含的叶子列数，分组列即为其 colspan。 */
+function leafCount(col: TableColumn): number {
+  if (!col.children?.length) return 1;
+  return col.children.reduce((sum, child) => sum + leafCount(child), 0);
+}
+
+/** 展平成叶子列：多级表头的分组列本身不渲染单元格。 */
+function flattenColumns(columns: TableColumn[]): TableColumn[] {
+  const leaves: TableColumn[] = [];
+  for (const col of columns) {
+    if (col.children?.length) leaves.push(...flattenColumns(col.children));
+    else leaves.push(col);
+  }
+  return leaves;
+}
+
+/**
+ * 按层级生成表头矩阵，第 0 行为最上层。
+ * 与 TDesign 的 useMultiHeader 一致：分组列 rowspan 1、colspan 为叶子数；
+ * 叶子列 rowspan 为剩余行数、colspan 1。
+ */
+function buildHeaderRows(columns: TableColumn[]): TableHeaderCell[][] {
+  const maxDepth = columnDepth(columns);
+  const rows: TableHeaderCell[][] = [];
+  const walk = (nodes: TableColumn[], depth: number): void => {
+    const row = (rows[depth - 1] ??= []);
+    for (const col of nodes) {
+      const children = col.children;
+      if (children?.length) {
+        row.push({ col, colspan: leafCount(col), rowspan: 1 });
+        walk(children, depth + 1);
+      } else {
+        row.push({ col, colspan: 1, rowspan: maxDepth - depth + 1 });
+      }
+    }
+  };
+  walk(columns, 1);
+  return rows;
+}
 
 /**
  * 表格。
@@ -256,12 +306,21 @@ export class TTable implements OnDestroy {
   /** 是否渲染展开图标列。 */
   protected readonly showExpandColumn = computed(() => this.expandIcon() && !!this.expandedRowTemplate());
 
-  /** 实际渲染的列：展开图标列固定在首列。 */
-  protected readonly displayColumns = computed<TableColumn[]>(() => {
+  /** 根列：展开图标列固定在首列。 */
+  protected readonly rootColumns = computed<TableColumn[]>(() => {
     const columns = this.columns();
     if (!this.showExpandColumn()) return columns;
     return [{ colKey: EXPAND_COLUMN_KEY, width: 46, className: 't-table__expandable-icon-cell' }, ...columns];
   });
+
+  /** 实际渲染的列：多级表头只渲染叶子列。 */
+  protected readonly displayColumns = computed<TableColumn[]>(() => flattenColumns(this.rootColumns()));
+
+  /** 表头矩阵，第 0 行为最上层，每格带 rowspan / colspan。 */
+  protected readonly headerRows = computed<TableHeaderCell[][]>(() => buildHeaderRows(this.rootColumns()));
+
+  /** 是否多级表头（超过一行）。 */
+  protected readonly hasMultiHeader = computed(() => this.headerRows().length > 1);
 
   /** 当前选中的行 key。 */
   protected readonly selectedKeys = computed(() => this.selectedRowKeys() ?? this.innerSelectedRowKeys());
@@ -352,7 +411,7 @@ export class TTable implements OnDestroy {
 
   /** 左侧最后一个固定列，用来挂滚动分界线。 */
   protected readonly lastLeftKey = computed(() => {
-    const columns = this.columns();
+    const columns = this.displayColumns();
     let key: string | null = null;
     columns.forEach((col, index) => {
       if (col.fixed === 'left' && columns[index + 1]?.fixed !== 'left') key = col.colKey;
@@ -362,20 +421,20 @@ export class TTable implements OnDestroy {
 
   /** 右侧第一个固定列，用来挂滚动分界线。 */
   protected readonly firstRightKey = computed(() => {
-    const columns = this.columns();
+    const columns = this.displayColumns();
     const index = columns.findIndex((col) => col.fixed === 'right');
     return index < 0 ? null : columns[index].colKey;
   });
 
   /** 已向右滚动且存在左侧固定列时显示左阴影。 */
   protected readonly showLeftShadow = computed(
-    () => this.scrollState().scrollLeft > 0 && this.columns().some((col) => col.fixed === 'left'),
+    () => this.scrollState().scrollLeft > 0 && this.displayColumns().some((col) => col.fixed === 'left'),
   );
 
   /** 右侧还有未滚动到的内容且存在右侧固定列时显示右阴影。 */
   protected readonly showRightShadow = computed(() => {
     const scroll = this.scrollState();
-    if (!this.columns().some((col) => col.fixed === 'right')) return false;
+    if (!this.displayColumns().some((col) => col.fixed === 'right')) return false;
     return scroll.scrollLeft + scroll.viewportWidth < scroll.contentWidth - 1;
   });
 
@@ -401,6 +460,7 @@ export class TTable implements OnDestroy {
       this.loading() ? 't-table--loading' : '',
       this.selectColumn() ? 't-table--row-select' : '',
       this.showExpandColumn() ? 't-table--row-expandable' : '',
+      this.hasMultiHeader() ? 't-table--multiple-header' : '',
       this.hasFixedColumn() ? 't-table--column-fixed' : '',
       this.showLeftShadow() ? 't-table__content--scrollable-to-left' : '',
       this.showRightShadow() ? 't-table__content--scrollable-to-right' : '',

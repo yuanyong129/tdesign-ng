@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-19，对应提交：`a6a0db8`（Table 第五层）之后的未提交改动（Table 第六层：分页联动）。
+> 更新日期：2026-11-19，对应提交：`e8c0cb3`（Table 第六层）之后的未提交改动（Table 第七层：多级表头）。
 
 ## 1. 这个项目是什么
 
@@ -23,7 +23,7 @@
 | P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination 已完成；**Table 进行中**；Tabs / Collapse / List / Empty / Progress 未开始 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **27 个组件、311 个输入属性、120 个示例**，合计 `missing 0 / extra 0`。
+当前 `align-check` 覆盖 **27 个组件、311 个输入属性、121 个示例**，合计 `missing 0 / extra 0`。
 
 组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tag、textarea、tooltip。
 
@@ -73,20 +73,21 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：Table 第六层（分页联动）
+## 7. 当前进行中的工作：Table 第七层（多级表头）
 
 **已完成（未提交）**：
 
-- 输入 `pagination`（`TablePagination`，字段与上游 `PaginationProps` 对齐：`current` / `pageSize` / `defaultCurrent` / `defaultPageSize` / `total` / `pageSizeOptions` / `showPageSize` / `showJumper` / `totalContent` / `showFirstAndLastPageBtn` / `showPreviousAndNextBtn` / `showPageNumber` / `maxPageBtn` / `foldedMaxPageBtn` / `pageEllipsisMode` / `size` / `theme` / `disabled`）、`disableDataPage`；输出 `(pageChange)`（`TablePageChangeEvent<T>` = `{ pageInfo, dataSource }`）。
-- 语义照上游 `usePagination`：传了 `pagination` 且数据超过一页时表格**本地切页**（`pagedData`），`disableDataPage` 打开则交给服务端；`current` 传了即受控，否则用 `innerPagination` + `defaultCurrent` 兜底；翻页后内容区滚动位置复位。
-- 分页器在表格下方渲染 `.t-table__pagination` 包裹的 `t-pagination`，尺寸随表格 `size`（large 回落到 medium）；排序、行选择的全选/半选都只作用于当前页。
-- 文档站新增 `table-pagination` 示例（23 行、每页 5 条、受控 current、带跳页器），`/table` 现有 11 个示例。
+- `TableColumn` 新增 `children?: TableColumn<T>[]`：声明后该列成为分组列，表头按层级自动合并；新增导出类型 `TableHeaderCell<T> { col, colspan, rowspan }`。
+- 表头结构照上游 `useMultiHeader`：`columnDepth` 取最大层级、`leafCount` 取分组列叶子数（即 colspan）、`flattenColumns` 展平成叶子列、`buildHeaderRows` 生成 `TableHeaderCell[][]`（第 0 行为最上层）；叶子列 `rowspan = 最大层级 - 当前层级 + 1`，分组列 `rowspan = 1`、`colspan = 叶子数`。
+- 组件新增 computed `rootColumns`（展开列在最前）、`displayColumns`（现为叶子列，数据行/固定列/列宽都基于它）、`headerRows`、`hasMultiHeader`；根元素多级时加 `t-table--multiple-header`，`thead` 加 `t-table__header--multiple`，`bordered` 且跨行跨列的表头格加 `t-table__header-th--bordered`。
+- 模板 `<thead>` 改为按 `headerRows()` 渲染多行，`th` 带 `[attr.rowspan]` / `[attr.colspan]`，分组列只渲染标题（无排序/筛选图标）；数据行仍按叶子列渲染。
+- 文档站新增 `table-group-header` 示例（「基本信息」下 姓名/角色/部门，「联系方式」下 邮箱/手机号），`/table` 现有 12 个示例。
 
-**已用 CDP 验证**（`http://localhost:4280/table`）：分页 demo 首屏 5 行（成员 1…5）、`.t-table__pagination` 存在且含「共 23 条」与 5 条/页选择器；点第 2 页 → 成员 6…10、`ng-reflect-current="2"`、hint 更新为「当前第 2 页」；`consoleErrors` 为空；行选择（5 行 / 6 个 cell-check / 选中 1 行）、展开行（4 行 / 展开 1 行 / colspan 4）、固定列（21 个 sticky 单元格）均无回归。
+**已用 CDP 验证**（`http://localhost:4280/table`）：多级表头 demo 的 `thead` 为 2 行，第一行「基本信息」`colspan=3`、「联系方式」`colspan=2`，第二行 5 个叶子表头；根类含 `t-table--multiple-header`、`thead` 含 `t-table__header--multiple`；数据行 4 行 × 5 个单元格；`consoleErrors` 为空；行选择 / 展开行 / 固定列 / 分页均无回归。
 
 **下一步（建议顺序）**：
 
-1. **虚拟滚动 / 多级表头 / 合并单元格 / 列宽拖拽**（HANDOFF 原计划剩余项）。
+1. **虚拟滚动 / 合并单元格（`rowspanAndColspan`）/ 列宽拖拽**（HANDOFF 原计划剩余项）。
 2. 行选择补充：`selectOnRowClick` / `expandOnRowClick` 尚未写专门示例，下一轮可补「点击行选中」demo。
 3. Table 收尾后继续 P4 的 Tabs / Collapse / List / Empty / Progress。
 
