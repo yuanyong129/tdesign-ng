@@ -10,6 +10,7 @@ import { DemoTableFixed } from './demos/table-fixed';
 import { DemoTableGroupHeader } from './demos/table-group-header';
 import { DemoTableMerge } from './demos/table-merge';
 import { DemoTablePagination } from './demos/table-pagination';
+import { DemoTableVirtual } from './demos/table-virtual';
 import { DemoTableSelect } from './demos/table-select';
 import { DemoTableSize } from './demos/table-size';
 import { DemoTableSort } from './demos/table-sort';
@@ -35,13 +36,14 @@ import { DemoTableStyle } from './demos/table-style';
     DemoTablePagination,
     DemoTableGroupHeader,
     DemoTableMerge,
+    DemoTableVirtual,
   ],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">表格 Table</h1>
       <p class="docs-page__lead">
         表格用于展示结构化数据。当前版本支持列配置、模板式单元格、排序、表头筛选、固定列、行选择、展开行、分页联动、多级表头、
-        合并单元格、边框、斑马纹、悬停高亮、尺寸、对齐、省略、加载与空态；虚拟滚动在后续版本逐步补齐。
+        合并单元格、虚拟滚动、边框、斑马纹、悬停高亮、尺寸、对齐、省略、加载与空态；列宽拖拽在后续版本逐步补齐。
       </p>
 
       <docs-demo id="table-basic" title="基础用法" description="columns 声明列，data 提供行数据。">
@@ -122,6 +124,14 @@ import { DemoTableStyle } from './demos/table-style';
         description="rowspanAndColspan 返回 { rowspan, colspan } 的单元格会与相邻单元格合并，被覆盖的格子自动跳过。"
       >
         <demo-table-merge />
+      </docs-demo>
+
+      <docs-demo
+        id="table-virtual"
+        title="虚拟滚动"
+        description="scroll.type 为 virtual 且行数超过 threshold 时只渲染可视区域的行，适合上万行的大表格。"
+      >
+        <demo-table-virtual />
       </docs-demo>
 
       <h2 class="docs-section__title" id="table-api">API</h2>

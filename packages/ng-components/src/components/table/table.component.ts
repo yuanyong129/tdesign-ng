@@ -48,6 +48,7 @@ import {
   TableRowSelectionType,
   TableRowspan,
   TableRowspanParams,
+  TableScroll,
   TableSelectChangeEvent,
   TableSize,
   TableSort,
@@ -295,6 +296,13 @@ export class TTable implements OnDestroy {
   readonly rowspanAndColspan = input<
     ((params: TableRowspanParams) => TableRowspan | undefined) | undefined
   >(undefined);
+
+  /**
+   * @zh 虚拟滚动配置，`type: 'virtual'` 且行数超过 `threshold` 时只渲染可视区域的行
+   * @en Virtual scroll config; only visible rows are rendered when `type` is `virtual` and rows exceed `threshold`
+   * @defaultValue undefined
+   */
+  readonly scroll = input<TableScroll | undefined>(undefined);
 
   protected readonly sizes = TABLE_SIZES;
   protected readonly aligns = TABLE_ALIGNS;
@@ -610,6 +618,66 @@ export class TTable implements OnDestroy {
     });
   });
 
+  /** 虚拟滚动行高。 */
+  protected readonly virtualRowHeight = computed(() => this.scroll()?.rowHeight ?? 47);
+
+  private readonly virtualBuffer = computed(() => this.scroll()?.bufferSize ?? 10);
+
+  private readonly virtualThreshold = computed(() => this.scroll()?.threshold ?? 100);
+
+  /** 是否启用虚拟滚动：`type: 'virtual'` 且行数超过阈值。 */
+  protected readonly isVirtualScroll = computed(
+    () => this.scroll()?.type === 'virtual' && this.rows().length > this.virtualThreshold(),
+  );
+
+  private readonly scrollTop = signal(0);
+
+  private readonly viewportHeight = signal(0);
+
+  /** 虚拟滚动的可视范围（含上下缓冲区）。 */
+  private readonly virtualRange = computed(() => {
+    const rowHeight = this.virtualRowHeight() || 47;
+    const buffer = this.virtualBuffer();
+    const total = this.rows().length;
+    if (!this.isVirtualScroll()) return { startIndex: 0, endIndex: total, translateY: 0 };
+
+    const startIndex = Math.max(Math.floor(this.scrollTop() / rowHeight) - buffer, 0);
+    const capacity = Math.ceil(this.viewportHeight() / rowHeight) + buffer * 2 + 1;
+    return {
+      startIndex,
+      endIndex: Math.min(startIndex + capacity, total),
+      translateY: startIndex * rowHeight,
+    };
+  });
+
+  /** 实际渲染的行：虚拟滚动时只含可视范围，行下标仍是全局下标。 */
+  protected readonly tableRows = computed(() => {
+    const rows = this.rows();
+    const { startIndex, endIndex } = this.virtualRange();
+    return rows.slice(startIndex, endIndex).map((row, index) => ({ row, rowIndex: startIndex + index }));
+  });
+
+  /** 虚拟滚动的占位高度，决定滚动条长度。 */
+  protected readonly virtualScrollHeight = computed(
+    () => this.rows().length * (this.virtualRowHeight() || 47),
+  );
+
+  /** tbody 位移，让可视行落在正确位置。 */
+  protected readonly tbodyTransform = computed(() => {
+    const { translateY } = this.virtualRange();
+    return this.isVirtualScroll() && translateY ? `translateY(${translateY}px)` : null;
+  });
+
+  /** 表头高度，虚拟滚动时用来对齐占位高度与行位置。 */
+  private readonly headerHeight = signal(0);
+
+  /** 虚拟滚动占位元素的高度：行总高加上表头，保证最后一行能滚到视口底部。 */
+  protected readonly virtualCursorHeight = computed(
+    () =>
+      this.virtualScrollHeight() +
+      (this.showHeader() && this.isVirtualScroll() ? this.headerHeight() : 0),
+  );
+
   constructor() {
     effect(() => {
       const defaultSort = this.defaultSort();
@@ -654,7 +722,12 @@ export class TTable implements OnDestroy {
   }
 
   protected handleScroll(event: Event): void {
-    this.updateScrollState(event.target as HTMLElement);
+    const element = event.target as HTMLElement;
+    this.updateScrollState(element);
+    if (this.isVirtualScroll()) {
+      this.scrollTop.set(element.scrollTop);
+      this.viewportHeight.set(element.clientHeight);
+    }
   }
 
   /** 表格分页器的尺寸：large 没有对应分页尺寸，回落到 medium。 */
@@ -970,7 +1043,13 @@ export class TTable implements OnDestroy {
   protected trackRow = (_index: number, row: TableRow): unknown => row?.[this.rowKey()] ?? _index;
 
   private scheduleColumnMeasure(): void {
-    afterNextRender(() => this.refreshColumnMetrics(), { injector: this.injector });
+    afterNextRender(
+      () => {
+        this.refreshColumnMetrics();
+        this.refreshVirtualViewport();
+      },
+      { injector: this.injector },
+    );
   }
 
   /** 首次渲染后建立滚动 / 尺寸监听。 */
@@ -979,14 +1058,33 @@ export class TTable implements OnDestroy {
     if (!element) return;
 
     this.refreshColumnMetrics();
+    this.refreshVirtualViewport();
     if (typeof ResizeObserver === 'undefined') return;
 
     this.resizeObserver?.disconnect();
     this.resizeObserver = new ResizeObserver(() => {
       this.refreshColumnMetrics();
+      this.refreshVirtualViewport();
       this.updateScrollState(element);
     });
     this.resizeObserver.observe(element);
+  }
+
+  /** 记录虚拟滚动需要的可视区域高度，并在数据变少时把滚动位置收回范围内。 */
+  private refreshVirtualViewport(): void {
+    const element = this.contentRef()?.nativeElement;
+    if (!element) return;
+
+    const header = element.querySelector<HTMLElement>('thead');
+    const headerHeight = header ? header.getBoundingClientRect().height : 0;
+    if (this.headerHeight() !== headerHeight) this.headerHeight.set(headerHeight);
+
+    this.viewportHeight.set(element.clientHeight);
+    const maxScrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
+    if (element.scrollTop > maxScrollTop) {
+      element.scrollTop = maxScrollTop;
+      this.scrollTop.set(maxScrollTop);
+    }
   }
 
   /** 量一次表头宽度与横向滚动状态。 */

@@ -343,7 +343,6 @@ const CONFIG = {
       'rowAttributes': '行属性在后续版本实现',
       'rowClassName': '行类名在后续版本实现',
       'rowspanAndColspanInFooter': '表尾合并单元格在后续版本实现',
-      'scroll': '自定义滚动配置在后续版本实现',
       'tableContentWidth': '表格内容宽度在后续版本实现',
       'topContent': '顶部内容暂未实现',
       'onActiveChange': '点击激活行未实现',

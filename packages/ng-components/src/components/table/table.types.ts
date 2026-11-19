@@ -221,6 +221,24 @@ export interface TableRowspanParams<T extends TableRow = TableRow> {
   colIndex: number;
 }
 
+/**
+ * 虚拟滚动配置，字段与 TDesign 的 TScroll 对齐。
+ *
+ * 只有 `type: 'virtual'` 且行数超过 `threshold` 时才启用虚拟滚动。
+ */
+export interface TableScroll {
+  /** 滚动类型，`virtual` 为虚拟滚动 */
+  type?: 'virtual' | 'lazy';
+  /** 行高，用于计算可视区域与占位高度，默认 47 */
+  rowHeight?: number;
+  /** 可视区域上下各多渲染几条，默认 10 */
+  bufferSize?: number;
+  /** 超过多少行才启用虚拟滚动，默认 100 */
+  threshold?: number;
+  /** 行高是否固定。固定行高时不再逐行测量，性能更好 */
+  isFixedRowHeight?: boolean;
+}
+
 /** 列配置，字段名与 TDesign 的 BaseTableCol 对齐。 */
 export interface TableColumn<T extends TableRow = TableRow> {
   /** 列唯一标识，同时作为取值字段名 */

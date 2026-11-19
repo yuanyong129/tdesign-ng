@@ -3210,6 +3210,15 @@
           "zh": "合并单元格回调，返回 `{ rowspan, colspan }` 与相邻单元格合并",
           "en": "Merge cells by returning `{ rowspan, colspan }` for the target cell",
           "values": []
+        },
+        {
+          "name": "scroll",
+          "type": "TableScroll | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "虚拟滚动配置，`type: 'virtual'` 且行数超过 `threshold` 时只渲染可视区域的行",
+          "en": "Virtual scroll config; only visible rows are rendered when `type` is `virtual` and rows exceed `threshold`",
+          "values": []
         }
       ],
       "outputs": [

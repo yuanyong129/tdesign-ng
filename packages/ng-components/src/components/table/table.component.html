@@ -1,5 +1,11 @@
 <div [class]="classes()">
   <div #content class="t-table__content" [style]="contentStyle()" (scroll)="handleScroll($event)">
+    @if (isVirtualScroll()) {
+      <div
+        class="t-table__virtual-scroll-cursor"
+        [style.transform]="'translate(0,' + virtualCursorHeight() + 'px)'"
+      ></div>
+    }
     <table [class]="tableLayoutClass()" [style.width]="tableWidth()">
       @if (showHeader()) {
         <thead class="t-table__header" [class.t-table__header--multiple]="hasMultiHeader()">
@@ -155,8 +161,10 @@
         </thead>
       }
 
-      <tbody class="t-table__body">
-        @for (row of rows(); track trackRow($index, row); let rowIndex = $index) {
+      <tbody class="t-table__body" [style.transform]="tbodyTransform()">
+        @for (entry of tableRows(); track trackRow(entry.rowIndex, entry.row)) {
+          @let row = entry.row;
+          @let rowIndex = entry.rowIndex;
           <tr [class]="rowClasses(row)" (click)="handleRowClick(row)">
             @for (col of displayColumns(); track col.colKey; let colIndex = $index) {
               @let span = cellSpanOf(row, col, rowIndex, colIndex);
