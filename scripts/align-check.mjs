@@ -276,15 +276,12 @@ const CONFIG = {
     angularOnly: [],
     ignoreUpstream: {
       'action': '自定义操作区未实现',
-      'addable': '新增页签未实现',
-      'dragSort': '拖拽排序未实现',
       'list': '数据驱动面板未实现，用 t-tab-panel 投影',
-      'scrollPosition': '选项卡滚动定位未实现，暂不滚动导航',
       'modelValue': 'Angular 用 value（受控）/ defaultValue',
-      'onAdd': '新增页签未实现',
+      'onAdd': 'Angular 用 (add) 输出，payload { e }',
       'onChange': 'Angular 用 (change) 输出',
-      'onDragSort': '拖拽排序未实现',
-      'onRemove': '关闭页签未实现',
+      'onDragSort': 'Angular 用 (dragSortChange) 输出',
+      'onRemove': 'Angular 用 (remove) 输出，payload { value, index, e }',
     },
   },
   TAvatar: {

@@ -4,8 +4,10 @@ import {
   ViewEncapsulation,
   booleanAttribute,
   computed,
+  effect,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import { TTabs } from './tabs.component';
 import { TabValue } from './tabs.types';
@@ -36,6 +38,40 @@ export class TTabPanel {
   /** @zh 是否禁用该选项卡 @en Whether the tab is disabled @defaultValue false */
   readonly disabled = input(false, { transform: booleanAttribute });
 
+  /** @zh 是否显示关闭按钮 @en Whether to show the close icon @defaultValue false */
+  readonly removable = input(false, { transform: booleanAttribute });
+
+  /** @zh 是否允许拖拽排序（配合 t-tabs 的 dragSort） @en Whether this tab can be dragged @defaultValue true */
+  readonly draggable = input(true, { transform: booleanAttribute });
+
+  /** @zh 是否在首次激活时才渲染内容 @en Whether to render the content on first activation @defaultValue false */
+  readonly lazy = input(false, { transform: booleanAttribute });
+
+  /** @zh 是否在隐藏时销毁内容 @en Whether to destroy the content when hidden @defaultValue false */
+  readonly destroyOnHide = input(false, { transform: booleanAttribute });
+
   /** 当前面板是否处于激活状态（由 t-tabs 计算） */
-  protected readonly active = computed(() => this.tabs.panelActive(this));
+  readonly active = computed(() => this.tabs.panelActive(this));
+
+  /** 是否曾经被激活过（lazy 面板首次激活后才渲染内容） */
+  private readonly activatedOnce = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (this.active()) {
+        this.activatedOnce.set(true);
+      }
+    });
+  }
+
+  /** 面板内容是否渲染：destroyOnHide 只在激活时渲染，lazy 首次激活后一直保留，其余始终渲染 */
+  protected readonly rendered = computed(() => {
+    if (this.destroyOnHide()) {
+      return this.active();
+    }
+    if (this.lazy()) {
+      return this.activatedOnce();
+    }
+    return true;
+  });
 }

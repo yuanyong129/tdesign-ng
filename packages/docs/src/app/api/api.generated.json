@@ -3300,6 +3300,42 @@
           "zh": "是否禁用该选项卡",
           "en": "Whether the tab is disabled",
           "values": []
+        },
+        {
+          "name": "removable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示关闭按钮",
+          "en": "Whether to show the close icon",
+          "values": []
+        },
+        {
+          "name": "draggable",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否允许拖拽排序（配合 t-tabs 的 dragSort）",
+          "en": "Whether this tab can be dragged",
+          "values": []
+        },
+        {
+          "name": "lazy",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否在首次激活时才渲染内容",
+          "en": "Whether to render the content on first activation",
+          "values": []
+        },
+        {
+          "name": "destroyOnHide",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否在隐藏时销毁内容",
+          "en": "Whether to destroy the content when hidden",
+          "values": []
         }
       ],
       "outputs": []
@@ -3357,6 +3393,38 @@
           "values": []
         },
         {
+          "name": "addable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示新增按钮",
+          "en": "Whether to show the add button",
+          "values": []
+        },
+        {
+          "name": "dragSort",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否开启拖拽排序，排序结果由 (dragSortChange) 抛给使用方",
+          "en": "Whether tabs can be dragged to sort",
+          "values": []
+        },
+        {
+          "name": "scrollPosition",
+          "type": "TabsScrollPosition",
+          "default": "'auto'",
+          "required": false,
+          "zh": "激活选项卡滚入可视区时的对齐方式",
+          "en": "Alignment used when scrolling the active tab into view",
+          "values": [
+            "auto",
+            "start",
+            "center",
+            "end"
+          ]
+        },
+        {
           "name": "value",
           "type": "TabValue | undefined",
           "default": "undefined",
@@ -3381,6 +3449,24 @@
           "type": "TabValue",
           "zh": "激活选项卡变化时触发",
           "en": "Emits when the active tab changes"
+        },
+        {
+          "name": "add",
+          "type": "TabsAddEvent",
+          "zh": "点击新增按钮时触发",
+          "en": "Emits when the add button is clicked"
+        },
+        {
+          "name": "remove",
+          "type": "TabsRemoveEvent",
+          "zh": "点击页签关闭按钮时触发",
+          "en": "Emits when a tab close icon is clicked"
+        },
+        {
+          "name": "dragSortChange",
+          "type": "TabsDragSortEvent",
+          "zh": "拖拽排序时触发，使用方按 payload 重排自己的面板数据",
+          "en": "Emits when tabs are dropped at a new position"
         }
       ]
     },

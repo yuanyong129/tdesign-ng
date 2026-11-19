@@ -1,7 +1,7 @@
 ﻿# 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-19，对应提交：`a858633` 之后的未提交改动（新组件 Tabs 第一层）。
+> 更新日期：2026-11-19，对应提交：`0cce00e` 之后的未提交改动（Tabs 第二层）。
 
 ## 1. 这个项目是什么
 
@@ -20,10 +20,10 @@
 | P1 打样 | ✅ | Button / Link / Divider / Space / Icon |
 | P2 基础表单 | ✅ | Input / Textarea / Switch / Checkbox / Radio / Select / Form（含 TDesign rules 校验引擎） |
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
-| P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination / Table 已完成；**Tabs 进行中**；Collapse / List / Empty / Progress 未开始 |
+| P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination / Table 已完成；**Tabs 已完成两层（第二层待提交）**；Collapse / List / Empty / Progress 未开始 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **29 个组件、323 个输入属性、129 个示例**，合计 `missing 0 / extra 0`。
+当前 `align-check` 覆盖 **29 个组件、330 个输入属性、132 个示例**，合计 `missing 0 / extra 0`。
 
 组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tabs、tag、textarea、tooltip。
 
@@ -73,33 +73,42 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：Tabs 第一层（normal / card 主题、四个方向）
+## 7. 当前进行中的工作：Tabs 第二层（新增/关闭、拖拽排序、懒加载、导航滚动）
 
 **已完成（未提交）**：
 
-- 新组件目录 `packages/ng-components/src/components/tabs/`：`tabs.component.ts`（TTabs）、`tabs.component.html`、`tab-panel.component.ts`（TTabPanel）、`tab-panel.component.html`、`tabs.types.ts`、`tabs.module.ts`、`index.ts`；`packages/ng-components/src/index.ts` 已 `export * from './components/tabs'`。
-- API 对齐 `TdTabsProps`：`theme`（normal / card）、`placement`（top / bottom / left / right）、`size`（medium / large）、`disabled`、`value`（受控）、`defaultValue`；输出 `(change)`，payload 为面板的 `TabValue`。
-- 面板用内容投影声明：`<t-tab-panel value label [disabled]>`，未写 value 时用下标作值（与上游一致）；`TTabPanel` 注入父级 `TTabs` 读取激活态，未激活时面板加 `t-is-hidden`。
-- DOM 照上游：`div.t-tabs` > `div.t-tabs__header.t-is-{placement}` > `t-tabs__nav-container.t-is-*`（card 额外 `t-tabs__nav--card`）> `t-tabs__nav-scroll` > `t-tabs__nav-wrap.t-is-smooth`（竖向加 `t-is-vertical`）> 指示条 `div.t-tabs__bar`（normal 主题才有）+ `div.t-tabs__nav-item` 列表；bottom 时 header 渲染在内容之后。
-- 指示条用 `getBoundingClientRect` 实测激活项：水平写 `width/left`，竖向写 `height/top`；card 主题不渲染指示条。测量时机为 `effect`（读 activeValue / panels / placement / isCard 后 `untracked` 调度 `afterNextRender`）+ 首次 `afterNextRender`。
-- 新 demo：`tabs-basic`（第三个面板 disabled）、`tabs-card`、`tabs-placement`（left + size large）；文档页 `packages/docs/src/app/docs/tabs/tabs.component.ts`，路由 `/tabs`、导航「数据展示」分组、`styles.less` 已引入 `tabs.less`。
-- `align-check` 新增 `TTabs` 条目（`upstream: 'tabs'`、`TdTabsProps`），未实现项写清原因：`action`、`addable`、`dragSort`、`list`、`scrollPosition`、`modelValue`、`onAdd`、`onChange`、`onDragSort`、`onRemove`。结果 `TTabs 已对齐 6/16`，总量 `missing 0 / extra 0`。
+- 面板能力（`tab-panel.component.ts`）：`removable`、`draggable`（默认 true）、`lazy`、`destroyOnHide`；渲染条件照上游 `isMount`：`lazy` 首次激活后挂载，`destroyOnHide` 在切走后卸载，其余常驻。
+- 导航能力（`tabs.component.ts`）：
+  - `addable` → 导航右侧 `t-tabs__add-btn`，点击抛 `(add)`（payload `{ e }`），`t-tabs__nav` 加 `min-height: 48px`；
+  - `removable` → 页签内 `<span class="remove-btn">` + close 图标，点击 `stopPropagation` 后抛 `(remove)`（payload `{ value, index, e }`）；
+  - `dragSort` → 页签 `draggable`，`dragstart/dragover/drop/dragend` 计算前后下标，抛 `(dragSortChange)`（payload `{ currentIndex, current, targetIndex, target }`），面板级 `draggable: false` 可单独关掉；
+  - `scrollPosition`（auto / start / center / end）+ 左右滚动按钮：导航内容用 `translate3d(-scrollLeft px,0,0)` 平移（不依赖原生 scrollLeft），`nav-scroll` 加 `t-is-scrollable`，滚轮横向滚动，溢出时渲染 `t-tabs__btn--left/--right`（离边缘 1px 内自动隐藏）。
+- 事件与上游对齐：`(add)` / `(remove)` / `(dragSortChange)` 都只抛事件，页签数据由使用方维护（demo 里用 signal 数组 splice / 追加）。
+- 新 demo：`tabs-add-remove`（新增 + 关闭，激活项被删回落到首个）、`tabs-drag-sort`（拖拽后 hint 显示新顺序）、`tabs-lazy`（lazy / destroyOnHide / 默认三种面板）。
+- `align-check`：`TTabs` 去掉 `addable` / `dragSort` / `scrollPosition` 三条忽略，`onAdd` / `onDragSort` / `onRemove` 的理由改成「Angular 用对应输出」；结果 `TTabs 已对齐 9/16`，总量 `missing 0 / extra 0`。
 
-**已用 CDP 验证**（`http://localhost:4280/tabs`）：3 个导航项、首个激活、指示条 `left 0 / width 88` 与激活项完全贴合；点第二个后指示条 `left 88 / width 88`、面板切换为「选项卡二的内容」、hint 变为 `second`；禁用的第三个点击无效；card 主题无 `.t-tabs__bar` 且 3 个导航项都带 `t-tabs__nav--card`；`placement="left"` 时 `nav-wrap` 有 `t-is-vertical`、header 为 `t-is-left`、指示条 `3×64`；`consoleErrors` 为空。
+**已用 CDP 验证**（`http://localhost:4280/tabs`）：
+
+- 新增：2 → 3 个页签，新页签「选项卡3」自动激活；关闭后回到 2 个。
+- 拖拽：A|B|C|D 把 A 拖到 C 位置后变为 B|C|A|D，hint 同步「B → C → A → D」。
+- 懒加载：初始只挂载 lazy（当前激活）与默认面板；切到「隐藏即销毁」后该面板挂载；切回后它被卸载（只剩 2 个面板）。
+- 滚动：连续新增 12 个页签后 `nav-scroll` 宽 810 / 内容 1318，出现右箭头；点左箭头到底后左箭头消失、右箭头出现，`nav-wrap` transform 在 `translate3d(0,0,0)` 与 `translate3d(-505px,0,0)` 之间切换。
+- `consoleErrors` 为空。
 
 **下一步（建议顺序）**：
 
-1. Tabs 第二层：`destroyOnHide`、`lazy`、可关闭页签（`removable` + `(remove)`）、`addable` + `(add)`、`dragSort` 拖拽排序、`scrollPosition` 导航滚动、`t-tabs__operations` 左右滚动按钮。
-2. 之后 P4 剩余组件：Collapse / List / Empty / Progress。
+1. 之后 P4 剩余组件：Collapse / List / Empty / Progress。
+2. Tabs 可继续补：`action` 自定义操作区、`list` 数据驱动面板、`t-tabs__nav-action` 插槽。
 3. Table 的其余上游能力（行拖拽排序、单元格编辑、吸顶表头、`lazy` 虚拟滚动）留到后续版本，`align-check` 里已写明原因。
 
-**已知取舍（写进文档，不要当成 bug）**：Table 虚拟滚动只做固定行高近似，不做列虚拟化 / `lazy` / 吸顶表头，`scroll.colWidth` 与 `disableHorizontalScroll` 不生效；Tabs 暂无导航溢出滚动与页签操作区。
+**已知取舍（写进文档，不要当成 bug）**：Table 虚拟滚动只做固定行高近似，不做列虚拟化 / `lazy` / 吸顶表头，`scroll.colWidth` 与 `disableHorizontalScroll` 不生效；Tabs 的 `action` 与 `list` 未实现，竖向导航暂不滚动。
+
 ## 8. 已知缺口与技术债
 
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
-- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `addable`/`dragSort`/`removable`/`scrollPosition` 与面板的 `destroyOnHide`/`lazy` 未实现。
+- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现。
 - **文档站**：无搜索、无中英切换、无右侧锚点导航；示例卡片视觉可再贴近官网。
 
 ## 9. 怎么验证一个改动

@@ -34,9 +34,9 @@
 | Avatar / AvatarGroup | ✅ 图片/文字/图标、形状与尺寸、max 折叠 |
 | Pagination | ✅ 每页条数、跳转、统计、折叠省略号、simple 形态 |
 | Table | ✅ 数据与列渲染、模板单元格、排序、表头筛选、固定列、行选择、展开行、分页联动、多级表头、合并单元格、虚拟滚动、列宽拖拽 |
-| Tabs | ✅ normal / card 主题、四个方向、禁用与受控取值 |
+| Tabs | ✅ normal / card 主题、四个方向、禁用与受控取值、新增/关闭页签、拖拽排序、懒加载与 destroyOnHide |
 
-P4 数据展示的 Table 已按层完成主要能力，Tabs 第一层已落地，Collapse / List / Empty / Progress 继续推进，计划见 `docs/plans/tdesign-angular-plan.md`；
+P4 数据展示的 Table 与 Tabs 已完成主要能力，Collapse / List / Empty / Progress 继续推进，计划见 `docs/plans/tdesign-angular-plan.md`；
 接手开发请先读 [`HANDOFF.md`](./HANDOFF.md)。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。

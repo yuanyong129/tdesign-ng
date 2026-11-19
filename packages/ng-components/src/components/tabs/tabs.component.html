@@ -20,57 +20,135 @@
     [class.t-is-left]="placement() === 'left'"
     [class.t-is-right]="placement() === 'right'"
   >
-    <div
-      class="t-tabs__nav-container"
-      [class.t-tabs__nav--card]="isCard()"
-      [class.t-is-top]="placement() === 'top'"
-      [class.t-is-bottom]="placement() === 'bottom'"
-      [class.t-is-left]="placement() === 'left'"
-      [class.t-is-right]="placement() === 'right'"
-    >
-      <div class="t-tabs__nav-scroll">
-        <div
-          #navWrap
-          class="t-tabs__nav-wrap t-is-smooth"
-          [class.t-is-vertical]="vertical()"
-        >
-          @if (!isCard()) {
-            <div
-              class="t-tabs__bar"
-              [class.t-is-top]="placement() === 'top'"
-              [class.t-is-bottom]="placement() === 'bottom'"
-              [class.t-is-left]="placement() === 'left'"
-              [class.t-is-right]="placement() === 'right'"
-              [style]="barStyle()"
-            ></div>
-          }
+    <div class="t-tabs__nav" [style.min-height]="addable() ? '48px' : null">
+      <div class="t-tabs__operations t-tabs__operations--left">
+        @if (canToLeft()) {
+          <div
+            class="t-tabs__btn t-tabs__btn--left"
+            [class.t-size-m]="size() === 'medium'"
+            [class.t-size-l]="size() === 'large'"
+            (click)="scrollNav('prev')"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M14.5 17.5L9 12L14.5 6.5"
+                stroke="currentColor"
+                stroke-linecap="square"
+                stroke-width="2"
+              />
+            </svg>
+          </div>
+        }
+      </div>
 
-          @for (panel of panels(); track $index; let i = $index) {
-            <div
-              #navItem
-              class="t-tabs__nav-item"
-              [class.t-tabs__nav--card]="isCard()"
-              [class.t-is-active]="isActiveAt(i)"
-              [class.t-is-disabled]="isDisabledAt(i)"
-              [class.t-is-left]="placement() === 'left'"
-              [class.t-is-right]="placement() === 'right'"
-              [class.t-size-m]="size() === 'medium'"
-              [class.t-size-l]="size() === 'large'"
-              (click)="select(i)"
-            >
-              @if (isCard()) {
-                <span class="t-tabs__nav-item-text-wrapper">{{ panelLabel(panel, i) }}</span>
-              } @else {
-                <div
-                  class="t-tabs__nav-item-wrapper"
-                  [class.t-is-active]="isActiveAt(i)"
-                  [class.t-is-disabled]="isDisabledAt(i)"
-                >
+      <div class="t-tabs__operations t-tabs__operations--right">
+        @if (canToRight()) {
+          <div
+            class="t-tabs__btn t-tabs__btn--right"
+            [class.t-size-m]="size() === 'medium'"
+            [class.t-size-l]="size() === 'large'"
+            (click)="scrollNav('next')"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M9.5 17.5L15 12L9.5 6.5"
+                stroke="currentColor"
+                stroke-linecap="square"
+                stroke-width="2"
+              />
+            </svg>
+          </div>
+        }
+        @if (addable()) {
+          <div
+            class="t-tabs__btn t-tabs__add-btn"
+            [class.t-size-m]="size() === 'medium'"
+            [class.t-size-l]="size() === 'large'"
+            (click)="handleAdd($event)"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 5L12 19M19 12L5 12" stroke="currentColor" stroke-linecap="square" stroke-width="2" />
+            </svg>
+          </div>
+        }
+      </div>
+
+      <div
+        class="t-tabs__nav-container"
+        [class.t-tabs__nav--card]="isCard()"
+        [class.t-is-top]="placement() === 'top'"
+        [class.t-is-bottom]="placement() === 'bottom'"
+        [class.t-is-left]="placement() === 'left'"
+        [class.t-is-right]="placement() === 'right'"
+        [class.t-is-addable]="addable()"
+      >
+        <div
+          #navScroll
+          class="t-tabs__nav-scroll"
+          [class.t-is-scrollable]="canToLeft() || canToRight()"
+          (wheel)="handleWheel($event)"
+        >
+          <div
+            #navWrap
+            class="t-tabs__nav-wrap t-is-smooth"
+            [class.t-is-vertical]="vertical()"
+            [style.transform]="wrapTransform()"
+          >
+            @if (!isCard()) {
+              <div
+                class="t-tabs__bar"
+                [class.t-is-top]="placement() === 'top'"
+                [class.t-is-bottom]="placement() === 'bottom'"
+                [class.t-is-left]="placement() === 'left'"
+                [class.t-is-right]="placement() === 'right'"
+                [style]="barStyle()"
+              ></div>
+            }
+
+            @for (panel of panels(); track $index; let i = $index) {
+              <div
+                #navItem
+                class="t-tabs__nav-item"
+                [class.t-tabs__nav--card]="isCard()"
+                [class.t-is-active]="isActiveAt(i)"
+                [class.t-is-disabled]="isDisabledAt(i)"
+                [class.t-is-left]="placement() === 'left'"
+                [class.t-is-right]="placement() === 'right'"
+                [class.t-size-m]="size() === 'medium'"
+                [class.t-size-l]="size() === 'large'"
+                [attr.draggable]="isDraggableAt(i)"
+                (click)="select(i)"
+                (dragstart)="onDragStart($event, i)"
+                (dragover)="onDragOver($event)"
+                (drop)="onDrop($event, i)"
+                (dragend)="onDragEnd()"
+              >
+                @if (isCard()) {
                   <span class="t-tabs__nav-item-text-wrapper">{{ panelLabel(panel, i) }}</span>
-                </div>
-              }
-            </div>
-          }
+                } @else {
+                  <div
+                    class="t-tabs__nav-item-wrapper"
+                    [class.t-is-active]="isActiveAt(i)"
+                    [class.t-is-disabled]="isDisabledAt(i)"
+                  >
+                    <span class="t-tabs__nav-item-text-wrapper">{{ panelLabel(panel, i) }}</span>
+                  </div>
+                }
+                @if (panel.removable() && !isDisabledAt(i)) {
+                  <span class="remove-btn" (click)="handleRemove($event, i)">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
+                        stroke="currentColor"
+                        stroke-linecap="square"
+                        stroke-width="2"
+                      />
+                    </svg>
+                  </span>
+                }
+              </div>
+            }
+          </div>
         </div>
       </div>
     </div>

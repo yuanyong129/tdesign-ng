@@ -1,1 +1,5 @@
-﻿<div class="t-tab-panel" [class.t-is-hidden]="!active()"><ng-content /></div>
+﻿@if (rendered()) {
+  <div class="t-tab-panel" [class.t-is-hidden]="!active()">
+    <ng-content />
+  </div>
+}
