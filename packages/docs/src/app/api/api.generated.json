@@ -521,6 +521,176 @@
         }
       ]
     },
+    "TCollapse": {
+      "className": "TCollapse",
+      "selector": "t-collapse",
+      "file": "packages/ng-components/src/components/collapse/collapse.component.ts",
+      "inputs": [
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否无边框",
+          "en": "Whether the collapse is borderless",
+          "values": []
+        },
+        {
+          "name": "defaultExpandAll",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否默认展开全部面板，仅在非受控时生效",
+          "en": "Whether all panels are expanded by default",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用全部面板",
+          "en": "Whether all panels are disabled",
+          "values": []
+        },
+        {
+          "name": "expandIcon",
+          "type": "boolean | TemplateRef<unknown>",
+          "default": "true",
+          "required": false,
+          "zh": "展开图标；传 false 隐藏，传模板自定义",
+          "en": "Expand icon, false hides it",
+          "values": []
+        },
+        {
+          "name": "expandIconPlacement",
+          "type": "CollapseExpandIconPlacement",
+          "default": "'left'",
+          "required": false,
+          "zh": "展开图标位置",
+          "en": "Expand icon placement",
+          "values": [
+            "left",
+            "right"
+          ]
+        },
+        {
+          "name": "expandMutex",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只允许同时展开一个面板（手风琴）",
+          "en": "Whether only one panel can be expanded at a time",
+          "values": []
+        },
+        {
+          "name": "expandOnRowClick",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否点击整行展开 / 收起",
+          "en": "Whether clicking the whole row toggles the panel",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "CollapseValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "当前展开的面板值，受控时以它为准",
+          "en": "Expanded panel values (controlled)",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "CollapseValue",
+          "default": "[]",
+          "required": false,
+          "zh": "默认展开的面板值",
+          "en": "Default expanded panel values",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "CollapseValue",
+          "zh": "展开面板变化时触发",
+          "en": "Emits when expanded panels change"
+        }
+      ]
+    },
+    "TCollapsePanel": {
+      "className": "TCollapsePanel",
+      "selector": "t-collapse-panel",
+      "file": "packages/ng-components/src/components/collapse/collapse-panel.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "CollapsePanelValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "面板值，未传时按面板顺序自动生成",
+          "en": "Panel value, defaults to its index",
+          "values": []
+        },
+        {
+          "name": "header",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "面板标题",
+          "en": "Panel header",
+          "values": []
+        },
+        {
+          "name": "headerRightContent",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "标题右侧内容",
+          "en": "Content on the right side of the header",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "面板内容，也可以用内容投影",
+          "en": "Panel content, or use content projection",
+          "values": []
+        },
+        {
+          "name": "expandIcon",
+          "type": "boolean | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "展开图标，传 false 隐藏，传模板自定义",
+          "en": "Expand icon, false hides it",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用该面板",
+          "en": "Whether the panel is disabled",
+          "values": []
+        },
+        {
+          "name": "destroyOnCollapse",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否收起后销毁内容",
+          "en": "Whether the content is destroyed after collapsing",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TDialog": {
       "className": "TDialog",
       "selector": "t-dialog",

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Public API Surface of @tdesign-ng/components
  */
 
@@ -7,6 +7,7 @@ export * from './components/avatar';
 export * from './components/badge';
 export * from './components/button';
 export * from './components/checkbox';
+export * from './components/collapse';
 export * from './components/dialog';
 export * from './components/divider';
 export * from './components/drawer';

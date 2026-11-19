@@ -1,0 +1,66 @@
+<div class="t-collapse-panel" [class.t-is-disabled]="isDisabled()">
+  <div class="t-collapse-panel__wrapper">
+    <div
+      class="t-collapse-panel__header"
+      [class.t-is-clickable]="expandOnRowClick() && !isDisabled()"
+      (click)="handleHeaderClick()"
+    >
+      @if (placement() === 'left') {
+        <ng-container [ngTemplateOutlet]="iconTemplateRef" />
+      }
+      <span class="t-collapse-panel__header-text">{{ header() }}</span>
+      <div class="t-collapse-panel__header--blank"></div>
+      @if (headerRightContent()) {
+        <div class="t-collapse-panel__header-right-content" (click)="stopPropagation($event)">
+          {{ headerRightContent() }}
+        </div>
+      }
+      @if (placement() === 'right') {
+        <ng-container [ngTemplateOutlet]="iconTemplateRef" />
+      }
+    </div>
+
+    @if (!destroyOnCollapse() || active()) {
+      <div class="t-collapse-panel__body" [style.display]="active() ? null : 'none'">
+        <div class="t-collapse-panel__content">
+          @if (content()) {
+            <span>{{ content() }}</span>
+          }
+          <ng-content />
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<ng-template #iconTemplateRef>
+  @if (showIcon()) {
+    <div
+      class="t-collapse-panel__icon"
+      [class.t-collapse-panel__icon--left]="placement() === 'left'"
+      [class.t-collapse-panel__icon--right]="placement() === 'right'"
+      [class.t-collapse-panel__icon--active]="active()"
+      (click)="handleIconClick($event)"
+    >
+      @if (iconTemplate(); as tpl) {
+        <ng-container [ngTemplateOutlet]="tpl" />
+      } @else {
+        <svg
+          class="t-fake-arrow t-collapse-panel__icon--default"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
+            stroke="black"
+            stroke-opacity="0.9"
+            stroke-width="1.3"
+          />
+        </svg>
+      }
+    </div>
+  }
+</ng-template>

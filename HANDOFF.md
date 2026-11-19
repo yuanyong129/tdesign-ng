@@ -1,7 +1,7 @@
-﻿# 交接文档 · TDesign Angular
+# 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-19，对应提交：`0cce00e` 之后的未提交改动（Tabs 第二层）。
+> 更新日期：2026-11-19，对应提交：`4f6ccee`（Tabs 第二层）之后的未提交改动（新组件 Collapse 第一层）。
 
 ## 1. 这个项目是什么
 
@@ -20,12 +20,12 @@
 | P1 打样 | ✅ | Button / Link / Divider / Space / Icon |
 | P2 基础表单 | ✅ | Input / Textarea / Switch / Checkbox / Radio / Select / Form（含 TDesign rules 校验引擎） |
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
-| P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination / Table 已完成；**Tabs 已完成两层（第二层待提交）**；Collapse / List / Empty / Progress 未开始 |
+| P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs 已完成；**Collapse 第一层待提交**；List / Empty / Progress 未开始 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **29 个组件、330 个输入属性、132 个示例**，合计 `missing 0 / extra 0`。
+当前 `align-check` 覆盖 **31 个组件、346 个输入属性、135 个示例**，合计 `missing 0 / extra 0`。
 
-组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tabs、tag、textarea、tooltip。
+组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、collapse、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tabs、tag、textarea、tooltip。
 
 ## 3. 目录与环境
 
@@ -73,33 +73,32 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：Tabs 第二层（新增/关闭、拖拽排序、懒加载、导航滚动）
+## 7. 当前进行中的工作：新组件 Collapse（第一层）
+
+Tabs 第二层已提交（`4f6ccee`）；本层新增 `@tdesign-ng/components` 的 Collapse（折叠面板）。
 
 **已完成（未提交）**：
 
-- 面板能力（`tab-panel.component.ts`）：`removable`、`draggable`（默认 true）、`lazy`、`destroyOnHide`；渲染条件照上游 `isMount`：`lazy` 首次激活后挂载，`destroyOnHide` 在切走后卸载，其余常驻。
-- 导航能力（`tabs.component.ts`）：
-  - `addable` → 导航右侧 `t-tabs__add-btn`，点击抛 `(add)`（payload `{ e }`），`t-tabs__nav` 加 `min-height: 48px`；
-  - `removable` → 页签内 `<span class="remove-btn">` + close 图标，点击 `stopPropagation` 后抛 `(remove)`（payload `{ value, index, e }`）；
-  - `dragSort` → 页签 `draggable`，`dragstart/dragover/drop/dragend` 计算前后下标，抛 `(dragSortChange)`（payload `{ currentIndex, current, targetIndex, target }`），面板级 `draggable: false` 可单独关掉；
-  - `scrollPosition`（auto / start / center / end）+ 左右滚动按钮：导航内容用 `translate3d(-scrollLeft px,0,0)` 平移（不依赖原生 scrollLeft），`nav-scroll` 加 `t-is-scrollable`，滚轮横向滚动，溢出时渲染 `t-tabs__btn--left/--right`（离边缘 1px 内自动隐藏）。
-- 事件与上游对齐：`(add)` / `(remove)` / `(dragSortChange)` 都只抛事件，页签数据由使用方维护（demo 里用 signal 数组 splice / 追加）。
-- 新 demo：`tabs-add-remove`（新增 + 关闭，激活项被删回落到首个）、`tabs-drag-sort`（拖拽后 hint 显示新顺序）、`tabs-lazy`（lazy / destroyOnHide / 默认三种面板）。
-- `align-check`：`TTabs` 去掉 `addable` / `dragSort` / `scrollPosition` 三条忽略，`onAdd` / `onDragSort` / `onRemove` 的理由改成「Angular 用对应输出」；结果 `TTabs 已对齐 9/16`，总量 `missing 0 / extra 0`。
+- `TCollapse`（`t-collapse`）：`borderless`、`defaultExpandAll`、`disabled`、`expandIcon`（`boolean | TemplateRef`）、`expandIconPlacement`（left / right）、`expandMutex`、`expandOnRowClick`、`value`（受控）、`defaultValue`、`(change)`。
+- `TCollapsePanel`（`t-collapse-panel`）：`value`、`header`、`headerRightContent`、`content`、`expandIcon`、`disabled`、`destroyOnCollapse`；正文既可用 `content` 字符串，也可用 `<ng-content>` 投影。
+- 取值优先级 `value ?? innerValue ?? defaultValue`（`innerValue` 初值 null，避免吞掉 `defaultValue`）；非受控时 `toggle` 写内部值并 emit；`expandMutex` 打开时新面板替换旧值；`defaultExpandAll` 只在非受控时把所有面板写入初始值。
+- DOM 照上游：`t-collapse[t--border-less]` > `t-collapse-panel[t-is-disabled]` > `__wrapper` > `__header`（左图标 / `__header-text` / `__header--blank` / `__header-right-content` / 右图标）> `__body` > `__content`；箭头用内联 `svg.t-fake-arrow`，激活时 `t-collapse-panel__icon--active` 让 less 把 `rotate(-90deg)` 归零。
+- `destroyOnCollapse` 时未展开面板的 body 直接从 DOM 移除；其余面板用 `display:none` 保留（与上游 v-show 一致）。
+- 新 demo：`collapse-basic`（默认展开第一项 + 变化 hint）、`collapse-accordion`（`expandMutex`）、`collapse-options`（`borderless` + `expandOnRowClick` + 箭头在右 + `headerRightContent` + 禁用面板 + `destroyOnCollapse`）。
+- `align-check` 新增 `TCollapse`（`TdCollapseProps`），结果 `TCollapse 已对齐 9/11`，总量 `missing 0 / extra 0`。
 
-**已用 CDP 验证**（`http://localhost:4280/tabs`）：
+**已用 CDP 验证**（`http://localhost:4280/collapse`）：
 
-- 新增：2 → 3 个页签，新页签「选项卡3」自动激活；关闭后回到 2 个。
-- 拖拽：A|B|C|D 把 A 拖到 C 位置后变为 B|C|A|D，hint 同步「B → C → A → D」。
-- 懒加载：初始只挂载 lazy（当前激活）与默认面板；切到「隐藏即销毁」后该面板挂载；切回后它被卸载（只剩 2 个面板）。
-- 滚动：连续新增 12 个页签后 `nav-scroll` 宽 810 / 内容 1318，出现右箭头；点左箭头到底后左箭头消失、右箭头出现，`nav-wrap` transform 在 `translate3d(0,0,0)` 与 `translate3d(-505px,0,0)` 之间切换。
+- basic：初始 `[true,false,false]`；点第二个图标 → `[true,true,false]`、hint「当前展开：1、2」；`expandOnRowClick` 未开时点标题文字不切换。
+- accordion：点第二个图标 → `[false,true,false]`，hint 同步，互斥生效。
+- options：根类 `t-collapse t--border-less`；整行点击可开合；禁用面板类含 `t-is-disabled` 且点击无效；点 `headerRightContent` 不切换；`destroyOnCollapse` 面板收起时 body 不存在、展开后出现；箭头在右（`--right`）；borderless 下正文白底无边框（与 less 的 borderless 分支一致）。
 - `consoleErrors` 为空。
 
 **下一步（建议顺序）**：
 
-1. 之后 P4 剩余组件：Collapse / List / Empty / Progress。
-2. Tabs 可继续补：`action` 自定义操作区、`list` 数据驱动面板、`t-tabs__nav-action` 插槽。
-3. Table 的其余上游能力（行拖拽排序、单元格编辑、吸顶表头、`lazy` 虚拟滚动）留到后续版本，`align-check` 里已写明原因。
+1. P4 剩余组件：List / Empty / Progress。
+2. Collapse 可继续补：`expandIcon` 支持渲染函数（当前只有 `boolean | TemplateRef`）。
+3. Table / Tabs 的余项见 §8。
 
 **已知取舍（写进文档，不要当成 bug）**：Table 虚拟滚动只做固定行高近似，不做列虚拟化 / `lazy` / 吸顶表头，`scroll.colWidth` 与 `disableHorizontalScroll` 不生效；Tabs 的 `action` 与 `list` 未实现，竖向导航暂不滚动。
 
@@ -108,7 +107,7 @@ node scripts/align-check.mjs --component TTable
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
-- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现。
+- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数。
 - **文档站**：无搜索、无中英切换、无右侧锚点导航；示例卡片视觉可再贴近官网。
 
 ## 9. 怎么验证一个改动
