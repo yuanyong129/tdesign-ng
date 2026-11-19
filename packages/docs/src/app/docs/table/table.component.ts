@@ -1,10 +1,11 @@
-﻿import { Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { ApiTable } from '../../api/api-table.component';
 import { DemoBlock } from '../demo-block';
 import { PageNav } from '../page-nav';
 import { DemoTableBasic } from './demos/table-basic';
 import { DemoTableCell } from './demos/table-cell';
 import { DemoTableExpand } from './demos/table-expand';
+import { DemoTableExpandClick } from './demos/table-expand-click';
 import { DemoTableFilter } from './demos/table-filter';
 import { DemoTableFixed } from './demos/table-fixed';
 import { DemoTableGroupHeader } from './demos/table-group-header';
@@ -13,6 +14,7 @@ import { DemoTablePagination } from './demos/table-pagination';
 import { DemoTableVirtual } from './demos/table-virtual';
 import { DemoTableResizable } from './demos/table-resizable';
 import { DemoTableSelect } from './demos/table-select';
+import { DemoTableSelectClick } from './demos/table-select-click';
 import { DemoTableSize } from './demos/table-size';
 import { DemoTableSort } from './demos/table-sort';
 import { DemoTableState } from './demos/table-state';
@@ -31,7 +33,9 @@ import { DemoTableStyle } from './demos/table-style';
     DemoTableSort,
     DemoTableCell,
     DemoTableSelect,
+    DemoTableSelectClick,
     DemoTableExpand,
+    DemoTableExpandClick,
     DemoTableFilter,
     DemoTableFixed,
     DemoTablePagination,
@@ -97,11 +101,27 @@ import { DemoTableStyle } from './demos/table-style';
       </docs-demo>
 
       <docs-demo
+        id="table-select-click"
+        title="点击行选中"
+        description="打开 selectOnRowClick 后点击整行即可选中，再点已选行取消选中。"
+      >
+        <demo-table-select-click />
+      </docs-demo>
+
+      <docs-demo
         id="table-expand"
         title="展开行"
         description="用 ng-template tTableExpandedRow 提供展开内容，展开状态由 expandedRowKeys 控制。"
       >
         <demo-table-expand />
+      </docs-demo>
+
+      <docs-demo
+        id="table-expand-click"
+        title="点击行展开"
+        description="打开 expandOnRowClick 后点击整行即可展开 / 收起，行首图标仍然可用。"
+      >
+        <demo-table-expand-click />
       </docs-demo>
 
       <docs-demo
