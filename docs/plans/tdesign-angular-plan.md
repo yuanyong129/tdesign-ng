@@ -489,8 +489,30 @@ tdesign-ng/
 
 ### 19.3 待办
 
-- Table：单独立项（列配置、固定列、排序筛选、虚拟滚动）。
+- Table：单独立项（列配置、固定列、排序筛选、虚拟滚动）。已交付第一层，见 §20。
 - Avatar 的 `imageProps`、AvatarGroup 折叠头像的弹层列表、CheckTag / CheckTagGroup、Pagination 的 `simple` 形态细节（当前只显示「当前页/总页数」）暂未实现，已在 `align-check` 里写明理由。
+
+## 20. Table 第一层：数据与列渲染
+
+### 20.1 已实现（14/62，missing 0）
+
+- **输入**：`data`、`columns`、`rowKey`、`bordered`、`stripe`、`hover`、`size`、`verticalAlign`、`tableLayout`、`showHeader`、`loading`、`loadingText`、`empty`、`height`、`maxHeight`。
+- **列配置**：`colKey`（同时作为取值字段）、`title`、`width`、`minWidth`、`align`、`ellipsis`、`cell`（自定义文本函数）、`className`。
+- **状态**：加载遮罩复用上游 `.t-loading--full` + `.t-loading__overlay`；空态用 `.t-table__row--full` + `.t-table__empty`。
+- 上游剩余能力（排序筛选、固定列、行选择、展开行、分页联动、虚拟滚动、合并单元格、列宽拖拽、行事件）全部在 `align-check` 里逐条写明「后续版本实现」，因此 `missing` / `extra` 均为 0。
+
+### 20.2 两个实现要点
+
+1. **`table-layout` 必须写在 `<table>` 上**。上游 less 里 `.t-table--layout-fixed { table-layout: fixed }` 作用于表格元素，写在根 `div` 上完全无效（实测 `getComputedStyle(table).tableLayout` 仍是 `auto`）。类名现在加在 `<table>` 上。
+2. **表格总宽只在「所有列都有固定宽度」时才写死**。最初把有宽度的列求和（160+220=380）就设成表格宽度，导致整张表缩到 380px、其余列被压成多行。现在只要有一列没写宽度就交回 `width: 100%`，与上游一致。
+3. **宿主必须是块级**。`t-table` 默认为行内元素时会收缩到内容宽度，桥接层补了 `t-table { display: block; }`。
+4. **省略列的截断要自己补**。上游用 `Ellipsis` 组件（自带 tooltip）实现，本版本改为在单元格内包一层 `.t-table__ellipsis`（`overflow: hidden; text-overflow: ellipsis; white-space: nowrap`），并把完整内容放到 `title` 上；`col.ellipsis` 仍会输出上游的 `t-table-td--ellipsis` 类。
+
+### 20.3 已知问题
+
+- 编辑 `bridge.less` 后 dev server 的热更新会报 `absoluteFrom(../ng-components/src/bridge.less): path is not absolute`，重启 dev server 即恢复；这是 Angular 19 dev-server 对全局样式依赖的已知问题。
+- 需要富内容单元格（标签、按钮等）时目前只能用 `cell` 返回字符串；模板式单元格（`<ng-template>` + 指令）留到行选择/展开行一层一起设计。
+
 
 
 

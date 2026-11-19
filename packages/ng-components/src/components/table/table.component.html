@@ -1,0 +1,65 @@
+<div [class]="classes()">
+  <div class="t-table__content" [style]="contentStyle()">
+    <table [class]="tableLayoutClass()" [style.width]="tableWidth()">
+      @if (showHeader()) {
+        <thead class="t-table__header">
+          <tr>
+            @for (col of columns(); track col.colKey) {
+              <th [class]="cellClasses(col)" [style]="columnStyle(col)">
+                {{ col.title ?? '' }}
+              </th>
+            }
+          </tr>
+        </thead>
+      }
+
+      <tbody class="t-table__body">
+        @for (row of rows(); track trackRow($index, row); let rowIndex = $index) {
+          <tr>
+            @for (col of columns(); track col.colKey; let colIndex = $index) {
+              <td [class]="cellClasses(col)" [style]="columnStyle(col)">
+                @if (col.ellipsis) {
+                  <div class="t-table__ellipsis" [attr.title]="cellText(row, col, rowIndex, colIndex)">
+                    {{ cellText(row, col, rowIndex, colIndex) }}
+                  </div>
+                } @else {
+                  {{ cellText(row, col, rowIndex, colIndex) }}
+                }
+              </td>
+            }
+          </tr>
+        }
+
+        @if (!rows().length) {
+          <tr class="t-table__row--full">
+            <td [attr.colspan]="columns().length">
+              <div class="t-table__empty">{{ empty() }}</div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (loading()) {
+    <div class="t-loading t-loading--center t-loading--full t-loading__overlay">
+      <div class="t-loading--center t-size-s">
+        <svg
+          class="t-loading__gradient t-icon-loading"
+          viewBox="0 0 12 12"
+          width="1em"
+          height="1em"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <foreignObject x="0" y="0" width="12" height="12">
+            <div class="t-loading__gradient-conic"></div>
+          </foreignObject>
+        </svg>
+        @if (loadingText()) {
+          <div class="t-loading__text">{{ loadingText() }}</div>
+        }
+      </div>
+    </div>
+  }
+</div>

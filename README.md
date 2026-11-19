@@ -33,8 +33,9 @@
 | Badge | ✅ 数字封顶、小红点、showZero、偏移与自定义色 |
 | Avatar / AvatarGroup | ✅ 图片/文字/图标、形状与尺寸、max 折叠 |
 | Pagination | ✅ 每页条数、跳转、统计、折叠省略号、simple 形态 |
+| Table | 🚧 第一层：数据与列渲染、边框/斑马纹/尺寸/加载/空态；排序筛选、固定列、行选择、虚拟滚动待补 |
 
-P4 数据展示目前只剩 Table（单独立项：列配置、固定列、排序筛选、虚拟滚动）。
+P4 数据展示的 Table 仍在推进，后续分层提交，计划见 `docs/plans/tdesign-angular-plan.md`。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
 

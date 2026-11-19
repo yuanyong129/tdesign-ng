@@ -34,6 +34,7 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/badge', label: '徽标 Badge', group: '数据展示' },
   { path: '/avatar', label: '头像 Avatar', group: '数据展示' },
   { path: '/pagination', label: '分页 Pagination', group: '数据展示' },
+  { path: '/table', label: '表格 Table', group: '数据展示' },
 ];
 
 /** 按分组统计，保持 DOCS_NAV 里的先后顺序。 */

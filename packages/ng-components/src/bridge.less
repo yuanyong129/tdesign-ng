@@ -118,6 +118,20 @@ t-avatar-group {
   display: contents;
 }
 
+// 表格：根元素 .t-table 是 width: 100% 的块级容器，宿主也必须是块级
+t-table {
+  display: block;
+}
+
+// 省略列：上游用 Ellipsis 组件（自带 tooltip）做截断，这里只做单行省略，
+// 完整内容放在 title 上
+.t-table__ellipsis {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 // 头像组用 max 限制显示数量时，超出部分由组组件下发隐藏标记
 t-avatar.t-avatar--hidden {
   display: none;

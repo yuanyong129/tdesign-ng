@@ -2907,6 +2907,160 @@
         }
       ]
     },
+    "TTable": {
+      "className": "TTable",
+      "selector": "t-table",
+      "file": "packages/ng-components/src/components/table/table.component.ts",
+      "inputs": [
+        {
+          "name": "data",
+          "type": "TableRow[]",
+          "default": "[]",
+          "required": false,
+          "zh": "表格数据",
+          "en": "Table data",
+          "values": []
+        },
+        {
+          "name": "columns",
+          "type": "TableColumn[]",
+          "default": "[]",
+          "required": false,
+          "zh": "列配置",
+          "en": "Column configuration",
+          "values": []
+        },
+        {
+          "name": "rowKey",
+          "type": "string",
+          "default": "'id'",
+          "required": false,
+          "zh": "行唯一标识字段名",
+          "en": "Field name of the row key",
+          "values": []
+        },
+        {
+          "name": "bordered",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示边框",
+          "en": "Whether to show borders",
+          "values": []
+        },
+        {
+          "name": "stripe",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示斑马纹",
+          "en": "Whether to show stripes",
+          "values": []
+        },
+        {
+          "name": "hover",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "鼠标悬停高亮行",
+          "en": "Whether to highlight the row on hover",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "TableSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "表格尺寸",
+          "en": "Table size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "verticalAlign",
+          "type": "TableVerticalAlign",
+          "default": "'middle'",
+          "required": false,
+          "zh": "单元格垂直对齐",
+          "en": "Vertical alignment of cells",
+          "values": [
+            "top",
+            "middle",
+            "bottom"
+          ]
+        },
+        {
+          "name": "tableLayout",
+          "type": "TableLayout",
+          "default": "'fixed'",
+          "required": false,
+          "zh": "表格布局方式",
+          "en": "Table layout mode",
+          "values": [
+            "auto",
+            "fixed"
+          ]
+        },
+        {
+          "name": "showHeader",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示表头",
+          "en": "Whether to show the header",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示加载中",
+          "en": "Whether the table is loading",
+          "values": []
+        },
+        {
+          "name": "loadingText",
+          "type": "string",
+          "default": "'加载中'",
+          "required": false,
+          "zh": "加载提示文字",
+          "en": "Loading text",
+          "values": []
+        },
+        {
+          "name": "empty",
+          "type": "string",
+          "default": "'暂无数据'",
+          "required": false,
+          "zh": "空数据提示文字",
+          "en": "Empty content",
+          "values": []
+        },
+        {
+          "name": "height",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "表格高度，超出后内部滚动",
+          "en": "Table height, scrolls inside when exceeded",
+          "values": []
+        },
+        {
+          "name": "maxHeight",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "表格最大高度，超出后内部滚动",
+          "en": "Max table height, scrolls inside when exceeded",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TTag": {
       "className": "TTag",
       "selector": "t-tag",

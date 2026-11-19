@@ -101,6 +101,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/pagination/pagination.component').then((m) => m.PaginationDocs),
   },
   {
+    path: 'table',
+    loadComponent: () => import('./docs/table/table.component').then((m) => m.TableDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },
