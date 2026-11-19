@@ -1,11 +1,11 @@
 <div [class]="classes()">
-  <div class="t-table__content" [style]="contentStyle()">
+  <div #content class="t-table__content" [style]="contentStyle()" (scroll)="handleScroll($event)">
     <table [class]="tableLayoutClass()" [style.width]="tableWidth()">
       @if (showHeader()) {
         <thead class="t-table__header">
           <tr>
             @for (col of columns(); track col.colKey) {
-              <th [class]="headerCellClasses(col)" [style]="columnStyle(col)">
+              <th [class]="headerCellClasses(col)" [style]="columnStyle(col)" [attr.data-colkey]="col.colKey">
                 <div class="t-table__th-cell-inner">
                   <div [class]="headerTitleClasses(col)">
                     <div class="t-table__cell--title">

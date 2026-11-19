@@ -99,6 +99,11 @@ export interface TableCellContext<T extends TableRow = TableRow> {
   value: unknown;
 }
 
+/** 固定列位置。 */
+export const TABLE_COLUMN_FIXED = ['left', 'right'] as const;
+
+export type TableColumnFixed = (typeof TABLE_COLUMN_FIXED)[number];
+
 /** 列配置，字段名与 TDesign 的 BaseTableCol 对齐。 */
 export interface TableColumn<T extends TableRow = TableRow> {
   /** 列唯一标识，同时作为取值字段名 */
@@ -113,8 +118,8 @@ export interface TableColumn<T extends TableRow = TableRow> {
   align?: TableAlign;
   /** 是否省略超出内容 */
   ellipsis?: boolean;
-  /** 固定列位置（本版本仅记录，固定列在后续版本实现） */
-  fixed?: 'left' | 'right';
+  /** 固定列位置，固定列需要同时声明宽度，否则横向滚动时无法计算偏移 */
+  fixed?: TableColumnFixed;
   /** 自定义单元格文本 */
   cell?: (context: TableCellContext<T>) => string;
   /** 列附加类名 */

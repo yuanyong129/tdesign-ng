@@ -2,16 +2,22 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  Injector,
+  OnDestroy,
   TemplateRef,
   ViewEncapsulation,
+  afterNextRender,
   booleanAttribute,
   computed,
   contentChildren,
   effect,
+  inject,
   input,
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { TButton } from '../button';
 import { TCheckboxGroup } from '../checkbox';
@@ -64,7 +70,7 @@ const SIZE_CLASS: Record<TableSize, string> = {
   encapsulation: ViewEncapsulation.None,
   templateUrl: './table.component.html',
 })
-export class TTable {
+export class TTable implements OnDestroy {
   /** @zh 表格数据 @en Table data @defaultValue [] */
   readonly data = input<TableRow[]>([]);
 
@@ -153,6 +159,74 @@ export class TTable {
   /** 当前展开筛选面板的列。 */
   private readonly openedFilterKey = signal<string | null>(null);
 
+  private readonly injector = inject(Injector);
+
+  private readonly contentRef = viewChild<ElementRef<HTMLElement>>('content');
+
+  /** 实测列宽（colKey → px）。固定列偏移优先用它，取不到时回退到列配置的数字宽度。 */
+  private readonly colWidths = signal<Record<string, number>>({});
+
+  /** 横向滚动状态，用于决定固定列两侧的阴影分界线是否显示。 */
+  private readonly scrollState = signal({ scrollLeft: 0, contentWidth: 0, viewportWidth: 0 });
+
+  private resizeObserver?: ResizeObserver;
+
+  /** 是否存在固定列。 */
+  protected readonly hasFixedColumn = computed(() => this.columns().some((col) => !!col.fixed));
+
+  /** 固定列偏移：colKey → 距离表格左 / 右边缘的像素值。 */
+  protected readonly fixedOffset = computed(() => {
+    const columns = this.columns();
+    const widths = this.colWidths();
+    const widthOf = (col: TableColumn) => widths[col.colKey] ?? this.numericWidth(col.width) ?? 0;
+    const map = new Map<string, number>();
+
+    let left = 0;
+    for (const col of columns) {
+      if (col.fixed !== 'left') continue;
+      map.set(col.colKey, left);
+      left += widthOf(col);
+    }
+
+    let right = 0;
+    for (let index = columns.length - 1; index >= 0; index--) {
+      const col = columns[index];
+      if (col.fixed !== 'right') continue;
+      map.set(col.colKey, right);
+      right += widthOf(col);
+    }
+    return map;
+  });
+
+  /** 左侧最后一个固定列，用来挂滚动分界线。 */
+  protected readonly lastLeftKey = computed(() => {
+    const columns = this.columns();
+    let key: string | null = null;
+    columns.forEach((col, index) => {
+      if (col.fixed === 'left' && columns[index + 1]?.fixed !== 'left') key = col.colKey;
+    });
+    return key;
+  });
+
+  /** 右侧第一个固定列，用来挂滚动分界线。 */
+  protected readonly firstRightKey = computed(() => {
+    const columns = this.columns();
+    const index = columns.findIndex((col) => col.fixed === 'right');
+    return index < 0 ? null : columns[index].colKey;
+  });
+
+  /** 已向右滚动且存在左侧固定列时显示左阴影。 */
+  protected readonly showLeftShadow = computed(
+    () => this.scrollState().scrollLeft > 0 && this.columns().some((col) => col.fixed === 'left'),
+  );
+
+  /** 右侧还有未滚动到的内容且存在右侧固定列时显示右阴影。 */
+  protected readonly showRightShadow = computed(() => {
+    const scroll = this.scrollState();
+    if (!this.columns().some((col) => col.fixed === 'right')) return false;
+    return scroll.scrollLeft + scroll.viewportWidth < scroll.contentWidth - 1;
+  });
+
   private readonly cellDirectives = contentChildren(TTableCell);
 
   /** colKey → 单元格模板。 */
@@ -173,6 +247,9 @@ export class TTable {
       `t-table--align-${this.verticalAlign()}`,
       SIZE_CLASS[this.size()],
       this.loading() ? 't-table--loading' : '',
+      this.hasFixedColumn() ? 't-table--column-fixed' : '',
+      this.showLeftShadow() ? 't-table__content--scrollable-to-left' : '',
+      this.showRightShadow() ? 't-table__content--scrollable-to-right' : '',
     ]
       .filter(Boolean)
       .join(' '),
@@ -258,6 +335,23 @@ export class TTable {
         if (defaultFilterValue !== undefined) this.innerFilterValue.set({ ...defaultFilterValue });
       });
     });
+
+    // 固定列需要实测宽度：首屏渲染后量一次，列 / 数据变化后再量
+    afterNextRender(() => this.setupFixedColumns());
+
+    effect(() => {
+      this.columns();
+      this.rows();
+      untracked(() => this.scheduleColumnMeasure());
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+  }
+
+  protected handleScroll(event: Event): void {
+    this.updateScrollState(event.target as HTMLElement);
   }
 
   protected sortOrderOf(colKey: string): 'asc' | 'desc' | null {
@@ -389,10 +483,14 @@ export class TTable {
   }
 
   protected cellClasses(col: TableColumn): string {
+    const fixed = col.fixed;
     return [
       col.align ? `t-align-${col.align}` : '',
       col.ellipsis ? 't-table-td--ellipsis' : '',
       col.className ?? '',
+      fixed ? `t-table__cell--fixed-${fixed}` : '',
+      fixed === 'left' && col.colKey === this.lastLeftKey() ? 't-table__cell--fixed-left-last' : '',
+      fixed === 'right' && col.colKey === this.firstRightKey() ? 't-table__cell--fixed-right-first' : '',
     ]
       .filter(Boolean)
       .join(' ');
@@ -421,10 +519,73 @@ export class TTable {
     const style: Record<string, string> = {};
     if (col.width !== undefined) style['width'] = this.toLength(col.width);
     if (col.minWidth !== undefined) style['min-width'] = this.toLength(col.minWidth);
+
+    // 固定列用 sticky，偏移量必须写在单元格上
+    const offset = this.fixedOffset().get(col.colKey);
+    if (offset !== undefined && col.fixed) {
+      style[col.fixed] = `${offset}px`;
+    }
     return Object.keys(style).length ? style : null;
   }
 
   protected trackRow = (_index: number, row: TableRow): unknown => row?.[this.rowKey()] ?? _index;
+
+  private scheduleColumnMeasure(): void {
+    afterNextRender(() => this.refreshColumnMetrics(), { injector: this.injector });
+  }
+
+  /** 首次渲染后建立滚动 / 尺寸监听。 */
+  private setupFixedColumns(): void {
+    const element = this.contentRef()?.nativeElement;
+    if (!element) return;
+
+    this.refreshColumnMetrics();
+    if (typeof ResizeObserver === 'undefined') return;
+
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = new ResizeObserver(() => {
+      this.refreshColumnMetrics();
+      this.updateScrollState(element);
+    });
+    this.resizeObserver.observe(element);
+  }
+
+  /** 量一次表头宽度与横向滚动状态。 */
+  private refreshColumnMetrics(): void {
+    const element = this.contentRef()?.nativeElement;
+    if (!element) return;
+
+    const next: Record<string, number> = {};
+    element.querySelectorAll<HTMLElement>('thead th[data-colkey]').forEach((cell) => {
+      const key = cell.dataset['colkey'];
+      const width = cell.getBoundingClientRect().width;
+      if (key && width > 0) next[key] = Math.round(width * 100) / 100;
+    });
+
+    const previous = this.colWidths();
+    const keys = Object.keys(next);
+    const changed =
+      keys.length !== Object.keys(previous).length || keys.some((key) => previous[key] !== next[key]);
+    if (changed) this.colWidths.set(next);
+
+    this.updateScrollState(element);
+  }
+
+  private updateScrollState(element: HTMLElement): void {
+    const previous = this.scrollState();
+    const next = {
+      scrollLeft: element.scrollLeft,
+      contentWidth: element.scrollWidth,
+      viewportWidth: element.clientWidth,
+    };
+    if (
+      previous.scrollLeft !== next.scrollLeft ||
+      previous.contentWidth !== next.contentWidth ||
+      previous.viewportWidth !== next.viewportWidth
+    ) {
+      this.scrollState.set(next);
+    }
+  }
 
   private normalizeSort(sort: TableSort | undefined): TableSortInfo[] {
     if (!sort) return [];
