@@ -4,6 +4,7 @@ import { DemoBlock } from '../demo-block';
 import { PageNav } from '../page-nav';
 import { DemoTableBasic } from './demos/table-basic';
 import { DemoTableCell } from './demos/table-cell';
+import { DemoTableFilter } from './demos/table-filter';
 import { DemoTableSize } from './demos/table-size';
 import { DemoTableSort } from './demos/table-sort';
 import { DemoTableState } from './demos/table-state';
@@ -21,13 +22,14 @@ import { DemoTableStyle } from './demos/table-style';
     DemoTableState,
     DemoTableSort,
     DemoTableCell,
+    DemoTableFilter,
   ],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">表格 Table</h1>
       <p class="docs-page__lead">
-        表格用于展示结构化数据。当前版本支持列配置、模板式单元格、排序、边框、斑马纹、悬停高亮、尺寸、对齐、省略、
-        加载与空态；表头筛选、固定列、行选择、分页联动与虚拟滚动在后续版本逐步补齐。
+        表格用于展示结构化数据。当前版本支持列配置、模板式单元格、排序、表头筛选、边框、斑马纹、悬停高亮、尺寸、对齐、省略、
+        加载与空态；固定列、行选择、分页联动与虚拟滚动在后续版本逐步补齐。
       </p>
 
       <docs-demo id="table-basic" title="基础用法" description="columns 声明列，data 提供行数据。">
@@ -52,6 +54,14 @@ import { DemoTableStyle } from './demos/table-style';
 
       <docs-demo id="table-cell" title="自定义单元格" description="用 ng-template + tTableCell 渲染标签、按钮等任意内容。">
         <demo-table-cell />
+      </docs-demo>
+
+      <docs-demo
+        id="table-filter"
+        title="表头筛选"
+        description="列上声明 filter 即可筛选：single 单选、multiple 多选、input 输入；showConfirmAndReset 时点确定才提交。"
+      >
+        <demo-table-filter />
       </docs-demo>
 
       <h2 class="docs-section__title" id="table-api">API</h2>

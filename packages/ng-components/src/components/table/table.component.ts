@@ -13,6 +13,11 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { TButton } from '../button';
+import { TCheckboxGroup } from '../checkbox';
+import { TInput } from '../input';
+import { TPopup } from '../popup';
+import { TRadioGroup } from '../radio';
 import { TTableCell } from './table-cell.directive';
 import {
   TABLE_ALIGNS,
@@ -21,6 +26,10 @@ import {
   TABLE_SORT_TYPES,
   TABLE_VERTICAL_ALIGNS,
   TableColumn,
+  TableFilterChangeEvent,
+  TableFilterChangeContext,
+  TableFilterType,
+  TableFilterValue,
   TableLayout,
   TableRow,
   TableSize,
@@ -50,7 +59,7 @@ const SIZE_CLASS: Record<TableSize, string> = {
 @Component({
   selector: 't-table',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, TButton, TCheckboxGroup, TInput, TPopup, TRadioGroup],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './table.component.html',
@@ -116,6 +125,18 @@ export class TTable {
   /** @zh 排序变化 @en Emitted when the sort changes */
   readonly sortChange = output<TableSort | undefined>();
 
+  /**
+   * @zh 受控筛选值，传入后表格不再自己记录筛选状态 @en Controlled filter value, the table stops keeping filter state once provided
+   * @defaultValue undefined
+   */
+  readonly filterValue = input<TableFilterValue | undefined>(undefined);
+
+  /** @zh 默认筛选值，仅初始生效 @en Default filter value, applied initially @defaultValue undefined */
+  readonly defaultFilterValue = input<TableFilterValue | undefined>(undefined);
+
+  /** @zh 筛选变化，表格本身不改变数据，需要在使用方自行过滤 @en Emitted when the filter changes, filter the data yourself */
+  readonly filterChange = output<TableFilterChangeEvent>();
+
   protected readonly sizes = TABLE_SIZES;
   protected readonly aligns = TABLE_ALIGNS;
   protected readonly layouts = TABLE_LAYOUTS;
@@ -123,6 +144,14 @@ export class TTable {
   protected readonly sortTypes = TABLE_SORT_TYPES;
 
   private readonly innerSort = signal<TableSortInfo[]>([]);
+
+  private readonly innerFilterValue = signal<TableFilterValue>({});
+
+  /** 筛选面板里的草稿值，开启 showConfirmAndReset 时点「确定」才提交。 */
+  private readonly draftFilterValue = signal<TableFilterValue>({});
+
+  /** 当前展开筛选面板的列。 */
+  private readonly openedFilterKey = signal<string | null>(null);
 
   private readonly cellDirectives = contentChildren(TTableCell);
 
@@ -190,6 +219,12 @@ export class TTable {
     return new Map(list.map((info) => [info.sortBy, info.descending ? 'desc' : 'asc'] as const));
   });
 
+  /** 当前筛选值：受控时用外部传入的，否则用内部状态。 */
+  protected readonly filterState = computed<TableFilterValue>(() => {
+    const controlled = this.filterValue();
+    return controlled === undefined ? this.innerFilterValue() : controlled;
+  });
+
   /** 展示用数据：受控排序时原样返回，否则按本地排序重排。 */
   protected readonly rows = computed(() => {
     const data = this.data();
@@ -214,6 +249,13 @@ export class TTable {
       const defaultSort = this.defaultSort();
       untracked(() => {
         if (defaultSort !== undefined) this.innerSort.set(this.normalizeSort(defaultSort));
+      });
+    });
+
+    effect(() => {
+      const defaultFilterValue = this.defaultFilterValue();
+      untracked(() => {
+        if (defaultFilterValue !== undefined) this.innerFilterValue.set({ ...defaultFilterValue });
       });
     });
   }
@@ -252,6 +294,81 @@ export class TTable {
     this.sortChange.emit(value);
   }
 
+  /** 该列是否配置了筛选。 */
+  protected hasFilter(col: TableColumn): boolean {
+    const filter = col.filter;
+    return !!filter && Object.keys(filter).length > 0;
+  }
+
+  /** 筛选控件类型，缺省为多选（与 TDesign 文档示例一致）。 */
+  protected filterTypeOf(col: TableColumn): TableFilterType {
+    return col.filter?.type ?? 'multiple';
+  }
+
+  /** 有筛选值时筛选图标进入激活态。 */
+  protected hasFilterValue(col: TableColumn): boolean {
+    const value = this.filterState()[col.colKey];
+    if (Array.isArray(value)) return value.length > 0;
+    if (value !== null && typeof value === 'object') return Object.keys(value).length > 0;
+    return !['null', '', 'undefined'].includes(String(value));
+  }
+
+  protected draftValueOf(col: TableColumn): any {
+    return this.draftFilterValue()[col.colKey];
+  }
+
+  protected filterVisible(col: TableColumn): boolean {
+    return this.openedFilterKey() === col.colKey;
+  }
+
+  protected handleFilterVisibleChange(col: TableColumn, visible: boolean): void {
+    if (visible) {
+      this.openedFilterKey.set(col.colKey);
+      // 打开面板时同步一次草稿，保证面板展示的是当前生效值
+      this.draftFilterValue.set({ ...this.filterState() });
+      return;
+    }
+    if (this.openedFilterKey() === col.colKey) this.openedFilterKey.set(null);
+  }
+
+  /** 选项类控件改值：草稿必更新，未开启「确定」按钮时立即提交。 */
+  protected handleFilterOptionChange(col: TableColumn, value: unknown): void {
+    const filter = col.filter;
+    if (!filter) return;
+
+    const next = { ...this.draftFilterValue(), [col.colKey]: value };
+    this.draftFilterValue.set(next);
+    if (!filter.showConfirmAndReset) this.commitFilter(col, next, 'filter-change');
+  }
+
+  /** 输入类控件改值：与上游一致，未开启「确定」按钮时随输入立即提交。 */
+  protected handleFilterTextChange(col: TableColumn, value: unknown): void {
+    const filter = col.filter;
+    if (!filter) return;
+
+    const next = { ...this.draftFilterValue(), [col.colKey]: value };
+    this.draftFilterValue.set(next);
+    if (!filter.showConfirmAndReset) this.commitFilter(col, next, 'filter-change');
+  }
+
+  protected handleFilterConfirm(col: TableColumn): void {
+    this.commitFilter(col, this.draftFilterValue(), 'confirm');
+    this.openedFilterKey.set(null);
+    this.draftFilterValue.set({ ...this.filterState() });
+  }
+
+  protected handleFilterReset(col: TableColumn): void {
+    const filter = col.filter;
+    if (!filter) return;
+
+    const resetValue = filter.resetValue !== undefined ? filter.resetValue : this.emptyFilterValueOf(col);
+    const next = { ...this.draftFilterValue(), [col.colKey]: resetValue };
+    this.draftFilterValue.set(next);
+    this.commitFilter(col, next, 'reset');
+    this.openedFilterKey.set(null);
+    this.draftFilterValue.set({ ...this.filterState() });
+  }
+
   protected cellTemplate(col: TableColumn): TemplateRef<unknown> | null {
     return this.cellTemplates().get(col.colKey) ?? null;
   }
@@ -281,10 +398,19 @@ export class TTable {
       .join(' ');
   }
 
+  /** 表头内层容器：sortable / filterable 类挂在这里，表头本身保持表格单元格布局。 */
+  protected headerTitleClasses(col: TableColumn): string {
+    return [
+      col.sorter ? 't-table__cell--sortable' : '',
+      this.hasFilter(col) ? 't-table__cell--filterable' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
   protected headerCellClasses(col: TableColumn): string {
     return [
       this.cellClasses(col),
-      col.sorter ? 't-table__cell--sortable' : '',
       this.sortOrderOf(col.colKey) ? 't-table__sort-column' : '',
     ]
       .filter(Boolean)
@@ -303,6 +429,22 @@ export class TTable {
   private normalizeSort(sort: TableSort | undefined): TableSortInfo[] {
     if (!sort) return [];
     return Array.isArray(sort) ? sort : [sort];
+  }
+
+  /** 重置时的空值：单选 / 输入为空串，多选为空数组。 */
+  private emptyFilterValueOf(col: TableColumn): unknown {
+    switch (this.filterTypeOf(col)) {
+      case 'single':
+      case 'input':
+        return '';
+      default:
+        return [];
+    }
+  }
+
+  private commitFilter(col: TableColumn, value: TableFilterValue, trigger: TableFilterChangeContext['trigger']): void {
+    if (this.filterValue() === undefined) this.innerFilterValue.set(value);
+    this.filterChange.emit({ filterValue: value, value: value[col.colKey], col, trigger });
   }
 
   private compare(a: TableRow, b: TableRow, key: string, col?: TableColumn): number {

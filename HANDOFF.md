@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-19，对应提交：`12eb354`（Table 第一层）之后的未提交改动（Table 第二层）。
+> 更新日期：2026-11-19，对应提交：`d98dd33`（Table 第二层）之后的未提交改动（Table 第三层：表头筛选）。
 
 ## 1. 这个项目是什么
 
@@ -23,7 +23,7 @@
 | P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination 已完成；**Table 进行中**；Tabs / Collapse / List / Empty / Progress 未开始 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **27 个组件、298 个输入属性、115 个示例**，合计 `missing 0 / extra 0`。
+当前 `align-check` 覆盖 **27 个组件、300 个输入属性、116 个示例**，合计 `missing 0 / extra 0`。
 
 组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tag、textarea、tooltip。
 
@@ -73,26 +73,27 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：Table 第二层
+## 7. 当前进行中的工作：Table 第三层（表头筛选）
 
 **已完成（未提交）**：
 
-- `TTableCell` 指令：`<ng-template tTableCell="colKey" let-row let-value="value">`，模板上下文 `{ $implicit: row, row, value, rowIndex, col, colIndex }`。
-- 列级排序：`TableColumn.sorter?: boolean | ((a, b) => number)`、`sortType?: 'all' | 'asc' | 'desc'`。
-- 表级排序：`sort`（受控，传入后不本地排序）、`defaultSort`、`multipleSort`（默认单列，点新列会替换）、`(sortChange)` 输出 `TableSort | undefined`。
-- 表头结构对齐上游：`t-table__cell--title` / `t-table__cell--sort-trigger` / `t-table__double-icons` / `t-table__sort-icon` + `t-table-sort-asc|desc` + `t-negative-rotate-180`。
-- 文档站新增 `table-sort`、`table-cell` 两个示例（`/table` 现有 6 个示例）。
+- 列配置新增 `filter?: TableColumnFilter`：`{ type?: 'single' | 'multiple' | 'input'; list?: TableFilterOption[]; showConfirmAndReset?: boolean; resetValue?: any }`，`type` 缺省 `'multiple'`。
+- 表级：`filterValue`（受控）/ `defaultFilterValue` / `(filterChange)`；事件对象 `TableFilterChangeEvent { filterValue, value, col, trigger }`，`trigger ∈ 'filter-change' | 'confirm' | 'reset' | 'clear'`。
+- 与上游语义一致：**表格不本地过滤数据**，筛选值只是「选中状态 + 事件」，使用方在 `(filterChange)` 里自行过滤 `data`（demo 即如此）。
+- 面板复用 `t-popup`：`placement="bottom-right"`、`destroyOnClose`、`overlayClassName="t-table__filter-pop"`；宿主 class `t-table__filter-icon`，有值时加 `t-is-focus`（漏斗变主题色）。
+- 表头结构对齐上游：`th > .t-table__th-cell-inner > .t-table__cell--sortable/.filterable > .t-table__cell--title > span + .t-table__filter-icon-wrap`，排序触发器与漏斗同处一个 icon-wrap（`t-table--bordered` 下靠 `space-between; flex: 1` 左右分列）。
+- 交互：`showConfirmAndReset` 时面板底部出「重置 / 确定」两个 small 按钮，点确定才提交；否则选项类改值立即提交、`input` 回车或失焦提交。重置值 `filter.resetValue ?? (single|input → ''，multiple → [])`。
+- 文档站新增 `table-filter` 示例（`/table` 现有 7 个示例）。
 
-**已用 CDP 验证**：默认按积分倒序 → 点姓名正序 → 再点倒序 → 再点取消恢复原序；模板单元格里 `t-tag` 正常渲染、按钮点击回调拿到整行；`consoleErrors` 为空。
+**已用 CDP 验证**（`http://localhost:4280/table`）：角色列（single + 确认）选值后表格不变、点确定后过滤到 2 行且面板关闭、图标 `t-is-focus`；状态列（multiple）点选即过滤、图标高亮；重置后恢复原数据且图标失去高亮；邮箱列输入 `zhangsan` 回车后只剩 1 行；排序点击后 `th.t-table__sort-column`、`t-table__sort-icon--active` 正确。DOM 尺寸：icon-wrap 16×16 + `margin-left: 8px`，漏斗面板箭头对准图标。
 
 **下一步（建议顺序）**：
 
-1. **表头筛选**：`filter: { list, showConfirmAndReset, type }` + `filterValue` / `defaultFilterValue` + `(filterChange)`；面板可复用 Popup。
-2. **固定列**：`col.fixed: 'left' | 'right'`，需要 `t-table__cell--fixed-*` 与滚动阴影类。
-3. **行选择 / 展开行**：`t-table__cell-check`、`t-table__row--selected`、`t-table__expanded-row`。
-4. **分页联动**：`pagination` + `(pageChange)`，内部接 TPagination。
-5. **虚拟滚动 / 多级表头 / 合并单元格 / 列宽拖拽**。
-6. Table 收尾后继续 P4 的 Tabs / Collapse / List / Empty / Progress。
+1. **固定列**：`col.fixed: 'left' | 'right'`，需要 `t-table__cell--fixed-*` 与滚动阴影类。
+2. **行选择 / 展开行**：`t-table__cell-check`、`t-table__row--selected`、`t-table__expanded-row`。
+3. **分页联动**：`pagination` + `(pageChange)`，内部接 TPagination。
+4. **虚拟滚动 / 多级表头 / 合并单元格 / 列宽拖拽**。
+5. Table 收尾后继续 P4 的 Tabs / Collapse / List / Empty / Progress。
 
 ## 8. 已知缺口与技术债
 

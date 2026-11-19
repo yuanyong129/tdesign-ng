@@ -6,56 +6,126 @@
           <tr>
             @for (col of columns(); track col.colKey) {
               <th [class]="headerCellClasses(col)" [style]="columnStyle(col)">
-                <div class="t-table__cell--title">
-                  <span>{{ col.title ?? '' }}</span>
-                  @if (col.sorter) {
-                    <div
-                      class="t-table__cell--sort-trigger"
-                      [class.t-table__double-icons]="(col.sortType ?? 'all') === 'all'"
-                      (click)="handleSort(col)"
-                    >
-                      <span
-                        class="t-icon t-table__sort-icon t-table-sort-asc t-negative-rotate-180"
-                        [class.t-table__sort-icon--active]="sortOrderOf(col.colKey) === 'asc'"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          width="1em"
-                          height="1em"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-linecap="square"
-                            stroke-width="2"
-                            d="M6.5 9.5L12 15L17.5 9.5"
-                          />
-                        </svg>
-                      </span>
-                      <span
-                        class="t-icon t-table__sort-icon t-table-sort-desc"
-                        [class.t-table__sort-icon--active]="sortOrderOf(col.colKey) === 'desc'"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          width="1em"
-                          height="1em"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-linecap="square"
-                            stroke-width="2"
-                            d="M6.5 9.5L12 15L17.5 9.5"
-                          />
-                        </svg>
-                      </span>
+                <div class="t-table__th-cell-inner">
+                  <div [class]="headerTitleClasses(col)">
+                    <div class="t-table__cell--title">
+                      <span>{{ col.title ?? '' }}</span>
+                      @if (col.sorter || hasFilter(col)) {
+                        <div class="t-table__filter-icon-wrap">
+                          @if (col.sorter) {
+                            <div
+                              class="t-table__cell--sort-trigger"
+                              [class.t-table__double-icons]="(col.sortType ?? 'all') === 'all'"
+                              (click)="handleSort(col)"
+                            >
+                              <span
+                                class="t-icon t-table__sort-icon t-table-sort-asc t-negative-rotate-180"
+                                [class.t-table__sort-icon--active]="sortOrderOf(col.colKey) === 'asc'"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  height="1em"
+                                  aria-hidden="true"
+                                >
+                                  <path
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-linecap="square"
+                                    stroke-width="2"
+                                    d="M6.5 9.5L12 15L17.5 9.5"
+                                  />
+                                </svg>
+                              </span>
+                              <span
+                                class="t-icon t-table__sort-icon t-table-sort-desc"
+                                [class.t-table__sort-icon--active]="sortOrderOf(col.colKey) === 'desc'"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  height="1em"
+                                  aria-hidden="true"
+                                >
+                                  <path
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-linecap="square"
+                                    stroke-width="2"
+                                    d="M6.5 9.5L12 15L17.5 9.5"
+                                  />
+                                </svg>
+                              </span>
+                            </div>
+                          }
+                          @if (hasFilter(col)) {
+                            <t-popup
+                              class="t-table__filter-icon"
+                              [class.t-is-focus]="hasFilterValue(col)"
+                              placement="bottom-right"
+                              trigger="click"
+                              destroyOnClose
+                              overlayClassName="t-table__filter-pop"
+                              [visible]="filterVisible(col)"
+                              (visibleChange)="handleFilterVisibleChange(col, $event)"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                width="1em"
+                                height="1em"
+                                aria-hidden="true"
+                              >
+                                <path fill="transparent" d="M19.5 4H4.5L10.5 12.5V20H13.5V12.5L19.5 4Z" />
+                                <path
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-linecap="square"
+                                  stroke-width="2"
+                                  d="M19.5 4H4.5L10.5 12.5V20H13.5V12.5L19.5 4Z"
+                                />
+                              </svg>
+                              <div tPopupContent class="t-table__filter-pop-content">
+                                <div class="t-table__filter-pop-content-inner">
+                                  @switch (filterTypeOf(col)) {
+                                    @case ('single') {
+                                      <t-radio-group
+                                        direction="vertical"
+                                        [options]="col.filter?.list ?? []"
+                                        [value]="draftValueOf(col)"
+                                        (valueChange)="handleFilterOptionChange(col, $event)"
+                                      />
+                                    }
+                                    @case ('input') {
+                                      <t-input
+                                        [value]="draftValueOf(col) ?? ''"
+                                        (valueChange)="handleFilterTextChange(col, $event)"
+                                      />
+                                    }
+                                    @default {
+                                      <t-checkbox-group
+                                        [options]="col.filter?.list ?? []"
+                                        [value]="draftValueOf(col) ?? []"
+                                        (valueChange)="handleFilterOptionChange(col, $event)"
+                                      />
+                                    }
+                                  }
+                                </div>
+                                @if (col.filter?.showConfirmAndReset) {
+                                  <div class="t-table__filter--bottom-buttons">
+                                    <t-button theme="default" size="small" (click)="handleFilterReset(col)">重置</t-button>
+                                    <t-button theme="primary" size="small" (click)="handleFilterConfirm(col)">确定</t-button>
+                                  </div>
+                                }
+                              </div>
+                            </t-popup>
+                          }
+                        </div>
+                      }
                     </div>
-                  }
+                  </div>
                 </div>
               </th>
             }

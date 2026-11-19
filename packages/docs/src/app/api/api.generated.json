@@ -3084,6 +3084,24 @@
           "zh": "是否支持多列排序",
           "en": "Whether multiple column sorting is allowed",
           "values": []
+        },
+        {
+          "name": "filterValue",
+          "type": "TableFilterValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控筛选值，传入后表格不再自己记录筛选状态",
+          "en": "Controlled filter value, the table stops keeping filter state once provided",
+          "values": []
+        },
+        {
+          "name": "defaultFilterValue",
+          "type": "TableFilterValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认筛选值，仅初始生效",
+          "en": "Default filter value, applied initially",
+          "values": []
         }
       ],
       "outputs": [
@@ -3092,6 +3110,12 @@
           "type": "TableSort | undefined",
           "zh": "排序变化",
           "en": "Emitted when the sort changes"
+        },
+        {
+          "name": "filterChange",
+          "type": "TableFilterChangeEvent",
+          "zh": "筛选变化，表格本身不改变数据，需要在使用方自行过滤",
+          "en": "Emitted when the filter changes, filter the data yourself"
         }
       ]
     },

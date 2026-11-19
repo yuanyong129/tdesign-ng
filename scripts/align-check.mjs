@@ -294,10 +294,9 @@ const CONFIG = {
     upstream: 'table',
     upstreamInterface: 'TdBaseTableProps',
     renames: {},
-    // loadingText 是 Angular 侧的独立文字属性，上游是 loading 的 TNode
     // loadingText 是 Angular 侧的独立文字属性，上游是 loading 的 TNode；
-    // sort / defaultSort 来自上游 TdPrimaryTableProps（本处对比的是 TdBaseTableProps）
-    angularOnly: ['loadingText', 'sort', 'defaultSort', 'multipleSort'],
+    // sort / defaultSort / filterValue / defaultFilterValue 来自上游 TdPrimaryTableProps（本处对比的是 TdBaseTableProps）
+    angularOnly: ['loadingText', 'sort', 'defaultSort', 'multipleSort', 'filterValue', 'defaultFilterValue'],
     ignoreUpstream: {
       'activeRowKeys': '行选中在后续版本实现',
       'defaultActiveRowKeys': '行选中在后续版本实现',
@@ -345,6 +344,7 @@ const CONFIG = {
       'onRowMouseover': '行事件在后续版本实现',
       'onRowMouseup': '行事件在后续版本实现',
       'onSortChange': 'Angular 用 (sortChange) 输出',
+      'onFilterChange': 'Angular 用 (filterChange) 输出',
       'onScroll': '滚动事件暂未暴露',
       'onScrollX': '横向滚动事件暂未暴露',
       'onScrollY': '纵向滚动事件暂未暴露',

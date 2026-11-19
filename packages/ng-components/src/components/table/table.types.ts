@@ -26,6 +26,56 @@ export const TABLE_SORT_TYPES = ['all', 'asc', 'desc'] as const;
 
 export type TableSortType = (typeof TABLE_SORT_TYPES)[number];
 
+/** 筛选控件类型，与 TDesign 的 FilterType 一致。 */
+export const TABLE_FILTER_TYPES = ['input', 'single', 'multiple'] as const;
+
+export type TableFilterType = (typeof TABLE_FILTER_TYPES)[number];
+
+/** 筛选项，与 TDesign 的 OptionData 对齐。 */
+export interface TableFilterOption {
+  /** 展示文字 */
+  label?: string;
+  /** 选项值 */
+  value: string | number;
+  /** 是否禁用 */
+  disabled?: boolean;
+}
+
+/** 列筛选配置，与 TDesign 的 TableColumnFilter 对齐。 */
+export interface TableColumnFilter {
+  /** 筛选列表，`single` / `multiple` 时生效 */
+  list?: TableFilterOption[];
+  /** 筛选控件类型 */
+  type?: TableFilterType;
+  /** 是否显示「重置」「确定」按钮，开启后点击确定才提交 */
+  showConfirmAndReset?: boolean;
+  /** 重置时使用的值 */
+  resetValue?: unknown;
+}
+
+/** 筛选值：colKey → 该列的筛选值。 */
+export type TableFilterValue = Record<string, unknown>;
+
+/** 筛选变化上下文，与 TDesign 的 TableFilterChangeContext 对齐。 */
+export interface TableFilterChangeContext<T extends TableRow = TableRow> {
+  /** 触发的列 */
+  col: TableColumn<T>;
+  /** 触发方式 */
+  trigger: 'filter-change' | 'confirm' | 'reset' | 'clear';
+}
+
+/** 筛选变化事件。 */
+export interface TableFilterChangeEvent<T extends TableRow = TableRow> {
+  /** 完整筛选值，可直接用于过滤数据 */
+  filterValue: TableFilterValue;
+  /** 当前列的筛选值 */
+  value: unknown;
+  /** 触发的列 */
+  col: TableColumn<T>;
+  /** 触发方式 */
+  trigger: TableFilterChangeContext['trigger'];
+}
+
 /** 单列排序信息，与 TDesign 的 SortInfo 一致。 */
 export interface TableSortInfo {
   sortBy: string;
@@ -73,4 +123,6 @@ export interface TableColumn<T extends TableRow = TableRow> {
   sorter?: boolean | ((a: T, b: T) => number);
   /** 排序触发方式，默认 asc → desc → 取消 */
   sortType?: TableSortType;
+  /** 列筛选配置 */
+  filter?: TableColumnFilter;
 }
