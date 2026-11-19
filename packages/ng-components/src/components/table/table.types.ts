@@ -99,6 +99,43 @@ export interface TableCellContext<T extends TableRow = TableRow> {
   value: unknown;
 }
 
+/** 行选择类型：单选 / 多选。 */
+export const TABLE_ROW_SELECTION_TYPES = ['single', 'multiple'] as const;
+
+export type TableRowSelectionType = (typeof TABLE_ROW_SELECTION_TYPES)[number];
+
+/** 选中行变化事件，字段与 TDesign 的 SelectOptions 对齐。 */
+export interface TableSelectChangeEvent<T extends TableRow = TableRow> {
+  /** 选中行的 key 列表 */
+  selectedRowKeys: Array<string | number>;
+  /** 选中行的数据 */
+  selectedRowData: T[];
+  /** 本次是选中还是取消选中 */
+  type: 'check' | 'uncheck';
+  /** 本次操作的行 key */
+  currentRowKey?: string | number;
+  /** 本次操作的行数据 */
+  currentRowData?: T;
+}
+
+/** 展开行变化事件，字段与 TDesign 的 ExpandOptions 对齐。 */
+export interface TableExpandChangeEvent<T extends TableRow = TableRow> {
+  /** 展开行的 key 列表 */
+  expandedRowKeys: Array<string | number>;
+  /** 展开行的数据 */
+  expandedRowData: T[];
+  /** 本次操作的行数据 */
+  currentRowData?: T;
+}
+
+/** 展开行模板上下文。 */
+export interface TableExpandedRowContext<T extends TableRow = TableRow> {
+  /** 当前行数据 */
+  row: T;
+  /** 行下标 */
+  rowIndex: number;
+}
+
 /** 固定列位置。 */
 export const TABLE_COLUMN_FIXED = ['left', 'right'] as const;
 
@@ -120,6 +157,8 @@ export interface TableColumn<T extends TableRow = TableRow> {
   ellipsis?: boolean;
   /** 固定列位置，固定列需要同时声明宽度，否则横向滚动时无法计算偏移 */
   fixed?: TableColumnFixed;
+  /** 列类型，`single` / `multiple` 时该列渲染为行选择列，宽度默认 64 */
+  type?: TableRowSelectionType;
   /** 自定义单元格文本 */
   cell?: (context: TableCellContext<T>) => string;
   /** 列附加类名 */

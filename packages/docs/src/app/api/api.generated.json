@@ -3102,6 +3102,87 @@
           "zh": "默认筛选值，仅初始生效",
           "en": "Default filter value, applied initially",
           "values": []
+        },
+        {
+          "name": "selectedRowKeys",
+          "type": "Array<string | number> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控的选中行 key，传入后表格不再自己记录选中状态",
+          "en": "Controlled selected row keys, the table stops keeping selection state once provided",
+          "values": []
+        },
+        {
+          "name": "defaultSelectedRowKeys",
+          "type": "Array<string | number> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认选中的行 key，仅初始生效",
+          "en": "Default selected row keys, applied initially",
+          "values": []
+        },
+        {
+          "name": "indeterminateSelectedRowKeys",
+          "type": "Array<string | number>",
+          "default": "[]",
+          "required": false,
+          "zh": "半选状态的行 key，用于表格外部控制半选",
+          "en": "Row keys in indeterminate state",
+          "values": []
+        },
+        {
+          "name": "rowSelectionAllowUncheck",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "单选时是否允许再次点击取消选中",
+          "en": "Whether clicking a selected row again deselects it in single mode",
+          "values": []
+        },
+        {
+          "name": "selectOnRowClick",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "点击行时选中该行",
+          "en": "Whether clicking a row selects it",
+          "values": []
+        },
+        {
+          "name": "expandedRowKeys",
+          "type": "Array<string | number> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控的展开行 key，传入后表格不再自己记录展开状态",
+          "en": "Controlled expanded row keys, the table stops keeping expand state once provided",
+          "values": []
+        },
+        {
+          "name": "defaultExpandedRowKeys",
+          "type": "Array<string | number> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认展开的行 key，仅初始生效",
+          "en": "Default expanded row keys, applied initially",
+          "values": []
+        },
+        {
+          "name": "expandOnRowClick",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "点击行时展开 / 收起该行",
+          "en": "Whether clicking a row toggles its expanded state",
+          "values": []
+        },
+        {
+          "name": "expandIcon",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示展开图标列",
+          "en": "Whether to show the expand icon column",
+          "values": []
         }
       ],
       "outputs": [
@@ -3116,6 +3197,18 @@
           "type": "TableFilterChangeEvent",
           "zh": "筛选变化，表格本身不改变数据，需要在使用方自行过滤",
           "en": "Emitted when the filter changes, filter the data yourself"
+        },
+        {
+          "name": "selectChange",
+          "type": "TableSelectChangeEvent",
+          "zh": "选中行变化",
+          "en": "Emitted when the selected rows change"
+        },
+        {
+          "name": "expandChange",
+          "type": "TableExpandChangeEvent",
+          "zh": "展开行变化",
+          "en": "Emitted when the expanded rows change"
         }
       ]
     },

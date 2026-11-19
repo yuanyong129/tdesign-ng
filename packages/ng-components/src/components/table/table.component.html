@@ -4,9 +4,20 @@
       @if (showHeader()) {
         <thead class="t-table__header">
           <tr>
-            @for (col of columns(); track col.colKey) {
+            @for (col of displayColumns(); track col.colKey) {
               <th [class]="headerCellClasses(col)" [style]="columnStyle(col)" [attr.data-colkey]="col.colKey">
                 <div class="t-table__th-cell-inner">
+                  @if (col.colKey === expandColumnKey) {
+                    <!-- 展开图标列，表头留空 -->
+                  } @else if (col.type === 'multiple') {
+                    <t-checkbox
+                      [checked]="allSelected()"
+                      [indeterminate]="partiallySelected()"
+                      (checkedChange)="handleSelectAll($event)"
+                    />
+                  } @else if (col.type === 'single') {
+                    <span>{{ col.title ?? '' }}</span>
+                  } @else {
                   <div [class]="headerTitleClasses(col)">
                     <div class="t-table__cell--title">
                       <span>{{ col.title ?? '' }}</span>
@@ -126,6 +137,7 @@
                       }
                     </div>
                   </div>
+                  }
                 </div>
               </th>
             }
@@ -135,29 +147,82 @@
 
       <tbody class="t-table__body">
         @for (row of rows(); track trackRow($index, row); let rowIndex = $index) {
-          <tr>
-            @for (col of columns(); track col.colKey; let colIndex = $index) {
+          <tr [class]="rowClasses(row)" (click)="handleRowClick(row)">
+            @for (col of displayColumns(); track col.colKey; let colIndex = $index) {
               <td [class]="cellClasses(col)" [style]="columnStyle(col)">
-                @if (cellTemplate(col); as tpl) {
-                  <ng-container
-                    [ngTemplateOutlet]="tpl"
-                    [ngTemplateOutletContext]="cellContext(row, col, rowIndex, colIndex)"
-                  />
-                } @else if (col.ellipsis) {
-                  <div class="t-table__ellipsis" [attr.title]="cellText(row, col, rowIndex, colIndex)">
-                    {{ cellText(row, col, rowIndex, colIndex) }}
+                @if (col.colKey === expandColumnKey) {
+                  <div
+                    class="t-table__expand-box"
+                    [class.t-positive-rotate-90]="isRowExpanded(row)"
+                    (click)="handleExpandClick($event, row)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      height="1em"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" />
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="square"
+                        stroke-width="2"
+                        d="M10.5 8.5L14 12L10.5 15.5"
+                      />
+                    </svg>
                   </div>
+                } @else if (col.type === 'multiple') {
+                  <t-checkbox
+                    [checked]="isRowSelected(row)"
+                    [indeterminate]="isRowIndeterminate(row)"
+                    (click)="$event.stopPropagation()"
+                    (checkedChange)="handleSelectRow(row, $event)"
+                  />
+                } @else if (col.type === 'single') {
+                  <t-radio
+                    [checked]="isRowSelected(row)"
+                    [allowUncheck]="rowSelectionAllowUncheck()"
+                    (click)="$event.stopPropagation()"
+                    (checkedChange)="handleSelectRow(row, $event)"
+                  />
                 } @else {
-                  {{ cellText(row, col, rowIndex, colIndex) }}
+                  @if (cellTemplate(col); as tpl) {
+                    <ng-container
+                      [ngTemplateOutlet]="tpl"
+                      [ngTemplateOutletContext]="cellContext(row, col, rowIndex, colIndex)"
+                    />
+                  } @else if (col.ellipsis) {
+                    <div class="t-table__ellipsis" [attr.title]="cellText(row, col, rowIndex, colIndex)">
+                      {{ cellText(row, col, rowIndex, colIndex) }}
+                    </div>
+                  } @else {
+                    {{ cellText(row, col, rowIndex, colIndex) }}
+                  }
                 }
               </td>
             }
           </tr>
+          @if (expandedRowTemplate(); as expanded) {
+            @if (isRowExpanded(row)) {
+              <tr class="t-table__expanded-row">
+                <td [attr.colspan]="displayColumns().length">
+                  <div class="t-table__expanded-row-inner">
+                    <ng-container
+                      [ngTemplateOutlet]="expanded.template"
+                      [ngTemplateOutletContext]="expandedRowContext(row, rowIndex)"
+                    />
+                  </div>
+                </td>
+              </tr>
+            }
+          }
         }
 
         @if (!rows().length) {
           <tr class="t-table__row--full">
-            <td [attr.colspan]="columns().length">
+            <td [attr.colspan]="displayColumns().length">
               <div class="t-table__empty">{{ empty() }}</div>
             </td>
           </tr>

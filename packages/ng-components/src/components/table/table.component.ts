@@ -10,6 +10,7 @@ import {
   afterNextRender,
   booleanAttribute,
   computed,
+  contentChild,
   contentChildren,
   effect,
   inject,
@@ -20,11 +21,12 @@ import {
   viewChild,
 } from '@angular/core';
 import { TButton } from '../button';
-import { TCheckboxGroup } from '../checkbox';
+import { TCheckbox, TCheckboxGroup } from '../checkbox';
 import { TInput } from '../input';
 import { TPopup } from '../popup';
-import { TRadioGroup } from '../radio';
+import { TRadio, TRadioGroup } from '../radio';
 import { TTableCell } from './table-cell.directive';
+import { TTableExpandedRow } from './table-expanded-row.directive';
 import {
   TABLE_ALIGNS,
   TABLE_LAYOUTS,
@@ -32,12 +34,15 @@ import {
   TABLE_SORT_TYPES,
   TABLE_VERTICAL_ALIGNS,
   TableColumn,
+  TableExpandChangeEvent,
   TableFilterChangeEvent,
   TableFilterChangeContext,
   TableFilterType,
   TableFilterValue,
   TableLayout,
   TableRow,
+  TableRowSelectionType,
+  TableSelectChangeEvent,
   TableSize,
   TableSort,
   TableSortInfo,
@@ -50,6 +55,9 @@ const SIZE_CLASS: Record<TableSize, string> = {
   medium: '',
   large: 't-size-l',
 };
+
+/** 展开图标列的 colKey，与 TDesign 保持一致。 */
+const EXPAND_COLUMN_KEY = '__EXPAND_ROW_ICON_COLUMN__';
 
 /**
  * 表格。
@@ -65,7 +73,7 @@ const SIZE_CLASS: Record<TableSize, string> = {
 @Component({
   selector: 't-table',
   standalone: true,
-  imports: [NgTemplateOutlet, TButton, TCheckboxGroup, TInput, TPopup, TRadioGroup],
+  imports: [NgTemplateOutlet, TButton, TCheckbox, TCheckboxGroup, TInput, TPopup, TRadio, TRadioGroup],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './table.component.html',
@@ -143,11 +151,55 @@ export class TTable implements OnDestroy {
   /** @zh 筛选变化，表格本身不改变数据，需要在使用方自行过滤 @en Emitted when the filter changes, filter the data yourself */
   readonly filterChange = output<TableFilterChangeEvent>();
 
+  /**
+   * @zh 受控的选中行 key，传入后表格不再自己记录选中状态 @en Controlled selected row keys, the table stops keeping selection state once provided
+   * @defaultValue undefined
+   */
+  readonly selectedRowKeys = input<Array<string | number> | undefined>(undefined);
+
+  /** @zh 默认选中的行 key，仅初始生效 @en Default selected row keys, applied initially @defaultValue undefined */
+  readonly defaultSelectedRowKeys = input<Array<string | number> | undefined>(undefined);
+
+  /** @zh 半选状态的行 key，用于表格外部控制半选 @en Row keys in indeterminate state @defaultValue [] */
+  readonly indeterminateSelectedRowKeys = input<Array<string | number>>([]);
+
+  /**
+   * @zh 单选时是否允许再次点击取消选中 @en Whether clicking a selected row again deselects it in single mode
+   * @defaultValue false
+   */
+  readonly rowSelectionAllowUncheck = input(false, { transform: booleanAttribute });
+
+  /** @zh 点击行时选中该行 @en Whether clicking a row selects it @defaultValue false */
+  readonly selectOnRowClick = input(false, { transform: booleanAttribute });
+
+  /** @zh 选中行变化 @en Emitted when the selected rows change */
+  readonly selectChange = output<TableSelectChangeEvent>();
+
+  /**
+   * @zh 受控的展开行 key，传入后表格不再自己记录展开状态 @en Controlled expanded row keys, the table stops keeping expand state once provided
+   * @defaultValue undefined
+   */
+  readonly expandedRowKeys = input<Array<string | number> | undefined>(undefined);
+
+  /** @zh 默认展开的行 key，仅初始生效 @en Default expanded row keys, applied initially @defaultValue undefined */
+  readonly defaultExpandedRowKeys = input<Array<string | number> | undefined>(undefined);
+
+  /** @zh 点击行时展开 / 收起该行 @en Whether clicking a row toggles its expanded state @defaultValue false */
+  readonly expandOnRowClick = input(false, { transform: booleanAttribute });
+
+  /** @zh 是否显示展开图标列 @en Whether to show the expand icon column @defaultValue true */
+  readonly expandIcon = input(true, { transform: booleanAttribute });
+
+  /** @zh 展开行变化 @en Emitted when the expanded rows change */
+  readonly expandChange = output<TableExpandChangeEvent>();
+
   protected readonly sizes = TABLE_SIZES;
   protected readonly aligns = TABLE_ALIGNS;
   protected readonly layouts = TABLE_LAYOUTS;
   protected readonly verticalAligns = TABLE_VERTICAL_ALIGNS;
   protected readonly sortTypes = TABLE_SORT_TYPES;
+  /** 展开图标列的 colKey，模板里用来判断特殊列。 */
+  protected readonly expandColumnKey = EXPAND_COLUMN_KEY;
 
   private readonly innerSort = signal<TableSortInfo[]>([]);
 
@@ -159,7 +211,59 @@ export class TTable implements OnDestroy {
   /** 当前展开筛选面板的列。 */
   private readonly openedFilterKey = signal<string | null>(null);
 
+  /** 内部选中行 key，受控时忽略。 */
+  private readonly innerSelectedRowKeys = signal<Array<string | number>>([]);
+
+  /** 内部展开行 key，受控时忽略。 */
+  private readonly innerExpandedRowKeys = signal<Array<string | number>>([]);
+
   private readonly injector = inject(Injector);
+
+  /** 展开行模板。 */
+  protected readonly expandedRowTemplate = contentChild(TTableExpandedRow);
+
+  /** 行选择列：`type` 为 single / multiple 的列。 */
+  protected readonly selectColumn = computed(
+    () => this.columns().find((col) => col.type === 'single' || col.type === 'multiple') ?? null,
+  );
+
+  /** 行选择类型。 */
+  protected readonly selectionType = computed<TableRowSelectionType | null>(() => this.selectColumn()?.type ?? null);
+
+  /** 是否渲染展开图标列。 */
+  protected readonly showExpandColumn = computed(() => this.expandIcon() && !!this.expandedRowTemplate());
+
+  /** 实际渲染的列：展开图标列固定在首列。 */
+  protected readonly displayColumns = computed<TableColumn[]>(() => {
+    const columns = this.columns();
+    if (!this.showExpandColumn()) return columns;
+    return [{ colKey: EXPAND_COLUMN_KEY, width: 46, className: 't-table__expandable-icon-cell' }, ...columns];
+  });
+
+  /** 当前选中的行 key。 */
+  protected readonly selectedKeys = computed(() => this.selectedRowKeys() ?? this.innerSelectedRowKeys());
+
+  private readonly selectedKeySet = computed(() => new Set(this.selectedKeys()));
+
+  /** 当前展开的行 key。 */
+  protected readonly expandedKeys = computed(() => this.expandedRowKeys() ?? this.innerExpandedRowKeys());
+
+  private readonly expandedKeySet = computed(() => new Set(this.expandedKeys()));
+
+  /** 当前页已选中的行数。 */
+  private readonly selectedRowCount = computed(
+    () => this.data().filter((row) => this.selectedKeySet().has(this.keyOf(row))).length,
+  );
+
+  /** 是否全部选中（多选表头的复选框状态）。 */
+  protected readonly allSelected = computed(
+    () => this.data().length > 0 && this.selectedRowCount() === this.data().length,
+  );
+
+  /** 是否半选（多选表头的复选框状态）。 */
+  protected readonly partiallySelected = computed(
+    () => this.selectedRowCount() > 0 && this.selectedRowCount() < this.data().length,
+  );
 
   private readonly contentRef = viewChild<ElementRef<HTMLElement>>('content');
 
@@ -247,6 +351,8 @@ export class TTable implements OnDestroy {
       `t-table--align-${this.verticalAlign()}`,
       SIZE_CLASS[this.size()],
       this.loading() ? 't-table--loading' : '',
+      this.selectColumn() ? 't-table--row-select' : '',
+      this.showExpandColumn() ? 't-table--row-expandable' : '',
       this.hasFixedColumn() ? 't-table--column-fixed' : '',
       this.showLeftShadow() ? 't-table__content--scrollable-to-left' : '',
       this.showRightShadow() ? 't-table__content--scrollable-to-right' : '',
@@ -279,7 +385,7 @@ export class TTable implements OnDestroy {
    * 否则交回 100%，让浏览器按剩余空间分配（与上游一致）。
    */
   protected readonly tableWidth = computed(() => {
-    const columns = this.columns();
+    const columns = this.displayColumns();
     if (!columns.length) return null;
 
     const widths = columns.map((col) => this.numericWidth(col.width));
@@ -336,6 +442,20 @@ export class TTable implements OnDestroy {
       });
     });
 
+    effect(() => {
+      const defaultSelected = this.defaultSelectedRowKeys();
+      untracked(() => {
+        if (defaultSelected !== undefined) this.innerSelectedRowKeys.set([...defaultSelected]);
+      });
+    });
+
+    effect(() => {
+      const defaultExpanded = this.defaultExpandedRowKeys();
+      untracked(() => {
+        if (defaultExpanded !== undefined) this.innerExpandedRowKeys.set([...defaultExpanded]);
+      });
+    });
+
     // 固定列需要实测宽度：首屏渲染后量一次，列 / 数据变化后再量
     afterNextRender(() => this.setupFixedColumns());
 
@@ -352,6 +472,103 @@ export class TTable implements OnDestroy {
 
   protected handleScroll(event: Event): void {
     this.updateScrollState(event.target as HTMLElement);
+  }
+
+  protected isRowSelected(row: TableRow): boolean {
+    return this.selectedKeySet().has(this.keyOf(row));
+  }
+
+  protected isRowIndeterminate(row: TableRow): boolean {
+    return this.indeterminateSelectedRowKeys().includes(this.keyOf(row));
+  }
+
+  /** 行选择：单选只能选中一个，多选累加；单选允许取消时再次点击可清空。 */
+  protected handleSelectRow(row: TableRow, checked: boolean): void {
+    const key = this.keyOf(row);
+    const current = this.selectedKeys();
+    const isSingle = this.selectionType() === 'single';
+
+    if (isSingle && !checked && !this.rowSelectionAllowUncheck()) return;
+
+    const next = isSingle
+      ? checked
+        ? [key]
+        : current.filter((item) => item !== key)
+      : checked
+        ? current.includes(key)
+          ? current
+          : [...current, key]
+        : current.filter((item) => item !== key);
+
+    this.commitSelection(next, checked ? 'check' : 'uncheck', key, row);
+  }
+
+  /** 多选表头：全选当前页，同时保留不在当前页的已选 key。 */
+  protected handleSelectAll(checked: boolean): void {
+    const current = this.selectedKeys();
+    const keys = this.data().map((row) => this.keyOf(row));
+    const next = checked
+      ? Array.from(new Set([...current, ...keys]))
+      : current.filter((key) => !keys.includes(key));
+    this.commitSelection(next, checked ? 'check' : 'uncheck');
+  }
+
+  protected isRowExpanded(row: TableRow): boolean {
+    return this.expandedKeySet().has(this.keyOf(row));
+  }
+
+  protected handleExpandClick(event: Event, row: TableRow): void {
+    // 展开图标所在单元格不再触发行的点击（选中 / 展开）逻辑
+    event.stopPropagation();
+    this.toggleExpand(row);
+  }
+
+  /** 点击行：按需展开 / 选中。 */
+  protected handleRowClick(row: TableRow): void {
+    if (this.expandOnRowClick() && this.showExpandColumn()) this.toggleExpand(row);
+    if (this.selectOnRowClick() && this.selectColumn()) this.handleSelectRow(row, !this.isRowSelected(row));
+  }
+
+  protected rowClasses(row: TableRow): string {
+    return [
+      this.isRowSelected(row) ? 't-table__row--selected' : '',
+      this.showExpandColumn() ? (this.isRowExpanded(row) ? 't-table__row--expanded' : 't-table__row--folded') : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  private toggleExpand(row: TableRow): void {
+    const key = this.keyOf(row);
+    const current = this.expandedKeys();
+    const next = current.includes(key) ? current.filter((item) => item !== key) : [...current, key];
+    if (this.expandedRowKeys() === undefined) this.innerExpandedRowKeys.set(next);
+    this.expandChange.emit({
+      expandedRowKeys: next,
+      expandedRowData: this.data().filter((item) => next.includes(this.keyOf(item))),
+      currentRowData: row,
+    });
+  }
+
+  private commitSelection(
+    keys: Array<string | number>,
+    type: 'check' | 'uncheck',
+    currentRowKey?: string | number,
+    currentRowData?: TableRow,
+  ): void {
+    if (this.selectedRowKeys() === undefined) this.innerSelectedRowKeys.set(keys);
+    const selected = new Set(keys);
+    this.selectChange.emit({
+      selectedRowKeys: keys,
+      selectedRowData: this.data().filter((row) => selected.has(this.keyOf(row))),
+      type,
+      currentRowKey,
+      currentRowData,
+    });
+  }
+
+  private keyOf(row: TableRow): string | number {
+    return row?.[this.rowKey()];
   }
 
   protected sortOrderOf(colKey: string): 'asc' | 'desc' | null {
@@ -467,6 +684,11 @@ export class TTable implements OnDestroy {
     return this.cellTemplates().get(col.colKey) ?? null;
   }
 
+  /** 展开行模板上下文。 */
+  protected expandedRowContext(row: TableRow, rowIndex: number): Record<string, unknown> {
+    return { $implicit: row, row, rowIndex };
+  }
+
   protected cellContext(row: TableRow, col: TableColumn, rowIndex: number, colIndex: number): Record<string, unknown> {
     const value = row?.[col.colKey];
     // $implicit 与上游 slot 参数保持一致（整行），单元格值用 value 单独暴露
@@ -487,6 +709,7 @@ export class TTable implements OnDestroy {
     return [
       col.align ? `t-align-${col.align}` : '',
       col.ellipsis ? 't-table-td--ellipsis' : '',
+      col.type ? 't-table__cell-check' : '',
       col.className ?? '',
       fixed ? `t-table__cell--fixed-${fixed}` : '',
       fixed === 'left' && col.colKey === this.lastLeftKey() ? 't-table__cell--fixed-left-last' : '',
@@ -518,6 +741,7 @@ export class TTable implements OnDestroy {
   protected columnStyle(col: TableColumn): Record<string, string> | null {
     const style: Record<string, string> = {};
     if (col.width !== undefined) style['width'] = this.toLength(col.width);
+    if (col.type && col.width === undefined) style['width'] = '64px';
     if (col.minWidth !== undefined) style['min-width'] = this.toLength(col.minWidth);
 
     // 固定列用 sticky，偏移量必须写在单元格上
