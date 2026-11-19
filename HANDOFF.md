@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-19，对应提交：`8b67037`（Table 第四层）之后的未提交改动（Table 第五层：行选择与展开行）。
+> 更新日期：2026-11-19，对应提交：`a6a0db8`（Table 第五层）之后的未提交改动（Table 第六层：分页联动）。
 
 ## 1. 这个项目是什么
 
@@ -23,7 +23,7 @@
 | P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination 已完成；**Table 进行中**；Tabs / Collapse / List / Empty / Progress 未开始 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **27 个组件、309 个输入属性、119 个示例**，合计 `missing 0 / extra 0`。
+当前 `align-check` 覆盖 **27 个组件、311 个输入属性、120 个示例**，合计 `missing 0 / extra 0`。
 
 组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tag、textarea、tooltip。
 
@@ -73,26 +73,22 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：Table 第五层（行选择与展开行）
+## 7. 当前进行中的工作：Table 第六层（分页联动）
 
 **已完成（未提交）**：
 
-- 行选择：列上 `type: 'single' | 'multiple'`（`TableRowSelectionType`）渲染选择列，默认宽 64、单元格类 `t-table__cell-check`；输入 `selectedRowKeys` / `defaultSelectedRowKeys` / `indeterminateSelectedRowKeys` / `rowSelectionAllowUncheck` / `selectOnRowClick`，输出 `(selectChange)`（`TableSelectChangeEvent`）。
-- 多选列表头自动渲染全选 Checkbox：全部选中 → checked，部分选中 → indeterminate，无行时 disabled；全选只影响当前页数据，不清空其他页的 key。
-- 单选列用 Radio 渲染，`rowSelectionAllowUncheck` 控制能否再次点击取消；选中行加 `t-table__row--selected`（上游发布版 CSS 也没有该类的背景样式，选中态由复选框表达）。
-- 展开行：输入 `expandedRowKeys` / `defaultExpandedRowKeys` / `expandOnRowClick` / `expandIcon`，输出 `(expandChange)`（`TableExpandChangeEvent`）；`<ng-template tTableExpandedRow let-row>` 提供内容，`TTableExpandedRow` 指令用 `contentChild` 捕获。
-- 展开列自动插到列首：`{ colKey: '__EXPAND_ROW_ICON_COLUMN__', width: 46, className: 't-table__expandable-icon-cell' }`，图标 `t-table__expand-box` + 展开时 `t-positive-rotate-90`，行类 `t-table__row--expanded` / `t-table__row--folded`；展开内容渲染在数据行之后 `<tr class="t-table__expanded-row"><td colspan=列数><div class="t-table__expanded-row-inner">`。
-- 表格总宽、空态 colspan 都改用 `displayColumns()`（会算上自动插入的展开列）。
-- 文档站新增 `table-select` / `table-expand` 两个示例（`/table` 现有 10 个示例）。
+- 输入 `pagination`（`TablePagination`，字段与上游 `PaginationProps` 对齐：`current` / `pageSize` / `defaultCurrent` / `defaultPageSize` / `total` / `pageSizeOptions` / `showPageSize` / `showJumper` / `totalContent` / `showFirstAndLastPageBtn` / `showPreviousAndNextBtn` / `showPageNumber` / `maxPageBtn` / `foldedMaxPageBtn` / `pageEllipsisMode` / `size` / `theme` / `disabled`）、`disableDataPage`；输出 `(pageChange)`（`TablePageChangeEvent<T>` = `{ pageInfo, dataSource }`）。
+- 语义照上游 `usePagination`：传了 `pagination` 且数据超过一页时表格**本地切页**（`pagedData`），`disableDataPage` 打开则交给服务端；`current` 传了即受控，否则用 `innerPagination` + `defaultCurrent` 兜底；翻页后内容区滚动位置复位。
+- 分页器在表格下方渲染 `.t-table__pagination` 包裹的 `t-pagination`，尺寸随表格 `size`（large 回落到 medium）；排序、行选择的全选/半选都只作用于当前页。
+- 文档站新增 `table-pagination` 示例（23 行、每页 5 条、受控 current、带跳页器），`/table` 现有 11 个示例。
 
-**已用 CDP 验证**（`http://localhost:4280/table`）：选择列共 6 个 `.t-table__cell-check`（1 表头 + 5 行），初始选中第 2 行、表头为半选；点表头 → 5 行全选，再点 → 全不选；点第 3 行 → 只选「王五」且表头回到半选。展开行：初始 1 行展开、`colspan=4`（3 列 + 展开列）、内容为「张三 的详细信息…」；展开第 2 行 → 2 行展开且行类为 `expanded/expanded/folded/folded`，再点收起；固定列 demo 仍为 9 列、3 个 sticky 单元格；`consoleErrors` 为空。
+**已用 CDP 验证**（`http://localhost:4280/table`）：分页 demo 首屏 5 行（成员 1…5）、`.t-table__pagination` 存在且含「共 23 条」与 5 条/页选择器；点第 2 页 → 成员 6…10、`ng-reflect-current="2"`、hint 更新为「当前第 2 页」；`consoleErrors` 为空；行选择（5 行 / 6 个 cell-check / 选中 1 行）、展开行（4 行 / 展开 1 行 / colspan 4）、固定列（21 个 sticky 单元格）均无回归。
 
 **下一步（建议顺序）**：
 
-1. **分页联动**：`pagination` + `(pageChange)`，内部接 TPagination。
-2. **虚拟滚动 / 多级表头 / 合并单元格 / 列宽拖拽**。
-3. 行选择补充：`selectOnRowClick` / `expandOnRowClick` 尚未写专门示例，下一轮可补「点击行选中」demo。
-4. Table 收尾后继续 P4 的 Tabs / Collapse / List / Empty / Progress。
+1. **虚拟滚动 / 多级表头 / 合并单元格 / 列宽拖拽**（HANDOFF 原计划剩余项）。
+2. 行选择补充：`selectOnRowClick` / `expandOnRowClick` 尚未写专门示例，下一轮可补「点击行选中」demo。
+3. Table 收尾后继续 P4 的 Tabs / Collapse / List / Empty / Progress。
 
 ## 8. 已知缺口与技术债
 

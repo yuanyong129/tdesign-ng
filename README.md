@@ -33,7 +33,7 @@
 | Badge | ✅ 数字封顶、小红点、showZero、偏移与自定义色 |
 | Avatar / AvatarGroup | ✅ 图片/文字/图标、形状与尺寸、max 折叠 |
 | Pagination | ✅ 每页条数、跳转、统计、折叠省略号、simple 形态 |
-| Table | 🚧 已完成数据与列渲染、模板单元格、排序、表头筛选、固定列、行选择、展开行；分页联动、虚拟滚动待补 |
+| Table | 🚧 已完成数据与列渲染、模板单元格、排序、表头筛选、固定列、行选择、展开行、分页联动；虚拟滚动待补 |
 
 P4 数据展示的 Table 仍在推进，后续分层提交，计划见 `docs/plans/tdesign-angular-plan.md`；
 接手开发请先读 [`HANDOFF.md`](./HANDOFF.md)。

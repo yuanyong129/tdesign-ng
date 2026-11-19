@@ -296,7 +296,8 @@ const CONFIG = {
     renames: {},
     // loadingText 是 Angular 侧的独立文字属性，上游是 loading 的 TNode；
     // sort / defaultSort / filterValue / defaultFilterValue 来自上游 TdPrimaryTableProps（本处对比的是 TdBaseTableProps）；
-    // 行选择与展开行的输入同样来自 TdPrimaryTableProps，事件用 (selectChange) / (expandChange) 输出。
+    // 行选择与展开行的输入同样来自 TdPrimaryTableProps，事件用 (selectChange) / (expandChange) 输出；
+    // pagination / disableDataPage 是 TdBaseTableProps 上的属性，已实现，不再列入忽略。
     angularOnly: [
       'loadingText',
       'sort',
@@ -322,7 +323,6 @@ const CONFIG = {
       'attach': '表格固定在当前 DOM，暂不支持自定义挂载点',
       'bottomContent': '底部内容暂未实现',
       'cellEmptyContent': '单元格空值占位暂未实现',
-      'disableDataPage': '分页联动在后续版本实现',
       'disableSpaceInactiveRow': '键盘空格取消选中未实现',
       'firstFullRow': '整行内容在后续版本实现',
       'fixedRows': '固定行在后续版本实现',
@@ -338,7 +338,6 @@ const CONFIG = {
       'lazyLoad': '懒加载在后续版本实现',
       'loadingProps': '加载配置暂不透传',
       'locale': '文案目前用输入属性控制，暂不接入 locale',
-      'pagination': '分页联动在后续版本实现',
       'paginationAffixedBottom': '分页吸底在后续版本实现',
       'resizable': '列宽拖拽在后续版本实现',
       'rowAttributes': '行属性在后续版本实现',
@@ -352,7 +351,7 @@ const CONFIG = {
       'onActiveRowAction': '点击激活行未实现',
       'onCellClick': '单元格点击在后续版本实现',
       'onColumnResizeChange': '列宽拖拽在后续版本实现',
-      'onPageChange': '分页联动在后续版本实现',
+      'onPageChange': 'Angular 用 (pageChange) 输出',
       'onRowClick': '行事件在后续版本实现',
       'onRowDblclick': '行事件在后续版本实现',
       'onRowMousedown': '行事件在后续版本实现',

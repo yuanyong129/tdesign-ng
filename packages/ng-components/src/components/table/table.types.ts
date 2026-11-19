@@ -1,3 +1,11 @@
+import type {
+  PageInfo,
+  PaginationEllipsisMode,
+  PaginationPageSizeOptions,
+  PaginationSize,
+  PaginationTheme,
+} from '../pagination';
+
 /** 行数据：任意对象，默认按键取值。 */
 export type TableRow = Record<string, any>;
 
@@ -140,6 +148,58 @@ export interface TableExpandedRowContext<T extends TableRow = TableRow> {
 export const TABLE_COLUMN_FIXED = ['left', 'right'] as const;
 
 export type TableColumnFixed = (typeof TABLE_COLUMN_FIXED)[number];
+
+/**
+ * 表格分页配置，字段与 TDesign 的 PaginationProps 对齐。
+ *
+ * 不传 `total` 时用 `data.length`；`current` / `pageSize` 传入即受控。
+ */
+export interface TablePagination {
+  /** 当前页，传入即受控 */
+  current?: number;
+  /** 每页条数，传入即受控 */
+  pageSize?: number;
+  /** 默认当前页，非受控时生效 */
+  defaultCurrent?: number;
+  /** 默认每页条数，非受控时生效 */
+  defaultPageSize?: number;
+  /** 数据总条数，不传时用 data.length */
+  total?: number;
+  /** 每页条数选项 */
+  pageSizeOptions?: PaginationPageSizeOptions;
+  /** 是否显示每页条数选择器 */
+  showPageSize?: boolean;
+  /** 是否显示跳页器 */
+  showJumper?: boolean;
+  /** 是否显示总条数 */
+  totalContent?: string | boolean;
+  /** 是否显示首页 / 尾页按钮 */
+  showFirstAndLastPageBtn?: boolean;
+  /** 是否显示上一页 / 下一页按钮 */
+  showPreviousAndNextBtn?: boolean;
+  /** 是否显示页码 */
+  showPageNumber?: boolean;
+  /** 最多显示多少个页码 */
+  maxPageBtn?: number;
+  /** 折叠时最多显示多少个页码 */
+  foldedMaxPageBtn?: number;
+  /** 省略号出现的位置 */
+  pageEllipsisMode?: PaginationEllipsisMode;
+  /** 分页尺寸 */
+  size?: PaginationSize;
+  /** 分页形态 */
+  theme?: PaginationTheme;
+  /** 是否禁用分页 */
+  disabled?: boolean;
+}
+
+/** 分页变化事件。 */
+export interface TablePageChangeEvent<T extends TableRow = TableRow> {
+  /** 分页信息 */
+  pageInfo: PageInfo;
+  /** 新一页的数据（本地分页时已切好） */
+  dataSource: T[];
+}
 
 /** 列配置，字段名与 TDesign 的 BaseTableCol 对齐。 */
 export interface TableColumn<T extends TableRow = TableRow> {

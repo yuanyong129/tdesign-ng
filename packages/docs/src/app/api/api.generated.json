@@ -3183,6 +3183,24 @@
           "zh": "是否显示展开图标列",
           "en": "Whether to show the expand icon column",
           "values": []
+        },
+        {
+          "name": "pagination",
+          "type": "TablePagination | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "分页配置，传入后表格底部显示分页；数据超过一页且未开启 disableDataPage 时自动本地分页",
+          "en": "Pagination config; the table renders a pager and paginates locally unless disableDataPage is on",
+          "values": []
+        },
+        {
+          "name": "disableDataPage",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "关闭本地分页，只显示分页器并把翻页事件交给使用方（服务端分页）",
+          "en": "Disable local pagination, only render the pager and emit page changes (server-side paging)",
+          "values": []
         }
       ],
       "outputs": [
@@ -3209,6 +3227,12 @@
           "type": "TableExpandChangeEvent",
           "zh": "展开行变化",
           "en": "Emitted when the expanded rows change"
+        },
+        {
+          "name": "pageChange",
+          "type": "TablePageChangeEvent",
+          "zh": "分页变化，携带新一页的数据",
+          "en": "Emitted when the page changes, with the new page data"
         }
       ]
     },

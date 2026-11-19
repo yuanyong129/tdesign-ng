@@ -7,6 +7,7 @@ import { DemoTableCell } from './demos/table-cell';
 import { DemoTableExpand } from './demos/table-expand';
 import { DemoTableFilter } from './demos/table-filter';
 import { DemoTableFixed } from './demos/table-fixed';
+import { DemoTablePagination } from './demos/table-pagination';
 import { DemoTableSelect } from './demos/table-select';
 import { DemoTableSize } from './demos/table-size';
 import { DemoTableSort } from './demos/table-sort';
@@ -29,13 +30,14 @@ import { DemoTableStyle } from './demos/table-style';
     DemoTableExpand,
     DemoTableFilter,
     DemoTableFixed,
+    DemoTablePagination,
   ],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">表格 Table</h1>
       <p class="docs-page__lead">
-        表格用于展示结构化数据。当前版本支持列配置、模板式单元格、排序、表头筛选、固定列、行选择、展开行、边框、斑马纹、悬停高亮、
-        尺寸、对齐、省略、加载与空态；分页联动与虚拟滚动在后续版本逐步补齐。
+        表格用于展示结构化数据。当前版本支持列配置、模板式单元格、排序、表头筛选、固定列、行选择、展开行、分页联动、边框、斑马纹、
+        悬停高亮、尺寸、对齐、省略、加载与空态；虚拟滚动在后续版本逐步补齐。
       </p>
 
       <docs-demo id="table-basic" title="基础用法" description="columns 声明列，data 提供行数据。">
@@ -92,6 +94,14 @@ import { DemoTableStyle } from './demos/table-style';
         description="用 ng-template tTableExpandedRow 提供展开内容，展开状态由 expandedRowKeys 控制。"
       >
         <demo-table-expand />
+      </docs-demo>
+
+      <docs-demo
+        id="table-pagination"
+        title="分页联动"
+        description="传入 pagination 后表格底部显示分页；数据超过一页时自动本地切页，disableDataPage 可改为服务端分页。"
+      >
+        <demo-table-pagination />
       </docs-demo>
 
       <h2 class="docs-section__title" id="table-api">API</h2>

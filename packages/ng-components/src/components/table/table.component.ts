@@ -23,6 +23,7 @@ import {
 import { TButton } from '../button';
 import { TCheckbox, TCheckboxGroup } from '../checkbox';
 import { TInput } from '../input';
+import { TPagination, type PageInfo } from '../pagination';
 import { TPopup } from '../popup';
 import { TRadio, TRadioGroup } from '../radio';
 import { TTableCell } from './table-cell.directive';
@@ -40,6 +41,8 @@ import {
   TableFilterType,
   TableFilterValue,
   TableLayout,
+  TablePageChangeEvent,
+  TablePagination,
   TableRow,
   TableRowSelectionType,
   TableSelectChangeEvent,
@@ -73,7 +76,7 @@ const EXPAND_COLUMN_KEY = '__EXPAND_ROW_ICON_COLUMN__';
 @Component({
   selector: 't-table',
   standalone: true,
-  imports: [NgTemplateOutlet, TButton, TCheckbox, TCheckboxGroup, TInput, TPopup, TRadio, TRadioGroup],
+  imports: [NgTemplateOutlet, TButton, TCheckbox, TCheckboxGroup, TInput, TPagination, TPopup, TRadio, TRadioGroup],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './table.component.html',
@@ -193,6 +196,23 @@ export class TTable implements OnDestroy {
   /** @zh 展开行变化 @en Emitted when the expanded rows change */
   readonly expandChange = output<TableExpandChangeEvent>();
 
+  /**
+   * @zh 分页配置，传入后表格底部显示分页；数据超过一页且未开启 disableDataPage 时自动本地分页
+   * @en Pagination config; the table renders a pager and paginates locally unless disableDataPage is on
+   * @defaultValue undefined
+   */
+  readonly pagination = input<TablePagination | undefined>(undefined);
+
+  /**
+   * @zh 关闭本地分页，只显示分页器并把翻页事件交给使用方（服务端分页）
+   * @en Disable local pagination, only render the pager and emit page changes (server-side paging)
+   * @defaultValue false
+   */
+  readonly disableDataPage = input(false, { transform: booleanAttribute });
+
+  /** @zh 分页变化，携带新一页的数据 @en Emitted when the page changes, with the new page data */
+  readonly pageChange = output<TablePageChangeEvent>();
+
   protected readonly sizes = TABLE_SIZES;
   protected readonly aligns = TABLE_ALIGNS;
   protected readonly layouts = TABLE_LAYOUTS;
@@ -216,6 +236,9 @@ export class TTable implements OnDestroy {
 
   /** 内部展开行 key，受控时忽略。 */
   private readonly innerExpandedRowKeys = signal<Array<string | number>>([]);
+
+  /** 非受控分页时内部记录的页码 / 每页条数。 */
+  private readonly innerPagination = signal<{ current: number; pageSize: number } | null>(null);
 
   private readonly injector = inject(Injector);
 
@@ -250,19 +273,44 @@ export class TTable implements OnDestroy {
 
   private readonly expandedKeySet = computed(() => new Set(this.expandedKeys()));
 
+  /** 分页状态：当前页 / 每页条数 / 总条数，非受控时用内部值兜底。 */
+  protected readonly paginationState = computed(() => {
+    const config = this.pagination();
+    const inner = this.innerPagination();
+    return {
+      current: config?.current ?? inner?.current ?? config?.defaultCurrent ?? 1,
+      pageSize: config?.pageSize ?? inner?.pageSize ?? config?.defaultPageSize ?? 10,
+      total: config?.total ?? this.data().length,
+    };
+  });
+
+  /** 是否本地分页：传了分页配置、没关掉 disableDataPage、且数据超过一页。 */
+  protected readonly isPaginateData = computed(() => {
+    if (!this.pagination() || this.disableDataPage()) return false;
+    return this.data().length > this.paginationState().pageSize;
+  });
+
+  /** 当前页的数据，本地分页时已经切好。 */
+  protected readonly pagedData = computed<TableRow[]>(() => {
+    if (!this.isPaginateData()) return this.data();
+    const { current, pageSize } = this.paginationState();
+    const start = (current - 1) * pageSize;
+    return this.data().slice(start, start + pageSize);
+  });
+
   /** 当前页已选中的行数。 */
   private readonly selectedRowCount = computed(
-    () => this.data().filter((row) => this.selectedKeySet().has(this.keyOf(row))).length,
+    () => this.pagedData().filter((row) => this.selectedKeySet().has(this.keyOf(row))).length,
   );
 
   /** 是否全部选中（多选表头的复选框状态）。 */
   protected readonly allSelected = computed(
-    () => this.data().length > 0 && this.selectedRowCount() === this.data().length,
+    () => this.pagedData().length > 0 && this.selectedRowCount() === this.pagedData().length,
   );
 
   /** 是否半选（多选表头的复选框状态）。 */
   protected readonly partiallySelected = computed(
-    () => this.selectedRowCount() > 0 && this.selectedRowCount() < this.data().length,
+    () => this.selectedRowCount() > 0 && this.selectedRowCount() < this.pagedData().length,
   );
 
   private readonly contentRef = viewChild<ElementRef<HTMLElement>>('content');
@@ -408,9 +456,9 @@ export class TTable implements OnDestroy {
     return controlled === undefined ? this.innerFilterValue() : controlled;
   });
 
-  /** 展示用数据：受控排序时原样返回，否则按本地排序重排。 */
+  /** 展示用数据：先按分页切页，再按本地排序重排；受控排序时只切页。 */
   protected readonly rows = computed(() => {
-    const data = this.data();
+    const data = this.pagedData();
     if (this.sort() !== undefined) return data;
 
     const sortList = this.innerSort();
@@ -472,6 +520,33 @@ export class TTable implements OnDestroy {
 
   protected handleScroll(event: Event): void {
     this.updateScrollState(event.target as HTMLElement);
+  }
+
+  /** 表格分页器的尺寸：large 没有对应分页尺寸，回落到 medium。 */
+  protected readonly paginationSize = computed<'small' | 'medium'>(() =>
+    this.size() === 'small' ? 'small' : 'medium',
+  );
+
+  /** 翻页：非受控时记下页码，随后把滚动位置复位并抛出事件。 */
+  protected handlePageChange(pageInfo: PageInfo): void {
+    const config = this.pagination();
+    if (!config) return;
+
+    if (config.current === undefined) {
+      this.innerPagination.set({ current: pageInfo.current, pageSize: pageInfo.pageSize });
+    }
+
+    const data = this.data();
+    const start = (pageInfo.current - 1) * pageInfo.pageSize;
+    const dataSource = this.disableDataPage() ? data : data.slice(start, start + pageInfo.pageSize);
+
+    const content = this.contentRef()?.nativeElement;
+    if (content) {
+      content.scrollTop = 0;
+      content.scrollLeft = 0;
+    }
+
+    this.pageChange.emit({ pageInfo, dataSource });
   }
 
   protected isRowSelected(row: TableRow): boolean {

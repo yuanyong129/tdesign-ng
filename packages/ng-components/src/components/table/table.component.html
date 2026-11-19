@@ -231,6 +231,30 @@
     </table>
   </div>
 
+  @if (pagination(); as config) {
+    <div class="t-table__pagination">
+      <t-pagination
+        [current]="paginationState().current"
+        [pageSize]="paginationState().pageSize"
+        [total]="paginationState().total"
+        [pageSizeOptions]="config.pageSizeOptions ?? [10, 20, 50]"
+        [showPageSize]="config.showPageSize ?? true"
+        [showJumper]="config.showJumper ?? false"
+        [totalContent]="config.totalContent ?? true"
+        [showFirstAndLastPageBtn]="config.showFirstAndLastPageBtn ?? true"
+        [showPreviousAndNextBtn]="config.showPreviousAndNextBtn ?? true"
+        [showPageNumber]="config.showPageNumber ?? true"
+        [maxPageBtn]="config.maxPageBtn ?? 7"
+        [foldedMaxPageBtn]="config.foldedMaxPageBtn ?? 5"
+        [pageEllipsisMode]="config.pageEllipsisMode ?? 'mid'"
+        [size]="config.size ?? paginationSize()"
+        [theme]="config.theme ?? 'default'"
+        [disabled]="config.disabled ?? false"
+        (change)="handlePageChange($event)"
+      />
+    </div>
+  }
+
   @if (loading()) {
     <div class="t-loading t-loading--center t-loading--full t-loading__overlay">
       <div class="t-loading--center t-size-s">
