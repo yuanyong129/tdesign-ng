@@ -1,7 +1,7 @@
-# 交接文档 · TDesign Angular
+﻿# 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-19，对应提交：`9765fa2`（Table 第九层）之后的未提交改动（Table 第十层：列宽拖拽）。
+> 更新日期：2026-11-19，对应提交：`a858633`（Table 第十层收尾：列宽拖拽）。
 
 ## 1. 这个项目是什么
 
@@ -73,9 +73,9 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：Table 第十层（列宽拖拽，Table 收尾）
+## 7. 当前进行中的工作：Table 第十层（列宽拖拽，Table 主要能力已收尾）
 
-**已完成（未提交）**：
+**已完成（已提交 `a858633`）**：
 
 - 表级输入 `resizable?: boolean`，列级 `TableColumn.resizable?: boolean` 与 `TableColumn.resize?: { minWidth; maxWidth }`；输出 `(columnResizeChange)`，payload `TableColumnResizeEvent { columnsWidth: Record<string, number> }`，与上游 `onColumnResizeChange` 对齐。
 - 拖拽判定与上游一致：鼠标距表头右边缘 ≤8px 拖本列，距左边缘 ≤8px 拖左邻列；拖拽中显示根元素上的 `.t-table__resize-line`（`position:absolute`、`border-left`），放在根 `.t-table` 而不是 `.t-table__content` 里，避免横向滚动把竖线带走。
