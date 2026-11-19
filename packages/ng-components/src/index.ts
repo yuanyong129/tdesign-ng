@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Public API Surface of @tdesign-ng/components
  */
 
@@ -23,6 +23,7 @@ export * from './components/select';
 export * from './components/space';
 export * from './components/switch';
 export * from './components/table';
+export * from './components/tabs';
 export * from './components/tag';
 export * from './components/textarea';
 export * from './components/tooltip';

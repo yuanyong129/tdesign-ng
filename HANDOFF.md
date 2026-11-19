@@ -1,7 +1,7 @@
 ﻿# 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-19，对应提交：`a858633`（Table 第十层收尾：列宽拖拽）。
+> 更新日期：2026-11-19，对应提交：`a858633` 之后的未提交改动（新组件 Tabs 第一层）。
 
 ## 1. 这个项目是什么
 
@@ -20,12 +20,12 @@
 | P1 打样 | ✅ | Button / Link / Divider / Space / Icon |
 | P2 基础表单 | ✅ | Input / Textarea / Switch / Checkbox / Radio / Select / Form（含 TDesign rules 校验引擎） |
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
-| P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination 已完成；**Table 进行中**；Tabs / Collapse / List / Empty / Progress 未开始 |
+| P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination / Table 已完成；**Tabs 进行中**；Collapse / List / Empty / Progress 未开始 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **27 个组件、314 个输入属性、124 个示例**，合计 `missing 0 / extra 0`。
+当前 `align-check` 覆盖 **29 个组件、323 个输入属性、129 个示例**，合计 `missing 0 / extra 0`。
 
-组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tag、textarea、tooltip。
+组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tabs、tag、textarea、tooltip。
 
 ## 3. 目录与环境
 
@@ -73,32 +73,33 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：Table 第十层（列宽拖拽，Table 主要能力已收尾）
+## 7. 当前进行中的工作：Tabs 第一层（normal / card 主题、四个方向）
 
-**已完成（已提交 `a858633`）**：
+**已完成（未提交）**：
 
-- 表级输入 `resizable?: boolean`，列级 `TableColumn.resizable?: boolean` 与 `TableColumn.resize?: { minWidth; maxWidth }`；输出 `(columnResizeChange)`，payload `TableColumnResizeEvent { columnsWidth: Record<string, number> }`，与上游 `onColumnResizeChange` 对齐。
-- 拖拽判定与上游一致：鼠标距表头右边缘 ≤8px 拖本列，距左边缘 ≤8px 拖左邻列；拖拽中显示根元素上的 `.t-table__resize-line`（`position:absolute`、`border-left`），放在根 `.t-table` 而不是 `.t-table__content` 里，避免横向滚动把竖线带走。
-- 宽度写回：`columnWidthOverrides` 记拖拽结果 → `columnWidths`（override → 列配置 width → 实测表头宽度）→ `tableWidth` 求和、`columnStyle` 写 px、固定列偏移同步使用；松手时当前列宽度变化、相邻可拖列反向补偿（总宽不变），相邻列不可拖时只改当前列。
-- 每列宽度夹在 `resize.minWidth ?? 80` 与 `resize.maxWidth ?? 600` 之间；列上 `resizable: false` 关闭该列；多级表头的分组列不参与拖拽（只有叶子列可拖）。
-- 根元素加 `t-table--column-resizable`，可拖表头加 `t-table__cell-resizable`（less 里已有 `cursor: col-resize` 与边框 hover 规则）。
-- 新 demo `table-resizable`（姓名列 `resize: { minWidth: 100, maxWidth: 220 }`、邮箱列 `resizable: false`，hint 实时显示各列宽度），`/table` 现有 15 个示例。
+- 新组件目录 `packages/ng-components/src/components/tabs/`：`tabs.component.ts`（TTabs）、`tabs.component.html`、`tab-panel.component.ts`（TTabPanel）、`tab-panel.component.html`、`tabs.types.ts`、`tabs.module.ts`、`index.ts`；`packages/ng-components/src/index.ts` 已 `export * from './components/tabs'`。
+- API 对齐 `TdTabsProps`：`theme`（normal / card）、`placement`（top / bottom / left / right）、`size`（medium / large）、`disabled`、`value`（受控）、`defaultValue`；输出 `(change)`，payload 为面板的 `TabValue`。
+- 面板用内容投影声明：`<t-tab-panel value label [disabled]>`，未写 value 时用下标作值（与上游一致）；`TTabPanel` 注入父级 `TTabs` 读取激活态，未激活时面板加 `t-is-hidden`。
+- DOM 照上游：`div.t-tabs` > `div.t-tabs__header.t-is-{placement}` > `t-tabs__nav-container.t-is-*`（card 额外 `t-tabs__nav--card`）> `t-tabs__nav-scroll` > `t-tabs__nav-wrap.t-is-smooth`（竖向加 `t-is-vertical`）> 指示条 `div.t-tabs__bar`（normal 主题才有）+ `div.t-tabs__nav-item` 列表；bottom 时 header 渲染在内容之后。
+- 指示条用 `getBoundingClientRect` 实测激活项：水平写 `width/left`，竖向写 `height/top`；card 主题不渲染指示条。测量时机为 `effect`（读 activeValue / panels / placement / isCard 后 `untracked` 调度 `afterNextRender`）+ 首次 `afterNextRender`。
+- 新 demo：`tabs-basic`（第三个面板 disabled）、`tabs-card`、`tabs-placement`（left + size large）；文档页 `packages/docs/src/app/docs/tabs/tabs.component.ts`，路由 `/tabs`、导航「数据展示」分组、`styles.less` 已引入 `tabs.less`。
+- `align-check` 新增 `TTabs` 条目（`upstream: 'tabs'`、`TdTabsProps`），未实现项写清原因：`action`、`addable`、`dragSort`、`list`、`scrollPosition`、`modelValue`、`onAdd`、`onChange`、`onDragSort`、`onRemove`。结果 `TTabs 已对齐 6/16`，总量 `missing 0 / extra 0`。
 
-**已用 CDP 验证**（`http://localhost:4280/table`）：`th` hover 计算样式 `cursor: col-resize`；按下后 `.t-table__resize-line` `display:block`、高度贴合表格内容区；向右拖 45px 后 `姓名 140→185`、`角色 160→115`（反向补偿），`td` 同步变宽；`(columnResizeChange)` 收到 `{ name: 185, role: 115, ... }`；松手后竖线隐藏；`consoleErrors` 为空；行选择 / 展开行 / 固定列 / 多级表头 / 合并单元格 / 分页 / 虚拟滚动均无回归。
+**已用 CDP 验证**（`http://localhost:4280/tabs`）：3 个导航项、首个激活、指示条 `left 0 / width 88` 与激活项完全贴合；点第二个后指示条 `left 88 / width 88`、面板切换为「选项卡二的内容」、hint 变为 `second`；禁用的第三个点击无效；card 主题无 `.t-tabs__bar` 且 3 个导航项都带 `t-tabs__nav--card`；`placement="left"` 时 `nav-wrap` 有 `t-is-vertical`、header 为 `t-is-left`、指示条 `3×64`；`consoleErrors` 为空。
 
 **下一步（建议顺序）**：
 
-1. Table 收尾补示例：`selectOnRowClick` / `expandOnRowClick` 的「点击行选中 / 展开」demo。
-2. 继续 P4 的 Tabs / Collapse / List / Empty / Progress。
+1. Tabs 第二层：`destroyOnHide`、`lazy`、可关闭页签（`removable` + `(remove)`）、`addable` + `(add)`、`dragSort` 拖拽排序、`scrollPosition` 导航滚动、`t-tabs__operations` 左右滚动按钮。
+2. 之后 P4 剩余组件：Collapse / List / Empty / Progress。
 3. Table 的其余上游能力（行拖拽排序、单元格编辑、吸顶表头、`lazy` 虚拟滚动）留到后续版本，`align-check` 里已写明原因。
 
-**已知取舍（写进文档，不要当成 bug）**：虚拟滚动只做固定行高近似，不做列虚拟化 / `lazy` / 吸顶表头，`scroll.colWidth` 与 `disableHorizontalScroll` 不生效。
+**已知取舍（写进文档，不要当成 bug）**：Table 虚拟滚动只做固定行高近似，不做列虚拟化 / `lazy` / 吸顶表头，`scroll.colWidth` 与 `disableHorizontalScroll` 不生效；Tabs 暂无导航溢出滚动与页签操作区。
 ## 8. 已知缺口与技术债
 
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
-- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」。
+- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `addable`/`dragSort`/`removable`/`scrollPosition` 与面板的 `destroyOnHide`/`lazy` 未实现。
 - **文档站**：无搜索、无中英切换、无右侧锚点导航；示例卡片视觉可再贴近官网。
 
 ## 9. 怎么验证一个改动
@@ -108,3 +109,6 @@ node scripts/align-check.mjs --component TTable
 3. `pnpm build` 全绿。
 4. 用 `.local-cache/` 下的 CDP 脚本模板（如 `cdp-check-table2.mjs`）打开对应路由，断言 DOM 类名、文本、交互后的状态与 `consoleErrors`。
 5. `node .local-cache/cdp-check-live.mjs https://yuanyong129.github.io/tdesign-ng/<route>` 验证线上页面。
+
+
+

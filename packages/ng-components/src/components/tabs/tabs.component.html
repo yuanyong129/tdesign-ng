@@ -1,0 +1,78 @@
+<div class="t-tabs">
+  @if (placement() !== 'bottom') {
+    <ng-container [ngTemplateOutlet]="headerTemplate" />
+  }
+
+  <div class="t-tabs__content">
+    <ng-content />
+  </div>
+
+  @if (placement() === 'bottom') {
+    <ng-container [ngTemplateOutlet]="headerTemplate" />
+  }
+</div>
+
+<ng-template #headerTemplate>
+  <div
+    class="t-tabs__header"
+    [class.t-is-top]="placement() === 'top'"
+    [class.t-is-bottom]="placement() === 'bottom'"
+    [class.t-is-left]="placement() === 'left'"
+    [class.t-is-right]="placement() === 'right'"
+  >
+    <div
+      class="t-tabs__nav-container"
+      [class.t-tabs__nav--card]="isCard()"
+      [class.t-is-top]="placement() === 'top'"
+      [class.t-is-bottom]="placement() === 'bottom'"
+      [class.t-is-left]="placement() === 'left'"
+      [class.t-is-right]="placement() === 'right'"
+    >
+      <div class="t-tabs__nav-scroll">
+        <div
+          #navWrap
+          class="t-tabs__nav-wrap t-is-smooth"
+          [class.t-is-vertical]="vertical()"
+        >
+          @if (!isCard()) {
+            <div
+              class="t-tabs__bar"
+              [class.t-is-top]="placement() === 'top'"
+              [class.t-is-bottom]="placement() === 'bottom'"
+              [class.t-is-left]="placement() === 'left'"
+              [class.t-is-right]="placement() === 'right'"
+              [style]="barStyle()"
+            ></div>
+          }
+
+          @for (panel of panels(); track $index; let i = $index) {
+            <div
+              #navItem
+              class="t-tabs__nav-item"
+              [class.t-tabs__nav--card]="isCard()"
+              [class.t-is-active]="isActiveAt(i)"
+              [class.t-is-disabled]="isDisabledAt(i)"
+              [class.t-is-left]="placement() === 'left'"
+              [class.t-is-right]="placement() === 'right'"
+              [class.t-size-m]="size() === 'medium'"
+              [class.t-size-l]="size() === 'large'"
+              (click)="select(i)"
+            >
+              @if (isCard()) {
+                <span class="t-tabs__nav-item-text-wrapper">{{ panelLabel(panel, i) }}</span>
+              } @else {
+                <div
+                  class="t-tabs__nav-item-wrapper"
+                  [class.t-is-active]="isActiveAt(i)"
+                  [class.t-is-disabled]="isDisabledAt(i)"
+                >
+                  <span class="t-tabs__nav-item-text-wrapper">{{ panelLabel(panel, i) }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

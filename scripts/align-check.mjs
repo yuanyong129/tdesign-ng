@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
  * 把本仓库组件的 API 与 tdesign-vue-next 的 props 定义做机器比对。
  *
@@ -267,6 +267,24 @@ const CONFIG = {
     angularOnly: [],
     ignoreUpstream: {
       'default': '内容通过 ng-content 与 content 输入提供',
+    },
+  },
+  TTabs: {
+    upstream: 'tabs',
+    upstreamInterface: 'TdTabsProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      'action': '自定义操作区未实现',
+      'addable': '新增页签未实现',
+      'dragSort': '拖拽排序未实现',
+      'list': '数据驱动面板未实现，用 t-tab-panel 投影',
+      'scrollPosition': '选项卡滚动定位未实现，暂不滚动导航',
+      'modelValue': 'Angular 用 value（受控）/ defaultValue',
+      'onAdd': '新增页签未实现',
+      'onChange': 'Angular 用 (change) 输出',
+      'onDragSort': '拖拽排序未实现',
+      'onRemove': '关闭页签未实现',
     },
   },
   TAvatar: {

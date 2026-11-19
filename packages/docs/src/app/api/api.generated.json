@@ -3269,6 +3269,121 @@
         }
       ]
     },
+    "TTabPanel": {
+      "className": "TTabPanel",
+      "selector": "t-tab-panel",
+      "file": "packages/ng-components/src/components/tabs/tab-panel.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "TabValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选项卡值，未声明时使用所在位置的下标",
+          "en": "Tab value, defaults to the panel index",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "选项卡标题",
+          "en": "Tab label",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用该选项卡",
+          "en": "Whether the tab is disabled",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TTabs": {
+      "className": "TTabs",
+      "selector": "t-tabs",
+      "file": "packages/ng-components/src/components/tabs/tabs.component.ts",
+      "inputs": [
+        {
+          "name": "theme",
+          "type": "TabsTheme",
+          "default": "'normal'",
+          "required": false,
+          "zh": "选项卡主题",
+          "en": "Tabs theme",
+          "values": [
+            "normal",
+            "card"
+          ]
+        },
+        {
+          "name": "placement",
+          "type": "TabsPlacement",
+          "default": "'top'",
+          "required": false,
+          "zh": "选项卡位置",
+          "en": "Tab placement",
+          "values": [
+            "top",
+            "bottom",
+            "left",
+            "right"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "TabsSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "选项卡尺寸",
+          "en": "Tabs size",
+          "values": [
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用全部选项卡",
+          "en": "Whether all tabs are disabled",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "TabValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "当前激活的选项卡值，受控时以它为准",
+          "en": "Active tab value (controlled)",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "TabValue",
+          "default": "''",
+          "required": false,
+          "zh": "默认激活的选项卡值",
+          "en": "Default active tab value",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "TabValue",
+          "zh": "激活选项卡变化时触发",
+          "en": "Emits when the active tab changes"
+        }
+      ]
+    },
     "TTag": {
       "className": "TTag",
       "selector": "t-tag",

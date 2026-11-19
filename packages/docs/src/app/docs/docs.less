@@ -1,4 +1,4 @@
-/* 文档站自己的排版样式（全局，因为代码高亮的 span 由 innerHTML 注入，
+﻿/* 文档站自己的排版样式（全局，因为代码高亮的 span 由 innerHTML 注入，
    组件级样式的属性选择器作用不到它们）。 */
 
 // ---------------------------------------------------------------------------
@@ -250,3 +250,14 @@
     flex-direction: column;
   }
 }
+
+.demo-tabs-panel {
+  padding: 16px 0;
+  color: var(--td-text-color-primary);
+  font: var(--td-font-body-medium);
+}
+
+.demo-tabs-panel--vertical {
+  padding-left: 24px;
+}
+

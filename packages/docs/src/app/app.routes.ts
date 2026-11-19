@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+﻿import { Routes } from '@angular/router';
 
 /**
  * 文档站路由。所有页面都懒加载，示例组件的代码只在进入对应页面时才下载。
@@ -103,6 +103,10 @@ export const routes: Routes = [
   {
     path: 'table',
     loadComponent: () => import('./docs/table/table.component').then((m) => m.TableDocs),
+  },
+  {
+    path: 'tabs',
+    loadComponent: () => import('./docs/tabs/tabs.component').then((m) => m.TabsDocs),
   },
   {
     path: '**',
