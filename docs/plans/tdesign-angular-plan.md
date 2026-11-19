@@ -513,6 +513,32 @@ tdesign-ng/
 - 编辑 `bridge.less` 后 dev server 的热更新会报 `absoluteFrom(../ng-components/src/bridge.less): path is not absolute`，重启 dev server 即恢复；这是 Angular 19 dev-server 对全局样式依赖的已知问题。
 - 需要富内容单元格（标签、按钮等）时目前只能用 `cell` 返回字符串；模板式单元格（`<ng-template>` + 指令）留到行选择/展开行一层一起设计。
 
+## 21. Table 第二层：模板单元格与排序
+
+### 21.1 已实现
+
+- **模板单元格**：`TTableCell` 指令（`selector: '[tTableCell]'`），用法
+  `<ng-template tTableCell="status" let-row let-value="value">…</ng-template>`；
+  模板上下文 `{ $implicit: row, row, value, rowIndex, col, colIndex }`，通过 `NgTemplateOutlet` 渲染。
+- **列级排序**：`TableColumn.sorter?: boolean | ((a, b) => number)`、`sortType?: 'all' | 'asc' | 'desc'`。
+- **表级排序**：`sort`（受控）、`defaultSort`、`multipleSort`、`(sortChange)` 输出 `TableSort | undefined`；
+  `TableSortInfo { sortBy, descending }`，与上游 `SortInfo` 一致。
+- **表头 DOM 对齐上游**：`t-table__cell--title` → `t-table__cell--sort-trigger` → `t-table__double-icons`
+  → 两个 `t-table__sort-icon`（`t-table-sort-asc t-negative-rotate-180` / `t-table-sort-desc`），
+  激活态加 `t-table__sort-icon--active`，已排序列的 `th` 加 `t-table__sort-column`。
+- **单列 vs 多列**：`multipleSort=false`（默认）时点新列会替换原排序；为 `true` 时按顺序追加多列排序。
+
+### 21.2 两个实现要点
+
+1. **`$implicit` 必须是整行**。第一版把 `$implicit` 设成单元格值，结果「操作」列这类没有数据字段的模板拿到的 `row` 是 `undefined`（`row[colKey]` 为 undefined），点击按钮直接报错。改为上游 slot 语义：`$implicit` 是行，值单独用 `value` 暴露。
+2. **排序状态由 `sort` / `innerSort` 二选一驱动**。`sort` 有值即受控：表头高亮与「已排序列」都从 `sort` 推导，本地不再重排数据；`sort` 为空时用内部 `innerSort`，点表头即时重排。两者都用同一个 `sortState` Map 转成 `colKey → asc | desc`，避免表头与数据各自维护状态。
+
+### 21.3 待办
+
+- 表头筛选（`filter` / `filterValue` / `filterChange`）、固定列、行选择与展开行、分页联动、虚拟滚动、多级表头、合并单元格、列宽拖拽。
+- `loader`、`TNode` 级别的表头富内容（如带图标/提示的标题）暂未支持。
+
+
 
 
 

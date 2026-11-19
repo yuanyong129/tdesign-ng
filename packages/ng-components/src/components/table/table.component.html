@@ -5,8 +5,58 @@
         <thead class="t-table__header">
           <tr>
             @for (col of columns(); track col.colKey) {
-              <th [class]="cellClasses(col)" [style]="columnStyle(col)">
-                {{ col.title ?? '' }}
+              <th [class]="headerCellClasses(col)" [style]="columnStyle(col)">
+                <div class="t-table__cell--title">
+                  <span>{{ col.title ?? '' }}</span>
+                  @if (col.sorter) {
+                    <div
+                      class="t-table__cell--sort-trigger"
+                      [class.t-table__double-icons]="(col.sortType ?? 'all') === 'all'"
+                      (click)="handleSort(col)"
+                    >
+                      <span
+                        class="t-icon t-table__sort-icon t-table-sort-asc t-negative-rotate-180"
+                        [class.t-table__sort-icon--active]="sortOrderOf(col.colKey) === 'asc'"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                          height="1em"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="square"
+                            stroke-width="2"
+                            d="M6.5 9.5L12 15L17.5 9.5"
+                          />
+                        </svg>
+                      </span>
+                      <span
+                        class="t-icon t-table__sort-icon t-table-sort-desc"
+                        [class.t-table__sort-icon--active]="sortOrderOf(col.colKey) === 'desc'"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                          height="1em"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="square"
+                            stroke-width="2"
+                            d="M6.5 9.5L12 15L17.5 9.5"
+                          />
+                        </svg>
+                      </span>
+                    </div>
+                  }
+                </div>
               </th>
             }
           </tr>
@@ -18,7 +68,12 @@
           <tr>
             @for (col of columns(); track col.colKey; let colIndex = $index) {
               <td [class]="cellClasses(col)" [style]="columnStyle(col)">
-                @if (col.ellipsis) {
+                @if (cellTemplate(col); as tpl) {
+                  <ng-container
+                    [ngTemplateOutlet]="tpl"
+                    [ngTemplateOutletContext]="cellContext(row, col, rowIndex, colIndex)"
+                  />
+                } @else if (col.ellipsis) {
                   <div class="t-table__ellipsis" [attr.title]="cellText(row, col, rowIndex, colIndex)">
                     {{ cellText(row, col, rowIndex, colIndex) }}
                   </div>

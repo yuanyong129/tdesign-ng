@@ -21,6 +21,20 @@ export const TABLE_LAYOUTS = ['auto', 'fixed'] as const;
 
 export type TableLayout = (typeof TABLE_LAYOUTS)[number];
 
+/** 排序触发方式。 */
+export const TABLE_SORT_TYPES = ['all', 'asc', 'desc'] as const;
+
+export type TableSortType = (typeof TABLE_SORT_TYPES)[number];
+
+/** 单列排序信息，与 TDesign 的 SortInfo 一致。 */
+export interface TableSortInfo {
+  sortBy: string;
+  descending: boolean;
+}
+
+/** 排序信息：单列或多列。 */
+export type TableSort = TableSortInfo | TableSortInfo[];
+
 /** 单元格渲染上下文。 */
 export interface TableCellContext<T extends TableRow = TableRow> {
   /** 当前行数据 */
@@ -55,4 +69,8 @@ export interface TableColumn<T extends TableRow = TableRow> {
   cell?: (context: TableCellContext<T>) => string;
   /** 列附加类名 */
   className?: string;
+  /** 是否可排序，函数形式为自定义比较器 */
+  sorter?: boolean | ((a: T, b: T) => number);
+  /** 排序触发方式，默认 asc → desc → 取消 */
+  sortType?: TableSortType;
 }

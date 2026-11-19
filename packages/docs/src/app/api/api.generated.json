@@ -3057,9 +3057,43 @@
           "zh": "表格最大高度，超出后内部滚动",
           "en": "Max table height, scrolls inside when exceeded",
           "values": []
+        },
+        {
+          "name": "sort",
+          "type": "TableSort | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控排序，传入后表格不再本地排序",
+          "en": "Controlled sort, the table stops sorting locally once provided",
+          "values": []
+        },
+        {
+          "name": "defaultSort",
+          "type": "TableSort | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认排序，仅初始生效",
+          "en": "Default sort, applied initially",
+          "values": []
+        },
+        {
+          "name": "multipleSort",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否支持多列排序",
+          "en": "Whether multiple column sorting is allowed",
+          "values": []
         }
       ],
-      "outputs": []
+      "outputs": [
+        {
+          "name": "sortChange",
+          "type": "TableSort | undefined",
+          "zh": "排序变化",
+          "en": "Emitted when the sort changes"
+        }
+      ]
     },
     "TTag": {
       "className": "TTag",
