@@ -3219,6 +3219,15 @@
           "zh": "虚拟滚动配置，`type: 'virtual'` 且行数超过 `threshold` 时只渲染可视区域的行",
           "en": "Virtual scroll config; only visible rows are rendered when `type` is `virtual` and rows exceed `threshold`",
           "values": []
+        },
+        {
+          "name": "resizable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许拖拽表头调整列宽，单列可以用 `resizable: false` 关闭",
+          "en": "Whether column widths can be adjusted by dragging the header edge",
+          "values": []
         }
       ],
       "outputs": [
@@ -3251,6 +3260,12 @@
           "type": "TablePageChangeEvent",
           "zh": "分页变化，携带新一页的数据",
           "en": "Emitted when the page changes, with the new page data"
+        },
+        {
+          "name": "columnResizeChange",
+          "type": "TableColumnResizeEvent",
+          "zh": "列宽拖拽结束，携带拖拽后的列宽",
+          "en": "Emitted after a column resize drag ends"
         }
       ]
     },

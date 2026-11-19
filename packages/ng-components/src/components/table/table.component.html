@@ -20,6 +20,9 @@
                   [attr.data-colkey]="col.colKey"
                   [attr.rowspan]="cell.rowspan > 1 ? cell.rowspan : null"
                   [attr.colspan]="cell.colspan > 1 ? cell.colspan : null"
+                  (mousemove)="handleHeaderMouseMove($event, col)"
+                  (mouseleave)="handleHeaderMouseLeave($event)"
+                  (mousedown)="handleHeaderMouseDown($event, col)"
                 >
                 <div class="t-table__th-cell-inner">
                   @if (col.colKey === expandColumnKey) {
@@ -303,5 +306,15 @@
         }
       </div>
     </div>
+  }
+
+  @if (resizable()) {
+    <div
+      class="t-table__resize-line"
+      [style.display]="resizeLineState().visible ? 'block' : 'none'"
+      [style.left.px]="resizeLineState().left"
+      [style.top.px]="resizeLineState().top"
+      [style.height.px]="resizeLineState().height"
+    ></div>
   }
 </div>

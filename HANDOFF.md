@@ -1,7 +1,7 @@
-﻿# 交接文档 · TDesign Angular
+# 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-19，对应提交：`eed9acd`（Table 第八层）之后的未提交改动（Table 第九层：虚拟滚动）。
+> 更新日期：2026-11-19，对应提交：`9765fa2`（Table 第九层）之后的未提交改动（Table 第十层：列宽拖拽）。
 
 ## 1. 这个项目是什么
 
@@ -23,7 +23,7 @@
 | P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination 已完成；**Table 进行中**；Tabs / Collapse / List / Empty / Progress 未开始 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **27 个组件、313 个输入属性、123 个示例**，合计 `missing 0 / extra 0`。
+当前 `align-check` 覆盖 **27 个组件、314 个输入属性、124 个示例**，合计 `missing 0 / extra 0`。
 
 组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tag、textarea、tooltip。
 
@@ -73,27 +73,26 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：Table 第九层（虚拟滚动）
+## 7. 当前进行中的工作：Table 第十层（列宽拖拽，Table 收尾）
 
 **已完成（未提交）**：
 
-- 新输入 `scroll?: TableScroll`，字段与上游 `TScroll` 对齐：`type?: 'virtual' | 'lazy'`、`rowHeight?`（默认 47）、`bufferSize?`（默认 10）、`threshold?`（默认 100）、`isFixedRowHeight?`。
-- 启用条件与上游一致：`scroll.type === 'virtual'` 且行数超过 `threshold`，此时只渲染可视区域附近的行。
-- 行虚拟化按**固定行高**近似（不逐行测量 `tr` 高度，`isFixedRowHeight` 只接受不改变行为）；`virtualRange` 由 `scrollTop / rowHeight` 与 `viewportHeight` 算出起点、终点与 `translateY`，`tableRows` 返回 `{ row, rowIndex }`（行下标保持全局，合并单元格 / 展开行都依赖它）。
-- `tbody` 用 `transform: translateY()` 位移；`.t-table__content` 内放 `<div class="t-table__virtual-scroll-cursor">` 提供滚动高度。**cursor 高度 = 行数 × 行高 + 表头高度**，否则最后一行会被表头高度顶出视口、滚不到底（第一版就踩了这个坑，CDP 里表现为「滚到底还差 2 行」）。
-- 视口高度在 `refreshVirtualViewport()` 里量（首屏、ResizeObserver、数据变化时都调用），数据变少时把 `scrollTop` 收回范围内。
-- 新 demo `table-virtual`（1000 行、`height="400px"`），`/table` 现有 14 个示例。
+- 表级输入 `resizable?: boolean`，列级 `TableColumn.resizable?: boolean` 与 `TableColumn.resize?: { minWidth; maxWidth }`；输出 `(columnResizeChange)`，payload `TableColumnResizeEvent { columnsWidth: Record<string, number> }`，与上游 `onColumnResizeChange` 对齐。
+- 拖拽判定与上游一致：鼠标距表头右边缘 ≤8px 拖本列，距左边缘 ≤8px 拖左邻列；拖拽中显示根元素上的 `.t-table__resize-line`（`position:absolute`、`border-left`），放在根 `.t-table` 而不是 `.t-table__content` 里，避免横向滚动把竖线带走。
+- 宽度写回：`columnWidthOverrides` 记拖拽结果 → `columnWidths`（override → 列配置 width → 实测表头宽度）→ `tableWidth` 求和、`columnStyle` 写 px、固定列偏移同步使用；松手时当前列宽度变化、相邻可拖列反向补偿（总宽不变），相邻列不可拖时只改当前列。
+- 每列宽度夹在 `resize.minWidth ?? 80` 与 `resize.maxWidth ?? 600` 之间；列上 `resizable: false` 关闭该列；多级表头的分组列不参与拖拽（只有叶子列可拖）。
+- 根元素加 `t-table--column-resizable`，可拖表头加 `t-table__cell-resizable`（less 里已有 `cursor: col-resize` 与边框 hover 规则）。
+- 新 demo `table-resizable`（姓名列 `resize: { minWidth: 100, maxWidth: 220 }`、邮箱列 `resizable: false`，hint 实时显示各列宽度），`/table` 现有 15 个示例。
 
-**已用 CDP 验证**（`http://localhost:4280/table`）：`.t-table__virtual-scroll-cursor` 存在且 `transform` 为 `translate(0, 47047px)`（1000×47 + 表头 47）；首屏 `tbody` 只有 30 个 `tr`（视口 400px + 上下缓冲）；滚到底 `firstId=983`、`lastId=1000`、`scrollTop=46648`（= 滚动高度 − 视口）；`consoleErrors` 为空；行选择 / 展开行 / 固定列 / 多级表头 / 合并单元格 / 分页均无回归。
+**已用 CDP 验证**（`http://localhost:4280/table`）：`th` hover 计算样式 `cursor: col-resize`；按下后 `.t-table__resize-line` `display:block`、高度贴合表格内容区；向右拖 45px 后 `姓名 140→185`、`角色 160→115`（反向补偿），`td` 同步变宽；`(columnResizeChange)` 收到 `{ name: 185, role: 115, ... }`；松手后竖线隐藏；`consoleErrors` 为空；行选择 / 展开行 / 固定列 / 多级表头 / 合并单元格 / 分页 / 虚拟滚动均无回归。
 
 **下一步（建议顺序）**：
 
-1. **列宽拖拽**（`resizable`）——HANDOFF 原计划 Table 最后一项。
-2. 行选择补充：`selectOnRowClick` / `expandOnRowClick` 尚未写专门示例，下一轮可补「点击行选中」demo。
-3. Table 收尾后继续 P4 的 Tabs / Collapse / List / Empty / Progress。
+1. Table 收尾补示例：`selectOnRowClick` / `expandOnRowClick` 的「点击行选中 / 展开」demo。
+2. 继续 P4 的 Tabs / Collapse / List / Empty / Progress。
+3. Table 的其余上游能力（行拖拽排序、单元格编辑、吸顶表头、`lazy` 虚拟滚动）留到后续版本，`align-check` 里已写明原因。
 
-**已知取舍（写进文档，不要当成 bug）**：不做列虚拟化、`lazy` 模式、吸顶表头；`scroll.colWidth` 与 `disableHorizontalScroll` 暂不生效。
-
+**已知取舍（写进文档，不要当成 bug）**：虚拟滚动只做固定行高近似，不做列虚拟化 / `lazy` / 吸顶表头，`scroll.colWidth` 与 `disableHorizontalScroll` 不生效。
 ## 8. 已知缺口与技术债
 
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。

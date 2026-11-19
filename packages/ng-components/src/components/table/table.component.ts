@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
+﻿import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -49,6 +49,7 @@ import {
   TableRowspan,
   TableRowspanParams,
   TableScroll,
+  TableColumnResizeEvent,
   TableSelectChangeEvent,
   TableSize,
   TableSort,
@@ -304,6 +305,16 @@ export class TTable implements OnDestroy {
    */
   readonly scroll = input<TableScroll | undefined>(undefined);
 
+  /**
+   * @zh 是否允许拖拽表头调整列宽，单列可以用 `resizable: false` 关闭
+   * @en Whether column widths can be adjusted by dragging the header edge
+   * @defaultValue false
+   */
+  readonly resizable = input(false, { transform: booleanAttribute });
+
+  /** @zh 列宽拖拽结束，携带拖拽后的列宽 @en Emitted after a column resize drag ends */
+  readonly columnResizeChange = output<TableColumnResizeEvent>();
+
   protected readonly sizes = TABLE_SIZES;
   protected readonly aligns = TABLE_ALIGNS;
   protected readonly layouts = TABLE_LAYOUTS;
@@ -362,6 +373,30 @@ export class TTable implements OnDestroy {
 
   /** 是否多级表头（超过一行）。 */
   protected readonly hasMultiHeader = computed(() => this.headerRows().length > 1);
+
+  /** 拖拽后的列宽（colKey → px），优先级高于列配置与实测宽度。 */
+  private readonly columnWidthOverrides = signal<Record<string, number>>({});
+
+  /** 当前拖拽线：可见性、横坐标与高度。 */
+  protected readonly resizeLineState = signal({ visible: false, left: 0, top: 0, height: 0 });
+
+  /**
+   * 生效的列宽：拖拽结果 → 列配置的数字宽度 → 实测宽度（仅开启 resizable 时）。
+   * 开启拖拽后总宽按实测宽度固定，否则表格是 100% 宽、拖动没有意义。
+   */
+  protected readonly columnWidths = computed<Map<string, number>>(() => {
+    const overrides = this.columnWidthOverrides();
+    const measured = this.colWidths();
+    const map = new Map<string, number>();
+    for (const col of this.displayColumns()) {
+      const width =
+        overrides[col.colKey] ??
+        this.numericWidth(col.width) ??
+        (this.resizable() ? measured[col.colKey] : undefined);
+      if (width !== undefined) map.set(col.colKey, width);
+    }
+    return map;
+  });
 
   /** 当前选中的行 key。 */
   protected readonly selectedKeys = computed(() => this.selectedRowKeys() ?? this.innerSelectedRowKeys());
@@ -430,7 +465,9 @@ export class TTable implements OnDestroy {
   protected readonly fixedOffset = computed(() => {
     const columns = this.columns();
     const widths = this.colWidths();
-    const widthOf = (col: TableColumn) => widths[col.colKey] ?? this.numericWidth(col.width) ?? 0;
+    const overrides = this.columnWidthOverrides();
+    const widthOf = (col: TableColumn) =>
+      overrides[col.colKey] ?? widths[col.colKey] ?? this.numericWidth(col.width) ?? 0;
     const map = new Map<string, number>();
 
     let left = 0;
@@ -545,6 +582,7 @@ export class TTable implements OnDestroy {
       this.hasMultiHeader() ? 't-table--multiple-header' : '',
       this.rowspanAndColspan() ? 't-table--rowspan-colspan' : '',
       this.hasFixedColumn() ? 't-table--column-fixed' : '',
+      this.resizable() ? 't-table--column-resizable' : '',
       this.showLeftShadow() ? 't-table__content--scrollable-to-left' : '',
       this.showRightShadow() ? 't-table__content--scrollable-to-right' : '',
     ]
@@ -579,10 +617,10 @@ export class TTable implements OnDestroy {
     const columns = this.displayColumns();
     if (!columns.length) return null;
 
-    const widths = columns.map((col) => this.numericWidth(col.width));
-    if (widths.some((width) => width === null)) return null;
+    const widths = this.columnWidths();
+    if (columns.some((col) => !widths.has(col.colKey))) return null;
 
-    const total = (widths as number[]).reduce((sum, width) => sum + width, 0);
+    const total = columns.reduce((sum, col) => sum + (widths.get(col.colKey) ?? 0), 0);
     return `${total}px`;
   });
 
@@ -719,6 +757,144 @@ export class TTable implements OnDestroy {
 
   ngOnDestroy(): void {
     this.resizeObserver?.disconnect();
+    document.removeEventListener('mousemove', this.handleResizeMove);
+    document.removeEventListener('mouseup', this.handleResizeEnd);
+  }
+
+  /** 拖拽中的临时状态。 */
+  private resizeDrag: {
+    colKey: string;
+    nextKey: string | null;
+    startX: number;
+    startLeft: number;
+    startWidth: number;
+    nextWidth: number;
+    minWidth: number;
+    maxWidth: number;
+  } | null = null;
+
+  /** 鼠标当前停在哪一列的右边缘。 */
+  private resizeHoverKey: string | null = null;
+
+  /** 表头鼠标移动：靠近列右边缘 8px 内显示 col-resize，并把该列记为拖拽目标。 */
+  protected handleHeaderMouseMove(event: MouseEvent, col: TableColumn): void {
+    if (!this.isColumnResizable(col)) return;
+
+    const cell = event.currentTarget as HTMLElement;
+    const rect = cell.getBoundingClientRect();
+    const nearRight = rect.right - event.clientX <= 8;
+    const previous = event.clientX - rect.left <= 8 ? this.siblingColumn(col, -1) : null;
+
+    if (nearRight) {
+      this.resizeHoverKey = col.colKey;
+      cell.style.cursor = 'col-resize';
+      return;
+    }
+    if (previous) {
+      this.resizeHoverKey = previous.colKey;
+      cell.style.cursor = 'col-resize';
+      return;
+    }
+    this.resizeHoverKey = null;
+    cell.style.cursor = '';
+  }
+
+  protected handleHeaderMouseLeave(event: MouseEvent): void {
+    (event.currentTarget as HTMLElement).style.cursor = '';
+  }
+
+  /** 按下表头右边缘：记录初始宽度，拖拽期间只移动竖线。 */
+  protected handleHeaderMouseDown(event: MouseEvent, col: TableColumn): void {
+    const key = this.resizeHoverKey;
+    if (!key || !this.resizable()) return;
+
+    const target = this.displayColumns().find((item) => item.colKey === key);
+    const element = this.contentRef()?.nativeElement;
+    if (!target || !element) return;
+
+    const th = Array.from(element.querySelectorAll<HTMLElement>('thead th[data-colkey]')).find(
+      (item) => item.dataset['colkey'] === key,
+    );
+    if (!th) return;
+
+    event.preventDefault();
+    const rect = th.getBoundingClientRect();
+    const contentRect = element.getBoundingClientRect();
+    const widths = this.columnWidths();
+    const next = this.siblingColumn(target, 1);
+    const minWidth = Math.max(target.resize?.minWidth ?? 80, this.numericWidth(target.minWidth) ?? 0);
+
+    this.resizeDrag = {
+      colKey: key,
+      nextKey: next?.colKey ?? null,
+      startX: event.clientX,
+      startLeft: rect.right - contentRect.left,
+      startWidth: widths.get(key) ?? rect.width,
+      nextWidth: next ? (widths.get(next.colKey) ?? 0) : 0,
+      minWidth,
+      maxWidth: target.resize?.maxWidth ?? 600,
+    };
+    this.resizeLineState.set({
+      visible: true,
+      left: this.resizeDrag.startLeft,
+      top: rect.top - contentRect.top,
+      height: contentRect.bottom - rect.top,
+    });
+
+    document.addEventListener('mousemove', this.handleResizeMove);
+    document.addEventListener('mouseup', this.handleResizeEnd, { once: true });
+  }
+
+  private readonly handleResizeMove = (event: MouseEvent): void => {
+    const drag = this.resizeDrag;
+    if (!drag) return;
+
+    const delta = event.clientX - drag.startX;
+    const left = Math.min(
+      Math.max(drag.startLeft + delta, drag.startLeft - (drag.startWidth - drag.minWidth)),
+      drag.startLeft + (drag.maxWidth - drag.startWidth),
+    );
+    this.resizeLineState.set({ ...this.resizeLineState(), visible: true, left });
+  };
+
+  private readonly handleResizeEnd = (): void => {
+    const drag = this.resizeDrag;
+    const left = this.resizeLineState().left;
+    document.removeEventListener('mousemove', this.handleResizeMove);
+    this.resizeDrag = null;
+    this.resizeLineState.set({ visible: false, left: 0, top: 0, height: 0 });
+    if (!drag) return;
+
+    const width = Math.round(
+      Math.min(Math.max(drag.startWidth + (left - drag.startLeft), drag.minWidth), drag.maxWidth),
+    );
+    if (width === Math.round(drag.startWidth)) return;
+
+    const next = { ...Object.fromEntries(this.columnWidths()) };
+    const consumed = width - drag.startWidth;
+    next[drag.colKey] = width;
+
+    if (drag.nextKey && drag.nextWidth > 0) {
+      const nextCol = this.displayColumns().find((item) => item.colKey === drag.nextKey);
+      const nextMin = Math.max(nextCol?.resize?.minWidth ?? 80, this.numericWidth(nextCol?.minWidth) ?? 0);
+      next[drag.nextKey] = Math.max(nextMin, Math.round(drag.nextWidth - consumed));
+    }
+
+    this.columnWidthOverrides.set({ ...this.columnWidthOverrides(), ...next });
+    this.columnResizeChange.emit({ columnsWidth: next });
+  };
+
+  /** 同一层级相邻的可拖拽列（跳过显式关闭拖拽的列）。 */
+  private siblingColumn(col: TableColumn, step: 1 | -1): TableColumn | null {
+    const columns = this.displayColumns();
+    let index = columns.findIndex((item) => item.colKey === col.colKey);
+    while (index >= 0) {
+      index += step;
+      const candidate = columns[index];
+      if (!candidate) return null;
+      if (candidate.resizable !== false) return candidate;
+    }
+    return null;
   }
 
   protected handleScroll(event: Event): void {
@@ -1021,14 +1197,22 @@ export class TTable implements OnDestroy {
     return [
       this.cellClasses(col),
       this.sortOrderOf(col.colKey) ? 't-table__sort-column' : '',
+      this.isColumnResizable(col) ? 't-table__cell-resizable' : '',
     ]
       .filter(Boolean)
       .join(' ');
   }
 
+  /** 该列是否参与列宽拖拽：表级开关打开且列上没有显式关闭。 */
+  protected isColumnResizable(col: TableColumn): boolean {
+    return this.resizable() && col.resizable !== false && !col.children?.length;
+  }
+
   protected columnStyle(col: TableColumn): Record<string, string> | null {
     const style: Record<string, string> = {};
-    if (col.width !== undefined) style['width'] = this.toLength(col.width);
+    const width = this.columnWidths().get(col.colKey);
+    if (width !== undefined) style['width'] = `${width}px`;
+    else if (col.width !== undefined) style['width'] = this.toLength(col.width);
     if (col.type && col.width === undefined) style['width'] = '64px';
     if (col.minWidth !== undefined) style['min-width'] = this.toLength(col.minWidth);
 

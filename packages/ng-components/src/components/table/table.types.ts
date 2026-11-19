@@ -269,6 +269,24 @@ export interface TableColumn<T extends TableRow = TableRow> {
   filter?: TableColumnFilter;
   /** 子列，声明后该列成为多级表头的分组列，子列按层级渲染 */
   children?: TableColumn<T>[];
+  /** 该列是否允许拖拽调整宽度，`false` 时不出现拖拽手柄 */
+  resizable?: boolean;
+  /** 拖拽调整宽度时的最小 / 最大宽度 */
+  resize?: TableColumnResizeConfig;
+}
+
+/** 列宽拖拽的宽窄限制。 */
+export interface TableColumnResizeConfig {
+  /** 最小宽度，默认 80 */
+  minWidth: number;
+  /** 最大宽度，默认 600 */
+  maxWidth: number;
+}
+
+/** 列宽拖拽结束事件。 */
+export interface TableColumnResizeEvent {
+  /** 拖拽后的列宽，colKey → px */
+  columnsWidth: Record<string, number>;
 }
 
 /** 多级表头的一格：列本身 + 合并信息。 */
