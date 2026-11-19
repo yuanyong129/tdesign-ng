@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-19，对应提交：`e8c0cb3`（Table 第六层）之后的未提交改动（Table 第七层：多级表头）。
+> 更新日期：2026-11-19，对应提交：`e5057b5`（Table 第七层）之后的未提交改动（Table 第八层：合并单元格）。
 
 ## 1. 这个项目是什么
 
@@ -23,7 +23,7 @@
 | P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination 已完成；**Table 进行中**；Tabs / Collapse / List / Empty / Progress 未开始 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **27 个组件、311 个输入属性、121 个示例**，合计 `missing 0 / extra 0`。
+当前 `align-check` 覆盖 **27 个组件、312 个输入属性、122 个示例**，合计 `missing 0 / extra 0`。
 
 组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、dialog、divider、drawer、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tag、textarea、tooltip。
 
@@ -73,21 +73,21 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：Table 第七层（多级表头）
+## 7. 当前进行中的工作：Table 第八层（合并单元格）
 
 **已完成（未提交）**：
 
-- `TableColumn` 新增 `children?: TableColumn<T>[]`：声明后该列成为分组列，表头按层级自动合并；新增导出类型 `TableHeaderCell<T> { col, colspan, rowspan }`。
-- 表头结构照上游 `useMultiHeader`：`columnDepth` 取最大层级、`leafCount` 取分组列叶子数（即 colspan）、`flattenColumns` 展平成叶子列、`buildHeaderRows` 生成 `TableHeaderCell[][]`（第 0 行为最上层）；叶子列 `rowspan = 最大层级 - 当前层级 + 1`，分组列 `rowspan = 1`、`colspan = 叶子数`。
-- 组件新增 computed `rootColumns`（展开列在最前）、`displayColumns`（现为叶子列，数据行/固定列/列宽都基于它）、`headerRows`、`hasMultiHeader`；根元素多级时加 `t-table--multiple-header`，`thead` 加 `t-table__header--multiple`，`bordered` 且跨行跨列的表头格加 `t-table__header-th--bordered`。
-- 模板 `<thead>` 改为按 `headerRows()` 渲染多行，`th` 带 `[attr.rowspan]` / `[attr.colspan]`，分组列只渲染标题（无排序/筛选图标）；数据行仍按叶子列渲染。
-- 文档站新增 `table-group-header` 示例（「基本信息」下 姓名/角色/部门，「联系方式」下 邮箱/手机号），`/table` 现有 12 个示例。
+- 新输入 `rowspanAndColspan?: (params: TableRowspanParams) => TableRowspan | undefined`，参数 `{ row, col, rowIndex, colIndex }`，返回 `{ rowspan?, colspan? }`；新增导出类型 `TableRowspan`、`TableRowspanParams`。
+- 合并状态照上游 `useRowspanAndColspan`：`cellSpans` computed 遍历 `rows() × displayColumns()`，把锚点格写成 `{ rowspan, colspan }`，再把它覆盖到的格子标 `skipped`；模板里 `skipped` 的 `<td>` 不渲染。
+- 单元格键与上游一致：`cellKeyOf` 用 `${rowValue}_${colKey || colIndex}`，行值缺失时用 `__row_${rowIndex}__...`。
+- 类名：根元素有回调时加 `t-table--rowspan-colspan`（否则 `td:first-child` 的左边框重置规则会误伤）；首列锚点格 `t-table__td-first-col`；覆盖到最后一行的格子 `t-table__td-last-row`（去掉底部边框）。
+- 文档站新增 `table-merge` 示例（部门/城市按两行合并，6 行 3 组），`/table` 现有 13 个示例。
 
-**已用 CDP 验证**（`http://localhost:4280/table`）：多级表头 demo 的 `thead` 为 2 行，第一行「基本信息」`colspan=3`、「联系方式」`colspan=2`，第二行 5 个叶子表头；根类含 `t-table--multiple-header`、`thead` 含 `t-table__header--multiple`；数据行 4 行 × 5 个单元格；`consoleErrors` 为空；行选择 / 展开行 / 固定列 / 分页均无回归。
+**已用 CDP 验证**（`http://localhost:4280/table`）：根类含 `t-table--rowspan-colspan`；合并行 4 个 `td`（部门 `rowspan=2`、城市 `rowspan=2`），被覆盖行只剩姓名/角色 2 个 `td`；锚点格 `border-left-width: 0`、`vertical-align: middle`；`td-last-row` 4 个；`consoleErrors` 为空；多级表头 / 行选择 / 展开行 / 分页均无回归。
 
 **下一步（建议顺序）**：
 
-1. **虚拟滚动 / 合并单元格（`rowspanAndColspan`）/ 列宽拖拽**（HANDOFF 原计划剩余项）。
+1. **虚拟滚动**（`scroll` 配置）与**列宽拖拽**（`resizable`）——HANDOFF 原计划剩余项。
 2. 行选择补充：`selectOnRowClick` / `expandOnRowClick` 尚未写专门示例，下一轮可补「点击行选中」demo。
 3. Table 收尾后继续 P4 的 Tabs / Collapse / List / Empty / Progress。
 

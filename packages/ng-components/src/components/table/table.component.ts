@@ -46,6 +46,8 @@ import {
   TablePagination,
   TableRow,
   TableRowSelectionType,
+  TableRowspan,
+  TableRowspanParams,
   TableSelectChangeEvent,
   TableSize,
   TableSort,
@@ -110,6 +112,28 @@ function buildHeaderRows(columns: TableColumn[]): TableHeaderCell[][] {
   };
   walk(columns, 1);
   return rows;
+}
+
+/** 单元格合并状态。 */
+interface TableCellSpan {
+  rowspan?: number;
+  colspan?: number;
+  skipped?: boolean;
+}
+
+const EMPTY_CELL_SPAN: TableCellSpan = {};
+
+/** 单元格唯一键：行 key + 列 key，行 key 缺失时退化为行下标。 */
+function cellKeyOf(
+  row: TableRow,
+  col: TableColumn,
+  rowIndex: number,
+  colIndex: number,
+  rowKey: string,
+): string {
+  const rowValue = row[rowKey];
+  const colValue = col.colKey || colIndex;
+  return rowValue === undefined ? `__row_${rowIndex}___${colValue}` : `${rowValue}_${colValue}`;
 }
 
 /**
@@ -262,6 +286,15 @@ export class TTable implements OnDestroy {
 
   /** @zh 分页变化，携带新一页的数据 @en Emitted when the page changes, with the new page data */
   readonly pageChange = output<TablePageChangeEvent>();
+
+  /**
+   * @zh 合并单元格回调，返回 `{ rowspan, colspan }` 与相邻单元格合并
+   * @en Merge cells by returning `{ rowspan, colspan }` for the target cell
+   * @defaultValue undefined
+   */
+  readonly rowspanAndColspan = input<
+    ((params: TableRowspanParams) => TableRowspan | undefined) | undefined
+  >(undefined);
 
   protected readonly sizes = TABLE_SIZES;
   protected readonly aligns = TABLE_ALIGNS;
@@ -449,6 +482,47 @@ export class TTable implements OnDestroy {
     return map;
   });
 
+  /**
+   * 单元格合并状态：cellKey → `{ rowspan, colspan, skipped }`。
+   * 与上游 `useRowspanAndColspan` 一致：先算出锚点单元格的 span，
+   * 再把它覆盖到的其余单元格标记为 skipped（渲染时直接跳过）。
+   */
+  private readonly cellSpans = computed<Map<string, TableCellSpan>>(() => {
+    const map = new Map<string, TableCellSpan>();
+    const handler = this.rowspanAndColspan();
+    if (!handler) return map;
+
+    const rows = this.rows();
+    const columns = this.displayColumns();
+    const rowKey = this.rowKey();
+
+    rows.forEach((row, rowIndex) => {
+      columns.forEach((col, colIndex) => {
+        const key = cellKeyOf(row, col, rowIndex, colIndex, rowKey);
+        const state = map.get(key) ?? {};
+        const result = handler({ row, col, rowIndex, colIndex });
+        if (result?.rowspan) state.rowspan = result.rowspan;
+        if (result?.colspan) state.colspan = result.colspan;
+        if (state.rowspan || state.colspan) map.set(key, state);
+
+        const maxRowIndex = rowIndex + (state.rowspan ?? 1);
+        const maxColIndex = colIndex + (state.colspan ?? 1);
+        for (let i = rowIndex; i < maxRowIndex; i += 1) {
+          for (let j = colIndex; j < maxColIndex; j += 1) {
+            if (i === rowIndex && j === colIndex) continue;
+            if (!rows[i] || !columns[j]) return;
+            const coveredKey = cellKeyOf(rows[i], columns[j], i, j, rowKey);
+            const covered = map.get(coveredKey) ?? {};
+            covered.skipped = true;
+            map.set(coveredKey, covered);
+          }
+        }
+      });
+    });
+
+    return map;
+  });
+
   protected readonly classes = computed(() =>
     [
       't-table',
@@ -461,6 +535,7 @@ export class TTable implements OnDestroy {
       this.selectColumn() ? 't-table--row-select' : '',
       this.showExpandColumn() ? 't-table--row-expandable' : '',
       this.hasMultiHeader() ? 't-table--multiple-header' : '',
+      this.rowspanAndColspan() ? 't-table--rowspan-colspan' : '',
       this.hasFixedColumn() ? 't-table--column-fixed' : '',
       this.showLeftShadow() ? 't-table__content--scrollable-to-left' : '',
       this.showRightShadow() ? 't-table__content--scrollable-to-right' : '',
@@ -828,6 +903,11 @@ export class TTable implements OnDestroy {
     const value = row?.[col.colKey];
     // $implicit 与上游 slot 参数保持一致（整行），单元格值用 value 单独暴露
     return { $implicit: row, row, value, rowIndex, col, colIndex };
+  }
+
+  /** 单元格合并状态，模板里用来设置 rowspan / colspan 并跳过被合并掉的格子。 */
+  protected cellSpanOf(row: TableRow, col: TableColumn, rowIndex: number, colIndex: number): TableCellSpan {
+    return this.cellSpans().get(cellKeyOf(row, col, rowIndex, colIndex, this.rowKey())) ?? EMPTY_CELL_SPAN;
   }
 
   /** 单元格文本：优先用列自定义的 `cell`，否则按键取值。 */

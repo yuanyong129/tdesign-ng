@@ -159,7 +159,16 @@
         @for (row of rows(); track trackRow($index, row); let rowIndex = $index) {
           <tr [class]="rowClasses(row)" (click)="handleRowClick(row)">
             @for (col of displayColumns(); track col.colKey; let colIndex = $index) {
-              <td [class]="cellClasses(col)" [style]="columnStyle(col)">
+              @let span = cellSpanOf(row, col, rowIndex, colIndex);
+              @if (!span.skipped) {
+              <td
+                [class]="cellClasses(col)"
+                [class.t-table__td-first-col]="colIndex === 0 && rowspanAndColspan()"
+                [class.t-table__td-last-row]="rowIndex + (span.rowspan ?? 1) === rows().length"
+                [style]="columnStyle(col)"
+                [attr.rowspan]="span.rowspan && span.rowspan > 1 ? span.rowspan : null"
+                [attr.colspan]="span.colspan && span.colspan > 1 ? span.colspan : null"
+              >
                 @if (col.colKey === expandColumnKey) {
                   <div
                     class="t-table__expand-box"
@@ -212,6 +221,7 @@
                   }
                 }
               </td>
+              }
             }
           </tr>
           @if (expandedRowTemplate(); as expanded) {

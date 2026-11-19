@@ -201,6 +201,26 @@ export interface TablePageChangeEvent<T extends TableRow = TableRow> {
   dataSource: T[];
 }
 
+/** 合并单元格：返回的 span 会与相邻单元格合并。 */
+export interface TableRowspan {
+  /** 横向合并的列数 */
+  colspan?: number;
+  /** 纵向合并的行数 */
+  rowspan?: number;
+}
+
+/** 合并单元格回调参数。 */
+export interface TableRowspanParams<T extends TableRow = TableRow> {
+  /** 当前行数据 */
+  row: T;
+  /** 当前列 */
+  col: TableColumn<T>;
+  /** 当前行下标 */
+  rowIndex: number;
+  /** 当前列下标 */
+  colIndex: number;
+}
+
 /** 列配置，字段名与 TDesign 的 BaseTableCol 对齐。 */
 export interface TableColumn<T extends TableRow = TableRow> {
   /** 列唯一标识，同时作为取值字段名 */
