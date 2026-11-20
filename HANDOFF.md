@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-20，对应提交：`12cd5e4`（Collapse 第一层）之后的未提交改动（新组件 Empty）。
+> 更新日期：2026-11-20，对应提交：`ffec8f6`（Empty 空状态）之后的未提交改动（新组件 Progress）。
 
 ## 1. 这个项目是什么
 
@@ -20,12 +20,12 @@
 | P1 打样 | ✅ | Button / Link / Divider / Space / Icon |
 | P2 基础表单 | ✅ | Input / Textarea / Switch / Checkbox / Radio / Select / Form（含 TDesign rules 校验引擎） |
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
-| P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse 已完成；**Empty 待提交**；List / Progress 未开始 |
+| P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty 已完成；**Progress 待提交**；List 未开始 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **32 个组件、352 个输入属性、139 个示例**，合计 `missing 0 / extra 0`（`TEmpty 已对齐 6/7`）。
+当前 `align-check` 覆盖 **33 个组件、360 个输入属性、144 个示例**，合计 `missing 0 / extra 0`（`TProgress 已对齐 8/8`）。
 
-组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、collapse、dialog、divider、drawer、empty、form、input、link、loading、message、notification、pagination、popup、radio、select、space、switch、table、tabs、tag、textarea、tooltip。
+组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、collapse、dialog、divider、drawer、empty、form、input、link、loading、message、notification、pagination、popup、progress、radio、select、space、switch、table、tabs、tag、textarea、tooltip。
 
 ## 3. 目录与环境
 
@@ -73,40 +73,40 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：新组件 Empty（空状态）
+## 7. 当前进行中的工作：新组件 Progress（进度条）
 
-Collapse 第一层已提交（`12cd5e4`）；本层新增 `@tdesign-ng/components` 的 Empty（空状态）。
+Empty 已提交（`ffec8f6`）；本层新增 `@tdesign-ng/components` 的 Progress（进度条）。
 
 **已完成（未提交）**：
 
-- `TEmpty`（`t-empty`）：`type`（empty / success / fail / network-error / maintenance，默认 empty）、`size`（small / medium / large，默认 medium）、`title`、`description`、`image`（URL 字符串）、`imageStyle`；操作区用 `[tEmptyAction]` 投影（`TEmptyAction` 指令 + `contentChild` 判断是否渲染 `__action`）。
-- 标题优先级 `title ?? EMPTY_DEFAULT_TITLES[type]`；`type` 决定内置插图与默认标题；`image` 存在时用 `<img>` 替换内置 SVG。
-- DOM 照上游：`div.t-empty.t-size-{s|m|l}` > `__image` > `__title` > `__description` > `__action`；插图尺寸走 less 的 `font-size`（20 / 48 / 64px），SVG 用 `1em`。
-- 内置插图：empty = no-result-filled、success = check-circle（`--td-success-color`）、fail = error-circle（`--td-error-color`）、network-error = wifi-no-filled、maintenance = traffic-events-filled（后三个用 `--td-text-color-placeholder`），全部内联 SVG，不引 `@tdesign-ng/icons`。
-- `imageStyle` 作用在 `<img>` 上（不是 `__image` 容器），否则容器被压成图片宽度、插图会靠左。
-- 新 demo：`empty-basic`（默认类型 + description + 操作按钮）、`empty-type`（5 种类型，small 尺寸一行展示）、`empty-size`（small / medium / large）、`empty-custom`（data URI 自定义插图 + `imageStyle` 96px）。
-- `align-check` 新增 `TEmpty`（`TdEmptyProps`），结果 `TEmpty 已对齐 6/7`，总量 `missing 0 / extra 0`；`action` 写明「Angular 用 [tEmptyAction] 投影」，`title` / `description` / `image` 已实现但类型收窄为字符串。
+- `TProgress`（`t-progress`）：`theme`（line / plump / circle，默认 line）、`percentage`（0–100，默认 0）、`status`（success / error / warning / active）、`color`（单色 / 颜色数组 / `Record<百分比, 颜色>`）、`trackColor`、`strokeWidth`（line 条高、circle 环宽）、`size`（small / medium / large 或自定义像素）、`label`（`string | boolean`）。
+- 状态优先级 `status ?? (percentage >= 100 ? 'success' : 'default')`；line 与 circle 在 success / warning / error 时用图标替百分比，plump 始终显示文本。
+- DOM 照上游：line `div.t-progress--thin.t-progress--status--x` > `__bar` > `__inner` + `__info`；plump `div.t-progress__bar.t-progress--plump.t-progress--over-ten|--under-ten`（over-ten 时 `__info` 内嵌在 `__inner`）；circle `div.t-progress--circle` + `svg` 双 circle（外层 `__circle-outer`、内层 `__circle-inner` 带 `stroke-dasharray` 与 `matrix(0,-1,1,0,0,d)`）。
+- circle 直径 `72 / 112 / 160`，字号 `14 / 20 / 36`；环宽默认 6（small 为 4）；颜色数组生成 `linear-gradient(90deg, …)`，对象按 key 排序生成分段渐变。
+- 图标全部内联 SVG（`t-progress__icon`）；circle 下额外用 `circleIconSize`（直径 × 0.18）覆盖 less 的 `2.4em`，否则图标会撑满整个圆环（踩过）。
+- 新 demo：`progress-basic`（20/45/70/100%）、`progress-status`（success/warning/error/active）、`progress-plump`（70/30/8% + small）、`progress-circle`（三档尺寸 + 自定义 90px、环宽 4）、`progress-color`（单色 + trackColor、渐变数组、分段对象、circle 描边）。
+- `align-check` 新增 `TProgress`（`TdProgressProps`），结果 `TProgress 已对齐 8/8`，总量 `missing 0 / extra 0`。
 
-**已用 CDP 验证**（`http://localhost:4280/empty`）：
+**已用 CDP 验证**（`http://localhost:4280/progress`）：
 
-- basic：`t-empty t-size-m`、标题「暂无数据」、描述文案、操作按钮「重新加载」、插图 `font-size: 48px`、颜色 `rgba(0,0,0,0.4)`。
-- type：5 个 `t-empty t-size-s`，标题依次「暂无数据 / 成功 / 失败 / 网络异常 / 维护中」，SVG 类名分别为 `t-icon-no-result-filled` / `check-circle` / `error-circle` / `wifi-no-filled` / `traffic-events-filled`。
-- size：`t-size-s/m/l` 对应插图 20 / 48 / 64px，标题字号 12 / 14 / 14px。
-- custom：`<img>` 96×96、标题「还没有创建任何项目」、操作按钮「新建项目」，插图居中。
-- `consoleErrors` 为空。
+- line：宽度 20 / 45 / 70 / 100%，100% 自动 `status--success` 且背景 `rgb(43,164,113)`。
+- status：success / warning / error 渲染 `t-progress__icon`（`__info` 文本为空），active 显示 `70%`。
+- plump：70 / 30 为 `--over-ten` 且文本在 `__inner` 内、8% 为 `--under-ten` 文本在条外；条高 20px，small 16px。
+- circle：72 / 112 / 160px、字号 14 / 20 / 36px、`stroke-dasharray` 与内外圈 stroke 正确；状态图标 20 / 29 / 16px。
+- color：单色、渐变、分段、circle 描边都正确；`apiRows 8`；`console issues` 为空。
 
 **下一步（建议顺序）**：
 
-1. P4 剩余组件：List / Progress。
-2. Collapse 可继续补 `expandIcon` 渲染函数；Empty 可补 `image` 支持 ImageProps。
-3. Table / Tabs 的余项见 §8。
+1. P4 最后一项：List。
+2. Progress 余项：`label` 支持 TNode / 模板；circle 状态图标换成上游的细线图标。
+3. Table / Tabs / Collapse / Empty 的余项见 §8。
 
 ## 8. 已知缺口与技术债
 
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
-- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）。
+- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）。
 - **文档站**：无搜索、无中英切换、无右侧锚点导航；示例卡片视觉可再贴近官网。
 
 ## 9. 怎么验证一个改动

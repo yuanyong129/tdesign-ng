@@ -38,6 +38,7 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/tabs', label: '选项卡 Tabs', group: '数据展示' },
   { path: '/collapse', label: '折叠面板 Collapse', group: '数据展示' },
   { path: '/empty', label: '空状态 Empty', group: '数据展示' },
+  { path: '/progress', label: '进度条 Progress', group: '数据展示' },
 ];
 
 /** 按分组统计，保持 DOCS_NAV 里的先后顺序。 */

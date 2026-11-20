@@ -117,6 +117,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/empty/empty.component').then((m) => m.EmptyDocs),
   },
   {
+    path: 'progress',
+    loadComponent: () => import('./docs/progress/progress.component').then((m) => m.ProgressDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

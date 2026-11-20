@@ -1,4 +1,4 @@
-﻿# TDesign Angular
+# TDesign Angular
 
 [TDesign](https://tdesign.tencent.com/) 的 Angular 实现。
 
@@ -37,8 +37,9 @@
 | Tabs | ✅ normal / card 主题、四个方向、禁用与受控取值、新增/关闭页签、拖拽排序、懒加载与 destroyOnHide |
 | Collapse | ✅ 手风琴互斥、默认展开、整行点击、无边框、箭头位置、收起销毁内容 |
 | Empty | ✅ 五种内置插图、三种尺寸、自定义图片、操作区投影 |
+| Progress | ✅ line / plump / circle 主题、状态图标、渐变与分段颜色、自定义尺寸 |
 
-P4 数据展示的 Table、Tabs、Collapse 与 Empty 已完成主要能力，List / Progress 继续推进，计划见 `docs/plans/tdesign-angular-plan.md`；
+P4 数据展示的 Table、Tabs、Collapse、Empty 与 Progress 已完成主要能力，List 继续推进，计划见 `docs/plans/tdesign-angular-plan.md`；
 接手开发请先读 [`HANDOFF.md`](./HANDOFF.md)。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。

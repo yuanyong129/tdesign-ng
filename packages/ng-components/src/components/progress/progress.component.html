@@ -1,0 +1,107 @@
+﻿<div class="t-progress">
+  @if (theme() === 'line') {
+    <div [class]="lineClasses()">
+      <div class="t-progress__bar" [style]="trackStyle()">
+        <div class="t-progress__inner" [style]="barStyle()"></div>
+      </div>
+      @if (showLabel()) {
+        <div class="t-progress__info">
+          @if (statusIcon(); as icon) {
+            @switch (icon) {
+              @case ('success') {
+                <svg class="t-progress__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+                  <path fill="currentColor" d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11.0026 16L18.0737 8.92893L16.6595 7.51472L11.0026 13.1716L8.17421 10.3431L6.75999 11.7574L11.0026 16Z" />
+                </svg>
+              }
+              @case ('warning') {
+                <svg class="t-progress__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+                  <path fill="currentColor" d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM11 7V13H13V7H11Z" />
+                </svg>
+              }
+              @case ('error') {
+                <svg class="t-progress__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+                  <path fill="currentColor" d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM8.46447 7.05025L7.05025 8.46447L10.5858 12L7.05025 15.5355L8.46447 16.9497L12 13.4142L15.5355 16.9497L16.9497 15.5355L13.4142 12L16.9497 8.46447L15.5355 7.05025L12 10.5858L8.46447 7.05025Z" />
+                </svg>
+              }
+            }
+          } @else {
+            {{ labelText() }}
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (theme() === 'plump') {
+    <div [class]="plumpClasses()" [style]="trackStyle()">
+      <div class="t-progress__inner" [style]="barStyle()">
+        @if (showLabel() && plumpInfoInside()) {
+          <div class="t-progress__info">{{ labelText() }}</div>
+        }
+      </div>
+      @if (showLabel() && !plumpInfoInside()) {
+        <div class="t-progress__info">{{ labelText() }}</div>
+      }
+    </div>
+  }
+
+  @if (theme() === 'circle') {
+    <div [class]="circleClasses()" [style]="circleStyle()">
+      @if (showLabel()) {
+        <div class="t-progress__info">
+          @if (statusIcon(); as icon) {
+            @switch (icon) {
+              @case ('success') {
+                <svg class="t-progress__icon" [style.fontSize.px]="circleIconSize()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+                  <path fill="currentColor" d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11.0026 16L18.0737 8.92893L16.6595 7.51472L11.0026 13.1716L8.17421 10.3431L6.75999 11.7574L11.0026 16Z" />
+                </svg>
+              }
+              @case ('warning') {
+                <svg class="t-progress__icon" [style.fontSize.px]="circleIconSize()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+                  <path fill="currentColor" d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM11 7V13H13V7H11Z" />
+                </svg>
+              }
+              @case ('error') {
+                <svg class="t-progress__icon" [style.fontSize.px]="circleIconSize()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+                  <path fill="currentColor" d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM8.46447 7.05025L7.05025 8.46447L10.5858 12L7.05025 15.5355L8.46447 16.9497L12 13.4142L15.5355 16.9497L16.9497 15.5355L13.4142 12L16.9497 8.46447L15.5355 7.05025L12 10.5858L8.46447 7.05025Z" />
+                </svg>
+              }
+            }
+          } @else {
+            {{ labelText() }}
+          }
+        </div>
+      }
+      <svg
+        [attr.width]="diameter()"
+        [attr.height]="diameter()"
+        [attr.viewBox]="'0 0 ' + diameter() + ' ' + diameter()"
+        aria-hidden="true"
+      >
+        <circle
+          [attr.cx]="circleCenter()"
+          [attr.cy]="circleCenter()"
+          [attr.r]="circleRadius()"
+          [attr.stroke-width]="circleStrokeWidth()"
+          fill="none"
+          class="t-progress__circle-outer"
+          [style]="circleTrackStyle()"
+        />
+        @if (percentage() > 0) {
+          <circle
+            [attr.cx]="circleCenter()"
+            [attr.cy]="circleCenter()"
+            [attr.r]="circleRadius()"
+            [attr.stroke-width]="circleStrokeWidth()"
+            fill="none"
+            stroke-linecap="round"
+            class="t-progress__circle-inner"
+            [attr.transform]="'matrix(0,-1,1,0,0,' + diameter() + ')'"
+            [attr.stroke-dasharray]="circleDashArray()"
+            [style]="circleColorStyle()"
+          />
+        }
+      </svg>
+    </div>
+  }
+</div>

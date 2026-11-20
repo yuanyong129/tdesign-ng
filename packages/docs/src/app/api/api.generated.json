@@ -2540,6 +2540,95 @@
         }
       ]
     },
+    "TProgress": {
+      "className": "TProgress",
+      "selector": "t-progress",
+      "file": "packages/ng-components/src/components/progress/progress.component.ts",
+      "inputs": [
+        {
+          "name": "percentage",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "进度百分比，0 - 100",
+          "en": "Progress percentage, 0 - 100",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "ProgressTheme",
+          "default": "'line'",
+          "required": false,
+          "zh": "进度条主题",
+          "en": "Progress theme",
+          "values": [
+            "line",
+            "plump",
+            "circle"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "ProgressStatus | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "进度条状态，不传时百分比达到 100 自动显示为 success",
+          "en": "Progress status; falls back to success when percentage reaches 100",
+          "values": [
+            "success",
+            "error",
+            "warning",
+            "active"
+          ]
+        },
+        {
+          "name": "color",
+          "type": "ProgressColor | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "进度条颜色，支持单色、渐变色数组与按百分比分段的颜色对象",
+          "en": "Progress color: a color, a gradient array or a record keyed by percentage",
+          "values": []
+        },
+        {
+          "name": "trackColor",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "轨道颜色",
+          "en": "Track color",
+          "values": []
+        },
+        {
+          "name": "strokeWidth",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "线宽，line / plump 下为高度，circle 下为圆环宽度",
+          "en": "Stroke width",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "尺寸，circle 支持 small / medium / large 或自定义像素，line / plump 支持 small",
+          "en": "Size: small / medium / large or custom px for circle, small for line / plump",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | boolean | undefined",
+          "default": "true",
+          "required": false,
+          "zh": "标签内容，传 false 隐藏标签",
+          "en": "Label content, false hides the label",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TRadio": {
       "className": "TRadio",
       "selector": "t-radio",

@@ -20,6 +20,7 @@ export * from './components/message';
 export * from './components/notification';
 export * from './components/pagination';
 export * from './components/popup';
+export * from './components/progress';
 export * from './components/radio';
 export * from './components/select';
 export * from './components/space';

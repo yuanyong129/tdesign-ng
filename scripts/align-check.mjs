@@ -170,6 +170,16 @@ const CONFIG = {
       'action': 'Angular 用 <t-button tEmptyAction> 投影操作区，不是 TNode 属性',
     },
   },
+  TProgress: {
+    upstream: 'progress',
+    upstreamInterface: 'TdProgressProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ...ANGULAR_EVENT_IGNORES,
+      // label 已实现（string | boolean），只是不支持 TNode 渲染函数。
+    },
+  },
   TInput: {
     upstream: 'input',
     renames: {},
