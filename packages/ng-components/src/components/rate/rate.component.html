@@ -1,0 +1,41 @@
+<div class="t-rate" [class.t-is-disabled]="disabled()" (mouseleave)="handleMouseLeave()">
+  <ul class="t-rate__list" [style.gap.px]="gap()">
+    @for (item of items(); track item) {
+      <li
+        class="t-rate__item"
+        [class.t-rate__item--full]="isFull(item)"
+        [class.t-rate__item--half]="isHalf(item)"
+        (mousemove)="handleMouseMove($event, item)"
+        (click)="handleClick($event, item)"
+      >
+        <div class="t-rate__star-top">
+          <svg
+            viewBox="0 0 24 24"
+            [attr.width]="size()"
+            [attr.height]="size()"
+            [attr.fill]="activeColor()"
+          >
+            <path
+              d="M12.0012 0.63031L14.9039 8.98087L23.7427 9.16099L16.6978 14.502L19.2579 22.9639L12.0012 17.9143L4.74461 22.9639L7.30465 14.502L0.259766 9.16099L9.09859 8.98087L12.0012 0.63031Z"
+            />
+          </svg>
+        </div>
+        <div class="t-rate__star-bottom">
+          <svg
+            viewBox="0 0 24 24"
+            [attr.width]="size()"
+            [attr.height]="size()"
+            [attr.fill]="inactiveColor()"
+          >
+            <path
+              d="M12.0012 0.63031L14.9039 8.98087L23.7427 9.16099L16.6978 14.502L19.2579 22.9639L12.0012 17.9143L4.74461 22.9639L7.30465 14.502L0.259766 9.16099L9.09859 8.98087L12.0012 0.63031Z"
+            />
+          </svg>
+        </div>
+      </li>
+    }
+  </ul>
+  @if (showText()) {
+    <div class="t-rate__text">{{ displayText() }}</div>
+  }
+</div>

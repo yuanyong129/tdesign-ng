@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
  * 把本仓库组件的 API 与 tdesign-vue-next 的 props 定义做机器比对。
  *
@@ -204,6 +204,19 @@ const CONFIG = {
       'tooltipProps': '滑块提示用内置 t-tooltip，未透传 TooltipProps',
       'onChange': 'Angular 用 (change) 输出',
       'onChangeEnd': 'Angular 用 (changeEnd) 输出',
+      'modelValue': 'Angular 用 value 双向绑定',
+    },
+  },
+  TRate: {
+    upstream: 'rate',
+    upstreamInterface: 'TdRateProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ...ANGULAR_EVENT_IGNORES,
+      // color / texts / size 已实现（数组与字符串），icon 未实现。
+      'icon': '自定义评分图标在后续版本实现，当前固定使用内置星形',
+      'onChange': 'Angular 用 (change) 输出',
       'modelValue': 'Angular 用 value 双向绑定',
     },
   },
@@ -711,3 +724,5 @@ async function main() {
 }
 
 await main();
+
+

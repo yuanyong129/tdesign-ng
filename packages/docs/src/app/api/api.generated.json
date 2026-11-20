@@ -2993,6 +2993,120 @@
         }
       ]
     },
+    "TRate": {
+      "className": "TRate",
+      "selector": "t-rate",
+      "file": "packages/ng-components/src/components/rate/rate.component.ts",
+      "inputs": [
+        {
+          "name": "allowHalf",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许半星评分。",
+          "en": "Whether half star is allowed.",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许再次点击已选中的评分时清空。",
+          "en": "Whether clicking the selected value again clears it.",
+          "values": []
+        },
+        {
+          "name": "color",
+          "type": "RateColor",
+          "default": "'#ED7B2F'",
+          "required": false,
+          "zh": "评分颜色，传数组时第一项为选中色、第二项为未选中色。",
+          "en": "Rate color; an array means `[activeColor, inactiveColor]`.",
+          "values": []
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "default": "5",
+          "required": false,
+          "zh": "评分总数。",
+          "en": "Total number of icons.",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用评分。",
+          "en": "Whether the rate is disabled.",
+          "values": []
+        },
+        {
+          "name": "gap",
+          "type": "number",
+          "default": "4",
+          "required": false,
+          "zh": "图标之间的间距，单位 px。",
+          "en": "Gap between icons in px.",
+          "values": []
+        },
+        {
+          "name": "showText",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否在评分右侧显示文案。",
+          "en": "Whether to show the text on the right.",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "RateSize",
+          "default": "'24px'",
+          "required": false,
+          "zh": "图标尺寸，任意 CSS 长度。",
+          "en": "Icon size, any CSS length.",
+          "values": []
+        },
+        {
+          "name": "texts",
+          "type": "string[]",
+          "default": "[]",
+          "required": false,
+          "zh": "评分对应的文案，默认使用内置文案（极差 / 失望 / 一般 / 满意 / 惊喜）。",
+          "en": "Texts for each score; built-in texts are used when empty.",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "评分值，受控用法。",
+          "en": "Rate value in controlled mode.",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "默认评分值，非受控用法。",
+          "en": "Default rate value in uncontrolled mode.",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "RateChangeEvent",
+          "zh": "评分变化时触发。",
+          "en": "Emitted when the rate value changes."
+        }
+      ]
+    },
     "TSelect": {
       "className": "TSelect",
       "selector": "t-select",

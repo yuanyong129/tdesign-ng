@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+﻿import { Routes } from '@angular/router';
 
 /**
  * 文档站路由。所有页面都懒加载，示例组件的代码只在进入对应页面时才下载。
@@ -129,7 +129,12 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/slider/slider.component').then((m) => m.SliderDocs),
   },
   {
+    path: 'rate',
+    loadComponent: () => import('./docs/rate/rate.component').then((m) => m.RateDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },
 ];
+
