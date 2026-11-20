@@ -125,6 +125,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/list/list.component').then((m) => m.ListDocs),
   },
   {
+    path: 'slider',
+    loadComponent: () => import('./docs/slider/slider.component').then((m) => m.SliderDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

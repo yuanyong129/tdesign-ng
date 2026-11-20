@@ -24,6 +24,7 @@ export * from './components/popup';
 export * from './components/progress';
 export * from './components/radio';
 export * from './components/select';
+export * from './components/slider';
 export * from './components/space';
 export * from './components/switch';
 export * from './components/table';

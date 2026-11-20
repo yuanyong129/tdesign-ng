@@ -1,0 +1,66 @@
+﻿<div class="t-slider__container" [class.is-vertical]="vertical()">
+  <div
+    class="t-slider"
+    [class.is-vertical]="vertical()"
+    [class.t-slider--vertical]="vertical()"
+    [class.t-is-disabled]="disabled()"
+    role="slider"
+    [attr.aria-valuemin]="min()"
+    [attr.aria-valuemax]="max()"
+    [attr.aria-valuenow]="rangeStart()"
+    [attr.aria-orientation]="layout()"
+    [attr.aria-disabled]="disabled()"
+  >
+    <div class="t-slider__rail" (click)="handleRailClick($event)">
+      <div class="t-slider__track" [style]="trackStyle()"></div>
+
+      <div class="t-slider__button-wrapper" [style]="buttonStyle(rangeStart())" (mouseenter)="hovered.set(0)" (mouseleave)="hovered.set(-1)" tabindex="0" (mousedown)="handleButtonDown($event, 0)" (keydown)="handleButtonKeydown($event, 0)">
+        <t-tooltip
+          [content]="tooltipContent(rangeStart())"
+          [disabled]="!tooltipContent(rangeStart())"
+          [visible]="isTooltipVisible(0)"
+          [placement]="vertical() ? 'right' : 'top'"
+          [showArrow]="true"
+        >
+          <div class="t-slider__button" [class.t-slider__button--dragging]="isButtonDragging(0)"></div>
+        </t-tooltip>
+      </div>
+
+      @if (range()) {
+        <div class="t-slider__button-wrapper" [style]="buttonStyle(rangeEnd())" (mouseenter)="hovered.set(1)" (mouseleave)="hovered.set(-1)" tabindex="0" (mousedown)="handleButtonDown($event, 1)" (keydown)="handleButtonKeydown($event, 1)">
+          <t-tooltip
+            [content]="tooltipContent(rangeEnd())"
+            [disabled]="!tooltipContent(rangeEnd())"
+            [visible]="isTooltipVisible(1)"
+            [placement]="vertical() ? 'right' : 'top'"
+            [showArrow]="true"
+          >
+            <div class="t-slider__button" [class.t-slider__button--dragging]="isButtonDragging(1)"></div>
+          </t-tooltip>
+        </div>
+      }
+
+      @if (stops().length) {
+        <div class="t-slider__stops">
+          @for (stop of stops(); track $index) {
+            <div class="t-slider__stop" [style]="stopStyle(stop)"></div>
+          }
+        </div>
+      }
+
+      @if (markList().length) {
+        <div class="t-slider__stops">
+          @for (mark of markList(); track mark.point) {
+            <div class="t-slider__stop t-slider__mark-stop" [style]="stopStyle(mark.position)"></div>
+          }
+        </div>
+        <div class="t-slider__mark">
+          @for (mark of markList(); track mark.point) {
+            <span class="t-slider__mark-text" [style]="stopStyle(mark.position)" (click)="handleRailClick($event)">{{ mark.label }}</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+

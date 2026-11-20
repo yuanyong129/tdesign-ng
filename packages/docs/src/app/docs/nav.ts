@@ -23,6 +23,7 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/radio', label: '单选框 Radio', group: '数据录入' },
   { path: '/select', label: '选择器 Select', group: '数据录入' },
   { path: '/form', label: '表单 Form', group: '数据录入' },
+  { path: '/slider', label: '滑块 Slider', group: '数据录入' },
   { path: '/popup', label: '弹出层 Popup', group: '反馈' },
   { path: '/tooltip', label: '文字提示 Tooltip', group: '反馈' },
   { path: '/dialog', label: '对话框 Dialog', group: '反馈' },

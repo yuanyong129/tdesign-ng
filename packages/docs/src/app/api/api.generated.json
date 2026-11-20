@@ -3240,6 +3240,129 @@
         }
       ]
     },
+    "TSlider": {
+      "className": "TSlider",
+      "selector": "t-slider",
+      "file": "packages/ng-components/src/components/slider/slider.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "SliderValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "滑块值，受控用法",
+          "en": "Slider value, controlled usage",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "SliderValue",
+          "default": "0",
+          "required": false,
+          "zh": "默认滑块值",
+          "en": "Default slider value",
+          "values": []
+        },
+        {
+          "name": "min",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "最小值",
+          "en": "Minimum value",
+          "values": []
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "default": "100",
+          "required": false,
+          "zh": "最大值",
+          "en": "Maximum value",
+          "values": []
+        },
+        {
+          "name": "step",
+          "type": "number",
+          "default": "1",
+          "required": false,
+          "zh": "步长",
+          "en": "Step",
+          "values": []
+        },
+        {
+          "name": "range",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否双滑块（区间选择）",
+          "en": "Whether to use range selection",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether disabled",
+          "values": []
+        },
+        {
+          "name": "layout",
+          "type": "SliderLayout",
+          "default": "'horizontal'",
+          "required": false,
+          "zh": "布局方向",
+          "en": "Layout direction",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "label",
+          "type": "string | boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "滑块提示文案",
+          "en": "Tooltip label of the slider button",
+          "values": []
+        },
+        {
+          "name": "showStep",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示步长刻度点",
+          "en": "Whether to show step stops",
+          "values": []
+        },
+        {
+          "name": "marks",
+          "type": "SliderMarks | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "刻度标记",
+          "en": "Slider marks",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "SliderValue",
+          "zh": "值变化时触发",
+          "en": "Emits when value changes"
+        },
+        {
+          "name": "changeEnd",
+          "type": "SliderValue",
+          "zh": "拖动结束或点击轨道时触发",
+          "en": "Emits when dragging ends or rail is clicked"
+        }
+      ]
+    },
     "TSpace": {
       "className": "TSpace",
       "selector": "t-space",
