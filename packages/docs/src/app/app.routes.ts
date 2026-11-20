@@ -133,8 +133,13 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/rate/rate.component').then((m) => m.RateDocs),
   },
   {
+    path: 'cascader',
+    loadComponent: () => import('./docs/cascader/cascader.component').then((m) => m.CascaderDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },
 ];
+
 

@@ -344,6 +344,115 @@
       ],
       "outputs": []
     },
+    "TCascader": {
+      "className": "TCascader",
+      "selector": "t-cascader",
+      "file": "packages/ng-components/src/components/cascader/cascader.component.ts",
+      "inputs": [
+        {
+          "name": "options",
+          "type": "CascaderOption[]",
+          "default": "[]",
+          "required": false,
+          "zh": "级联选项数据。",
+          "en": "Cascader options.",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "CascaderValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中值，受控用法。",
+          "en": "Selected value in controlled mode.",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "CascaderValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认选中值，非受控用法。",
+          "en": "Default selected value in uncontrolled mode.",
+          "values": []
+        },
+        {
+          "name": "keys",
+          "type": "CascaderKeys",
+          "default": "{}",
+          "required": false,
+          "zh": "自定义字段名，默认 label / value / children。",
+          "en": "Custom field names; defaults to label / value / children.",
+          "values": []
+        },
+        {
+          "name": "showAllLevels",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "面板展开时是否显示完整路径（父级 / 子级），为 false 时只显示最后一级。",
+          "en": "Whether to show the full path in the input; false shows the last level only.",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空。",
+          "en": "Whether the value can be cleared.",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用。",
+          "en": "Whether the cascader is disabled.",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "'small' | 'medium' | 'large'",
+          "default": "'medium'",
+          "required": false,
+          "zh": "输入框尺寸。",
+          "en": "Size of the input.",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "default": "'请选择'",
+          "required": false,
+          "zh": "占位文案。",
+          "en": "Placeholder text.",
+          "values": []
+        },
+        {
+          "name": "empty",
+          "type": "string",
+          "default": "'暂无数据'",
+          "required": false,
+          "zh": "无选项时的提示文案。",
+          "en": "Text shown when there are no options.",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "CascaderChangeEvent",
+          "zh": "选中值变化时触发。",
+          "en": "Emitted when the selected value changes."
+        }
+      ]
+    },
     "TCheckbox": {
       "className": "TCheckbox",
       "selector": "t-checkbox",

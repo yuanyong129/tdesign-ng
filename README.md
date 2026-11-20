@@ -41,8 +41,9 @@
 | List | ✅ 头像与标题描述、操作区、分割线、斑马纹、尺寸、异步加载更多 |
 | Slider | ✅ 单值与区间、步长与刻度、横竖布局、提示文案、键盘操作 |
 | Rate | ✅ 半星、自定义数量与间距、选中/未选中颜色、禁用、再次点击清空、评分文案 |
+| Cascader | ✅ 单选级联、完整路径回显、自定义字段名、清空、禁用、三种尺寸 |
 
-P4 数据展示已全部落地；P5 复杂录入进行中（Slider、Rate 已完成，Cascader / TreeSelect / DatePicker / Upload / Transfer 待做），计划见 `docs/plans/tdesign-angular-plan.md`；
+P4 数据展示已全部落地；P5 复杂录入进行中（Slider、Rate、Cascader 已完成，TreeSelect / DatePicker / TimePicker / Upload / Transfer / ColorPicker 待做），计划见 `docs/plans/tdesign-angular-plan.md`；
 接手开发请先读 [`HANDOFF.md`](./HANDOFF.md)。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。

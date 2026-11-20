@@ -6,6 +6,7 @@
 export * from './components/avatar';
 export * from './components/badge';
 export * from './components/button';
+export * from './components/cascader';
 export * from './components/checkbox';
 export * from './components/collapse';
 export * from './components/dialog';

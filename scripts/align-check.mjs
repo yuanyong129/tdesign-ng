@@ -244,7 +244,60 @@ const CONFIG = {
       'separate': 'input-group 的属性，P2 做 t-input-group 时处理',
     },
   },
-  TTextarea: {
+  TCascader: {
+    upstream: 'cascader',
+    upstreamInterface: 'TdCascaderProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ...ANGULAR_EVENT_IGNORES,
+      // 第一层只做单选：options / value / defaultValue / keys / showAllLevels / clearable /
+      // disabled / size / placeholder / empty 已实现。
+      'multiple': '多选级联在后续版本实现',
+      'checkStrictly': '父子节点不关联在后续版本实现',
+      'checkProps': '多选复选框配置在后续版本实现',
+      'lazy': '异步加载子节点在后续版本实现',
+      'load': '异步加载子节点在后续版本实现',
+      'loading': '加载态在后续版本实现',
+      'loadingText': '加载态文案在后续版本实现',
+      'filterable': '搜索过滤在后续版本实现',
+      'filter': '搜索过滤在后续版本实现',
+      'reserveKeyword': '搜索过滤在后续版本实现',
+      'valueMode': '多选取值模式在后续版本实现',
+      'valueType': 'valueType 在后续版本实现',
+      'max': '多选上限在后续版本实现',
+      'minCollapsedNum': '多选折叠在后续版本实现',
+      'collapsedItems': '多选折叠在后续版本实现',
+      'panelTopContent': '面板顶部内容在后续版本实现',
+      'panelBottomContent': '面板底部内容在后续版本实现',
+      'columnHeader': '自定义列头在后续版本实现',
+      'columnFooter': '自定义列尾在后续版本实现',
+      'option': '自定义选项渲染在后续版本实现',
+      'valueDisplay': '自定义回显在后续版本实现',
+      'selectInputProps': '透传 SelectInputProps 在后续版本实现',
+      'tagInputProps': '多选标签配置在后续版本实现',
+      'tagProps': '多选标签配置在后续版本实现',
+      'inputProps': '透传 InputProps 在后续版本实现',
+      'popupProps': '透传 PopupProps 在后续版本实现',
+      'popupVisible': '受控弹层显隐在后续版本实现',
+      'trigger': '只支持 click 触发',
+      'prefixIcon': '前缀图标在后续版本实现',
+      'suffix': '后缀内容在后续版本实现',
+      'suffixIcon': '后缀图标在后续版本实现',
+      'label': '标签文案在后续版本实现',
+      'tips': '提示文案在后续版本实现',
+      'status': '校验状态在后续版本实现',
+      'borderless': '无边框模式在后续版本实现',
+      'autofocus': '自动聚焦在后续版本实现',
+      'readonly': '只读模式在后续版本实现',
+      'onChange': 'Angular 用 (change) 输出',
+      'onRemove': '多选删除在后续版本实现',
+      'onBlur': '失焦事件在后续版本实现',
+      'onFocus': '聚焦事件在后续版本实现',
+      'onPopupVisibleChange': 'Angular 用 (visibleChange) 输出',
+      'modelValue': 'Angular 用 value 双向绑定',
+    },
+  },  TTextarea: {
     upstream: 'textarea',
     renames: {},
     angularOnly: [],
@@ -724,5 +777,7 @@ async function main() {
 }
 
 await main();
+
+
 
 

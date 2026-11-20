@@ -1,7 +1,7 @@
 ﻿# 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-20，对应提交：`735bef8`（Slider 滑块）之后的未提交改动（新组件 Rate）。
+> 更新日期：2026-11-20，对应提交：`00fc0d0`（Rate 评分）之后的未提交改动（新组件 Cascader）。
 
 ## 1. 这个项目是什么
 
@@ -21,11 +21,11 @@
 | P2 基础表单 | ✅ | Input / Textarea / Switch / Checkbox / Radio / Select / Form（含 TDesign rules 校验引擎） |
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
 | P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
-| P5 复杂录入 | 🚧 | Select / Form 已在 P2 完成；Slider 已完成；**Rate 进行中**；Cascader / TreeSelect / DatePicker / TimePicker / Upload / Transfer / ColorPicker 未开始 |
+| P5 复杂录入 | 🚧 | Slider、Rate 已完成；**Cascader 进行中**；TreeSelect / DatePicker / TimePicker / Upload / Transfer / ColorPicker 未开始 |
 
-当前 `align-check` 覆盖 **38 个组件、394 个输入属性、156 个示例**，合计 `missing 0 / extra 0`（`TRate 已对齐 11/14`）。
+当前 `align-check` 覆盖 **39 个组件、404 个输入属性、159 个示例**，合计 `missing 0 / extra 0`（`TCascader 已对齐 10/53`）。
 
-组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、collapse、dialog、divider、drawer、empty、form、input、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、slider、space、switch、table、tabs、tag、textarea、tooltip。
+组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、cascader、checkbox、collapse、dialog、divider、drawer、empty、form、input、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、slider、space、switch、table、tabs、tag、textarea、tooltip。
 
 ## 3. 目录与环境
 
@@ -74,47 +74,46 @@ node scripts/align-check.mjs --component TTable
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 - 清理 headless Edge 只杀自己的实例：`Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -match 'local-cache[\\/]+edge-' } | ForEach-Object { taskkill /PID $_.ProcessId /T /F }`。**不要用 `Get-Process msedge | Stop-Process`**，会把用户自己的浏览器一起杀掉；正则要同时匹配 `/` 和 `\`（用 Node `spawn` 拼路径时是正斜杠，只写 `\\` 会漏杀）。
 
-## 7. 当前进行中的工作：新组件 Rate（评分）
+## 7. 当前进行中的工作：新组件 Cascader（级联选择）
 
-Slider 已提交（`735bef8`）并上线；本层继续 P5，第二个组件是 Rate。
+Rate 已提交（`00fc0d0`）并上线；本层继续 P5，第三个组件是 Cascader（第一层只做单选）。
 
 **已完成（未提交）**：
 
-- `TRate`（`t-rate`）：`allowHalf`、`clearable`、`color`（单色或 `[选中色, 未选中色]`）、`count`（默认 5）、`disabled`、`gap`（默认 4px）、`showText`、`size`（默认 `24px`）、`texts`、`value` / `defaultValue`；输出 `(change)`，payload 为 `{ value }`。
-- DOM 照上游：`div.t-rate` > `ul.t-rate__list`（`gap` 内联）> `li.t-rate__item[.t-rate__item--full|--half]` > `div.t-rate__star-top`（选中色，绝对定位，默认 `width: 0`，`--half` 为 50%、`--full` 为 100%）+ `div.t-rate__star-bottom`（未选中色）；`showText` 时右侧 `div.t-rate__text`。
-- 交互：`mousemove` 计算悬停值（`allowHalf` 时以每颗星中心线为界，`clientX < left + width / 2` 取半星）、`mouseleave` 清除悬停、点击提交；`clearable` 且点击值与当前值相同时归零。
-- 图标：内联 `star-filled` path（`M12.0012 0.63031L14.9039 8.98087…`），颜色走 `fill`，尺寸走 `width/height`；不引 `@tdesign-ng/icons`。
-- 文案：`texts` 为空时使用内置「极差 / 失望 / 一般 / 满意 / 惊喜」，取 `texts[ceil(displayValue - 1)]`。
+- `TCascader`（`t-cascader`）：`options`、`value` / `defaultValue`、`keys`（自定义 `label` / `value` / `children`）、`showAllLevels`（默认 `true`）、`clearable`、`disabled`、`size`（`small` / `medium` / `large`）、`placeholder`、`empty`；输出 `(change)`，payload 为 `{ value, source, option }`，`source` 取 `'check' | 'clear' | 'uncheck'`。
+- DOM 照上游：`<t-popup overlayClassName="t-cascader__popup">` 包 `div.t-select-input.t-cascader.t-cascader--single`（带 `--popup-visible` / `--empty`）> `div.t-input`（`t-input--prefix` / `t-input--suffix` + `t-size-*`）> 只读 `input.t-input__inner`（显示路径）+ 后缀「清空」图标（`t-input__suffix-clear`）与 `t-fake-arrow.t-cascader__icon`（展开加 `t-fake-arrow--active`）；弹层内 `div.t-cascader__panel.t-cascader--normal` > 每级一列 `div.t-cascader__menu.narrow-scrollbar`（列间 `--segment`）> `div.t-cascader__item`（`--with-icon` / `--leaf`、`t-size-*`、`t-is-expanded` / `t-is-selected` / `t-is-disabled`）+ `span.t-cascader__label.t-cascader__label--ellipsis` + 父节点的 chevron `t-cascader__item-icon`。
+- 交互：点开面板时把已选路径的**父级**展开（叶子不展开）；点父节点只展开下一列，点叶子提交值、关闭面板并 emit；`clearable` 时点清空图标 emit `{ value: undefined, source: 'clear' }` 并 `stopPropagation`；整组件 `disabled` 时忽略打开与清空。
+- 面板尺寸来自 less：列宽 148px（`@cascader-width-s - 2px`）、普通面板高 200px、条目高 28px；`--expanded` 用浅紫背景 + 高亮文字，`--selected` 用品牌色文字。
 
-**已用 CDP 验证**（`http://localhost:4280/rate`）：
+**已用 CDP 验证**（`http://localhost:4280/cascader`）：
 
-- 4 个 demo（basic / half / text / options）；basic 5 颗星、3 颗 `--full`、星 24×24、`fill` 为 `rgb(237, 123, 47)`、`gap` 4px。
-- 点击第 5 颗 80% 处 → 值 5、5 颗全亮、hint 同步。
-- 半星：点击第 4 颗左 1/4 → 值 3.5，3 颗 `--full` + 1 颗 `--half`，`--half` 的 `star-top` 宽 12px（50%）。
-- 文案：值 3 显示「一般」，自定义 `texts` 的 4 星显示「不错」。
-- `clearable`：值为 4 时点击第 4 颗 → 归零，10 颗星全灰。
-- 禁用态点击无响应；console 无报错。
+- 3 个 demo（basic / levels / options）；basic 初值 `广东省 / 深圳市 / 南山区`（叶子），打开面板后 3 列、`广东省` 与 `深圳市` 带 `t-is-expanded`、`南山区` 带 `t-is-selected`。
+- 依序点「广东省 → 广州市 → 天河区」→ 输入框回显 `广东省 / 广州市 / 天河区`、hint 更新为 `tianhe`、面板关闭（wrapper 去掉 `t-select-input--popup-visible`）。
+- `showAllLevels` 两个 cascader 分别回显 `广东省 / 深圳市 / 南山区` 与 `南山区`。
+- 尺寸：`t-size-s` 输入高 24px / 字号 12px、默认 32px / 14px、`t-size-l` 40px / 16px；`disabled` 时 `t-input` 带 `t-is-disabled` 且点击无反应；自定义 `keys`（name / code / items）渲染正常。
+- 清空：点后缀清空图标后值为空、hint 变为「（空）」；console 无报错。
 
 **下一步（建议顺序）**：
 
-1. 继续 P5：Cascader / TreeSelect / DatePicker / Upload / Transfer，其次 TimePicker / ColorPicker。
-2. Rate 余项：`icon`（自定义评分图标，当前固定星形）、`showText` 时每颗星的悬浮 tooltip。
-
+1. Cascader 第二层：`multiple` + `checkStrictly`、`filterable` 搜索、`lazy` / `load` 异步、`panelTopContent` / `panelBottomContent`、`valueDisplay` 自定义回显。
+2. 继续 P5：TreeSelect / DatePicker / TimePicker / Upload / Transfer / ColorPicker。
 ## 8. 已知缺口与技术债
 
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
-- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）；List 的 `scroll`（虚拟滚动）未实现，`asyncLoading` 不支持模板，`(scrollChange)` 原样透出没有节流。；Slider 的 `inputNumberProps`（两侧数字输入框）与 `tooltipProps` 透传未实现，键盘只支持方向键 / Home / End；Rate 的自定义 `icon` 未实现（固定内置星形），`showText` 不提供每颗星的悬浮 tooltip。
+- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）；List 的 `scroll`（虚拟滚动）未实现，`asyncLoading` 不支持模板，`(scrollChange)` 原样透出没有节流。；Slider 的 `inputNumberProps`（两侧数字输入框）与 `tooltipProps` 透传未实现，键盘只支持方向键 / Home / End；Rate 的自定义 `icon` 未实现（固定内置星形），`showText` 不提供每颗星的悬浮 tooltip。 Cascader 的 `multiple` / `checkStrictly` / `filterable` / `lazy` / `load` / 面板顶部与底部内容 / `valueDisplay` 均未实现（第一层只做单选），`option` / `columnsHeader` 等插槽类能力也不支持。
 - **文档站**：无搜索、无中英切换、无右侧锚点导航；示例卡片视觉可再贴近官网。
 
 ## 9. 怎么验证一个改动
 
-1. `node scripts/gen-api-docs.mjs && node scripts/gen-demo-sources.mjs`（有新增输入/示例时）。；Rate 的 `icon`（自定义评分图标）与每颗星的悬浮 tooltip 未实现。
+1. `node scripts/gen-api-docs.mjs && node scripts/gen-demo-sources.mjs`（有新增输入/示例时）。
 2. `node scripts/align-check.mjs` 必须 `missing 0 / extra 0`。
 3. `pnpm build` 全绿。
 4. 用 `.local-cache/` 下的 CDP 脚本模板（如 `cdp-check-table2.mjs`）打开对应路由，断言 DOM 类名、文本、交互后的状态与 `consoleErrors`。
 5. `node .local-cache/cdp-check-live.mjs https://yuanyong129.github.io/tdesign-ng/<route>` 验证线上页面。
+
+
 
 
 
