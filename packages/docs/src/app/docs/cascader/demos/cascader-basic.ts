@@ -38,7 +38,7 @@ export class DemoCascaderBasic {
           value: 'guangzhou',
           children: [
             { label: '天河区', value: 'tianhe' },
-            { label: '越秀区', value: 'yuexiu' },
+            { label: '越秀区', value: 'yuexiu', disabled: true },
           ],
         },
       ],
@@ -59,4 +59,5 @@ export class DemoCascaderBasic {
     },
   ];
 }
+
 
