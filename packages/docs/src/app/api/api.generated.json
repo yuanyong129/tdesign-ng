@@ -1957,6 +1957,161 @@
       ],
       "outputs": []
     },
+    "TList": {
+      "className": "TList",
+      "selector": "t-list",
+      "file": "packages/ng-components/src/components/list/list.component.ts",
+      "inputs": [
+        {
+          "name": "header",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "列表头部内容",
+          "en": "List header",
+          "values": []
+        },
+        {
+          "name": "footer",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "列表底部内容",
+          "en": "List footer",
+          "values": []
+        },
+        {
+          "name": "layout",
+          "type": "ListLayout",
+          "default": "'horizontal'",
+          "required": false,
+          "zh": "操作区排列方式，vertical 时操作区另起一行",
+          "en": "Action layout",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "ListSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "列表尺寸",
+          "en": "List size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "split",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示分割线",
+          "en": "Show split line",
+          "values": []
+        },
+        {
+          "name": "stripe",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示斑马纹",
+          "en": "Show stripe background",
+          "values": []
+        },
+        {
+          "name": "asyncLoading",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "异步加载状态，loading 显示加载图标，load-more 显示「加载更多」",
+          "en": "Async loading state",
+          "values": [
+            "loading",
+            "load-more"
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "loadMore",
+          "type": "ListLoadMoreEvent",
+          "zh": "点击加载更多时触发",
+          "en": "Emitted when the load-more area is clicked"
+        },
+        {
+          "name": "scrollChange",
+          "type": "ListScrollEvent",
+          "zh": "列表滚动时触发",
+          "en": "Emitted when the list scrolls"
+        }
+      ]
+    },
+    "TListItem": {
+      "className": "TListItem",
+      "selector": "t-list-item",
+      "file": "packages/ng-components/src/components/list/list-item.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "列表项内容，也可以在宿主内投影",
+          "en": "Item content, can also be projected into the host",
+          "values": []
+        },
+        {
+          "name": "action",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "列表项操作区内容",
+          "en": "Item action content",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TListItemMeta": {
+      "className": "TListItemMeta",
+      "selector": "t-list-item-meta",
+      "file": "packages/ng-components/src/components/list/list-item-meta.component.ts",
+      "inputs": [
+        {
+          "name": "image",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "头像图片地址",
+          "en": "Avatar image url",
+          "values": []
+        },
+        {
+          "name": "title",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标题",
+          "en": "Title",
+          "values": []
+        },
+        {
+          "name": "description",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "描述",
+          "en": "Description",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TLoading": {
       "className": "TLoading",
       "selector": "t-loading",

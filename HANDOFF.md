@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-20，对应提交：`ffec8f6`（Empty 空状态）之后的未提交改动（新组件 Progress）。
+> 更新日期：2026-11-20，对应提交：`146f5e3`（Progress 进度条）之后的未提交改动（新组件 List）。
 
 ## 1. 这个项目是什么
 
@@ -20,12 +20,12 @@
 | P1 打样 | ✅ | Button / Link / Divider / Space / Icon |
 | P2 基础表单 | ✅ | Input / Textarea / Switch / Checkbox / Radio / Select / Form（含 TDesign rules 校验引擎） |
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
-| P4 数据展示 | 🚧 | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty 已完成；**Progress 待提交**；List 未开始 |
+| P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
 | P5 复杂录入 | ⬜ | DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等 |
 
-当前 `align-check` 覆盖 **33 个组件、360 个输入属性、144 个示例**，合计 `missing 0 / extra 0`（`TProgress 已对齐 8/8`）。
+当前 `align-check` 覆盖 **36 个组件、372 个输入属性、148 个示例**，合计 `missing 0 / extra 0`（`TList 已对齐 7/10`）。
 
-组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、collapse、dialog、divider、drawer、empty、form、input、link、loading、message、notification、pagination、popup、progress、radio、select、space、switch、table、tabs、tag、textarea、tooltip。
+组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、checkbox、collapse、dialog、divider、drawer、empty、form、input、link、list、loading、message、notification、pagination、popup、progress、radio、select、space、switch、table、tabs、tag、textarea、tooltip。
 
 ## 3. 目录与环境
 
@@ -73,40 +73,40 @@ node scripts/align-check.mjs --component TTable
 - CDP 验证：headless Edge 在 **9341**（用户自己的 Edge 也开 9340，别用）。启动参数必须带 `--disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows`，脚本里要先 `Page.bringToFront()`，否则后台页 rAF 被节流、Angular 的 coalesced 变更检测不跑，交互看起来「没反应」。
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 
-## 7. 当前进行中的工作：新组件 Progress（进度条）
+## 7. 当前进行中的工作：新组件 List（列表）
 
-Empty 已提交（`ffec8f6`）；本层新增 `@tdesign-ng/components` 的 Progress（进度条）。
+Progress 已提交（`146f5e3`）；本层新增 `@tdesign-ng/components` 的 List（列表），P4 的五个组件（Tag / Badge / Avatar / Pagination / Table / Tabs / Collapse / Empty / Progress / List）到此全部落地。
 
 **已完成（未提交）**：
 
-- `TProgress`（`t-progress`）：`theme`（line / plump / circle，默认 line）、`percentage`（0–100，默认 0）、`status`（success / error / warning / active）、`color`（单色 / 颜色数组 / `Record<百分比, 颜色>`）、`trackColor`、`strokeWidth`（line 条高、circle 环宽）、`size`（small / medium / large 或自定义像素）、`label`（`string | boolean`）。
-- 状态优先级 `status ?? (percentage >= 100 ? 'success' : 'default')`；line 与 circle 在 success / warning / error 时用图标替百分比，plump 始终显示文本。
-- DOM 照上游：line `div.t-progress--thin.t-progress--status--x` > `__bar` > `__inner` + `__info`；plump `div.t-progress__bar.t-progress--plump.t-progress--over-ten|--under-ten`（over-ten 时 `__info` 内嵌在 `__inner`）；circle `div.t-progress--circle` + `svg` 双 circle（外层 `__circle-outer`、内层 `__circle-inner` 带 `stroke-dasharray` 与 `matrix(0,-1,1,0,0,d)`）。
-- circle 直径 `72 / 112 / 160`，字号 `14 / 20 / 36`；环宽默认 6（small 为 4）；颜色数组生成 `linear-gradient(90deg, …)`，对象按 key 排序生成分段渐变。
-- 图标全部内联 SVG（`t-progress__icon`）；circle 下额外用 `circleIconSize`（直径 × 0.18）覆盖 less 的 `2.4em`，否则图标会撑满整个圆环（踩过）。
-- 新 demo：`progress-basic`（20/45/70/100%）、`progress-status`（success/warning/error/active）、`progress-plump`（70/30/8% + small）、`progress-circle`（三档尺寸 + 自定义 90px、环宽 4）、`progress-color`（单色 + trackColor、渐变数组、分段对象、circle 描边）。
-- `align-check` 新增 `TProgress`（`TdProgressProps`），结果 `TProgress 已对齐 8/8`，总量 `missing 0 / extra 0`。
+- `TList`（`t-list`）：`header`、`footer`、`layout`（horizontal / vertical）、`size`（small / medium / large）、`split`、`stripe`、`asyncLoading`（`loading` / `load-more` / 自定义文案）；输出 `(loadMore)` 与 `(scrollChange)`。
+- `TListItem`（`t-list-item`）：`content`、`action`，可在宿主内投影富内容。
+- `TListItemMeta`（`t-list-item-meta`）：`image`（头像 URL）、`title`、`description`。
+- DOM 照上游：`div.t-list.t-size-*[.t-list--split][.t-list--stripe][.t-list--vertical-action]` > `__header` / `ul.__inner` / `__footer` / `div.t-list__load[--loading|--load-more]`；列表项 `li.t-list-item` > `.t-list-item-main` + `ul.t-list-item__action`（上游把 action 放在 main 内，导致 `--vertical-action` 的 `flex-direction: column` 不生效，这里改为 main 的兄弟节点，操作区才会真正换行）。
+- 结构选择器桥接（写进 `bridge.less`，附原因）：上游 `.t-list--stripe .t-list-item:nth-child(even)` 与 `.t-list--split .t-list-item:not(:last-child)::after` 依赖 li 在 ul 里的兄弟关系，Angular 每个列表项多一层宿主后会全部失效，因此补了两条落到宿主上的等价规则（颜色用 `var(--td-*)` + 兜底值）。
+- `align-check` 新增 `TList`（`TdListProps`），结果 `TList 已对齐 7/10`，总量 `missing 0 / extra 0`；`scroll`（列表虚拟滚动）与 `onLoadMore` / `onScroll` 写了忽略理由。
+- 新 demo：`list-basic`（头像 + 标题 + 描述 + header/footer）、`list-action`（操作区、horizontal / vertical）、`list-style`（分割线 / 斑马纹 / small 尺寸）、`list-async`（load-more → loading → 追加 3 条）。
 
-**已用 CDP 验证**（`http://localhost:4280/progress`）：
+**已用 CDP 验证**（`http://localhost:4280/list`）：
 
-- line：宽度 20 / 45 / 70 / 100%，100% 自动 `status--success` 且背景 `rgb(43,164,113)`。
-- status：success / warning / error 渲染 `t-progress__icon`（`__info` 文本为空），active 显示 `70%`。
-- plump：70 / 30 为 `--over-ten` 且文本在 `__inner` 内、8% 为 `--under-ten` 文本在条外；条高 20px，small 16px。
-- circle：72 / 112 / 160px、字号 14 / 20 / 36px、`stroke-dasharray` 与内外圈 stroke 正确；状态图标 20 / 29 / 16px。
-- color：单色、渐变、分段、circle 描边都正确；`apiRows 8`；`console issues` 为空。
+- basic：`t-list t-size-m`、header「文件列表」、footer「共 3 个文件」、3 个 item / 3 个 meta、头像 img 存在、标题与描述正确、`padding: 12px 16px`。
+- action：`layout="vertical"` 时根类含 `t-list--vertical-action`，`li.t-list-item` 计算样式 `flex-direction: column`（操作区换行）。
+- style：split 的 `::after` 在非末项为 `rgb(232,232,232)`、末项透明；stripe 第 2 项背景 `rgb(243,243,243)`；`t-size-s` 的 item padding `8px 12px`。
+- async：初始 `t-list__load--load-more`「加载更多」；点击后变 `--loading`「加载中...」→ 600ms 后回到 load-more，item 由 5 条变 8 条，hint 同步。
+- `console issues` 为空。
 
 **下一步（建议顺序）**：
 
-1. P4 最后一项：List。
-2. Progress 余项：`label` 支持 TNode / 模板；circle 状态图标换成上游的细线图标。
-3. Table / Tabs / Collapse / Empty 的余项见 §8。
+1. P4 收尾后进入 P5（DatePicker / Cascader / TreeSelect / Upload / Transfer / Slider / Rate 等），见 `docs/plans/tdesign-angular-plan.md` §21。
+2. List 余项：`scroll` 虚拟滚动、`onScroll` 的 scroll 节流、`asyncLoading` 支持模板。
+3. 其余组件缺口见 §8。
 
 ## 8. 已知缺口与技术债
 
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
-- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）。
+- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）；List 的 `scroll`（虚拟滚动）未实现，`asyncLoading` 不支持模板，`(scrollChange)` 原样透出没有节流。
 - **文档站**：无搜索、无中英切换、无右侧锚点导航；示例卡片视觉可再贴近官网。
 
 ## 9. 怎么验证一个改动

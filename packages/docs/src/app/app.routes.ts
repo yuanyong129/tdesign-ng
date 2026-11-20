@@ -121,6 +121,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/progress/progress.component').then((m) => m.ProgressDocs),
   },
   {
+    path: 'list',
+    loadComponent: () => import('./docs/list/list.component').then((m) => m.ListDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

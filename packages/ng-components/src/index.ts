@@ -15,6 +15,7 @@ export * from './components/empty';
 export * from './components/form';
 export * from './components/input';
 export * from './components/link';
+export * from './components/list';
 export * from './components/loading';
 export * from './components/message';
 export * from './components/notification';

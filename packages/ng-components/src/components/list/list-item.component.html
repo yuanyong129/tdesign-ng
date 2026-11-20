@@ -1,0 +1,13 @@
+<li class="t-list-item">
+  <div class="t-list-item-main">
+    <ng-content />
+    @if (content()) {
+      <span>{{ content() }}</span>
+    }
+  </div>
+  @if (action()) {
+    <ul class="t-list-item__action">
+      <li>{{ action() }}</li>
+    </ul>
+  }
+</li>

@@ -210,3 +210,14 @@ t-avatar.t-avatar--hidden {
 
 
 
+
+// 列表项：上游用 .t-list--stripe .t-list-item:nth-child(even) 与
+// .t-list--split .t-list-item:not(:last-child)::after 依赖 li 在 ul 里的兄弟关系；
+// Angular 每个列表项多一层宿主，nth-child / 相邻判断会全部失效，这里把等价规则落到宿主上。
+.t-list--stripe t-list-item:nth-child(even) > .t-list-item {
+  background: var(--td-bg-color-secondarycontainer, #f3f3f3);
+}
+
+.t-list--split t-list-item:not(:last-child) > .t-list-item::after {
+  background: var(--td-border-level-1-color, #e7e7e7);
+}

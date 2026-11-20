@@ -1,0 +1,26 @@
+<div [class]="classes()" (scroll)="handleScroll($event)">
+  @if (header()) {
+    <div class="t-list__header">{{ header() }}</div>
+  }
+
+  <ul class="t-list__inner">
+    <ng-content />
+  </ul>
+
+  @if (footer()) {
+    <div class="t-list__footer">{{ footer() }}</div>
+  }
+
+  <div [class]="loadingClasses()" (click)="handleLoadMore($event)">
+    @if (isLoading()) {
+      <div>
+        <t-loading size="small" />
+        <span>加载中...</span>
+      </div>
+    } @else if (isLoadMore()) {
+      <span>加载更多</span>
+    } @else if (hasCustomLoadingText()) {
+      <span>{{ asyncLoading() }}</span>
+    }
+  </div>
+</div>

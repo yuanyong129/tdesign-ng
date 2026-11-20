@@ -1,0 +1,15 @@
+<div class="t-list-item__meta">
+  @if (image()) {
+    <div class="t-list-item__meta-avatar">
+      <img [src]="image()" alt="" />
+    </div>
+  }
+  <div class="t-list-item__meta-content">
+    @if (title()) {
+      <h3 class="t-list-item__meta-title">{{ title() }}</h3>
+    }
+    @if (description()) {
+      <p class="t-list-item__meta-description">{{ description() }}</p>
+    }
+  </div>
+</div>
