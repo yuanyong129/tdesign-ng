@@ -113,6 +113,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/collapse/collapse.component').then((m) => m.CollapseDocs),
   },
   {
+    path: 'empty',
+    loadComponent: () => import('./docs/empty/empty.component').then((m) => m.EmptyDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

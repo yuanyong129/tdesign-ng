@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 文档站导航的单一数据源：侧边栏、上一页/下一页都从这里读，
  * 新增组件页时只要加一项，不会出现三处不同步。
  */
@@ -37,6 +37,7 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/table', label: '表格 Table', group: '数据展示' },
   { path: '/tabs', label: '选项卡 Tabs', group: '数据展示' },
   { path: '/collapse', label: '折叠面板 Collapse', group: '数据展示' },
+  { path: '/empty', label: '空状态 Empty', group: '数据展示' },
 ];
 
 /** 按分组统计，保持 DOCS_NAV 里的先后顺序。 */

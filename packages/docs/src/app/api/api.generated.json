@@ -1202,6 +1202,78 @@
         }
       ]
     },
+    "TEmpty": {
+      "className": "TEmpty",
+      "selector": "t-empty",
+      "file": "packages/ng-components/src/components/empty/empty.component.ts",
+      "inputs": [
+        {
+          "name": "type",
+          "type": "EmptyType",
+          "default": "'empty'",
+          "required": false,
+          "zh": "空状态类型",
+          "en": "Empty type",
+          "values": [
+            "empty",
+            "success",
+            "fail",
+            "network-error",
+            "maintenance"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "EmptySize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "尺寸",
+          "en": "Empty size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "title",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标题，不传时按 type 使用内置文案",
+          "en": "Title, falls back to the built-in text of the type",
+          "values": []
+        },
+        {
+          "name": "description",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "描述文字",
+          "en": "Description",
+          "values": []
+        },
+        {
+          "name": "image",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义图片地址，替换内置插图",
+          "en": "Custom image URL, replaces the built-in illustration",
+          "values": []
+        },
+        {
+          "name": "imageStyle",
+          "type": "Record<string, string> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "图片样式",
+          "en": "Image style",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TForm": {
       "className": "TForm",
       "selector": "t-form",

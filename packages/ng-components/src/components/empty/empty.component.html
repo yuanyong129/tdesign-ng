@@ -1,0 +1,131 @@
+<div [class]="classes()">
+  <div class="t-empty__image">
+    @if (image()) {
+      <img class="t-empty__img" [src]="image()" [style]="imageStyle()" alt="" />
+    } @else {
+      @switch (type()) {
+        @case ('success') {
+          <svg
+            class="t-icon t-icon-check-circle"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+            style="color: var(--td-success-color)"
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z"
+            />
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M16.5 9L10.5 15L7.5 12"
+            />
+          </svg>
+        }
+        @case ('fail') {
+          <svg
+            class="t-icon t-icon-error-circle"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+            style="color: var(--td-error-color)"
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+            />
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M12 7.5V13M12 16.5H12.0039V16.5039H12V16.5Z"
+            />
+          </svg>
+        }
+        @case ('network-error') {
+          <svg
+            class="t-icon t-icon-wifi-no-filled"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+            style="color: var(--td-text-color-placeholder)"
+          >
+            <path fill="currentColor" d="M13 8.5V1H11V8.5H13Z" />
+            <path fill="currentColor" d="M13.0039 10H11V12.0039H13.0039V10Z" />
+            <path
+              fill="currentColor"
+              d="M1.37875 6.725C3.64856 4.90458 6.27649 3.75138 9 3.26544V14H15V3.26526C17.7237 3.75108 20.3519 4.90427 22.6219 6.72487L23.401 7.34975L12.0003 21.6008L0.599609 7.34989L1.37875 6.725Z"
+            />
+          </svg>
+        }
+        @case ('maintenance') {
+          <svg
+            class="t-icon t-icon-traffic-events-filled"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+            style="color: var(--td-text-color-placeholder)"
+          >
+            <path fill="currentColor" d="M14.7618 8.5L12 1.91406L9.23816 8.5H14.7618Z" />
+            <path fill="currentColor" d="M15.6006 10.5H8.39945L6.83493 14.2308H17.1651L15.6006 10.5Z" />
+            <path
+              fill="currentColor"
+              d="M18.0038 16.2308H5.99622L4.83498 18.9999H3V20.9999H21V18.9999H19.165L18.0038 16.2308Z"
+            />
+          </svg>
+        }
+        @default {
+          <svg
+            class="t-icon t-icon-no-result-filled"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+            style="color: var(--td-text-color-placeholder)"
+          >
+            <path fill="currentColor" d="M11 0H13V4H11V0Z" />
+            <path fill="currentColor" d="M5.00098 0.585786L3.58676 2L6.50098 4.91421L7.91519 3.5L5.00098 0.585786Z" />
+            <path
+              fill="currentColor"
+              d="M1 13.7344L5.41968 6H18.5803L23 13.7344V22H1V13.7344ZM6.58032 8L3.72318 13H8.90123L9.09445 13.7507C9.42754 15.0449 10.6035 16 12 16C13.3965 16 14.5725 15.0449 14.9055 13.7507L15.0988 13H20.2768L17.4197 8H6.58032Z"
+            />
+            <path fill="currentColor" d="M18.999 0.585786L16.0848 3.5L17.499 4.91421L20.4132 2L18.999 0.585786Z" />
+          </svg>
+        }
+      }
+    }
+  </div>
+
+  @if (titleText()) {
+    <div class="t-empty__title">{{ titleText() }}</div>
+  }
+
+  @if (description()) {
+    <div class="t-empty__description">{{ description() }}</div>
+  }
+
+  @if (hasAction()) {
+    <div class="t-empty__action">
+      <ng-content select="[tEmptyAction]" />
+    </div>
+  }
+</div>

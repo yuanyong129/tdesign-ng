@@ -11,6 +11,7 @@ export * from './components/collapse';
 export * from './components/dialog';
 export * from './components/divider';
 export * from './components/drawer';
+export * from './components/empty';
 export * from './components/form';
 export * from './components/input';
 export * from './components/link';
