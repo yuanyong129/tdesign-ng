@@ -145,6 +145,11 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/date-picker/date-picker.component').then((m) => m.DatePickerDocs),
   },
   {
+    path: 'date-range-picker',
+    loadComponent: () =>
+      import('./docs/date-range-picker/date-range-picker.component').then((m) => m.DateRangePickerDocs),
+  },
+  {
     path: 'time-picker',
     loadComponent: () => import('./docs/time-picker/time-picker.component').then((m) => m.TimePickerDocs),
   },

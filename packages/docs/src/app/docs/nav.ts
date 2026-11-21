@@ -28,6 +28,7 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/cascader', label: '级联选择 Cascader', group: '数据录入' },
   { path: '/tree-select', label: '树选择 TreeSelect', group: '数据录入' },
   { path: '/date-picker', label: '日期选择 DatePicker', group: '数据录入' },
+  { path: '/date-range-picker', label: '日期范围 DateRangePicker', group: '数据录入' },
   { path: '/time-picker', label: '时间选择 TimePicker', group: '数据录入' },
   { path: '/popup', label: '弹出层 Popup', group: '反馈' },
   { path: '/tooltip', label: '文字提示 Tooltip', group: '反馈' },

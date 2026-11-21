@@ -10,6 +10,7 @@ export * from './components/cascader';
 export * from './components/checkbox';
 export * from './components/collapse';
 export * from './components/date-picker';
+export * from './components/date-range-picker';
 export * from './components/dialog';
 export * from './components/divider';
 export * from './components/drawer';

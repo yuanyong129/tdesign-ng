@@ -44,6 +44,7 @@
 | Cascader | ✅ 单选/多选级联、完整路径回显、自定义字段名、清空、禁用、三种尺寸、父子不关联、搜索、异步加载、面板与回显插槽 |
 | TreeSelect | ✅ 单选/多选、展开父级、父子不关联与取值模式、搜索、自定义字段名、清空、禁用、三种尺寸、加载态、面板插槽 |
 | DatePicker | ✅ 单日期、日期 + 时间（enableTimePicker / needConfirm / defaultTime）、面板导航、custom format / valueType、firstDayOfWeek、disableDate、预设日期、手动输入、清空、禁用、三种尺寸 |
+| DateRangePicker | ✅ 双面板范围选择、开始/结束归一化、范围高亮、custom format / valueType、firstDayOfWeek、disableDate、清空、禁用、三种尺寸 |
 | TimePicker | ✅ 时分秒三列、format 控制列、steps 步长、面板确认、此刻、预设时间、禁用时间、手动输入、自定义回显、清空、禁用、三种尺寸 |
 
 P4 数据展示已全部落地；P5 复杂录入进行中（Slider、Rate、Cascader、TreeSelect、DatePicker、TimePicker 已完成，Upload / Transfer / ColorPicker 待做），计划见 `docs/plans/tdesign-angular-plan.md`；

@@ -1086,6 +1086,121 @@
         }
       ]
     },
+    "TDateRangePicker": {
+      "className": "TDateRangePicker",
+      "selector": "t-date-range-picker",
+      "file": "packages/ng-components/src/components/date-range-picker/date-range-picker.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "DateRangeValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中的范围，受控用法。",
+          "en": "Selected range in controlled mode.",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "DateRangeValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认选中的范围，非受控用法。",
+          "en": "Default range in uncontrolled mode.",
+          "values": []
+        },
+        {
+          "name": "valueType",
+          "type": "DatePickerValueType",
+          "default": "'YYYY-MM-DD'",
+          "required": false,
+          "zh": "回传值的格式：格式串 / time-stamp / Date。",
+          "en": "Format of the emitted value: a format string, time-stamp or Date.",
+          "values": []
+        },
+        {
+          "name": "format",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "输入框显示的日期格式，默认与 valueType 一致。",
+          "en": "Date format shown in the inputs; defaults to valueType.",
+          "values": []
+        },
+        {
+          "name": "firstDayOfWeek",
+          "type": "number",
+          "default": "1",
+          "required": false,
+          "zh": "一周的起始日，0 为周日。",
+          "en": "First day of the week; 0 means Sunday.",
+          "values": []
+        },
+        {
+          "name": "disableDate",
+          "type": "DisableDate | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "禁用日期，支持日期数组、范围对象与判断函数。",
+          "en": "Disabled dates: an array, a range object or a predicate.",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空。",
+          "en": "Whether the range can be cleared.",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用。",
+          "en": "Whether the picker is disabled.",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "'small' | 'medium' | 'large'",
+          "default": "'medium'",
+          "required": false,
+          "zh": "输入框尺寸。",
+          "en": "Size of the inputs.",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "type": "string | [string, string]",
+          "default": "['开始日期', '结束日期']",
+          "required": false,
+          "zh": "两个输入框的占位文案。",
+          "en": "Placeholders of the two inputs.",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "DateRangePickerChangeEvent",
+          "zh": "选中范围变化",
+          "en": "Emitted when the selected range changes"
+        },
+        {
+          "name": "visibleChange",
+          "type": "boolean",
+          "zh": "弹层显隐变化",
+          "en": "Emitted when the popup visibility changes"
+        }
+      ]
+    },
     "TDialog": {
       "className": "TDialog",
       "selector": "t-dialog",
