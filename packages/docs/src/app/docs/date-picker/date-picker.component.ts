@@ -6,6 +6,7 @@ import { DemoDatePickerBasic } from './demos/date-picker-basic';
 import { DemoDatePickerDisabled } from './demos/date-picker-disabled';
 import { DemoDatePickerOptions } from './demos/date-picker-options';
 import { DemoDatePickerPresets } from './demos/date-picker-presets';
+import { DemoDatePickerTime } from './demos/date-picker-time';
 
 @Component({
   selector: 'date-picker-docs',
@@ -16,6 +17,7 @@ import { DemoDatePickerPresets } from './demos/date-picker-presets';
     DemoDatePickerBasic,
     DemoDatePickerOptions,
     DemoDatePickerPresets,
+    DemoDatePickerTime,
     DemoDatePickerDisabled,
   ],
   template: `
@@ -23,7 +25,8 @@ import { DemoDatePickerPresets } from './demos/date-picker-presets';
       <h1 class="docs-page__title">日期选择器 DatePicker</h1>
       <p class="docs-page__lead">
         日期选择器用日历面板选择单个日期：支持自定义回传格式（格式串 / 时间戳 / Date）、显示格式、
-        一周起始日、禁用日期、预设日期、手动输入、清空、禁用与三种尺寸。范围选择、时间选择与年份/月份模式在后续版本补齐。
+        一周起始日、禁用日期、预设日期、手动输入、日期 + 时间选择、清空、禁用与三种尺寸。
+        范围选择与年份/月份模式在后续版本补齐。
       </p>
 
       <docs-demo id="date-picker-basic" title="基础用法" description="value 控制选中日期，change 抛出 { value, trigger }；选中后自动收起面板。">
@@ -36,6 +39,10 @@ import { DemoDatePickerPresets } from './demos/date-picker-presets';
 
       <docs-demo id="date-picker-presets" title="预设与手动输入" description="presets 提供快捷日期，presetsPlacement 控制位置；allowInput 可直接输入，panelActiveDate 指定初始年月。">
         <demo-date-picker-presets />
+      </docs-demo>
+
+      <docs-demo id="date-picker-time" title="日期 + 时间" description="enableTimePicker 显示时分秒列；needConfirm 默认 true，点「确定」才提交，false 时点日期立即提交。">
+        <demo-date-picker-time />
       </docs-demo>
 
       <docs-demo id="date-picker-disabled" title="禁用日期" description="disableDate 支持函数、日期数组与范围对象（from / to / before / after）。">

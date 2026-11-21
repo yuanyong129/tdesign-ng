@@ -60,7 +60,7 @@
 
   <div tPopupContent>
     <div class="t-date-picker__panel" [class.t-date-picker__panel--direction-row]="isRowPlacement()">
-      @if (presetsAtTop() && presetEntries().length) {
+      @if (presetsAtTop() && showFooter()) {
         <ng-container [ngTemplateOutlet]="footer" />
       }
 
@@ -178,9 +178,35 @@
             </table>
           </div>
         </div>
+
+        @if (enableTimePicker()) {
+          <div class="t-date-picker__panel-time">
+            <div class="t-date-picker__panel-time-viewer">{{ timeViewerText() }}</div>
+            <div class="t-time-picker__panel">
+              <div class="t-time-picker__panel-section-body">
+                <div class="t-time-picker__panel-body">
+                  <div class="t-time-picker__panel-body-active-mask">
+                    @for (column of timeColumns(); track column.type) {
+                      <div></div>
+                    }
+                  </div>
+                  @for (column of timeColumns(); track column.type) {
+                    <ul class="t-time-picker__panel-body-scroll">
+                      @for (item of column.items; track item) {
+                        <li [class]="timeItemClasses(column.type, item)" (click)="selectTime(column.type, item)">
+                          {{ item }}
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
       </div>
 
-      @if (presetsAtBottom() && presetEntries().length) {
+      @if (presetsAtBottom() && showFooter()) {
         <ng-container [ngTemplateOutlet]="footer" />
       }
     </div>
@@ -189,16 +215,28 @@
 
 <ng-template #footer>
   <div [class]="footerClasses()">
-    <div class="t-date-picker__presets">
-      @for (preset of presetEntries(); track preset.key) {
-        <button
-          type="button"
-          class="t-button t-button--variant-text t-button--theme-default t-size-s"
-          (click)="applyPreset(preset)"
-        >
-          {{ preset.key }}
-        </button>
-      }
-    </div>
+    @if (presetEntries().length) {
+      <div class="t-date-picker__presets">
+        @for (preset of presetEntries(); track preset.key) {
+          <button
+            type="button"
+            class="t-button t-button--variant-text t-button--theme-default t-size-s"
+            (click)="applyPreset(preset)"
+          >
+            {{ preset.key }}
+          </button>
+        }
+      </div>
+    }
+    @if (enableTimePicker() && needConfirm()) {
+      <button
+        type="button"
+        class="t-button t-button--variant-base t-button--theme-primary t-size-s"
+        [disabled]="!activeDate()"
+        (click)="confirmTime()"
+      >
+        确定
+      </button>
+    }
   </div>
 </ng-template>

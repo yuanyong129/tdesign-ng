@@ -13,6 +13,12 @@ import {
 import { TPopup } from '../popup';
 import { TSelect } from '../select';
 import {
+  buildTimeColumns,
+  formatTimeParts,
+  parseTimeParts,
+} from '../time-picker/time-picker-utils';
+import { TimePickerColumn, TimePickerColumnType } from '../time-picker/time-picker.types';
+import {
   buildMonthCells,
   defaultFormat,
   endOfDay,
@@ -73,12 +79,11 @@ export class TDatePicker {
   readonly defaultValue = input<DateValue | undefined>(undefined);
 
   /**
-   * @zh 回传值的格式：格式串 / time-stamp / Date。
-   * @en Format of the emitted value: a format string, time-stamp or Date.
-   * @defaultValue 'YYYY-MM-DD'
-   * @values YYYY-MM-DD, YYYY-MM, YYYY, time-stamp, Date
+   * @zh 回传值的格式：格式串 / time-stamp / Date；不传时按是否带时间推导。
+   * @en Format of the emitted value: a format string, time-stamp or Date; derived when omitted.
+   * @defaultValue undefined
    */
-  readonly valueType = input<DatePickerValueType>('YYYY-MM-DD');
+  readonly valueType = input<DatePickerValueType | undefined>(undefined);
 
   /**
    * @zh 输入框里显示的日期格式，默认与 valueType 一致。
@@ -155,6 +160,27 @@ export class TDatePicker {
    */
   readonly allowInput = input(false, { transform: booleanAttribute });
 
+  /**
+   * @zh 是否允许选择时间（面板右侧出现时 / 分 / 秒列）。
+   * @en Whether time can be selected (hour / minute / second columns appear).
+   * @defaultValue false
+   */
+  readonly enableTimePicker = input(false, { transform: booleanAttribute });
+
+  /**
+   * @zh 打开面板时未指定时间时使用的默认时间。
+   * @en Default time used when the value has no time part.
+   * @defaultValue '00:00:00'
+   */
+  readonly defaultTime = input('00:00:00');
+
+  /**
+   * @zh 是否点「确定」后才提交（开启时间选择时生效）。
+   * @en Whether the value is committed only after clicking confirm (with time selection).
+   * @defaultValue true
+   */
+  readonly needConfirm = input(true, { transform: booleanAttribute });
+
   /** @zh 选中值变化 @en Emitted when the selected date changes */
   readonly change = output<DatePickerChangeEvent>();
 
@@ -164,6 +190,8 @@ export class TDatePicker {
   protected readonly open = signal(false);
   private readonly innerValue = signal<DateValue | undefined>(undefined);
   private readonly draftText = signal<string | null>(null);
+  private readonly draftDate = signal<Date | null>(null);
+  private readonly draftTime = signal('');
   protected readonly viewYear = signal(new Date().getFullYear());
   protected readonly viewMonth = signal(new Date().getMonth());
 
@@ -173,13 +201,52 @@ export class TDatePicker {
     return this.defaultValue();
   });
 
-  /** 当前值解析出来的日期。 */
-  protected readonly selectedDate = computed<Date | null>(() =>
-    parseDate(this.currentValue(), this.valueType()),
+  /** 实际使用的回传格式；未显式指定时按是否带时间推导。 */
+  protected readonly effectiveValueType = computed<DatePickerValueType>(
+    () =>
+      this.valueType() ??
+      (this.enableTimePicker() ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD'),
   );
 
-  protected readonly displayFormat = computed(
-    () => this.format() ?? defaultFormat(this.valueType()),
+  /** 当前值解析出来的日期。 */
+  protected readonly selectedDate = computed<Date | null>(() =>
+    parseDate(this.currentValue(), this.effectiveValueType()),
+  );
+
+  /** 面板里高亮的日期：时间模式下用草稿日期，否则用已提交值。 */
+  protected readonly activeDate = computed<Date | null>(() =>
+    this.enableTimePicker() && this.open() ? this.draftDate() : this.selectedDate(),
+  );
+
+  protected readonly displayFormat = computed(() => {
+    if (this.format()) return this.format() as string;
+    const valueType = this.effectiveValueType();
+    if (valueType === 'Date' || valueType === 'time-stamp') {
+      return this.enableTimePicker() ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD';
+    }
+    return defaultFormat(valueType);
+  });
+
+  /** 时间面板使用的格式：取显示格式里的时间 token，缺省 HH:mm:ss。 */
+  protected readonly timeFormat = computed(() => {
+    const tokens = this.displayFormat().match(/HH|mm|ss/g);
+    return tokens?.length ? tokens.join(':') : 'HH:mm:ss';
+  });
+
+  protected readonly timeColumns = computed<TimePickerColumn[]>(() =>
+    buildTimeColumns(this.timeFormat(), [1, 1, 1]),
+  );
+
+  protected readonly draftTimeParts = computed(() =>
+    parseTimeParts(this.draftTime(), this.timeFormat()),
+  );
+
+  protected readonly timeViewerText = computed(() =>
+    formatTimeParts(this.draftTimeParts(), this.timeFormat()),
+  );
+
+  protected readonly showFooter = computed(
+    () => this.presetEntries().length > 0 || (this.enableTimePicker() && this.needConfirm()),
   );
 
   protected readonly displayText = computed(() => {
@@ -261,7 +328,20 @@ export class TDatePicker {
     this.open.set(visible);
     this.visibleChange.emit(visible);
     this.draftText.set(null);
-    if (visible) this.syncViewToValue();
+    if (!visible) return;
+
+    const selected = this.selectedDate();
+    this.draftDate.set(selected);
+    this.draftTime.set(
+      selected
+        ? formatTimeParts(
+            { hour: selected.getHours(), minute: selected.getMinutes(), second: selected.getSeconds() },
+            this.timeFormat(),
+          )
+        : this.defaultTime(),
+    );
+    this.syncViewToValue();
+    if (this.enableTimePicker()) this.scheduleScrollTime();
   }
 
   protected handleInputText(event: Event): void {
@@ -293,15 +373,47 @@ export class TDatePicker {
 
   protected applyPreset(preset: { key: string; value: DateValue | (() => DateValue) }): void {
     const raw = typeof preset.value === 'function' ? preset.value() : preset.value;
-    const date = parseDate(raw, this.valueType());
+    const date = parseDate(raw, this.effectiveValueType());
     if (!date) return;
-    this.commit(formatValue(date, this.valueType()), 'preset');
+    this.commit(formatValue(date, this.effectiveValueType()), 'preset');
     this.closePanel();
   }
 
   protected pickDate(cell: DatePickerCell): void {
     if (this.isCellDisabled(cell)) return;
-    this.commit(formatValue(cell.date, this.valueType()), 'pick');
+
+    if (this.enableTimePicker()) {
+      this.draftDate.set(cell.date);
+      if (!this.needConfirm()) {
+        this.commit(this.combinedValue(cell.date), 'pick');
+        this.closePanel();
+      }
+      return;
+    }
+
+    this.commit(formatValue(cell.date, this.effectiveValueType()), 'pick');
+    this.closePanel();
+  }
+
+  protected selectTime(type: TimePickerColumnType, item: string): void {
+    const parts = { ...this.draftTimeParts(), [type]: Number(item) };
+    this.draftTime.set(formatTimeParts(parts, this.timeFormat()));
+  }
+
+  protected timeItemClasses(type: TimePickerColumnType, item: string): string {
+    return [
+      't-time-picker__panel-body-scroll-item',
+      Number(item) === this.draftTimeParts()[type] ? 't-is-current' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  /** 时间模式下点「确定」：合并草稿日期与时间后提交。 */
+  protected confirmTime(): void {
+    const date = this.draftDate();
+    if (!date || this.disabled()) return;
+    this.commit(this.combinedValue(date), 'confirm');
     this.closePanel();
   }
 
@@ -343,14 +455,14 @@ export class TDatePicker {
 
     if (Array.isArray(disableDate)) {
       return disableDate.some((value) => {
-        const date = parseDate(value, this.valueType());
+        const date = parseDate(value, this.effectiveValueType());
         return !!date && isSameDay(date, cell.date);
       });
     }
 
     const date = startOfDay(cell.date);
     const parseBound = (value: DateValue | undefined): Date | null =>
-      value === undefined ? null : parseDate(value, this.valueType());
+      value === undefined ? null : parseDate(value, this.effectiveValueType());
 
     const from = parseBound(disableDate.from);
     const to = parseBound(disableDate.to);
@@ -368,12 +480,21 @@ export class TDatePicker {
     const classes = ['t-date-picker__cell'];
     const today = new Date();
     if (isSameDay(cell.date, today)) classes.push('t-date-picker__cell--now');
-    if (this.selectedDate() && isSameDay(cell.date, this.selectedDate() as Date)) {
+    const active = this.activeDate();
+    if (active && isSameDay(cell.date, active)) {
       classes.push('t-date-picker__cell--active');
     }
     if (this.isCellDisabled(cell)) classes.push('t-date-picker__cell--disabled');
     if (cell.additional) classes.push('t-date-picker__cell--additional');
     return classes.join(' ');
+  }
+
+  /** 把草稿日期与草稿时间合并成回传值。 */
+  private combinedValue(date: Date): DateValue {
+    const combined = new Date(date);
+    const parts = this.draftTimeParts();
+    combined.setHours(parts.hour, parts.minute, parts.second, 0);
+    return formatValue(combined, this.effectiveValueType());
   }
 
   private commit(value: DateValue | '', trigger: DatePickerChangeEvent['trigger']): void {
@@ -385,6 +506,23 @@ export class TDatePicker {
     this.open.set(true);
     this.visibleChange.emit(true);
     this.syncViewToValue();
+    if (this.enableTimePicker()) this.scheduleScrollTime();
+  }
+
+  /** 打开面板后把时间列滚动到当前值附近。 */
+  private scheduleScrollTime(): void {
+    setTimeout(() => this.scrollTimeColumns(), 60);
+  }
+
+  private scrollTimeColumns(): void {
+    const columns = document.querySelectorAll<HTMLElement>(
+      '.t-date-picker__panel-container:not(.t-popup--hidden) .t-date-picker__panel-time .t-time-picker__panel-body-scroll',
+    );
+    columns.forEach((column) => {
+      const current = column.querySelector<HTMLElement>('.t-is-current');
+      if (!current) return;
+      column.scrollTop = current.offsetTop - column.clientHeight / 2 + current.clientHeight / 2;
+    });
   }
 
   private closePanel(): void {
@@ -408,7 +546,7 @@ export class TDatePicker {
     const date = parseDateByFormat(text, this.displayFormat());
     if (!date || this.isDateDisabledValue(date)) return;
 
-    this.commit(formatValue(date, this.valueType()), 'enter');
+    this.commit(formatValue(date, this.effectiveValueType()), 'enter');
     if (close) this.closePanel();
   }
 
@@ -427,7 +565,7 @@ export class TDatePicker {
     const active = this.panelActiveDate();
     if (!active) return;
 
-    const activeYear = active.year === undefined ? null : parseDate(active.year, this.valueType());
+    const activeYear = active.year === undefined ? null : parseDate(active.year, this.effectiveValueType());
     if (activeYear) this.viewYear.set(activeYear.getFullYear());
 
     if (active.month !== undefined) {
@@ -435,7 +573,7 @@ export class TDatePicker {
         const month = Math.min(Math.max(active.month - 1, 0), 11);
         this.viewMonth.set(month);
       } else {
-        const activeMonth = parseDate(active.month, this.valueType());
+        const activeMonth = parseDate(active.month, this.effectiveValueType());
         if (activeMonth) this.viewMonth.set(activeMonth.getMonth());
       }
     }

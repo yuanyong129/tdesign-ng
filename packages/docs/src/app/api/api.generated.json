@@ -928,18 +928,12 @@
         },
         {
           "name": "valueType",
-          "type": "DatePickerValueType",
-          "default": "'YYYY-MM-DD'",
+          "type": "DatePickerValueType | undefined",
+          "default": "undefined",
           "required": false,
-          "zh": "回传值的格式：格式串 / time-stamp / Date。",
-          "en": "Format of the emitted value: a format string, time-stamp or Date.",
-          "values": [
-            "YYYY-MM-DD",
-            "YYYY-MM",
-            "YYYY",
-            "time-stamp",
-            "Date"
-          ]
+          "zh": "回传值的格式：格式串 / time-stamp / Date；不传时按是否带时间推导。",
+          "en": "Format of the emitted value: a format string, time-stamp or Date; derived when omitted.",
+          "values": []
         },
         {
           "name": "format",
@@ -1047,6 +1041,33 @@
           "required": false,
           "zh": "是否允许在输入框里直接输入日期（按 Enter 或失焦提交）。",
           "en": "Whether the date can be typed in the input (committed on Enter or blur).",
+          "values": []
+        },
+        {
+          "name": "enableTimePicker",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许选择时间（面板右侧出现时 / 分 / 秒列）。",
+          "en": "Whether time can be selected (hour / minute / second columns appear).",
+          "values": []
+        },
+        {
+          "name": "defaultTime",
+          "type": "string",
+          "default": "'00:00:00'",
+          "required": false,
+          "zh": "打开面板时未指定时间时使用的默认时间。",
+          "en": "Default time used when the value has no time part.",
+          "values": []
+        },
+        {
+          "name": "needConfirm",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否点「确定」后才提交（开启时间选择时生效）。",
+          "en": "Whether the value is committed only after clicking confirm (with time selection).",
           "values": []
         }
       ],
