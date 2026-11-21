@@ -27,6 +27,12 @@ import {
   weekLabels,
 } from '../date-picker/date-picker-utils';
 import { DatePickerCell, DatePickerValueType, DateValue, DisableDate } from '../date-picker/date-picker.types';
+import {
+  buildTimeColumns,
+  formatTimeParts,
+  parseTimeParts,
+} from '../time-picker/time-picker-utils';
+import { TimePickerColumn, TimePickerColumnType } from '../time-picker/time-picker.types';
 import { DateRangePickerChangeEvent, DateRangeValue, PresetDateRange } from './date-range-picker.types';
 import { PresetsPlacement } from '../date-picker/date-picker.types';
 
@@ -74,7 +80,7 @@ export class TDateRangePicker {
    * @en Format of the emitted value: a format string, time-stamp or Date.
    * @defaultValue 'YYYY-MM-DD'
    */
-  readonly valueType = input<DatePickerValueType>('YYYY-MM-DD');
+  readonly valueType = input<DatePickerValueType | undefined>(undefined);
 
   /**
    * @zh 输入框显示的日期格式，默认与 valueType 一致。
@@ -194,6 +200,27 @@ export class TDateRangePicker {
    */
   readonly readonly = input(false, { transform: booleanAttribute });
 
+  /**
+   * @zh 是否允许选择时间（面板只展示一侧日期 + 时间列）。
+   * @en Whether time can be selected (panel shows one date panel plus time columns).
+   * @defaultValue false
+   */
+  readonly enableTimePicker = input(false, { transform: booleanAttribute });
+
+  /**
+   * @zh 未指定时间时开始 / 结束使用的默认时间。
+   * @en Default start / end time when the value has no time part.
+   * @defaultValue ['00:00:00', '23:59:59']
+   */
+  readonly defaultTime = input<string[]>(['00:00:00', '23:59:59']);
+
+  /**
+   * @zh 是否点「确定」后才提交（开启时间选择时生效）。
+   * @en Whether the value is committed only after clicking confirm (with time selection).
+   * @defaultValue true
+   */
+  readonly needConfirm = input(true, { transform: booleanAttribute });
+
   /** @zh 选中范围变化 @en Emitted when the selected range changes */
   readonly change = output<DateRangePickerChangeEvent>();
 
@@ -208,9 +235,19 @@ export class TDateRangePicker {
   protected readonly hoverDate = signal<Date | null>(null);
   private readonly draftStartText = signal<string | null>(null);
   private readonly draftEndText = signal<string | null>(null);
+  protected readonly activeSide = signal<'start' | 'end'>('start');
+  private readonly draftTimeStart = signal('');
+  private readonly draftTimeEnd = signal('');
 
   protected readonly viewYear = signal(new Date().getFullYear());
   protected readonly viewMonth = signal(new Date().getMonth());
+
+  /** 实际使用的回传格式；未显式指定时按是否带时间推导。 */
+  protected readonly effectiveValueType = computed<DatePickerValueType>(
+    () =>
+      this.valueType() ??
+      (this.enableTimePicker() ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD'),
+  );
 
   protected readonly currentValue = computed<DateRangeValue>(() => {
     if (this.value() !== undefined) return this.value() as DateRangeValue;
@@ -219,11 +256,11 @@ export class TDateRangePicker {
   });
 
   protected readonly committedStart = computed<Date | null>(() =>
-    parseDate(this.currentValue()[0], this.valueType()),
+    parseDate(this.currentValue()[0], this.effectiveValueType()),
   );
 
   protected readonly committedEnd = computed<Date | null>(() =>
-    parseDate(this.currentValue()[1], this.valueType()),
+    parseDate(this.currentValue()[1], this.effectiveValueType()),
   );
 
   protected readonly startDate = computed<Date | null>(
@@ -245,7 +282,40 @@ export class TDateRangePicker {
   );
 
   protected readonly displayFormat = computed(
-    () => this.format() ?? defaultFormat(this.valueType()),
+    () => this.format() ?? defaultFormat(this.effectiveValueType()),
+  );
+
+  /** 时间面板格式：取显示格式里的 HH/mm/ss token，缺省 HH:mm:ss。 */
+  protected readonly timeFormat = computed(() => {
+    const tokens = this.displayFormat().match(/HH|mm|ss/g);
+    return tokens?.length ? tokens.join(':') : 'HH:mm:ss';
+  });
+
+  protected readonly timeColumns = computed<TimePickerColumn[]>(() =>
+    buildTimeColumns(this.timeFormat(), [1, 1, 1]),
+  );
+
+  protected readonly activeTime = computed(() =>
+    this.activeSide() === 'start' ? this.draftTimeStart() : this.draftTimeEnd(),
+  );
+
+  protected readonly activeTimeParts = computed(() =>
+    parseTimeParts(this.activeTime(), this.timeFormat()),
+  );
+
+  protected readonly timeViewerText = computed(() =>
+    formatTimeParts(this.activeTimeParts(), this.timeFormat()),
+  );
+
+  protected readonly showConfirm = computed(
+    () => this.enableTimePicker() && this.needConfirm(),
+  );
+
+  /** 时间模式下是否已有可提交的两端日期。 */
+  protected readonly canConfirm = computed(
+    () =>
+      (!!this.pendingStart() && !!this.pendingEnd()) ||
+      (!this.pendingStart() && !!this.committedStart() && !!this.committedEnd()),
   );
 
   protected readonly startText = computed(() => {
@@ -280,6 +350,10 @@ export class TDateRangePicker {
 
   protected readonly footerClasses = computed(
     () => `t-date-picker__footer t-date-picker__footer--${this.presetsPlacement()}`,
+  );
+
+  protected readonly showFooter = computed(
+    () => this.presetEntries().length > 0 || this.showConfirm(),
   );
 
   protected readonly startPlaceholder = computed(() => {
@@ -353,11 +427,38 @@ export class TDateRangePicker {
     this.hoverDate.set(null);
     this.draftStartText.set(null);
     this.draftEndText.set(null);
-    if (visible) this.syncPanelsOnOpen();
+    if (!visible) return;
+
+    this.syncPanelsOnOpen();
+    if (!this.enableTimePicker()) return;
+
+    const start = this.committedStart();
+    const end = this.committedEnd();
+    this.draftTimeStart.set(
+      start ? this.timeTextOf(start) : (this.defaultTime()[0] ?? '00:00:00'),
+    );
+    this.draftTimeEnd.set(
+      end ? this.timeTextOf(end) : (this.defaultTime()[1] ?? '23:59:59'),
+    );
+    this.activeSide.set(start && !end ? 'end' : 'start');
+    this.scheduleScrollTime();
   }
 
   protected selectDate(cell: DatePickerCell): void {
     if (this.isDateDisabled(cell.date)) return;
+
+    if (this.enableTimePicker()) {
+      if (this.activeSide() === 'start') {
+        this.pendingStart.set(cell.date);
+        this.pendingEnd.set(null);
+        this.activeSide.set('end');
+        this.scheduleScrollTime();
+        return;
+      }
+      this.pendingEnd.set(cell.date);
+      if (!this.needConfirm()) this.confirmTimeRange();
+      return;
+    }
 
     const start = this.pendingStart();
     if (!start) {
@@ -374,6 +475,30 @@ export class TDateRangePicker {
 
     this.pendingStart.set(cell.date);
     this.pendingEnd.set(null);
+  }
+
+  protected selectTime(type: TimePickerColumnType, item: string): void {
+    const parts = { ...this.activeTimeParts(), [type]: Number(item) };
+    const text = formatTimeParts(parts, this.timeFormat());
+    if (this.activeSide() === 'start') this.draftTimeStart.set(text);
+    else this.draftTimeEnd.set(text);
+  }
+
+  protected timeItemClasses(type: TimePickerColumnType, item: string): string {
+    return [
+      't-time-picker__panel-body-scroll-item',
+      Number(item) === this.activeTimeParts()[type] ? 't-is-current' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  /** 时间模式下点「确定」：合并两端日期与时间后提交。 */
+  protected confirmTimeRange(): void {
+    const start = this.pendingStart() ?? this.committedStart();
+    const end = this.pendingEnd() ?? this.committedEnd();
+    if (!start || !end) return;
+    this.commitRangeWithTime(start, end);
   }
 
   protected handleCellEnter(cell: DatePickerCell): void {
@@ -409,8 +534,8 @@ export class TDateRangePicker {
 
   protected applyPreset(preset: { key: string; value: DateRangeValue | (() => DateRangeValue) }): void {
     const raw = typeof preset.value === 'function' ? preset.value() : preset.value;
-    const start = parseDate(raw[0], this.valueType());
-    const end = parseDate(raw[1], this.valueType());
+    const start = parseDate(raw[0], this.effectiveValueType());
+    const end = parseDate(raw[1], this.effectiveValueType());
     if (!start || !end) return;
     this.commitRange(end < start ? end : start, end < start ? start : end, 'preset');
   }
@@ -509,13 +634,13 @@ export class TDateRangePicker {
 
     if (Array.isArray(disableDate)) {
       return disableDate.some((item) => {
-        const parsed = parseDate(item, this.valueType());
+        const parsed = parseDate(item, this.effectiveValueType());
         return parsed ? isSameDay(parsed, date) : false;
       });
     }
 
     const parseBound = (value: DateValue | undefined): Date | null =>
-      value === undefined ? null : parseDate(value, this.valueType());
+      value === undefined ? null : parseDate(value, this.effectiveValueType());
 
     const from = parseBound(disableDate.from);
     const to = parseBound(disableDate.to);
@@ -542,8 +667,8 @@ export class TDateRangePicker {
       : [range as DateValue[]];
 
     return !windows.some(([from, to]) => {
-      const start = parseDate(from, this.valueType());
-      const end = parseDate(to, this.valueType());
+      const start = parseDate(from, this.effectiveValueType());
+      const end = parseDate(to, this.effectiveValueType());
       if (!start || !end) return false;
       return date >= startOfDay(start) && date <= endOfDay(end);
     });
@@ -555,8 +680,52 @@ export class TDateRangePicker {
     trigger: DateRangePickerChangeEvent['trigger'] = 'pick',
   ): void {
     this.commit(
-      [formatValue(start, this.valueType()), formatValue(end, this.valueType())],
+      [formatValue(start, this.effectiveValueType()), formatValue(end, this.effectiveValueType())],
       trigger,
+    );
+    this.closePanel();
+  }
+
+  private timeTextOf(date: Date): string {
+    return formatTimeParts(
+      { hour: date.getHours(), minute: date.getMinutes(), second: date.getSeconds() },
+      this.timeFormat(),
+    );
+  }
+
+  /** 打开面板后把时间列滚动到当前值附近。 */
+  private scheduleScrollTime(): void {
+    setTimeout(() => this.scrollTimeColumns(), 60);
+  }
+
+  private scrollTimeColumns(): void {
+    const columns = document.querySelectorAll<HTMLElement>(
+      '.t-date-range-picker__panel-container:not(.t-popup--hidden) .t-date-picker__panel-time .t-time-picker__panel-body-scroll',
+    );
+    columns.forEach((column) => {
+      const current = column.querySelector<HTMLElement>('.t-is-current');
+      if (!current) return;
+      column.scrollTop = current.offsetTop - column.clientHeight / 2 + current.clientHeight / 2;
+    });
+  }
+
+  /** 时间模式：把草稿时间合并到两端日期后提交。 */
+  private commitRangeWithTime(start: Date, end: Date): void {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const startParts = parseTimeParts(this.draftTimeStart(), this.timeFormat());
+    const endParts = parseTimeParts(this.draftTimeEnd(), this.timeFormat());
+    startDate.setHours(startParts.hour, startParts.minute, startParts.second, 0);
+    endDate.setHours(endParts.hour, endParts.minute, endParts.second, 0);
+
+    const orderedStart = endDate < startDate ? endDate : startDate;
+    const orderedEnd = endDate < startDate ? startDate : endDate;
+    this.commit(
+      [
+        formatValue(orderedStart, this.effectiveValueType()),
+        formatValue(orderedEnd, this.effectiveValueType()),
+      ],
+      'confirm',
     );
     this.closePanel();
   }

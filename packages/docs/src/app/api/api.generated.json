@@ -1111,7 +1111,7 @@
         },
         {
           "name": "valueType",
-          "type": "DatePickerValueType",
+          "type": "DatePickerValueType | undefined",
           "default": "'YYYY-MM-DD'",
           "required": false,
           "zh": "回传值的格式：格式串 / time-stamp / Date。",
@@ -1283,6 +1283,33 @@
           "required": false,
           "zh": "只读状态（不可编辑、不可展开面板）。",
           "en": "Readonly state (not editable and the panel cannot open).",
+          "values": []
+        },
+        {
+          "name": "enableTimePicker",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许选择时间（面板只展示一侧日期 + 时间列）。",
+          "en": "Whether time can be selected (panel shows one date panel plus time columns).",
+          "values": []
+        },
+        {
+          "name": "defaultTime",
+          "type": "string[]",
+          "default": "['00:00:00', '23:59:59']",
+          "required": false,
+          "zh": "未指定时间时开始 / 结束使用的默认时间。",
+          "en": "Default start / end time when the value has no time part.",
+          "values": []
+        },
+        {
+          "name": "needConfirm",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否点「确定」后才提交（开启时间选择时生效）。",
+          "en": "Whether the value is committed only after clicking confirm (with time selection).",
           "values": []
         }
       ],

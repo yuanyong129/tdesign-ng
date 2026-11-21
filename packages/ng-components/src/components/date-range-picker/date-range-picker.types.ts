@@ -10,7 +10,7 @@ export type DateRangeValue = DateValue[];
  * @zh 日期范围变化来源。
  * @en Source of a date range change.
  */
-export type DateRangePickerTrigger = 'pick' | 'clear' | 'preset' | 'enter';
+export type DateRangePickerTrigger = 'pick' | 'clear' | 'preset' | 'enter' | 'confirm';
 
 /**
  * @zh 日期范围变化事件。

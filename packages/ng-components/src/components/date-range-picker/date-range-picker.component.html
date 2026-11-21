@@ -98,7 +98,7 @@
       class="t-date-range-picker__panel"
       [class.t-date-range-picker__panel--direction-row]="isRowPlacement()"
     >
-      @if (presetsAtTop() && presetEntries().length) {
+      @if (presetsAtTop() && showFooter()) {
         <ng-container [ngTemplateOutlet]="footer" />
       }
 
@@ -221,7 +221,8 @@
           </div>
         </div>
 
-        <div class="t-date-picker__panel-date">
+        @if (!enableTimePicker()) {
+          <div class="t-date-picker__panel-date">
           <div class="t-date-picker__header">
             <div class="t-date-picker__header-controller">
               <div class="t-date-picker__header-controller-month">
@@ -338,9 +339,36 @@
             </table>
           </div>
         </div>
+        }
+
+        @if (enableTimePicker()) {
+          <div class="t-date-picker__panel-time">
+            <div class="t-date-picker__panel-time-viewer">{{ timeViewerText() }}</div>
+            <div class="t-time-picker__panel">
+              <div class="t-time-picker__panel-section-body">
+                <div class="t-time-picker__panel-body">
+                  <div class="t-time-picker__panel-body-active-mask">
+                    @for (column of timeColumns(); track column.type) {
+                      <div></div>
+                    }
+                  </div>
+                  @for (column of timeColumns(); track column.type) {
+                    <ul class="t-time-picker__panel-body-scroll">
+                      @for (item of column.items; track item) {
+                        <li [class]="timeItemClasses(column.type, item)" (click)="selectTime(column.type, item)">
+                          {{ item }}
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
       </div>
 
-      @if (presetsAtBottom() && presetEntries().length) {
+      @if (presetsAtBottom() && showFooter()) {
         <ng-container [ngTemplateOutlet]="footer" />
       }
     </div>
@@ -360,5 +388,15 @@
         </button>
       }
     </div>
+    @if (showConfirm()) {
+      <button
+        type="button"
+        class="t-button t-button--variant-base t-button--theme-primary t-size-s"
+        [disabled]="!canConfirm()"
+        (click)="confirmTimeRange()"
+      >
+        确定
+      </button>
+    }
   </div>
 </ng-template>
