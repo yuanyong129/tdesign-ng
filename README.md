@@ -44,8 +44,9 @@
 | Cascader | ✅ 单选/多选级联、完整路径回显、自定义字段名、清空、禁用、三种尺寸、父子不关联、搜索、异步加载、面板与回显插槽 |
 | TreeSelect | ✅ 单选/多选、展开父级、父子不关联与取值模式、搜索、自定义字段名、清空、禁用、三种尺寸、加载态、面板插槽 |
 | DatePicker | ✅ 单日期选择、面板导航、custom format / valueType（格式串 / 时间戳 / Date）、firstDayOfWeek、disableDate（数组 / 范围 / 函数）、预设日期、手动输入、清空、禁用、三种尺寸 |
+| TimePicker | ✅ 时分秒三列、format 控制列、steps 步长、面板确认、此刻、清空、禁用、三种尺寸 |
 
-P4 数据展示已全部落地；P5 复杂录入进行中（Slider、Rate、Cascader、TreeSelect、DatePicker 已完成，TimePicker / Upload / Transfer / ColorPicker 待做），计划见 `docs/plans/tdesign-angular-plan.md`；
+P4 数据展示已全部落地；P5 复杂录入进行中（Slider、Rate、Cascader、TreeSelect、DatePicker、TimePicker 已完成，Upload / Transfer / ColorPicker 待做），计划见 `docs/plans/tdesign-angular-plan.md`；
 接手开发请先读 [`HANDOFF.md`](./HANDOFF.md)。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。

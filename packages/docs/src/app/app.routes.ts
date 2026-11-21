@@ -145,6 +145,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/date-picker/date-picker.component').then((m) => m.DatePickerDocs),
   },
   {
+    path: 'time-picker',
+    loadComponent: () => import('./docs/time-picker/time-picker.component').then((m) => m.TimePickerDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

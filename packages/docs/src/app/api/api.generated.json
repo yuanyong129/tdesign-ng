@@ -4855,6 +4855,103 @@
         }
       ]
     },
+    "TTimePicker": {
+      "className": "TTimePicker",
+      "selector": "t-time-picker",
+      "file": "packages/ng-components/src/components/time-picker/time-picker.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "TimePickerValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中的时间，受控用法。",
+          "en": "Selected time in controlled mode.",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "TimePickerValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认选中的时间，非受控用法。",
+          "en": "Default selected time in uncontrolled mode.",
+          "values": []
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "default": "'HH:mm:ss'",
+          "required": false,
+          "zh": "时间格式，支持 HH / mm / ss。",
+          "en": "Time format; HH / mm / ss are supported.",
+          "values": []
+        },
+        {
+          "name": "steps",
+          "type": "Array<string | number>",
+          "default": "[1, 1, 1]",
+          "required": false,
+          "zh": "每一列的步长，顺序为 HH / mm / ss。",
+          "en": "Step of each column, in HH / mm / ss order.",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空。",
+          "en": "Whether the value can be cleared.",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用。",
+          "en": "Whether the time picker is disabled.",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "'small' | 'medium' | 'large'",
+          "default": "'medium'",
+          "required": false,
+          "zh": "输入框尺寸。",
+          "en": "Size of the input.",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "default": "'请选择时间'",
+          "required": false,
+          "zh": "占位文案。",
+          "en": "Placeholder text.",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "TimePickerChangeEvent",
+          "zh": "选中时间变化",
+          "en": "Emitted when the selected time changes"
+        },
+        {
+          "name": "visibleChange",
+          "type": "boolean",
+          "zh": "弹层显隐变化",
+          "en": "Emitted when the popup visibility changes"
+        }
+      ]
+    },
     "TTooltip": {
       "className": "TTooltip",
       "selector": "t-tooltip",

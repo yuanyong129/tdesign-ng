@@ -253,5 +253,18 @@ t-tree-select {
   color: var(--td-text-color-placeholder, #999);
 }
 
+// 时间选择面板：上游弹层内容 padding 为 0（面板自带内边距），这里给等价规则
+.t-time-picker__popup .t-popup__content {
+  padding: 0;
+}
+
+// 时钟 / 日历图标是描边图形，上游 .t-icon 默认 fill: currentColor 会把它们填成实心
+.t-icon-time,
+.t-icon-calendar {
+  fill: none;
+}
+
+
+
 
 
