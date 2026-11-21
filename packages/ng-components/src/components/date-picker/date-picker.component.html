@@ -65,18 +65,20 @@
       }
 
       <div class="t-date-picker__panel-content">
-        <div class="t-date-picker__panel-date">
+        <div [class]="panelClass()">
           <div class="t-date-picker__header">
             <div class="t-date-picker__header-controller">
-              <div class="t-date-picker__header-controller-month">
-                <t-select
-                  size="small"
-                  [borderless]="true"
-                  [options]="monthOptions()"
-                  [value]="viewMonth()"
-                  (valueChange)="handleMonthChange($event)"
-                />
-              </div>
+              @if (mode() === 'date') {
+                <div class="t-date-picker__header-controller-month">
+                  <t-select
+                    size="small"
+                    [borderless]="true"
+                    [options]="monthOptions()"
+                    [value]="viewMonth()"
+                    (valueChange)="handleMonthChange($event)"
+                  />
+                </div>
+              }
               <div class="t-date-picker__header-controller-year">
                 <t-select
                   size="small"
@@ -92,8 +94,8 @@
               <button
                 type="button"
                 class="t-button t-button--variant-text t-button--theme-default t-button--shape-square t-size-s t-pagination-mini__prev"
-                aria-label="上个月"
-                (click)="jumpMonth(-1)"
+                aria-label="上一步"
+                (click)="stepBackward()"
               >
                 <svg
                   class="t-icon"
@@ -133,7 +135,7 @@
                 type="button"
                 class="t-button t-button--variant-text t-button--theme-default t-button--shape-square t-size-s t-pagination-mini__next"
                 aria-label="下个月"
-                (click)="jumpMonth(1)"
+                (click)="stepForward()"
               >
                 <svg
                   class="t-icon"
@@ -155,31 +157,65 @@
             </div>
           </div>
 
-          <div class="t-date-picker__table">
-            <table>
-              <thead>
-                <tr class="t-date-picker__table-header-row">
-                  @for (label of weekLabels(); track $index) {
-                    <th class="t-date-picker__table-header-cell">{{ label }}</th>
-                  }
-                </tr>
-              </thead>
-              <tbody>
-                @for (week of weeks(); track $index) {
-                  <tr class="t-date-picker__table-date-row">
-                    @for (cell of week; track $index) {
-                      <td [class]="cellClasses(cell)" (click)="pickDate(cell)">
-                        <div class="t-date-picker__cell-inner">{{ cell.day }}</div>
-                      </td>
+          @if (mode() === 'date') {
+            <div class="t-date-picker__table">
+              <table>
+                <thead>
+                  <tr class="t-date-picker__table-header-row">
+                    @for (label of weekLabels(); track $index) {
+                      <th class="t-date-picker__table-header-cell">{{ label }}</th>
                     }
                   </tr>
-                }
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  @for (week of weeks(); track $index) {
+                    <tr class="t-date-picker__table-date-row">
+                      @for (cell of week; track $index) {
+                        <td [class]="cellClasses(cell)" (click)="pickDate(cell)">
+                          <div class="t-date-picker__cell-inner">{{ cell.day }}</div>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else if (mode() === 'month') {
+            <div class="t-date-picker__table">
+              <table>
+                <tbody>
+                  @for (row of monthRows(); track $index) {
+                    <tr>
+                      @for (cell of row; track cell.month) {
+                        <td [class]="periodCellClass(cell.active)" (click)="selectMonth(cell.month)">
+                          <div class="t-date-picker__cell-inner">{{ cell.label }}</div>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="t-date-picker__table">
+              <table>
+                <tbody>
+                  @for (row of yearRows(); track $index) {
+                    <tr>
+                      @for (cell of row; track cell.year) {
+                        <td [class]="periodCellClass(cell.active)" (click)="selectYear(cell.year)">
+                          <div class="t-date-picker__cell-inner">{{ cell.label }}</div>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
         </div>
 
-        @if (enableTimePicker()) {
+        @if (isTimeMode()) {
           <div class="t-date-picker__panel-time">
             <div class="t-date-picker__panel-time-viewer">{{ timeViewerText() }}</div>
             <div class="t-time-picker__panel">
@@ -228,7 +264,7 @@
         }
       </div>
     }
-    @if (enableTimePicker() && needConfirm()) {
+    @if (isTimeMode() && needConfirm()) {
       <button
         type="button"
         class="t-button t-button--variant-base t-button--theme-primary t-size-s"

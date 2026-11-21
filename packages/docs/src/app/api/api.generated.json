@@ -936,6 +936,19 @@
           "values": []
         },
         {
+          "name": "mode",
+          "type": "'date' | 'month' | 'year'",
+          "default": "'date'",
+          "required": false,
+          "zh": "选择器模式：日期 / 月份 / 年份。",
+          "en": "Picker mode: date, month or year.",
+          "values": [
+            "date",
+            "month",
+            "year"
+          ]
+        },
+        {
           "name": "format",
           "type": "string | undefined",
           "default": "undefined",

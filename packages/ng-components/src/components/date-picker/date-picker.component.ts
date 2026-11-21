@@ -86,6 +86,14 @@ export class TDatePicker {
   readonly valueType = input<DatePickerValueType | undefined>(undefined);
 
   /**
+   * @zh 选择器模式：日期 / 月份 / 年份。
+   * @en Picker mode: date, month or year.
+   * @defaultValue 'date'
+   * @values date, month, year
+   */
+  readonly mode = input<'date' | 'month' | 'year'>('date');
+
+  /**
    * @zh 输入框里显示的日期格式，默认与 valueType 一致。
    * @en Display format in the input; defaults to valueType.
    */
@@ -201,11 +209,17 @@ export class TDatePicker {
     return this.defaultValue();
   });
 
-  /** 实际使用的回传格式；未显式指定时按是否带时间推导。 */
-  protected readonly effectiveValueType = computed<DatePickerValueType>(
-    () =>
-      this.valueType() ??
-      (this.enableTimePicker() ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD'),
+  /** 实际使用的回传格式；未显式指定时按模式 / 是否带时间推导。 */
+  protected readonly effectiveValueType = computed<DatePickerValueType>(() => {
+    if (this.valueType()) return this.valueType() as DatePickerValueType;
+    if (this.mode() === 'year') return 'YYYY';
+    if (this.mode() === 'month') return 'YYYY-MM';
+    return this.isTimeMode() ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD';
+  });
+
+  /** 时间选择只在日期模式下生效。 */
+  protected readonly isTimeMode = computed(
+    () => this.enableTimePicker() && this.mode() === 'date',
   );
 
   /** 当前值解析出来的日期。 */
@@ -215,14 +229,16 @@ export class TDatePicker {
 
   /** 面板里高亮的日期：时间模式下用草稿日期，否则用已提交值。 */
   protected readonly activeDate = computed<Date | null>(() =>
-    this.enableTimePicker() && this.open() ? this.draftDate() : this.selectedDate(),
+    this.isTimeMode() && this.open() ? this.draftDate() : this.selectedDate(),
   );
 
   protected readonly displayFormat = computed(() => {
     if (this.format()) return this.format() as string;
+    if (this.mode() === 'year') return 'YYYY';
+    if (this.mode() === 'month') return 'YYYY-MM';
     const valueType = this.effectiveValueType();
     if (valueType === 'Date' || valueType === 'time-stamp') {
-      return this.enableTimePicker() ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD';
+      return this.isTimeMode() ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD';
     }
     return defaultFormat(valueType);
   });
@@ -246,7 +262,7 @@ export class TDatePicker {
   );
 
   protected readonly showFooter = computed(
-    () => this.presetEntries().length > 0 || (this.enableTimePicker() && this.needConfirm()),
+    () => this.presetEntries().length > 0 || (this.isTimeMode() && this.needConfirm()),
   );
 
   protected readonly displayText = computed(() => {
@@ -307,6 +323,35 @@ export class TDatePicker {
     });
   });
 
+  protected readonly panelClass = computed(() => `t-date-picker__panel-${this.mode()}`);
+
+  /** 月份面板的 12 个月，按 3 个一行分块。 */
+  protected readonly monthRows = computed(() => {
+    const selected = this.selectedDate();
+    const cells = Array.from({ length: 12 }, (_, month) => ({
+      month,
+      label: `${month + 1} 月`,
+      active:
+        !!selected &&
+        selected.getFullYear() === this.viewYear() &&
+        selected.getMonth() === month,
+    }));
+    return this.chunkRows(cells, 3);
+  });
+
+  protected readonly decadeStart = computed(() => Math.floor(this.viewYear() / 10) * 10);
+
+  /** 年份面板的 12 年（当前十年），按 3 个一行分块。 */
+  protected readonly yearRows = computed(() => {
+    const selected = this.selectedDate();
+    const start = this.decadeStart();
+    const cells = Array.from({ length: 12 }, (_, index) => {
+      const year = start + index;
+      return { year, label: String(year), active: !!selected && selected.getFullYear() === year };
+    });
+    return this.chunkRows(cells, 3);
+  });
+
   protected readonly inputClasses = computed(() => {
     const classes = ['t-input', 't-input--suffix'];
     const sizeClass = SIZE_CLASS[this.size()];
@@ -341,7 +386,7 @@ export class TDatePicker {
         : this.defaultTime(),
     );
     this.syncViewToValue();
-    if (this.enableTimePicker()) this.scheduleScrollTime();
+    if (this.isTimeMode()) this.scheduleScrollTime();
   }
 
   protected handleInputText(event: Event): void {
@@ -382,7 +427,7 @@ export class TDatePicker {
   protected pickDate(cell: DatePickerCell): void {
     if (this.isCellDisabled(cell)) return;
 
-    if (this.enableTimePicker()) {
+    if (this.isTimeMode()) {
       this.draftDate.set(cell.date);
       if (!this.needConfirm()) {
         this.commit(this.combinedValue(cell.date), 'pick');
@@ -476,6 +521,41 @@ export class TDatePicker {
     return false;
   }
 
+  protected jumpYear(delta: number): void {
+    this.viewYear.update((year) => year + delta);
+  }
+
+  protected stepBackward(): void {
+    if (this.mode() === 'year') this.jumpYear(-1);
+    else this.jumpMonth(-1);
+  }
+
+  protected stepForward(): void {
+    if (this.mode() === 'year') this.jumpYear(1);
+    else this.jumpMonth(1);
+  }
+
+  protected selectMonth(month: number): void {
+    const date = new Date(this.viewYear(), month, 1);
+    this.commit(formatValue(date, this.effectiveValueType()), 'pick');
+    this.closePanel();
+  }
+
+  protected selectYear(year: number): void {
+    const date = new Date(year, 0, 1);
+    this.commit(formatValue(date, this.effectiveValueType()), 'pick');
+    this.closePanel();
+  }
+
+  protected periodCellClass(active: boolean): string {
+    return [
+      't-date-picker__cell',
+      active ? 't-date-picker__cell--active' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
   protected cellClasses(cell: DatePickerCell): string {
     const classes = ['t-date-picker__cell'];
     const today = new Date();
@@ -497,6 +577,14 @@ export class TDatePicker {
     return formatValue(combined, this.effectiveValueType());
   }
 
+  private chunkRows<T>(items: T[], size: number): T[][] {
+    const rows: T[][] = [];
+    for (let index = 0; index < items.length; index += size) {
+      rows.push(items.slice(index, index + size));
+    }
+    return rows;
+  }
+
   private commit(value: DateValue | '', trigger: DatePickerChangeEvent['trigger']): void {
     if (this.value() === undefined) this.innerValue.set(value);
     this.change.emit({ value, trigger });
@@ -506,7 +594,7 @@ export class TDatePicker {
     this.open.set(true);
     this.visibleChange.emit(true);
     this.syncViewToValue();
-    if (this.enableTimePicker()) this.scheduleScrollTime();
+    if (this.isTimeMode()) this.scheduleScrollTime();
   }
 
   /** 打开面板后把时间列滚动到当前值附近。 */

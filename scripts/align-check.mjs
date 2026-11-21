@@ -294,8 +294,7 @@ const CONFIG = {
     angularOnly: [],
     ignoreUpstream: {
       ...ANGULAR_EVENT_IGNORES,
-      // 已实现：第一/二层 + 第三层的 enableTimePicker / defaultTime / needConfirm
-      'mode': '第一层只支持 date 模式（year / month / week / quarter 在后续版本实现）',
+      // 已实现：第一/二层 + 第三层的 enableTimePicker / defaultTime / needConfirm + mode（date/month/year）
       'disableTime': '时间选择的禁用候选在后续版本实现',
       'timePickerProps': '时间面板透传在后续版本实现',
       'multiple': '多选日期在后续版本实现',
