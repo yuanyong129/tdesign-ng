@@ -336,11 +336,7 @@ const CONFIG = {
     angularOnly: [],
     ignoreUpstream: {
       ...ANGULAR_EVENT_IGNORES,
-      // 第一层：value / defaultValue / format / steps / clearable / disabled / size / placeholder 已实现
-      'allowInput': '输入框编辑时间在后续版本实现',
-      'disableTime': '禁用时间在后续版本实现',
-      'hideDisabledTime': '禁用时间在后续版本实现',
-      'presets': '预设时间在后续版本实现',
+      // 第二层已补齐：presets / disableTime / hideDisabledTime / allowInput
       'borderless': '无边框模式在后续版本实现',
       'readonly': '只读模式在后续版本实现',
       'status': '校验状态在后续版本实现',
@@ -348,7 +344,7 @@ const CONFIG = {
       'label': '标签文案在后续版本实现',
       'prefixIcon': 'Angular 用 <t-icon tTimePickerPrefixIcon> 投影',
       'suffixIcon': '默认时钟图标，未支持替换',
-      'valueDisplay': '自定义回显在后续版本实现',
+      'valueDisplay': 'Angular 用 <ng-template tTimePickerValueDisplay> 投影',
       'inputProps': '透传 InputProps 在后续版本实现',
       'selectInputProps': '透传 SelectInputProps 在后续版本实现',
       'popupProps': '透传 PopupProps 在后续版本实现',

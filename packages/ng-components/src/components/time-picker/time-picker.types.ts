@@ -44,3 +44,31 @@ export interface TimeParts {
   minute: number;
   second: number;
 }
+
+/**
+ * @zh 预设时间：键为按钮文案，值为时间或返回时间的函数。
+ * @en Preset times: key is the button label, value is a time or a factory.
+ */
+export type PresetTime = Record<string, TimePickerValue | (() => TimePickerValue)>;
+
+/**
+ * @zh 各列被禁用的候选值。
+ * @en Disabled candidates of each column.
+ */
+export interface DisableTimeResult {
+  hour?: number[];
+  minute?: number[];
+  second?: number[];
+  millisecond?: number[];
+}
+
+/**
+ * @zh 禁用时间的判断函数，返回每列需要禁用的候选值。
+ * @en Predicate returning the candidates to disable for each column.
+ */
+export type DisableTime = (
+  hour: number,
+  minute: number,
+  second: number,
+  millisecond: number,
+) => DisableTimeResult | undefined;

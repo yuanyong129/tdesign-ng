@@ -9,12 +9,22 @@
   <div [class]="wrapperClasses()">
     <div class="t-input__wrap">
       <div [class]="inputClasses()">
+        <span class="t-input__prefix">
+          <ng-content select="[tTimePickerPrefixIcon]" />
+          @if (valueDisplayTemplate(); as valueDisplay) {
+            <ng-container [ngTemplateOutlet]="valueDisplay" [ngTemplateOutletContext]="valueDisplayContext()" />
+          }
+        </span>
         <input
           class="t-input__inner"
-          readonly
-          [value]="displayText()"
-          [attr.placeholder]="placeholder()"
+          [readOnly]="!allowInput()"
+          [value]="inputDisplayText()"
+          [attr.placeholder]="placeholderText()"
           [disabled]="disabled()"
+          (input)="handleInputText($event)"
+          (click)="handleInputClick($event)"
+          (keydown.enter)="handleInputEnter($event)"
+          (blur)="handleInputBlur($event)"
         />
         <span class="t-input__suffix">
           @if (clearable() && hasValue() && !disabled()) {
@@ -76,7 +86,13 @@
         <t-button theme="primary" variant="base" size="small" [disabled]="!draft()" (click)="confirm()">
           确定
         </t-button>
-        @if (showNowButton()) {
+        @if (presetEntries().length) {
+          @for (preset of presetEntries(); track preset.key) {
+            <t-button theme="primary" variant="text" size="small" (click)="applyPreset(preset)">
+              {{ preset.key }}
+            </t-button>
+          }
+        } @else if (showNowButton()) {
           <t-button theme="primary" variant="text" size="small" (click)="setNow()">此刻</t-button>
         }
       </div>

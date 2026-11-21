@@ -4935,6 +4935,42 @@
           "zh": "占位文案。",
           "en": "Placeholder text.",
           "values": []
+        },
+        {
+          "name": "presets",
+          "type": "PresetTime | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "预设时间：键为按钮文案，值为时间或返回时间的函数。",
+          "en": "Preset times: key is the button label, value is a time or a factory.",
+          "values": []
+        },
+        {
+          "name": "disableTime",
+          "type": "DisableTime | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "禁用时间的判断函数，返回每列需要禁用的候选值。",
+          "en": "Predicate returning the candidates to disable for each column.",
+          "values": []
+        },
+        {
+          "name": "hideDisabledTime",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否隐藏被禁用的候选项（false 时置灰显示）。",
+          "en": "Whether disabled candidates are hidden (shown greyed out when false).",
+          "values": []
+        },
+        {
+          "name": "allowInput",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许在输入框里直接输入时间（Enter / 失焦提交）。",
+          "en": "Whether time can be typed in the input (committed on Enter or blur).",
+          "values": []
         }
       ],
       "outputs": [

@@ -65,6 +65,47 @@ export function emptyTimeValue(format: string): string {
   return formatTimeParts({ hour: 0, minute: 0, second: 0 }, format);
 }
 
+/**
+ * 校验手输的时间文本并按格式规范化；非法时返回 null。
+ * 允许 1~2 位数字、缺失的列按 0 处理。
+ */
+export function normalizeTimeText(value: string, format: string): string | null {
+  const text = value.trim();
+  if (!text) return null;
+
+  const tokens: string[] = [];
+  let pattern = '^';
+  let lastIndex = 0;
+  for (const match of format.matchAll(TOKEN_PATTERN)) {
+    const index = match.index ?? 0;
+    pattern += escapeRegExp(format.slice(lastIndex, index));
+    tokens.push(match[0]);
+    pattern += '(\\d{1,2})';
+    lastIndex = index + match[0].length;
+  }
+  pattern += `${escapeRegExp(format.slice(lastIndex))}$`;
+
+  const matched = text.match(new RegExp(pattern));
+  if (!matched) return null;
+
+  const parts: TimeParts = { hour: 0, minute: 0, second: 0 };
+  for (let index = 0; index < tokens.length; index++) {
+    const number = Number(matched[index + 1]);
+    const token = tokens[index];
+    if (token === 'HH') {
+      if (number > 23) return null;
+      parts.hour = number;
+    } else if (token === 'mm') {
+      if (number > 59) return null;
+      parts.minute = number;
+    } else {
+      if (number > 59) return null;
+      parts.second = number;
+    }
+  }
+  return formatTimeParts(parts, format);
+}
+
 /** 当前时间（含秒）在当前格式下的字符串。 */
 export function nowTimeValue(format: string): string {
   const now = new Date();
