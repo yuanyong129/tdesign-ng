@@ -1,9 +1,11 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   booleanAttribute,
   computed,
+  contentChildren,
   input,
   numberAttribute,
   output,
@@ -12,9 +14,15 @@ import {
 import { TPopup } from '../popup';
 import { TTag } from '../tag/tag.component';
 import {
+  TCascaderPanelBottom,
+  TCascaderPanelTop,
+  TCascaderValueDisplay,
+} from './cascader-content.directives';
+import {
   CASCADER_DEFAULT_KEYS,
   buildCascaderTree,
   pathLabel,
+  searchLabel,
 } from './cascader-tree';
 import {
   CascaderChangeEvent,
@@ -41,7 +49,7 @@ const SIZE_SUFFIX: Record<'small' | 'medium' | 'large', string> = {
 @Component({
   selector: 't-cascader',
   standalone: true,
-  imports: [TPopup, TTag],
+  imports: [NgTemplateOutlet, TPopup, TTag],
   templateUrl: './cascader.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -146,6 +154,53 @@ export class TCascader {
   readonly max = input(0, { transform: numberAttribute });
 
   /**
+   * @zh 是否可搜索。打开后在输入框里输入关键字，面板切换成扁平的结果列表。
+   * @en Whether the options can be searched; typing switches the panel to a flat result list.
+   * @defaultValue false
+   */
+  readonly filterable = input(false, { transform: booleanAttribute });
+
+  /**
+   * @zh 自定义搜索函数，签名为 `(keyword, option) => boolean`（只支持同步返回）。
+   * @en Custom search predicate `(keyword, option) => boolean` (sync only).
+   */
+  readonly filter = input<((filterWords: string, option: CascaderOption) => boolean) | undefined>(undefined);
+
+  /**
+   * @zh 选中后是否保留搜索关键字。
+   * @en Whether the keyword is kept after selecting.
+   * @defaultValue true
+   */
+  readonly reserveKeyword = input(true, { transform: booleanAttribute });
+
+  /**
+   * @zh 是否按需加载子节点；配合 `load` 使用，点击没有子节点的选项时触发加载。
+   * @en Whether to load children on demand; works with `load` when clicking a childless option.
+   * @defaultValue true
+   */
+  readonly lazy = input(true, { transform: booleanAttribute });
+
+  /**
+   * @zh 异步加载子节点，返回子节点数组。
+   * @en Loads children asynchronously and returns them.
+   */
+  readonly load = input<((option: CascaderOption) => Promise<CascaderOption[]>) | undefined>(undefined);
+
+  /**
+   * @zh 是否处于加载中。
+   * @en Whether the panel is loading.
+   * @defaultValue false
+   */
+  readonly loading = input(false, { transform: booleanAttribute });
+
+  /**
+   * @zh 加载中的提示文案。
+   * @en Text shown while loading.
+   * @defaultValue '加载中'
+   */
+  readonly loadingText = input('加载中');
+
+  /**
    * @zh 选中值变化时触发。
    * @en Emitted when the selected value changes.
    */
@@ -153,15 +208,55 @@ export class TCascader {
 
   protected readonly open = signal(false);
   private readonly innerValue = signal<CascaderValue | undefined>(undefined);
-  private readonly expandedPath = signal<CascaderNode[]>([]);
+  private readonly expandedValues = signal<CascaderItemValue[]>([]);
+  private readonly keyword = signal('');
+
+  /** 懒加载得到的子节点：父节点 value → children。 */
+  private readonly loadedChildren = signal<Map<CascaderItemValue, CascaderOption[]>>(new Map());
+  private readonly loadingKeys = signal<Set<CascaderItemValue>>(new Set());
+  private readonly loadedEmptyKeys = signal<Set<CascaderItemValue>>(new Set());
+
+  private readonly valueDisplayDirectives = contentChildren(TCascaderValueDisplay);
+  private readonly panelTopDirectives = contentChildren(TCascaderPanelTop);
+  private readonly panelBottomDirectives = contentChildren(TCascaderPanelBottom);
+
+  protected readonly valueDisplayTemplate = computed(
+    () => this.valueDisplayDirectives()[0]?.template ?? null,
+  );
+  protected readonly panelTopTemplate = computed(() => this.panelTopDirectives()[0]?.template ?? null);
+  protected readonly panelBottomTemplate = computed(() => this.panelBottomDirectives()[0]?.template ?? null);
 
   private readonly fieldKeys = computed<Required<CascaderKeys>>(() => ({
     ...CASCADER_DEFAULT_KEYS,
     ...this.keys(),
   }));
 
+  /** 把懒加载拿到的子节点合并回 options，保持 options 本身不可变。 */
+  private readonly materializedOptions = computed<CascaderOption[]>(() => {
+    const loaded = this.loadedChildren();
+    if (!loaded.size) return this.options();
+    const keys = this.fieldKeys();
+
+    const clone = (items: CascaderOption[]): CascaderOption[] =>
+      items.map((option) => {
+        const value = option[keys.value] as CascaderItemValue;
+        const inline = option[keys.children] as CascaderOption[] | undefined;
+        const extra = loaded.get(value);
+        if (!extra && !inline?.length) return option;
+        return { ...option, [keys.children]: clone([...(inline ?? []), ...(extra ?? [])]) };
+      });
+
+    return clone(this.options());
+  });
+
   /** `options` 展开后的索引，选中 / 展开 / 回显都基于它。 */
-  protected readonly tree = computed(() => buildCascaderTree(this.options(), this.fieldKeys()));
+  protected readonly tree = computed(() => buildCascaderTree(this.materializedOptions(), this.fieldKeys()));
+
+  protected readonly isFilterable = computed(() => this.filterable() || !!this.filter());
+
+  protected readonly isFiltering = computed(
+    () => this.isFilterable() && this.open() && this.keyword().trim().length > 0,
+  );
 
   protected readonly currentValue = computed(
     () => this.value() ?? this.innerValue() ?? this.defaultValue(),
@@ -225,6 +320,13 @@ export class TCascader {
     return set;
   });
 
+  private readonly expandedNodes = computed<CascaderNode[]>(() => {
+    const tree = this.tree();
+    return this.expandedValues()
+      .map((value) => tree.byValue.get(value))
+      .filter((node): node is CascaderNode => !!node);
+  });
+
   /** 当前面板的列：第一列是根节点，之后每列是上一列展开项的子节点。 */
   protected readonly menus = computed<CascaderMenu[]>(() => {
     const tree = this.tree();
@@ -232,13 +334,35 @@ export class TCascader {
     if (!tree.roots.length) return result;
     result.push({ nodes: tree.roots, level: 0 });
 
-    const path = this.expandedPath();
+    const path = this.expandedNodes();
     for (let index = 0; index < path.length; index++) {
       const children = path[index].children;
       if (!children.length) break;
       result.push({ nodes: children, level: index + 1 });
     }
     return result;
+  });
+
+  /** 搜索命中的节点；父子不关联或 parentFirst 模式下父节点也参与匹配。 */
+  protected readonly filteredNodes = computed<CascaderNode[]>(() => {
+    if (!this.isFiltering()) return [];
+    const keyword = this.keyword().trim();
+    const lower = keyword.toLowerCase();
+    const filterFn = this.filter();
+    const allowParent = this.checkStrictly() || this.valueMode() === 'parentFirst';
+
+    return this.tree().nodes.filter((node) => {
+      if (node.children.length && !allowParent) return false;
+      if (filterFn) return filterFn(keyword, node.option);
+      return searchLabel(node).toLowerCase().includes(lower);
+    });
+  });
+
+  protected readonly panelClasses = computed(() => {
+    const hasContent = this.isFiltering() ? this.filteredNodes().length > 0 : this.menus().length > 0;
+    return ['t-cascader__panel', hasContent && !this.loading() ? 't-cascader--normal' : '']
+      .filter(Boolean)
+      .join(' ');
   });
 
   protected readonly inputClasses = computed(() => {
@@ -259,7 +383,7 @@ export class TCascader {
 
   protected readonly tagInputClasses = computed(() => {
     const classes = ['t-tag-input'];
-    if (this.selectedTags().length) {
+    if (this.selectedTags().length || this.valueDisplayTemplate()) {
       classes.push('t-tag-input--with-tag');
     } else {
       classes.push('t-is-empty');
@@ -274,14 +398,58 @@ export class TCascader {
     return classes.join(' ');
   });
 
-  protected readonly panelClasses = computed(() =>
-    ['t-cascader__panel', this.menus().length ? 't-cascader--normal' : ''].filter(Boolean).join(' '),
+  /** 单选输入框的显示值：搜索时显示关键字，自定义回显时让出输入框。 */
+  protected readonly singleInputValue = computed(() => {
+    if (this.isFiltering()) return this.keyword();
+    if (this.valueDisplayTemplate() && this.hasValue()) return '';
+    return this.displayText();
+  });
+
+  protected readonly multipleInputValue = computed(() => (this.isFiltering() ? this.keyword() : ''));
+
+  protected readonly singlePlaceholder = computed(() =>
+    this.valueDisplayTemplate() && this.hasValue() && !this.isFiltering() ? '' : this.placeholder(),
   );
+
+  protected readonly multiplePlaceholder = computed(() =>
+    this.selectedTags().length && !this.isFiltering() ? '' : this.placeholder(),
+  );
+
+  /** 自定义回显模板的上下文。 */
+  protected readonly valueDisplayContext = computed<Record<string, unknown>>(() => {
+    const value = this.currentValue();
+    const tree = this.tree();
+    const selectedOptions = this.multipleValues()
+      .map((item) => tree.byValue.get(item)?.option)
+      .filter((option): option is CascaderOption => !!option);
+    return {
+      $implicit: value,
+      value,
+      displayValue: value,
+      selectedOptions,
+      onClose: (index: number) => this.removeSelectedAt(index),
+    };
+  });
 
   protected readonly labelClasses = 't-cascader__item-label t-cascader__item-label--ellipsis';
 
   protected isExpanded(node: CascaderNode): boolean {
-    return node.children.length > 0 && this.expandedPath().includes(node);
+    return this.isNodeExpandable(node) && this.expandedValues().includes(node.value);
+  }
+
+  /** 有子节点，或者是 lazy + load 下尚未加载的潜在父节点。 */
+  protected isNodeExpandable(node: CascaderNode): boolean {
+    if (node.children.length) return true;
+    return (
+      this.lazy() &&
+      !!this.load() &&
+      !this.isExplicitLeaf(node.option) &&
+      !this.loadedEmptyKeys().has(node.value)
+    );
+  }
+
+  protected isNodeLoading(node: CascaderNode): boolean {
+    return this.loadingKeys().has(node.value);
   }
 
   protected isOptionChecked(node: CascaderNode): boolean {
@@ -318,7 +486,7 @@ export class TCascader {
 
   protected itemClasses(node: CascaderNode): string {
     const classes = ['t-cascader__item', `t-size-${SIZE_SUFFIX[this.size()]}`];
-    if (node.children.length) {
+    if (this.isNodeExpandable(node)) {
       classes.push('t-cascader__item--with-icon');
     } else {
       classes.push('t-cascader__item--leaf');
@@ -330,7 +498,7 @@ export class TCascader {
     let selected: boolean;
     if (this.multiple()) {
       selected = this.isOptionChecked(node);
-    } else if (node.children.length && !this.checkStrictly()) {
+    } else if (this.isNodeExpandable(node) && !this.checkStrictly()) {
       // 单选时整条展开路径都高亮
       selected = expanded;
     } else {
@@ -342,64 +510,102 @@ export class TCascader {
     return classes.join(' ');
   }
 
+  /** 搜索时按关键字把完整路径切成普通片段与高亮片段。 */
+  protected labelParts(node: CascaderNode): { text: string; match: boolean }[] {
+    const text = this.isFiltering() ? searchLabel(node) : node.label;
+    const keyword = this.keyword().trim();
+    if (!text || !this.isFiltering() || !keyword) return text ? [{ text, match: false }] : [];
+
+    const lowerText = text.toLowerCase();
+    const lowerKeyword = keyword.toLowerCase();
+    const parts: { text: string; match: boolean }[] = [];
+    let index = 0;
+    while (index < text.length) {
+      const found = lowerText.indexOf(lowerKeyword, index);
+      if (found < 0) {
+        parts.push({ text: text.slice(index), match: false });
+        break;
+      }
+      if (found > index) parts.push({ text: text.slice(index, found), match: false });
+      parts.push({ text: text.slice(found, found + keyword.length), match: true });
+      index = found + keyword.length;
+    }
+    return parts;
+  }
+
+  protected labelTitle(node: CascaderNode): string {
+    return this.isFiltering() ? searchLabel(node) : node.label;
+  }
+
   protected handleVisibleChange(visible: boolean): void {
     if (this.disabled()) return;
     this.open.set(visible);
     if (!visible) return;
+    if (this.isFilterable()) this.keyword.set('');
     this.expandSelectedOnOpen();
+  }
+
+  protected handleInputClick(event: MouseEvent): void {
+    if (!this.isFilterable()) return;
+    // 阻止 TPopup 的触发器点击把面板关掉，自己控制展开
+    event.stopPropagation();
+    if (this.disabled()) return;
+    if (!this.open()) {
+      this.keyword.set('');
+      this.open.set(true);
+      this.expandSelectedOnOpen();
+    }
+  }
+
+  protected handleInput(event: Event): void {
+    if (!this.isFilterable() || this.disabled()) return;
+    this.keyword.set((event.target as HTMLInputElement).value);
+    if (!this.open()) {
+      this.open.set(true);
+      this.expandSelectedOnOpen();
+    }
   }
 
   protected pickOption(node: CascaderNode): void {
     if (this.isOptionDisabled(node)) return;
-    const hasChildren = node.children.length > 0;
 
-    if (this.multiple()) {
-      // 父节点点击只展开，勾选由复选框负责
-      if (hasChildren) this.expandTo(node);
-      else this.toggleCheck(node);
+    // 搜索结果是一条扁平列表，点击即选中 / 勾选，不再展开
+    if (this.isFiltering()) {
+      if (this.multiple()) {
+        this.toggleCheck(node);
+        return;
+      }
+      this.commitSingle(node);
+      if (!this.checkStrictly()) this.closeAfterSelect();
       return;
     }
 
+    const hasChildren = node.children.length > 0;
+
     if (hasChildren) {
       this.expandTo(node);
-      if (!this.checkStrictly()) return;
+      if (this.multiple() || !this.checkStrictly()) return;
+      this.commitSingle(node);
+      return;
+    }
+
+    if (this.lazy() && this.load() && !this.isExplicitLeaf(node.option) && !this.loadedEmptyKeys().has(node.value)) {
+      void this.loadChildren(node);
+      return;
+    }
+
+    if (this.multiple()) {
+      this.toggleCheck(node);
+      return;
     }
 
     this.commitSingle(node);
-    // checkStrictly 单选时保留面板，方便继续浏览
-    if (!this.checkStrictly()) this.open.set(false);
-  }
-
-  protected handleCheckboxClick(node: CascaderNode, event: MouseEvent): void {
-    // 勾选态完全由 value 决定：阻止原生 checkbox 切换，避免受控值没更新时视觉与数据不一致
-    event.preventDefault();
-    event.stopPropagation();
-    this.toggleCheck(node);
-  }
-
-  protected checkboxClasses(node: CascaderNode): string {
-    const classes = ['t-checkbox'];
-    if (this.isOptionChecked(node)) classes.push('t-is-checked');
-    if (this.isOptionIndeterminate(node)) classes.push('t-is-indeterminate');
-    if (this.isOptionDisabled(node)) classes.push('t-is-disabled');
-    return classes.join(' ');
+    this.closeAfterSelect();
   }
 
   protected removeTag(tag: { value: CascaderItemValue }, event: MouseEvent): void {
     event.stopPropagation();
-    if (this.disabled()) return;
-
-    const node = this.tree().byValue.get(tag.value);
-    let next: CascaderItemValue[];
-
-    if (this.checkStrictly() || !node) {
-      next = this.multipleValues().filter((value) => value !== tag.value);
-    } else {
-      const leaves = new Set(this.checkedLeafSet());
-      for (const leaf of this.tree().leaves.get(node) ?? []) leaves.delete(leaf.value);
-      next = this.deriveValueFromLeaves(leaves);
-    }
-    this.commitMultiple(next, 'uncheck', node?.option);
+    this.removeValue(tag.value);
   }
 
   protected handleClear(event: MouseEvent): void {
@@ -412,24 +618,91 @@ export class TCascader {
     this.change.emit({ value, source: 'clear' });
   }
 
+  protected checkboxClasses(node: CascaderNode): string {
+    const classes = ['t-checkbox'];
+    if (this.isOptionChecked(node)) classes.push('t-is-checked');
+    if (this.isOptionIndeterminate(node)) classes.push('t-is-indeterminate');
+    if (this.isOptionDisabled(node)) classes.push('t-is-disabled');
+    return classes.join(' ');
+  }
+
+  protected handleCheckboxClick(node: CascaderNode, event: MouseEvent): void {
+    // 勾选态完全由 value 决定：阻止原生 checkbox 切换，避免受控值没更新时视觉与数据不一致
+    event.preventDefault();
+    event.stopPropagation();
+    this.toggleCheck(node);
+  }
+
+  private closeAfterSelect(): void {
+    this.open.set(false);
+    if (!this.reserveKeyword()) this.keyword.set('');
+  }
+
   private expandSelectedOnOpen(): void {
+    let node: CascaderNode | undefined;
     if (this.multiple()) {
-      const first = this.tree().byValue.get(this.multipleValues()[0]);
-      this.expandedPath.set(first ? this.pathToShowChildren(first) : []);
-      return;
+      node = this.tree().byValue.get(this.multipleValues()[0]);
+    } else {
+      node = this.selectedNode() ?? undefined;
     }
-    const node = this.selectedNode();
-    this.expandedPath.set(node ? this.pathToShowChildren(node) : []);
+    this.expandedValues.set(node ? this.pathValuesToShow(node) : []);
   }
 
   /** 选中父节点时展开它本身，选中叶子时展示它的父级列。 */
-  private pathToShowChildren(node: CascaderNode): CascaderNode[] {
-    const path = node.pathNodes;
-    return node.children.length ? path : path.slice(0, Math.max(path.length - 1, 0));
+  private pathValuesToShow(node: CascaderNode): CascaderItemValue[] {
+    const values = node.pathNodes.map((item) => item.value);
+    return node.children.length ? values : values.slice(0, Math.max(values.length - 1, 0));
   }
 
   private expandTo(node: CascaderNode): void {
-    this.expandedPath.set(node.pathNodes);
+    this.expandedValues.set(node.pathNodes.map((item) => item.value));
+  }
+
+  private async loadChildren(node: CascaderNode): Promise<void> {
+    const load = this.load();
+    if (!load || this.loadingKeys().has(node.value)) return;
+
+    this.addLoadingKey(node.value);
+    try {
+      const children = await load(node.option);
+      if (!children?.length) {
+        // load 返回空数组说明该节点其实是叶子：标记后直接按叶子节点处理，避免要点两次
+        this.loadedEmptyKeys.update((set) => new Set(set).add(node.value));
+        this.activateLeaf(node);
+        return;
+      }
+      this.loadedChildren.update((map) => {
+        const next = new Map(map);
+        next.set(node.value, children);
+        return next;
+      });
+      // 树会按新 options 重建，展开状态按 value 记录，重建后依然生效
+      this.expandTo(node);
+    } finally {
+      this.loadingKeys.update((set) => {
+        const next = new Set(set);
+        next.delete(node.value);
+        return next;
+      });
+    }
+  }
+
+  /** 懒加载过程中已知是叶子（option 上标了 isLeaf / leaf）时不触发 load。 */
+  private isExplicitLeaf(option: CascaderOption): boolean {
+    return option['isLeaf'] === true || option['leaf'] === true;
+  }
+
+  private activateLeaf(node: CascaderNode): void {
+    if (this.multiple()) {
+      this.toggleCheck(node);
+      return;
+    }
+    this.commitSingle(node);
+    this.closeAfterSelect();
+  }
+
+  private addLoadingKey(value: CascaderItemValue): void {
+    this.loadingKeys.update((set) => new Set(set).add(value));
   }
 
   private commitSingle(node: CascaderNode): void {
@@ -475,6 +748,28 @@ export class TCascader {
     }
 
     this.commitMultiple(this.deriveValueFromLeaves(leaves), checked ? 'uncheck' : 'check', node.option);
+  }
+
+  private removeSelectedAt(index: number): void {
+    const value = this.multipleValues()[index];
+    if (value === undefined) return;
+    this.removeValue(value);
+  }
+
+  private removeValue(value: CascaderItemValue): void {
+    if (this.disabled()) return;
+
+    const node = this.tree().byValue.get(value);
+    let next: CascaderItemValue[];
+
+    if (this.checkStrictly() || !node) {
+      next = this.multipleValues().filter((item) => item !== value);
+    } else {
+      const leaves = new Set(this.checkedLeafSet());
+      for (const leaf of this.tree().leaves.get(node) ?? []) leaves.delete(leaf.value);
+      next = this.deriveValueFromLeaves(leaves);
+    }
+    this.commitMultiple(next, 'uncheck', node?.option);
   }
 
   /** 由叶子勾选集合按 valueMode 推导对外暴露的值。 */

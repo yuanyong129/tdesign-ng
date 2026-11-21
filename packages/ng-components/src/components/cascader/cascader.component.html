@@ -1,3 +1,96 @@
+<ng-template #itemNode let-node>
+  <li [class]="itemClasses(node)" (click)="pickOption(node)">
+    @if (multiple()) {
+      <label [class]="checkboxClasses(node)" (click)="handleCheckboxClick(node, $event)">
+        <input
+          type="checkbox"
+          class="t-checkbox__former"
+          [checked]="isOptionChecked(node)"
+          [indeterminate]="isOptionIndeterminate(node)"
+          [disabled]="isOptionDisabled(node)"
+          [attr.aria-checked]="isOptionIndeterminate(node) ? 'mixed' : isOptionChecked(node)"
+        />
+        <span class="t-checkbox__input">
+          @if (isOptionIndeterminate(node)) {
+            <svg
+              class="t-icon t-icon-minus"
+              viewBox="0 0 24 24"
+              width="1em"
+              height="1em"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M16.502 12L7.50195 12"
+                stroke="currentColor"
+                stroke-linecap="square"
+                stroke-width="2"
+                fill="none"
+              />
+            </svg>
+          } @else {
+            <svg
+              class="t-icon t-icon-check"
+              viewBox="0 0 24 24"
+              width="1em"
+              height="1em"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M19.5708 7.37842L10.3785 16.5708L5.42871 11.6211"
+                stroke="currentColor"
+                stroke-linecap="square"
+                stroke-width="2"
+                fill="none"
+              />
+            </svg>
+          }
+        </span>
+        <span class="t-checkbox__label"></span>
+      </label>
+    }
+    <span [class]="labelClasses" [attr.title]="labelTitle(node)">
+      @for (part of labelParts(node); track $index) {
+        <span [class.t-cascader__item-label--filter]="part.match">{{ part.text }}</span>
+      }
+    </span>
+    @if (isNodeLoading(node)) {
+      <div class="t-cascader__item-icon t-loading t-loading--center t-size-s">
+        <svg
+          class="t-loading__gradient t-icon-loading"
+          viewBox="0 0 12 12"
+          width="1em"
+          height="1em"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <foreignObject x="0" y="0" width="12" height="12">
+            <div class="t-loading__gradient-conic"></div>
+          </foreignObject>
+        </svg>
+      </div>
+    } @else if (isNodeExpandable(node)) {
+      <svg
+        class="t-cascader__item-icon t-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="1em"
+        height="1em"
+        aria-hidden="true"
+      >
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="square"
+          stroke-width="2"
+          d="M9.5 17.5L15 12L9.5 6.5"
+        />
+      </svg>
+    }
+  </li>
+</ng-template>
+
 <t-popup
   class="t-cascader__trigger"
   placement="bottom-left"
@@ -13,22 +106,32 @@
         <div class="t-input__wrap">
           <div [class]="inputClasses()">
             <span class="t-input__prefix">
-              @for (tag of selectedTags(); track tag.value) {
-                <t-tag
-                  theme="default"
-                  variant="light"
-                  [closable]="!disabled()"
-                  (close)="removeTag(tag, $event)"
-                >
-                  {{ tag.label }}
-                </t-tag>
+              @if (valueDisplayTemplate(); as valueDisplay) {
+                <ng-container
+                  [ngTemplateOutlet]="valueDisplay"
+                  [ngTemplateOutletContext]="valueDisplayContext()"
+                />
+              } @else {
+                @for (tag of selectedTags(); track tag.value) {
+                  <t-tag
+                    theme="default"
+                    variant="light"
+                    [closable]="!disabled()"
+                    (close)="removeTag(tag, $event)"
+                  >
+                    {{ tag.label }}
+                  </t-tag>
+                }
               }
             </span>
             <input
               class="t-input__inner"
-              readonly
-              [attr.placeholder]="selectedTags().length ? '' : placeholder()"
+              [readOnly]="!isFilterable()"
+              [value]="multipleInputValue()"
+              [attr.placeholder]="multiplePlaceholder()"
               [disabled]="disabled()"
+              (input)="handleInput($event)"
+              (click)="handleInputClick($event)"
             />
             <span class="t-input__suffix">
               @if (clearable() && hasValue() && !disabled()) {
@@ -47,13 +150,28 @@
                   />
                 </svg>
               }
-              <svg [class]="arrowClasses()" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path
-                  d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
-                  stroke="currentColor"
-                  stroke-width="1.3"
-                />
-              </svg>
+              @if (loading()) {
+                <svg
+                  class="t-loading__gradient t-icon-loading"
+                  viewBox="0 0 12 12"
+                  width="1em"
+                  height="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <foreignObject x="0" y="0" width="12" height="12">
+                    <div class="t-loading__gradient-conic"></div>
+                  </foreignObject>
+                </svg>
+              } @else {
+                <svg [class]="arrowClasses()" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                  />
+                </svg>
+              }
             </span>
           </div>
         </div>
@@ -61,14 +179,22 @@
     } @else {
       <div [class]="inputClasses()">
         <span class="t-input__prefix">
+          @if (valueDisplayTemplate() && hasValue() && !isFiltering()) {
+            <ng-container
+              [ngTemplateOutlet]="valueDisplayTemplate()"
+              [ngTemplateOutletContext]="valueDisplayContext()"
+            />
+          }
           <ng-content select="[tCascaderPrefixIcon]" />
         </span>
         <input
           class="t-input__inner"
-          readonly
-          [value]="displayText()"
-          [attr.placeholder]="placeholder()"
+          [readOnly]="!isFilterable()"
+          [value]="singleInputValue()"
+          [attr.placeholder]="singlePlaceholder()"
           [disabled]="disabled()"
+          (input)="handleInput($event)"
+          (click)="handleInputClick($event)"
         />
         <span class="t-input__suffix">
           @if (clearable() && hasValue() && !disabled()) {
@@ -87,99 +213,66 @@
               />
             </svg>
           }
-          <svg [class]="arrowClasses()" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path
-              d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
-              stroke="currentColor"
-              stroke-width="1.3"
-            />
-          </svg>
+          @if (loading()) {
+            <svg
+              class="t-loading__gradient t-icon-loading"
+              viewBox="0 0 12 12"
+              width="1em"
+              height="1em"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <foreignObject x="0" y="0" width="12" height="12">
+                <div class="t-loading__gradient-conic"></div>
+              </foreignObject>
+            </svg>
+          } @else {
+            <svg [class]="arrowClasses()" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
+                stroke="currentColor"
+                stroke-width="1.3"
+              />
+            </svg>
+          }
         </span>
       </div>
     }
   </div>
 
-  <div tPopupContent [class]="panelClasses()">
-    @if (menus().length) {
-      @for (menu of menus(); track menu.level) {
-        <ul class="t-cascader__menu narrow-scrollbar" [class.t-cascader__menu--segment]="menu.level < menus().length - 1">
-          @for (node of menu.nodes; track node.value) {
-            <li [class]="itemClasses(node)" (click)="pickOption(node)">
-              @if (multiple()) {
-                <label [class]="checkboxClasses(node)" (click)="handleCheckboxClick(node, $event)">
-                  <input
-                    type="checkbox"
-                    class="t-checkbox__former"
-                    [checked]="isOptionChecked(node)"
-                    [indeterminate]="isOptionIndeterminate(node)"
-                    [disabled]="isOptionDisabled(node)"
-                    [attr.aria-checked]="isOptionIndeterminate(node) ? 'mixed' : isOptionChecked(node)"
-                  />
-                  <span class="t-checkbox__input">
-                    @if (isOptionIndeterminate(node)) {
-                      <svg
-                        class="t-icon t-icon-minus"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        height="1em"
-                        fill="none"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M16.502 12L7.50195 12"
-                          stroke="currentColor"
-                          stroke-linecap="square"
-                          stroke-width="2"
-                          fill="none"
-                        />
-                      </svg>
-                    } @else {
-                      <svg
-                        class="t-icon t-icon-check"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        height="1em"
-                        fill="none"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M19.5708 7.37842L10.3785 16.5708L5.42871 11.6211"
-                          stroke="currentColor"
-                          stroke-linecap="square"
-                          stroke-width="2"
-                          fill="none"
-                        />
-                      </svg>
-                    }
-                  </span>
-                  <span class="t-checkbox__label"></span>
-                </label>
-              }
-              <span [class]="labelClasses" [attr.title]="node.label">{{ node.label }}</span>
-              @if (node.children.length) {
-                <svg
-                  class="t-cascader__item-icon t-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  height="1em"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="square"
-                    stroke-width="2"
-                    d="M9.5 17.5L15 12L9.5 6.5"
-                  />
-                </svg>
-              }
-            </li>
-          }
-        </ul>
+  <div tPopupContent>
+    @if (panelTopTemplate(); as panelTop) {
+      <ng-container [ngTemplateOutlet]="panelTop" />
+    }
+
+    <div [class]="panelClasses()">
+      @if (loading()) {
+        <div class="t-cascader__panel--empty">{{ loadingText() }}</div>
+      } @else if (isFiltering()) {
+        @if (filteredNodes().length) {
+          <ul class="t-cascader__menu t-cascader__menu--filter narrow-scrollbar">
+            @for (node of filteredNodes(); track node.value) {
+              <ng-container [ngTemplateOutlet]="itemNode" [ngTemplateOutletContext]="{ $implicit: node }" />
+            }
+          </ul>
+        } @else {
+          <div class="t-cascader__panel--empty">{{ empty() }}</div>
+        }
+      } @else if (menus().length) {
+        @for (menu of menus(); track menu.level) {
+          <ul class="t-cascader__menu narrow-scrollbar" [class.t-cascader__menu--segment]="menu.level < menus().length - 1">
+            @for (node of menu.nodes; track node.value) {
+              <ng-container [ngTemplateOutlet]="itemNode" [ngTemplateOutletContext]="{ $implicit: node }" />
+            }
+          </ul>
+        }
+      } @else {
+        <div class="t-cascader__panel--empty">{{ empty() }}</div>
       }
-    } @else {
-      <div class="t-cascader__panel--empty">{{ empty() }}</div>
+    </div>
+
+    @if (panelBottomTemplate(); as panelBottom) {
+      <ng-container [ngTemplateOutlet]="panelBottom" />
     }
   </div>
 </t-popup>

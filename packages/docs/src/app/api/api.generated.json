@@ -482,6 +482,69 @@
           "zh": "多选上限，0 表示不限制。",
           "en": "Maximum number of checked nodes; 0 means unlimited.",
           "values": []
+        },
+        {
+          "name": "filterable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可搜索。打开后在输入框里输入关键字，面板切换成扁平的结果列表。",
+          "en": "Whether the options can be searched; typing switches the panel to a flat result list.",
+          "values": []
+        },
+        {
+          "name": "filter",
+          "type": "((filterWords: string, option: CascaderOption) => boolean) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义搜索函数，签名为 `(keyword, option) => boolean`（只支持同步返回）。",
+          "en": "Custom search predicate `(keyword, option) => boolean` (sync only).",
+          "values": []
+        },
+        {
+          "name": "reserveKeyword",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "选中后是否保留搜索关键字。",
+          "en": "Whether the keyword is kept after selecting.",
+          "values": []
+        },
+        {
+          "name": "lazy",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否按需加载子节点；配合 `load` 使用，点击没有子节点的选项时触发加载。",
+          "en": "Whether to load children on demand; works with `load` when clicking a childless option.",
+          "values": []
+        },
+        {
+          "name": "load",
+          "type": "((option: CascaderOption) => Promise<CascaderOption[]>) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "异步加载子节点，返回子节点数组。",
+          "en": "Loads children asynchronously and returns them.",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否处于加载中。",
+          "en": "Whether the panel is loading.",
+          "values": []
+        },
+        {
+          "name": "loadingText",
+          "type": "string",
+          "default": "'加载中'",
+          "required": false,
+          "zh": "加载中的提示文案。",
+          "en": "Text shown while loading.",
+          "values": []
         }
       ],
       "outputs": [
