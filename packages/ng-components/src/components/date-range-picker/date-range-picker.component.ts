@@ -152,6 +152,48 @@ export class TDateRangePicker {
    */
   readonly separator = input('-');
 
+  /**
+   * @zh 限制可选的日期范围：日期区间数组 / 区间数组的数组 / 判断函数。
+   * @en Restrict selectable dates: a range array, an array of ranges, or a predicate.
+   */
+  readonly range = input<DateValue[] | Array<DateValue[]> | ((date: DateValue) => boolean) | undefined>(
+    undefined,
+  );
+
+  /**
+   * @zh 前置标签文案。
+   * @en Label shown before the inputs.
+   */
+  readonly label = input<string | undefined>(undefined);
+
+  /**
+   * @zh 提示文案。
+   * @en Tips below the input.
+   */
+  readonly tips = input<string | undefined>(undefined);
+
+  /**
+   * @zh 校验状态。
+   * @en Validation status.
+   * @defaultValue 'default'
+   * @values default, success, warning, error
+   */
+  readonly status = input<'default' | 'success' | 'warning' | 'error'>('default');
+
+  /**
+   * @zh 无边框模式。
+   * @en Borderless mode.
+   * @defaultValue false
+   */
+  readonly borderless = input(false, { transform: booleanAttribute });
+
+  /**
+   * @zh 只读状态（不可编辑、不可展开面板）。
+   * @en Readonly state (not editable and the panel cannot open).
+   * @defaultValue false
+   */
+  readonly readonly = input(false, { transform: booleanAttribute });
+
   /** @zh 选中范围变化 @en Emitted when the selected range changes */
   readonly change = output<DateRangePickerChangeEvent>();
 
@@ -264,6 +306,9 @@ export class TDateRangePicker {
     if (sizeClass) classes.push(sizeClass);
     if (this.open()) classes.push('t-is-focused');
     if (this.disabled()) classes.push('t-is-disabled');
+    if (this.readonly()) classes.push('t-is-readonly');
+    if (this.borderless()) classes.push('t-range-input--borderless');
+    if (this.status() !== 'default') classes.push(`t-is-${this.status()}`);
     classes.push('t-range-input--suffix');
     return classes.join(' ');
   });
@@ -454,6 +499,9 @@ export class TDateRangePicker {
   }
 
   protected isDateDisabled(date: Date): boolean {
+    const range = this.range();
+    if (range !== undefined && this.isOutsideRange(range, date)) return true;
+
     const disableDate = this.disableDate();
     if (!disableDate) return false;
 
@@ -479,6 +527,26 @@ export class TDateRangePicker {
     if (before && date < startOfDay(before)) return true;
     if (after && date > endOfDay(after)) return true;
     return false;
+  }
+
+  /** 判断某个日期是否落在 `range` 限定的可选范围内。 */
+  private isOutsideRange(range: unknown, date: Date): boolean {
+    if (typeof range === 'function') {
+      return !(range as (value: DateValue) => boolean)(date);
+    }
+
+    if (!Array.isArray(range) || range.length === 0) return false;
+
+    const windows: DateValue[][] = Array.isArray(range[0])
+      ? (range as DateValue[][])
+      : [range as DateValue[]];
+
+    return !windows.some(([from, to]) => {
+      const start = parseDate(from, this.valueType());
+      const end = parseDate(to, this.valueType());
+      if (!start || !end) return false;
+      return date >= startOfDay(start) && date <= endOfDay(end);
+    });
   }
 
   private commitRange(

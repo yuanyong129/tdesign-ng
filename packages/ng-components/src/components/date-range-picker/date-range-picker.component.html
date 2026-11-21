@@ -1,7 +1,7 @@
 <t-popup
   trigger="click"
   placement="bottom-left"
-  [disabled]="disabled()"
+  [disabled]="disabled() || readonly()"
   [visible]="open()"
   [ignoreOutsideSelector]="'.t-select__dropdown'"
   (visibleChange)="handleVisibleChange($event)"
@@ -10,6 +10,9 @@
   <div [class]="popupClasses()">
     <div [class]="rangeInputClasses()">
       <div class="t-range-input__inner">
+        @if (label()) {
+          <div class="t-range-input__prefix">{{ label() }}</div>
+        }
         <div
           class="t-input t-range-input__inner-left"
           [class.t-is-focused]="startFocused()"
@@ -17,7 +20,7 @@
         >
           <input
             class="t-input__inner"
-            [readOnly]="!allowInput()"
+            [readOnly]="!allowInput() || readonly()"
             [value]="startText()"
             [attr.placeholder]="startPlaceholder()"
             [disabled]="disabled()"
@@ -35,7 +38,7 @@
         >
           <input
             class="t-input__inner"
-            [readOnly]="!allowInput()"
+            [readOnly]="!allowInput() || readonly()"
             [value]="endText()"
             [attr.placeholder]="endPlaceholder()"
             [disabled]="disabled()"
@@ -46,7 +49,7 @@
           />
         </div>
 
-        @if (clearable() && hasValue() && !disabled()) {
+        @if (clearable() && hasValue() && !disabled() && !readonly()) {
           <span class="t-range-input__suffix t-range-input__suffix-icon">
             <svg
               class="t-icon t-icon-close-circle-filled t-range-input__suffix-clear"
@@ -84,6 +87,10 @@
         </span>
       </div>
     </div>
+
+    @if (tips()) {
+      <div [class]="'t-range-input__tips t-input__extra t-is-' + status()">{{ tips() }}</div>
+    }
   </div>
 
   <div tPopupContent>

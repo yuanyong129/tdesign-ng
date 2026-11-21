@@ -333,10 +333,10 @@ const CONFIG = {
       ...ANGULAR_EVENT_IGNORES,
       // 第一层：value / defaultValue / valueType / format / firstDayOfWeek /
       // disableDate / clearable / disabled / size / placeholder 已实现；
-      // 第二层：presets / presetsPlacement / allowInput / separator / autoSwap 已实现
+      // 第二层：presets / presetsPlacement / allowInput / separator 已实现；
+      // 第三层：range / label / tips / status / borderless / readonly 已实现
       'cancelRangeSelectLimit': '范围选择上限在后续版本实现',
       'panelPreselection': '面板预选在后续版本实现',
-      'borderless': '无边框模式在后续版本实现',
       'cell': '自定义单元格在后续版本实现',
       'defaultTime': '时间选择在后续版本实现',
       'disableTime': '时间选择在后续版本实现',
@@ -346,11 +346,6 @@ const CONFIG = {
       'multiple': '多选日期在后续版本实现',
       'needConfirm': '需确认在后续版本实现',
       'panelActiveDate': '面板初始年月在后续版本实现',
-      'range': '范围限制在后续版本实现',
-      'readonly': '只读模式在后续版本实现',
-      'status': '校验状态在后续版本实现',
-      'tips': '提示文案在后续版本实现',
-      'label': '标签文案在后续版本实现',
       'prefixIcon': 'Angular 用 <t-icon tDateRangePickerPrefixIcon> 投影',
       'suffixIcon': '默认日历图标，未支持替换',
       'valueDisplay': '自定义回显在后续版本实现',

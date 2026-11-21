@@ -1225,6 +1225,65 @@
           "zh": "两个输入框之间的分隔符。",
           "en": "Separator between the two inputs.",
           "values": []
+        },
+        {
+          "name": "range",
+          "type": "DateValue[] | Array<DateValue[]> | ((date: DateValue) => boolean) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "限制可选的日期范围：日期区间数组 / 区间数组的数组 / 判断函数。",
+          "en": "Restrict selectable dates: a range array, an array of ranges, or a predicate.",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "前置标签文案。",
+          "en": "Label shown before the inputs.",
+          "values": []
+        },
+        {
+          "name": "tips",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示文案。",
+          "en": "Tips below the input.",
+          "values": []
+        },
+        {
+          "name": "status",
+          "type": "'default' | 'success' | 'warning' | 'error'",
+          "default": "'default'",
+          "required": false,
+          "zh": "校验状态。",
+          "en": "Validation status.",
+          "values": [
+            "default",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "无边框模式。",
+          "en": "Borderless mode.",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "只读状态（不可编辑、不可展开面板）。",
+          "en": "Readonly state (not editable and the panel cannot open).",
+          "values": []
         }
       ],
       "outputs": [
