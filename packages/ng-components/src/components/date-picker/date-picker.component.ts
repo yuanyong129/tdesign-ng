@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,6 +20,7 @@ import {
   formatValue,
   isSameDay,
   parseDate,
+  parseDateByFormat,
   startOfDay,
   weekLabels,
 } from './date-picker-utils';
@@ -28,6 +30,9 @@ import {
   DatePickerValueType,
   DateValue,
   DisableDate,
+  PanelActiveDate,
+  PresetDate,
+  PresetsPlacement,
 } from './date-picker.types';
 
 const SIZE_CLASS: Record<'small' | 'medium' | 'large', string> = {
@@ -48,7 +53,7 @@ const SIZE_CLASS: Record<'small' | 'medium' | 'large', string> = {
 @Component({
   selector: 't-date-picker',
   standalone: true,
-  imports: [TPopup, TSelect],
+  imports: [NgTemplateOutlet, TPopup, TSelect],
   templateUrl: './date-picker.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -123,6 +128,33 @@ export class TDatePicker {
    */
   readonly placeholder = input('请选择日期');
 
+  /**
+   * @zh 预设日期：键为按钮文案，值为日期或返回日期的函数。
+   * @en Preset dates: key is the button label, value is a date or a factory.
+   */
+  readonly presets = input<PresetDate | undefined>(undefined);
+
+  /**
+   * @zh 预设日期的摆放位置。
+   * @en Placement of the presets footer.
+   * @defaultValue 'bottom'
+   * @values left, top, right, bottom
+   */
+  readonly presetsPlacement = input<PresetsPlacement>('bottom');
+
+  /**
+   * @zh 没有选中值时，面板初始显示的年月。
+   * @en Initial panel year/month when there is no selected value.
+   */
+  readonly panelActiveDate = input<PanelActiveDate | undefined>(undefined);
+
+  /**
+   * @zh 是否允许在输入框里直接输入日期（按 Enter 或失焦提交）。
+   * @en Whether the date can be typed in the input (committed on Enter or blur).
+   * @defaultValue false
+   */
+  readonly allowInput = input(false, { transform: booleanAttribute });
+
   /** @zh 选中值变化 @en Emitted when the selected date changes */
   readonly change = output<DatePickerChangeEvent>();
 
@@ -131,6 +163,7 @@ export class TDatePicker {
 
   protected readonly open = signal(false);
   private readonly innerValue = signal<DateValue | undefined>(undefined);
+  private readonly draftText = signal<string | null>(null);
   protected readonly viewYear = signal(new Date().getFullYear());
   protected readonly viewMonth = signal(new Date().getMonth());
 
@@ -155,6 +188,31 @@ export class TDatePicker {
   });
 
   protected readonly hasValue = computed(() => this.displayText().length > 0);
+
+  /** 允许输入时优先显示用户正在输入的文本。 */
+  protected readonly inputDisplayText = computed(() => this.draftText() ?? this.displayText());
+
+  protected readonly presetEntries = computed(() =>
+    Object.entries(this.presets() ?? {}).map(([key, value]) => ({ key, value })),
+  );
+
+  protected readonly isRowPlacement = computed(
+    () => this.presetsPlacement() === 'left' || this.presetsPlacement() === 'right',
+  );
+
+  protected readonly presetsAtTop = computed(() => {
+    const placement = this.presetsPlacement();
+    return placement === 'top' || placement === 'left';
+  });
+
+  protected readonly presetsAtBottom = computed(() => {
+    const placement = this.presetsPlacement();
+    return placement === 'bottom' || placement === 'right';
+  });
+
+  protected readonly footerClasses = computed(
+    () => `t-date-picker__footer t-date-picker__footer--${this.presetsPlacement()}`,
+  );
 
   protected readonly normalizedFirstDayOfWeek = computed(
     () => ((this.firstDayOfWeek() % 7) + 7) % 7,
@@ -202,22 +260,56 @@ export class TDatePicker {
     if (this.disabled()) return;
     this.open.set(visible);
     this.visibleChange.emit(visible);
+    this.draftText.set(null);
     if (visible) this.syncViewToValue();
+  }
+
+  protected handleInputText(event: Event): void {
+    if (!this.allowInput() || this.disabled()) return;
+    this.draftText.set((event.target as HTMLInputElement).value);
+    if (!this.open()) this.openPanel();
+  }
+
+  protected handleInputClick(event: MouseEvent): void {
+    if (!this.allowInput()) return;
+    // 允许输入时点击输入框只负责打开面板，不触发 TPopup 的收起
+    event.stopPropagation();
+    if (this.disabled()) return;
+    if (!this.open()) this.openPanel();
+  }
+
+  protected handleInputEnter(event: Event): void {
+    if (!this.allowInput()) return;
+    this.commitDraft(true);
+    // 手输的内容可能是非法的，这里强制把 DOM 值同步回已提交的显示值
+    (event.target as HTMLInputElement).value = this.displayText();
+  }
+
+  protected handleInputBlur(event: Event): void {
+    if (!this.allowInput()) return;
+    if (this.draftText() !== null) this.commitDraft(false);
+    (event.target as HTMLInputElement).value = this.displayText();
+  }
+
+  protected applyPreset(preset: { key: string; value: DateValue | (() => DateValue) }): void {
+    const raw = typeof preset.value === 'function' ? preset.value() : preset.value;
+    const date = parseDate(raw, this.valueType());
+    if (!date) return;
+    this.commit(formatValue(date, this.valueType()), 'preset');
+    this.closePanel();
   }
 
   protected pickDate(cell: DatePickerCell): void {
     if (this.isCellDisabled(cell)) return;
     this.commit(formatValue(cell.date, this.valueType()), 'pick');
-    this.open.set(false);
-    this.visibleChange.emit(false);
+    this.closePanel();
   }
 
   protected handleClear(event: MouseEvent): void {
     event.stopPropagation();
     if (this.disabled()) return;
     this.commit('', 'clear');
-    this.open.set(false);
-    this.visibleChange.emit(false);
+    this.closePanel();
   }
 
   protected handleMonthChange(value: unknown): void {
@@ -289,9 +381,63 @@ export class TDatePicker {
     this.change.emit({ value, trigger });
   }
 
+  private openPanel(): void {
+    this.open.set(true);
+    this.visibleChange.emit(true);
+    this.syncViewToValue();
+  }
+
+  private closePanel(): void {
+    this.draftText.set(null);
+    this.open.set(false);
+    this.visibleChange.emit(false);
+  }
+
+  /** 提交输入框里手输的日期；解析失败时回退到已有值。 */
+  private commitDraft(close: boolean): void {
+    const text = this.draftText();
+    if (text === null) return;
+    this.draftText.set(null);
+
+    if (!text.trim()) {
+      this.commit('', 'clear');
+      if (close) this.closePanel();
+      return;
+    }
+
+    const date = parseDateByFormat(text, this.displayFormat());
+    if (!date || this.isDateDisabledValue(date)) return;
+
+    this.commit(formatValue(date, this.valueType()), 'enter');
+    if (close) this.closePanel();
+  }
+
+  private isDateDisabledValue(date: Date): boolean {
+    return this.isCellDisabled({ date, day: date.getDate(), additional: false });
+  }
+
   private syncViewToValue(): void {
-    const date = this.selectedDate() ?? new Date();
-    this.viewYear.set(date.getFullYear());
-    this.viewMonth.set(date.getMonth());
+    const date = this.selectedDate();
+    if (date) {
+      this.viewYear.set(date.getFullYear());
+      this.viewMonth.set(date.getMonth());
+      return;
+    }
+
+    const active = this.panelActiveDate();
+    if (!active) return;
+
+    const activeYear = active.year === undefined ? null : parseDate(active.year, this.valueType());
+    if (activeYear) this.viewYear.set(activeYear.getFullYear());
+
+    if (active.month !== undefined) {
+      if (typeof active.month === 'number') {
+        const month = Math.min(Math.max(active.month - 1, 0), 11);
+        this.viewMonth.set(month);
+      } else {
+        const activeMonth = parseDate(active.month, this.valueType());
+        if (activeMonth) this.viewMonth.set(activeMonth.getMonth());
+      }
+    }
   }
 }

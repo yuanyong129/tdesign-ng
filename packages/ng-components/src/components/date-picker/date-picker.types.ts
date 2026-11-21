@@ -44,6 +44,29 @@ export interface DisableDateObj {
 export type DisableDate = DateValue[] | DisableDateObj | ((date: Date) => boolean);
 
 /**
+ * @zh 预设日期：键为按钮文案，值为日期或返回日期的函数。
+ * @en Preset dates: key is the button label, value is a date or a factory.
+ */
+export type PresetDate = Record<string, DateValue | (() => DateValue)>;
+
+/**
+ * @zh 预设日期的摆放位置。
+ * @en Placement of the presets footer.
+ */
+export type PresetsPlacement = 'left' | 'top' | 'right' | 'bottom';
+
+/**
+ * @zh 面板初始年月，用于没有选中值时决定打开哪个月。
+ * @en Initial panel year/month used when there is no selected value.
+ */
+export interface PanelActiveDate {
+  /** @zh 年份，支持 Date / 时间戳 / `YYYY` 字符串 @en Year as Date, timestamp or `YYYY` string */
+  year?: DateValue;
+  /** @zh 月份，支持 1~12 的数字或日期 @en Month as 1~12 or a date */
+  month?: DateValue;
+}
+
+/**
  * @zh 日期选择的变化来源。
  * @en Source of a date picker change.
  */

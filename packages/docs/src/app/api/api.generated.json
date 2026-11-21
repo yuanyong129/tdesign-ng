@@ -1007,6 +1007,47 @@
           "zh": "占位文案。",
           "en": "Placeholder text.",
           "values": []
+        },
+        {
+          "name": "presets",
+          "type": "PresetDate | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "预设日期：键为按钮文案，值为日期或返回日期的函数。",
+          "en": "Preset dates: key is the button label, value is a date or a factory.",
+          "values": []
+        },
+        {
+          "name": "presetsPlacement",
+          "type": "PresetsPlacement",
+          "default": "'bottom'",
+          "required": false,
+          "zh": "预设日期的摆放位置。",
+          "en": "Placement of the presets footer.",
+          "values": [
+            "left",
+            "top",
+            "right",
+            "bottom"
+          ]
+        },
+        {
+          "name": "panelActiveDate",
+          "type": "PanelActiveDate | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "没有选中值时，面板初始显示的年月。",
+          "en": "Initial panel year/month when there is no selected value.",
+          "values": []
+        },
+        {
+          "name": "allowInput",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许在输入框里直接输入日期（按 Enter 或失焦提交）。",
+          "en": "Whether the date can be typed in the input (committed on Enter or blur).",
+          "values": []
         }
       ],
       "outputs": [

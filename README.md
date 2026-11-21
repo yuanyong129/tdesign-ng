@@ -43,7 +43,7 @@
 | Rate | ✅ 半星、自定义数量与间距、选中/未选中颜色、禁用、再次点击清空、评分文案 |
 | Cascader | ✅ 单选/多选级联、完整路径回显、自定义字段名、清空、禁用、三种尺寸、父子不关联、搜索、异步加载、面板与回显插槽 |
 | TreeSelect | ✅ 单选/多选、展开父级、父子不关联与取值模式、搜索、自定义字段名、清空、禁用、三种尺寸、加载态、面板插槽 |
-| DatePicker | ✅ 单日期选择、日期面板导航、custom format / valueType（格式串 / 时间戳 / Date）、firstDayOfWeek、disableDate（数组 / 范围 / 函数）、清空、禁用、三种尺寸 |
+| DatePicker | ✅ 单日期选择、面板导航、custom format / valueType（格式串 / 时间戳 / Date）、firstDayOfWeek、disableDate（数组 / 范围 / 函数）、预设日期、手动输入、清空、禁用、三种尺寸 |
 
 P4 数据展示已全部落地；P5 复杂录入进行中（Slider、Rate、Cascader、TreeSelect、DatePicker 已完成，TimePicker / Upload / Transfer / ColorPicker 待做），计划见 `docs/plans/tdesign-angular-plan.md`；
 接手开发请先读 [`HANDOFF.md`](./HANDOFF.md)。

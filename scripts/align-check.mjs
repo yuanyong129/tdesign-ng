@@ -294,20 +294,17 @@ const CONFIG = {
     angularOnly: [],
     ignoreUpstream: {
       ...ANGULAR_EVENT_IGNORES,
-      // 第一层只做单日期：value / defaultValue / valueType / format / firstDayOfWeek /
-      // disableDate / clearable / disabled / size / placeholder 已实现。
+      // 第一层 + 预设/手输：value / defaultValue / valueType / format / firstDayOfWeek /
+      // disableDate / clearable / disabled / size / placeholder / presets / presetsPlacement /
+      // panelActiveDate / allowInput 已实现。
       'mode': '第一层只支持 date 模式（year / month / week / quarter 在后续版本实现）',
       'enableTimePicker': '时间选择在后续版本实现',
       'disableTime': '时间选择在后续版本实现',
       'timePickerProps': '时间选择在后续版本实现',
       'defaultTime': '时间选择在后续版本实现',
       'needConfirm': '需确认在后续版本实现',
-      'allowInput': '输入框编辑日期在后续版本实现',
       'multiple': '多选日期在后续版本实现',
       'range': '范围限制在后续版本实现',
-      'presets': '预设日期在后续版本实现',
-      'presetsPlacement': '预设日期在后续版本实现',
-      'panelActiveDate': '面板初始年月在后续版本实现',
       'cell': '自定义单元格在后续版本实现',
       'valueDisplay': '自定义回显在后续版本实现',
       'prefixIcon': 'Angular 用 <t-icon tDatePickerPrefixIcon> 投影',

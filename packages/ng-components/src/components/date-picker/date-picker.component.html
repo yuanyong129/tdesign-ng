@@ -12,10 +12,14 @@
       <div [class]="inputClasses()">
         <input
           class="t-input__inner"
-          readonly
-          [value]="displayText()"
+          [readOnly]="!allowInput()"
+          [value]="inputDisplayText()"
           [attr.placeholder]="placeholder()"
           [disabled]="disabled()"
+          (input)="handleInputText($event)"
+          (click)="handleInputClick($event)"
+          (keydown.enter)="handleInputEnter($event)"
+          (blur)="handleInputBlur($event)"
         />
         <span class="t-input__suffix">
           @if (clearable() && hasValue() && !disabled()) {
@@ -55,7 +59,11 @@
   </div>
 
   <div tPopupContent>
-    <div class="t-date-picker__panel">
+    <div class="t-date-picker__panel" [class.t-date-picker__panel--direction-row]="isRowPlacement()">
+      @if (presetsAtTop() && presetEntries().length) {
+        <ng-container [ngTemplateOutlet]="footer" />
+      }
+
       <div class="t-date-picker__panel-content">
         <div class="t-date-picker__panel-date">
           <div class="t-date-picker__header">
@@ -171,6 +179,26 @@
           </div>
         </div>
       </div>
+
+      @if (presetsAtBottom() && presetEntries().length) {
+        <ng-container [ngTemplateOutlet]="footer" />
+      }
     </div>
   </div>
 </t-popup>
+
+<ng-template #footer>
+  <div [class]="footerClasses()">
+    <div class="t-date-picker__presets">
+      @for (preset of presetEntries(); track preset.key) {
+        <button
+          type="button"
+          class="t-button t-button--variant-text t-button--theme-default t-size-s"
+          (click)="applyPreset(preset)"
+        >
+          {{ preset.key }}
+        </button>
+      }
+    </div>
+  </div>
+</ng-template>
