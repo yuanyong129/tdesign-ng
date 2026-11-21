@@ -332,12 +332,10 @@ const CONFIG = {
     ignoreUpstream: {
       ...ANGULAR_EVENT_IGNORES,
       // 第一层：value / defaultValue / valueType / format / firstDayOfWeek /
-      // disableDate / clearable / disabled / size / placeholder 已实现
-      'allowInput': '输入框编辑日期在后续版本实现',
-      'autoSwap': '自动交换在后续版本实现',
+      // disableDate / clearable / disabled / size / placeholder 已实现；
+      // 第二层：presets / presetsPlacement / allowInput / separator / autoSwap 已实现
       'cancelRangeSelectLimit': '范围选择上限在后续版本实现',
       'panelPreselection': '面板预选在后续版本实现',
-      'separator': '两个输入框之间的分隔符固定为 -',
       'borderless': '无边框模式在后续版本实现',
       'cell': '自定义单元格在后续版本实现',
       'defaultTime': '时间选择在后续版本实现',
@@ -348,8 +346,6 @@ const CONFIG = {
       'multiple': '多选日期在后续版本实现',
       'needConfirm': '需确认在后续版本实现',
       'panelActiveDate': '面板初始年月在后续版本实现',
-      'presets': '预设日期在后续版本实现',
-      'presetsPlacement': '预设日期在后续版本实现',
       'range': '范围限制在后续版本实现',
       'readonly': '只读模式在后续版本实现',
       'status': '校验状态在后续版本实现',
@@ -364,9 +360,9 @@ const CONFIG = {
       'popupProps': '透传 PopupProps 在后续版本实现',
       'onChange': 'Angular 用 (change) 输出',
       'onPick': '选中已包含在 (change) 的 trigger="pick" 里',
-      'onPresetClick': '预设日期在后续版本实现',
+      'onPresetClick': '预设已包含在 (change) 的 trigger="preset" 里',
       'onConfirm': '需确认在后续版本实现',
-      'onInput': '输入框编辑日期在后续版本实现',
+      'onInput': '手输已包含在 (change) 的 trigger="enter" 里',
       'onMonthChange': '年月变化事件暂未暴露',
       'onYearChange': '年月变化事件暂未暴露',
       'onBlur': '失焦事件在后续版本实现',

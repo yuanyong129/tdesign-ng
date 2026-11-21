@@ -1184,6 +1184,47 @@
           "zh": "两个输入框的占位文案。",
           "en": "Placeholders of the two inputs.",
           "values": []
+        },
+        {
+          "name": "presets",
+          "type": "PresetDateRange | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "预设范围：键为按钮文案，值为范围或返回范围的函数。",
+          "en": "Preset ranges: key is the button label, value is a range or a factory.",
+          "values": []
+        },
+        {
+          "name": "presetsPlacement",
+          "type": "PresetsPlacement",
+          "default": "'bottom'",
+          "required": false,
+          "zh": "预设范围的摆放位置。",
+          "en": "Placement of the presets footer.",
+          "values": [
+            "left",
+            "top",
+            "right",
+            "bottom"
+          ]
+        },
+        {
+          "name": "allowInput",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许在输入框里直接输入日期（Enter / 失焦提交）。",
+          "en": "Whether dates can be typed in the inputs (committed on Enter or blur).",
+          "values": []
+        },
+        {
+          "name": "separator",
+          "type": "string",
+          "default": "'-'",
+          "required": false,
+          "zh": "两个输入框之间的分隔符。",
+          "en": "Separator between the two inputs.",
+          "values": []
         }
       ],
       "outputs": [

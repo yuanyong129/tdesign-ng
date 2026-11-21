@@ -1,9 +1,12 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   ViewEncapsulation,
   booleanAttribute,
   computed,
+  inject,
   input,
   numberAttribute,
   output,
@@ -19,11 +22,13 @@ import {
   formatValue,
   isSameDay,
   parseDate,
+  parseDateByFormat,
   startOfDay,
   weekLabels,
 } from '../date-picker/date-picker-utils';
 import { DatePickerCell, DatePickerValueType, DateValue, DisableDate } from '../date-picker/date-picker.types';
-import { DateRangePickerChangeEvent, DateRangeValue } from './date-range-picker.types';
+import { DateRangePickerChangeEvent, DateRangeValue, PresetDateRange } from './date-range-picker.types';
+import { PresetsPlacement } from '../date-picker/date-picker.types';
 
 const SIZE_CLASS: Record<'small' | 'medium' | 'large', string> = {
   small: 't-size-s',
@@ -45,7 +50,7 @@ type PanelSide = 'left' | 'right';
 @Component({
   selector: 't-date-range-picker',
   standalone: true,
-  imports: [TPopup, TSelect],
+  imports: [NgTemplateOutlet, TPopup, TSelect],
   templateUrl: './date-range-picker.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -119,6 +124,34 @@ export class TDateRangePicker {
    */
   readonly placeholder = input<string | [string, string]>(['开始日期', '结束日期']);
 
+  /**
+   * @zh 预设范围：键为按钮文案，值为范围或返回范围的函数。
+   * @en Preset ranges: key is the button label, value is a range or a factory.
+   */
+  readonly presets = input<PresetDateRange | undefined>(undefined);
+
+  /**
+   * @zh 预设范围的摆放位置。
+   * @en Placement of the presets footer.
+   * @defaultValue 'bottom'
+   * @values left, top, right, bottom
+   */
+  readonly presetsPlacement = input<PresetsPlacement>('bottom');
+
+  /**
+   * @zh 是否允许在输入框里直接输入日期（Enter / 失焦提交）。
+   * @en Whether dates can be typed in the inputs (committed on Enter or blur).
+   * @defaultValue false
+   */
+  readonly allowInput = input(false, { transform: booleanAttribute });
+
+  /**
+   * @zh 两个输入框之间的分隔符。
+   * @en Separator between the two inputs.
+   * @defaultValue '-'
+   */
+  readonly separator = input('-');
+
   /** @zh 选中范围变化 @en Emitted when the selected range changes */
   readonly change = output<DateRangePickerChangeEvent>();
 
@@ -127,9 +160,12 @@ export class TDateRangePicker {
 
   protected readonly open = signal(false);
   private readonly innerValue = signal<DateRangeValue | undefined>(undefined);
+  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly pendingStart = signal<Date | null>(null);
   private readonly pendingEnd = signal<Date | null>(null);
   protected readonly hoverDate = signal<Date | null>(null);
+  private readonly draftStartText = signal<string | null>(null);
+  private readonly draftEndText = signal<string | null>(null);
 
   protected readonly viewYear = signal(new Date().getFullYear());
   protected readonly viewMonth = signal(new Date().getMonth());
@@ -171,14 +207,38 @@ export class TDateRangePicker {
   );
 
   protected readonly startText = computed(() => {
+    if (this.draftStartText() !== null) return this.draftStartText() as string;
     const date = this.committedStart();
     return date ? formatDate(date, this.displayFormat()) : '';
   });
 
   protected readonly endText = computed(() => {
+    if (this.draftEndText() !== null) return this.draftEndText() as string;
     const date = this.committedEnd();
     return date ? formatDate(date, this.displayFormat()) : '';
   });
+
+  protected readonly presetEntries = computed(() =>
+    Object.entries(this.presets() ?? {}).map(([key, value]) => ({ key, value })),
+  );
+
+  protected readonly isRowPlacement = computed(
+    () => this.presetsPlacement() === 'left' || this.presetsPlacement() === 'right',
+  );
+
+  protected readonly presetsAtTop = computed(() => {
+    const placement = this.presetsPlacement();
+    return placement === 'top' || placement === 'left';
+  });
+
+  protected readonly presetsAtBottom = computed(() => {
+    const placement = this.presetsPlacement();
+    return placement === 'bottom' || placement === 'right';
+  });
+
+  protected readonly footerClasses = computed(
+    () => `t-date-picker__footer t-date-picker__footer--${this.presetsPlacement()}`,
+  );
 
   protected readonly startPlaceholder = computed(() => {
     const placeholder = this.placeholder();
@@ -243,21 +303,12 @@ export class TDateRangePicker {
     if (this.disabled()) return;
     this.open.set(visible);
     this.visibleChange.emit(visible);
-    if (!visible) {
-      this.pendingStart.set(null);
-      this.pendingEnd.set(null);
-      this.hoverDate.set(null);
-      return;
-    }
-
     this.pendingStart.set(null);
     this.pendingEnd.set(null);
-    const start = this.committedStart() ?? new Date();
-    this.viewYear.set(start.getFullYear());
-    this.viewMonth.set(start.getMonth());
-    const next = new Date(start.getFullYear(), start.getMonth() + 1, 1);
-    this.rightYear.set(next.getFullYear());
-    this.rightMonth.set(next.getMonth());
+    this.hoverDate.set(null);
+    this.draftStartText.set(null);
+    this.draftEndText.set(null);
+    if (visible) this.syncPanelsOnOpen();
   }
 
   protected selectDate(cell: DatePickerCell): void {
@@ -271,9 +322,8 @@ export class TDateRangePicker {
     }
     if (!this.pendingEnd()) {
       const end = cell.date;
-      const normalizedStart = end < start ? end : start;
-      const normalizedEnd = end < start ? start : end;
-      this.commitRange(normalizedStart, normalizedEnd);
+      if (end < start) this.commitRange(end, start);
+      else this.commitRange(start, end);
       return;
     }
 
@@ -285,6 +335,39 @@ export class TDateRangePicker {
     if (this.pendingStart() && !this.pendingEnd() && !this.isDateDisabled(cell.date)) {
       this.hoverDate.set(cell.date);
     }
+  }
+
+  protected handleInputText(side: 'start' | 'end', event: Event): void {
+    if (!this.allowInput() || this.disabled()) return;
+    const value = (event.target as HTMLInputElement).value;
+    if (side === 'start') this.draftStartText.set(value);
+    else this.draftEndText.set(value);
+    if (!this.open()) this.openFromInput();
+  }
+
+  protected handleInputClick(event: MouseEvent): void {
+    if (!this.allowInput()) return;
+    event.stopPropagation();
+    if (this.disabled()) return;
+    if (!this.open()) this.openFromInput();
+  }
+
+  protected handleInputEnter(): void {
+    if (!this.allowInput()) return;
+    this.commitTypedRange();
+  }
+
+  protected handleInputBlur(): void {
+    if (!this.allowInput()) return;
+    if (this.draftStartText() !== null || this.draftEndText() !== null) this.commitTypedRange();
+  }
+
+  protected applyPreset(preset: { key: string; value: DateRangeValue | (() => DateRangeValue) }): void {
+    const raw = typeof preset.value === 'function' ? preset.value() : preset.value;
+    const start = parseDate(raw[0], this.valueType());
+    const end = parseDate(raw[1], this.valueType());
+    if (!start || !end) return;
+    this.commitRange(end < start ? end : start, end < start ? start : end, 'preset');
   }
 
   protected handleClear(event: MouseEvent): void {
@@ -398,12 +481,62 @@ export class TDateRangePicker {
     return false;
   }
 
-  private commitRange(start: Date, end: Date): void {
+  private commitRange(
+    start: Date,
+    end: Date,
+    trigger: DateRangePickerChangeEvent['trigger'] = 'pick',
+  ): void {
     this.commit(
       [formatValue(start, this.valueType()), formatValue(end, this.valueType())],
-      'pick',
+      trigger,
     );
     this.closePanel();
+  }
+
+  /** 从输入框直接打开面板（不重置用户正在输入的内容）。 */
+  private openFromInput(): void {
+    this.open.set(true);
+    this.visibleChange.emit(true);
+    this.pendingStart.set(null);
+    this.pendingEnd.set(null);
+    this.syncPanelsOnOpen();
+  }
+
+  private syncPanelsOnOpen(): void {
+    const start = this.committedStart() ?? new Date();
+    this.viewYear.set(start.getFullYear());
+    this.viewMonth.set(start.getMonth());
+    const next = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+    this.rightYear.set(next.getFullYear());
+    this.rightMonth.set(next.getMonth());
+  }
+
+  /** 提交手输的两个日期；非法时回退到已提交值。 */
+  private commitTypedRange(): void {
+    const startText = this.draftStartText() ?? this.startText();
+    const endText = this.draftEndText() ?? this.endText();
+    this.draftStartText.set(null);
+    this.draftEndText.set(null);
+
+    const start = parseDateByFormat(startText, this.displayFormat());
+    const end = parseDateByFormat(endText, this.displayFormat());
+    if (!start || !end) {
+      this.syncInputDom();
+      return;
+    }
+
+    const orderedStart = end < start ? end : start;
+    const orderedEnd = end < start ? start : end;
+    this.commitRange(orderedStart, orderedEnd, 'enter');
+  }
+
+  /** 手输内容可能非法，这里强制把 DOM 值同步回显示值。 */
+  private syncInputDom(): void {
+    const inputs = this.hostRef.nativeElement.querySelectorAll<HTMLInputElement>(
+      '.t-range-input__inner input',
+    );
+    if (inputs[0]) inputs[0].value = this.startText();
+    if (inputs[1]) inputs[1].value = this.endText();
   }
 
   private commit(value: DateRangeValue, trigger: DateRangePickerChangeEvent['trigger']): void {
@@ -415,6 +548,8 @@ export class TDateRangePicker {
     this.pendingStart.set(null);
     this.pendingEnd.set(null);
     this.hoverDate.set(null);
+    this.draftStartText.set(null);
+    this.draftEndText.set(null);
     this.open.set(false);
     this.visibleChange.emit(false);
   }

@@ -17,13 +17,17 @@
         >
           <input
             class="t-input__inner"
-            readonly
+            [readOnly]="!allowInput()"
             [value]="startText()"
             [attr.placeholder]="startPlaceholder()"
             [disabled]="disabled()"
+            (input)="handleInputText('start', $event)"
+            (click)="handleInputClick($event)"
+            (keydown.enter)="handleInputEnter()"
+            (blur)="handleInputBlur()"
           />
         </div>
-        <div class="t-range-input__inner-separator">-</div>
+        <div class="t-range-input__inner-separator">{{ separator() }}</div>
         <div
           class="t-input t-range-input__inner-right"
           [class.t-is-focused]="endFocused()"
@@ -31,10 +35,14 @@
         >
           <input
             class="t-input__inner"
-            readonly
+            [readOnly]="!allowInput()"
             [value]="endText()"
             [attr.placeholder]="endPlaceholder()"
             [disabled]="disabled()"
+            (input)="handleInputText('end', $event)"
+            (click)="handleInputClick($event)"
+            (keydown.enter)="handleInputEnter()"
+            (blur)="handleInputBlur()"
           />
         </div>
 
@@ -79,7 +87,14 @@
   </div>
 
   <div tPopupContent>
-    <div class="t-date-range-picker__panel">
+    <div
+      class="t-date-range-picker__panel"
+      [class.t-date-range-picker__panel--direction-row]="isRowPlacement()"
+    >
+      @if (presetsAtTop() && presetEntries().length) {
+        <ng-container [ngTemplateOutlet]="footer" />
+      }
+
       <div class="t-date-range-picker__panel-content-wrapper">
         <div class="t-date-picker__panel-date">
           <div class="t-date-picker__header">
@@ -317,6 +332,26 @@
           </div>
         </div>
       </div>
+
+      @if (presetsAtBottom() && presetEntries().length) {
+        <ng-container [ngTemplateOutlet]="footer" />
+      }
     </div>
   </div>
 </t-popup>
+
+<ng-template #footer>
+  <div [class]="footerClasses()">
+    <div class="t-date-picker__presets">
+      @for (preset of presetEntries(); track preset.key) {
+        <button
+          type="button"
+          class="t-button t-button--variant-text t-button--theme-default t-size-s"
+          (click)="applyPreset(preset)"
+        >
+          {{ preset.key }}
+        </button>
+      }
+    </div>
+  </div>
+</ng-template>
