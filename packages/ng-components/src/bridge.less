@@ -221,3 +221,20 @@ t-avatar.t-avatar--hidden {
 .t-list--split t-list-item:not(:last-child) > .t-list-item::after {
   background: var(--td-border-level-1-color, #e7e7e7);
 }
+
+// 级联多选：复选框只负责勾选，节点文字改由 .t-cascader__item-label 渲染。
+// 上游文字在 .t-checkbox__label 里（自带 8px 左边距），这里隐藏空 label 并把等价间距补到文字上。
+.t-cascader__item .t-checkbox__label:empty {
+  display: none;
+}
+
+.t-cascader__item .t-checkbox + .t-cascader__item-label {
+  margin-left: 8px;
+}
+
+// 叶子节点的文字同样不在复选框 label 里，复选框不需要撑满整行，
+// 否则上游的 .t-cascader__item--leaf .t-checkbox { width: 100% } 会把文字挤到右侧。
+.t-cascader__item--leaf .t-checkbox {
+  width: auto;
+}
+

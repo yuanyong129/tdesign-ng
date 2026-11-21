@@ -363,8 +363,8 @@
           "type": "CascaderValue | undefined",
           "default": "undefined",
           "required": false,
-          "zh": "选中值，受控用法。",
-          "en": "Selected value in controlled mode.",
+          "zh": "选中值，受控用法。多选时为值数组。",
+          "en": "Selected value in controlled mode; an array in multiple mode.",
           "values": []
         },
         {
@@ -441,6 +441,46 @@
           "required": false,
           "zh": "无选项时的提示文案。",
           "en": "Text shown when there are no options.",
+          "values": []
+        },
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否多选。",
+          "en": "Whether multiple selection is allowed.",
+          "values": []
+        },
+        {
+          "name": "checkStrictly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "父子节点是否不关联：为 true 时勾选父节点不再连带子节点。",
+          "en": "Whether parent and child nodes are unlinked while checking.",
+          "values": []
+        },
+        {
+          "name": "valueMode",
+          "type": "CascaderValueMode",
+          "default": "'onlyLeaf'",
+          "required": false,
+          "zh": "多选时的取值模式。\n- `onlyLeaf`：只包含叶子节点；`parentFirst`：父节点全选时取父节点；`all`：父子节点都包含。",
+          "en": "Value mode in multiple mode.",
+          "values": [
+            "onlyLeaf",
+            "parentFirst",
+            "all"
+          ]
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "多选上限，0 表示不限制。",
+          "en": "Maximum number of checked nodes; 0 means unlimited.",
           "values": []
         }
       ],

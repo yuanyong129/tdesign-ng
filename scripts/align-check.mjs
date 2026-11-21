@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 /**
  * 把本仓库组件的 API 与 tdesign-vue-next 的 props 定义做机器比对。
  *
@@ -251,11 +251,8 @@ const CONFIG = {
     angularOnly: [],
     ignoreUpstream: {
       ...ANGULAR_EVENT_IGNORES,
-      // 第一层只做单选：options / value / defaultValue / keys / showAllLevels / clearable /
-      // disabled / size / placeholder / empty 已实现。
-      'multiple': '多选级联在后续版本实现',
-      'checkStrictly': '父子节点不关联在后续版本实现',
-      'checkProps': '多选复选框配置在后续版本实现',
+      // 第二层已补齐：multiple / checkStrictly / valueMode / max
+      'checkProps': '多选复选框配置属于透传，Angular 侧不暴露',
       'lazy': '异步加载子节点在后续版本实现',
       'load': '异步加载子节点在后续版本实现',
       'loading': '加载态在后续版本实现',
@@ -263,9 +260,7 @@ const CONFIG = {
       'filterable': '搜索过滤在后续版本实现',
       'filter': '搜索过滤在后续版本实现',
       'reserveKeyword': '搜索过滤在后续版本实现',
-      'valueMode': '多选取值模式在后续版本实现',
       'valueType': 'valueType 在后续版本实现',
-      'max': '多选上限在后续版本实现',
       'minCollapsedNum': '多选折叠在后续版本实现',
       'collapsedItems': '多选折叠在后续版本实现',
       'panelTopContent': '面板顶部内容在后续版本实现',

@@ -2,60 +2,161 @@
   class="t-cascader__trigger"
   placement="bottom-left"
   trigger="click"
+  [disabled]="disabled()"
   [visible]="open()"
   (visibleChange)="handleVisibleChange($event)"
   overlayClassName="t-cascader__popup"
 >
   <div [class]="wrapperClasses()">
-    <div [class]="inputClasses()">
-      <span class="t-input__prefix">
-        <ng-content select="[tCascaderPrefixIcon]" />
-      </span>
-      <input
-        class="t-input__inner"
-        readonly
-        [value]="displayText()"
-        [attr.placeholder]="placeholder()"
-        [disabled]="disabled()"
-      />
-      <span class="t-input__suffix">
-        @if (clearable() && hasValue() && !disabled()) {
-          <svg
-            class="t-icon t-icon-close-circle-filled t-input__suffix-clear"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="1em"
-            height="1em"
-            aria-hidden="true"
-            (click)="handleClear($event)"
-          >
+    @if (multiple()) {
+      <div [class]="tagInputClasses()">
+        <div class="t-input__wrap">
+          <div [class]="inputClasses()">
+            <span class="t-input__prefix">
+              @for (tag of selectedTags(); track tag.value) {
+                <t-tag
+                  theme="default"
+                  variant="light"
+                  [closable]="!disabled()"
+                  (close)="removeTag(tag, $event)"
+                >
+                  {{ tag.label }}
+                </t-tag>
+              }
+            </span>
+            <input
+              class="t-input__inner"
+              readonly
+              [attr.placeholder]="selectedTags().length ? '' : placeholder()"
+              [disabled]="disabled()"
+            />
+            <span class="t-input__suffix">
+              @if (clearable() && hasValue() && !disabled()) {
+                <svg
+                  class="t-icon t-icon-close-circle-filled t-tag-input__suffix-clear"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  height="1em"
+                  aria-hidden="true"
+                  (click)="handleClear($event)"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23ZM8.81753 7.40346L11.9999 10.5858L15.1815 7.40414L16.5957 8.81835L13.4141 12L16.5957 15.1816L15.1815 16.5958L11.9999 13.4142L8.81753 16.5965L7.40332 15.1823L10.5856 12L7.40332 8.81767L8.81753 7.40346Z"
+                  />
+                </svg>
+              }
+              <svg [class]="arrowClasses()" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path
+                  d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
+                  stroke="currentColor"
+                  stroke-width="1.3"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div [class]="inputClasses()">
+        <span class="t-input__prefix">
+          <ng-content select="[tCascaderPrefixIcon]" />
+        </span>
+        <input
+          class="t-input__inner"
+          readonly
+          [value]="displayText()"
+          [attr.placeholder]="placeholder()"
+          [disabled]="disabled()"
+        />
+        <span class="t-input__suffix">
+          @if (clearable() && hasValue() && !disabled()) {
+            <svg
+              class="t-icon t-icon-close-circle-filled t-input__suffix-clear"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="1em"
+              height="1em"
+              aria-hidden="true"
+              (click)="handleClear($event)"
+            >
+              <path
+                fill="currentColor"
+                d="M12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23ZM8.81753 7.40346L11.9999 10.5858L15.1815 7.40414L16.5957 8.81835L13.4141 12L16.5957 15.1816L15.1815 16.5958L11.9999 13.4142L8.81753 16.5965L7.40332 15.1823L10.5856 12L7.40332 8.81767L8.81753 7.40346Z"
+              />
+            </svg>
+          }
+          <svg [class]="arrowClasses()" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path
-              fill="currentColor"
-              d="M12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23ZM8.81753 7.40346L11.9999 10.5858L15.1815 7.40414L16.5957 8.81835L13.4141 12L16.5957 15.1816L15.1815 16.5958L11.9999 13.4142L8.81753 16.5965L7.40332 15.1823L10.5856 12L7.40332 8.81767L8.81753 7.40346Z"
+              d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
+              stroke="currentColor"
+              stroke-width="1.3"
             />
           </svg>
-        }
-        <svg [class]="arrowClasses()" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path
-            d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
-            stroke="currentColor"
-            stroke-width="1.3"
-          />
-        </svg>
-      </span>
-    </div>
+        </span>
+      </div>
+    }
   </div>
 
-  <div tPopupContent class="t-cascader__panel t-cascader--normal">
+  <div tPopupContent [class]="panelClasses()">
     @if (menus().length) {
       @for (menu of menus(); track menu.level) {
-        <div class="t-cascader__menu narrow-scrollbar" [class.t-cascader__menu--segment]="menu.level < menus().length - 1">
-          @for (option of menu.options; track $index) {
-            <div [class]="itemClasses(option, menu.level)" (click)="pickOption(option, menu.level)">
-              <span class="t-cascader__label t-cascader__label--ellipsis" [attr.title]="labelOf(option)">
-                {{ labelOf(option) }}
-              </span>
-              @if (childrenOf(option).length) {
+        <ul class="t-cascader__menu narrow-scrollbar" [class.t-cascader__menu--segment]="menu.level < menus().length - 1">
+          @for (node of menu.nodes; track node.value) {
+            <li [class]="itemClasses(node)" (click)="pickOption(node)">
+              @if (multiple()) {
+                <label [class]="checkboxClasses(node)" (click)="handleCheckboxClick(node, $event)">
+                  <input
+                    type="checkbox"
+                    class="t-checkbox__former"
+                    [checked]="isOptionChecked(node)"
+                    [indeterminate]="isOptionIndeterminate(node)"
+                    [disabled]="isOptionDisabled(node)"
+                    [attr.aria-checked]="isOptionIndeterminate(node) ? 'mixed' : isOptionChecked(node)"
+                  />
+                  <span class="t-checkbox__input">
+                    @if (isOptionIndeterminate(node)) {
+                      <svg
+                        class="t-icon t-icon-minus"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        height="1em"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M16.502 12L7.50195 12"
+                          stroke="currentColor"
+                          stroke-linecap="square"
+                          stroke-width="2"
+                          fill="none"
+                        />
+                      </svg>
+                    } @else {
+                      <svg
+                        class="t-icon t-icon-check"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        height="1em"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M19.5708 7.37842L10.3785 16.5708L5.42871 11.6211"
+                          stroke="currentColor"
+                          stroke-linecap="square"
+                          stroke-width="2"
+                          fill="none"
+                        />
+                      </svg>
+                    }
+                  </span>
+                  <span class="t-checkbox__label"></span>
+                </label>
+              }
+              <span [class]="labelClasses" [attr.title]="node.label">{{ node.label }}</span>
+              @if (node.children.length) {
                 <svg
                   class="t-cascader__item-icon t-icon"
                   xmlns="http://www.w3.org/2000/svg"
@@ -73,9 +174,9 @@
                   />
                 </svg>
               }
-            </div>
+            </li>
           }
-        </div>
+        </ul>
       }
     } @else {
       <div class="t-cascader__panel--empty">{{ empty() }}</div>
