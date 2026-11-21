@@ -141,6 +141,10 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/tree-select/tree-select.component').then((m) => m.TreeSelectDocs),
   },
   {
+    path: 'date-picker',
+    loadComponent: () => import('./docs/date-picker/date-picker.component').then((m) => m.DatePickerDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

@@ -903,6 +903,127 @@
       ],
       "outputs": []
     },
+    "TDatePicker": {
+      "className": "TDatePicker",
+      "selector": "t-date-picker",
+      "file": "packages/ng-components/src/components/date-picker/date-picker.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "DateValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中的日期，受控用法。",
+          "en": "Selected date in controlled mode.",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "DateValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认选中的日期，非受控用法。",
+          "en": "Default selected date in uncontrolled mode.",
+          "values": []
+        },
+        {
+          "name": "valueType",
+          "type": "DatePickerValueType",
+          "default": "'YYYY-MM-DD'",
+          "required": false,
+          "zh": "回传值的格式：格式串 / time-stamp / Date。",
+          "en": "Format of the emitted value: a format string, time-stamp or Date.",
+          "values": [
+            "YYYY-MM-DD",
+            "YYYY-MM",
+            "YYYY",
+            "time-stamp",
+            "Date"
+          ]
+        },
+        {
+          "name": "format",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "输入框里显示的日期格式，默认与 valueType 一致。",
+          "en": "Display format in the input; defaults to valueType.",
+          "values": []
+        },
+        {
+          "name": "firstDayOfWeek",
+          "type": "number",
+          "default": "1",
+          "required": false,
+          "zh": "周一作为一周的第一天（0 为周日）。",
+          "en": "First day of the week (0 is Sunday).",
+          "values": []
+        },
+        {
+          "name": "disableDate",
+          "type": "DisableDate | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "禁用日期：精确日期数组、范围对象或判断函数。",
+          "en": "Disabled dates: an array, a range object or a predicate.",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空。",
+          "en": "Whether the value can be cleared.",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用。",
+          "en": "Whether the date picker is disabled.",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "'small' | 'medium' | 'large'",
+          "default": "'medium'",
+          "required": false,
+          "zh": "输入框尺寸。",
+          "en": "Size of the input.",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "default": "'请选择日期'",
+          "required": false,
+          "zh": "占位文案。",
+          "en": "Placeholder text.",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "DatePickerChangeEvent",
+          "zh": "选中值变化",
+          "en": "Emitted when the selected date changes"
+        },
+        {
+          "name": "visibleChange",
+          "type": "boolean",
+          "zh": "弹层显隐变化",
+          "en": "Emitted when the popup visibility changes"
+        }
+      ]
+    },
     "TDialog": {
       "className": "TDialog",
       "selector": "t-dialog",
@@ -2871,6 +2992,15 @@
           "required": false,
           "zh": "弹层内容元素的附加类名",
           "en": "Extra class names of the popup content",
+          "values": []
+        },
+        {
+          "name": "ignoreOutsideSelector",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "点击该选择器匹配的元素时不视为「弹层外部」，用于弹层内嵌其它 CDK 弹层（如日期面板里的月份下拉）",
+          "en": "Clicking elements matching this selector is not treated as outside; useful for popups nested in other overlays",
           "values": []
         },
         {

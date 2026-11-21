@@ -92,6 +92,13 @@ export class TPopup {
   /** @zh 弹层内容元素的附加类名 @en Extra class names of the popup content @defaultValue null */
   readonly overlayInnerClassName = input<string | string[] | Record<string, boolean> | null>(null);
 
+  /**
+   * @zh 点击该选择器匹配的元素时不视为「弹层外部」，用于弹层内嵌其它 CDK 弹层（如日期面板里的月份下拉）
+   * @en Clicking elements matching this selector is not treated as outside; useful for popups nested in other overlays
+   * @defaultValue undefined
+   */
+  readonly ignoreOutsideSelector = input<string | undefined>(undefined);
+
   /** @zh 受控的展开状态 @en Controlled visible state @defaultValue undefined */
   readonly visible = input<boolean | undefined>();
 
@@ -249,6 +256,8 @@ export class TPopup {
     const target = event.target as Node | null;
     if (!target) return;
     if (this.hostRef.nativeElement.contains(target) || this.overlayRef?.overlayElement.contains(target)) return;
+    const ignoreSelector = this.ignoreOutsideSelector();
+    if (ignoreSelector && target instanceof Element && target.closest(ignoreSelector)) return;
     this.close({ trigger: 'outside' });
   };
 
