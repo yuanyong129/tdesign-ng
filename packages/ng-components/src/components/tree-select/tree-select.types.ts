@@ -8,7 +8,33 @@ export type TreeSelectData = Record<string, any>;
  * @zh 树选择的值：默认是数据项的 `value`，`valueType="object"` 时是数据项本身。
  * @en Tree select value: the item `value` by default, or the item itself when `valueType="object"`.
  */
-export type TreeSelectValue = string | number | TreeSelectData;
+export type TreeSelectSingleValue = string | number | TreeSelectData;
+
+/**
+ * @zh 树选择的值：单选为一个值，多选为值数组。
+ * @en Tree select value: one value in single mode, an array in multiple mode.
+ */
+export type TreeSelectValue = TreeSelectSingleValue | TreeSelectSingleValue[];
+
+/**
+ * @zh 多选时的取值模式。
+ * - `onlyLeaf`：只包含叶子节点；`parentFirst`：父节点全选时取父节点；`all`：父子节点都包含。
+ * @en Value mode in multiple mode.
+ */
+export type TreeSelectValueMode = 'onlyLeaf' | 'parentFirst' | 'all';
+
+/**
+ * @zh 透传给内部树的配置，当前只支持这几个字段。
+ * @en Tree props passed through; only these fields are supported for now.
+ */
+export interface TreeSelectTreeProps {
+  /** @zh 父子节点是否不关联 @en Whether parent and child nodes are unlinked */
+  checkStrictly?: boolean;
+  /** @zh 多选时的取值模式 @en Value mode in multiple mode */
+  valueMode?: TreeSelectValueMode;
+  /** @zh 默认展开全部父节点 @en Whether to expand all parent nodes by default */
+  expandAll?: boolean;
+}
 
 /**
  * @zh 自定义字段名，默认 label / value / children / disabled。

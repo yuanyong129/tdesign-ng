@@ -14,11 +14,13 @@ export interface TreeSelectTree {
   nodes: TreeSelectNode[];
   byValue: Map<string | number, TreeSelectNode>;
   byData: Map<TreeSelectData, TreeSelectNode>;
+  /** 节点 → 该节点下所有叶子节点（叶子自身返回自己）。 */
+  leaves: Map<TreeSelectNode, TreeSelectNode[]>;
 }
 
 /**
  * 把树选择的数据展开成带父路径的节点树。
- * Angular 侧没有 Vue 的 TreeStore，展开、选中、回显都基于这份索引计算。
+ * Angular 侧没有 Vue 的 TreeStore，展开、选中、多选推导都基于这份索引计算。
  */
 export function buildTreeSelectTree(
   data: TreeSelectData[],
@@ -27,6 +29,7 @@ export function buildTreeSelectTree(
   const nodes: TreeSelectNode[] = [];
   const byValue = new Map<string | number, TreeSelectNode>();
   const byData = new Map<TreeSelectData, TreeSelectNode>();
+  const leaves = new Map<TreeSelectNode, TreeSelectNode[]>();
 
   const walk = (
     items: TreeSelectData[],
@@ -55,9 +58,13 @@ export function buildTreeSelectTree(
 
       const children = item[keys.children] as TreeSelectData[] | undefined;
       node.children = children?.length ? walk(children, node, level + 1, node.path, node.pathNodes) : [];
+      leaves.set(
+        node,
+        node.children.length ? node.children.flatMap((child) => leaves.get(child) ?? []) : [node],
+      );
       return node;
     });
 
   const roots = walk(data, null, 0, [], []);
-  return { roots, nodes, byValue, byData };
+  return { roots, nodes, byValue, byData, leaves };
 }

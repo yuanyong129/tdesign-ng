@@ -4829,8 +4829,8 @@
           "type": "TreeSelectValue | undefined",
           "default": "undefined",
           "required": false,
-          "zh": "选中值，受控用法。",
-          "en": "Selected value in controlled mode.",
+          "zh": "选中值，受控用法。多选时为值数组。",
+          "en": "Selected value in controlled mode; an array in multiple mode.",
           "values": []
         },
         {
@@ -4862,6 +4862,78 @@
             "value",
             "object"
           ]
+        },
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否多选。",
+          "en": "Whether multiple selection is allowed.",
+          "values": []
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "多选上限，0 表示不限制。",
+          "en": "Maximum number of checked nodes; 0 means unlimited.",
+          "values": []
+        },
+        {
+          "name": "minCollapsedNum",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "多选时最多显示几个标签，其余用 +N 折叠；0 表示全部显示。",
+          "en": "Maximum number of tags to show before collapsing into +N; 0 shows all.",
+          "values": []
+        },
+        {
+          "name": "treeProps",
+          "type": "TreeSelectTreeProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "透传给内部树的配置，当前支持 checkStrictly / valueMode / expandAll。",
+          "en": "Tree props passed through; checkStrictly / valueMode / expandAll are supported.",
+          "values": []
+        },
+        {
+          "name": "filterable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可搜索。打开后在输入框里输入关键字，树只保留命中节点及其父级。",
+          "en": "Whether the tree can be searched; only matched nodes and their ancestors are kept.",
+          "values": []
+        },
+        {
+          "name": "filter",
+          "type": "((filterWords: string, data: TreeSelectData) => boolean) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义搜索函数，签名为 `(keyword, data) => boolean`（只支持同步返回）。",
+          "en": "Custom search predicate `(keyword, data) => boolean` (sync only).",
+          "values": []
+        },
+        {
+          "name": "inputValue",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控的搜索关键字。",
+          "en": "Controlled search keyword.",
+          "values": []
+        },
+        {
+          "name": "defaultInputValue",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认搜索关键字。",
+          "en": "Default search keyword.",
+          "values": []
         },
         {
           "name": "clearable",
@@ -4943,6 +5015,12 @@
           "type": "boolean",
           "zh": "弹层显隐变化",
           "en": "Emitted when the popup visibility changes"
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "zh": "搜索关键字变化",
+          "en": "Emitted when the search keyword changes"
         }
       ]
     }

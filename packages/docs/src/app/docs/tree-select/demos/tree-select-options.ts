@@ -75,6 +75,8 @@ export class DemoTreeSelectOptions {
 
   protected objectLabel(): string {
     const value = this.objectValue();
-    return value && typeof value === 'object' ? String(value['name'] ?? '（空）') : '（空）';
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? String(value['name'] ?? '（空）')
+      : '（空）';
   }
 }
