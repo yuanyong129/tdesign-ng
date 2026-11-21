@@ -1,0 +1,109 @@
+<t-popup
+  trigger="click"
+  placement="bottom-left"
+  [disabled]="disabled()"
+  [visible]="open()"
+  (visibleChange)="handleVisibleChange($event)"
+  overlayClassName="t-select__dropdown narrow-scrollbar"
+>
+  <div [class]="wrapperClasses()">
+    <div [class]="inputClasses()">
+      <span class="t-input__prefix">
+        <ng-content select="[tTreeSelectPrefixIcon]" />
+      </span>
+      <input
+        class="t-input__inner"
+        readonly
+        [value]="displayText()"
+        [attr.placeholder]="placeholderText()"
+        [disabled]="disabled()"
+      />
+      <span class="t-input__suffix">
+        @if (clearable() && hasValue() && !disabled()) {
+          <svg
+            class="t-icon t-icon-close-circle-filled t-input__suffix-clear"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+            (click)="handleClear($event)"
+          >
+            <path
+              fill="currentColor"
+              d="M12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23ZM8.81753 7.40346L11.9999 10.5858L15.1815 7.40414L16.5957 8.81835L13.4141 12L16.5957 15.1816L15.1815 16.5958L11.9999 13.4142L8.81753 16.5965L7.40332 15.1823L10.5856 12L7.40332 8.81767L8.81753 7.40346Z"
+            />
+          </svg>
+        }
+        <svg [class]="arrowClasses()" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
+            stroke="black"
+            stroke-opacity="0.9"
+            stroke-width="1.3"
+          />
+        </svg>
+      </span>
+    </div>
+  </div>
+
+  <div tPopupContent>
+    <div [class]="'t-select__dropdown-inner ' + panelSizeClass()" [style.min-width.px]="hostWidth()">
+      @if (panelTopTemplate(); as panelTop) {
+        <ng-container [ngTemplateOutlet]="panelTop" />
+      }
+
+      @if (loading()) {
+        <p class="t-select-loading-tips">{{ loadingText() }}</p>
+      } @else if (flatNodes().length) {
+        <div [class]="treeClasses()">
+          <div class="t-tree__list">
+            @for (node of flatNodes(); track node.value) {
+              <div
+                [class]="itemClasses(node)"
+                [attr.data-value]="node.value"
+                [attr.data-level]="node.level"
+                [style.--level]="node.level"
+              >
+                @if (node.children.length) {
+                  <span
+                    class="t-tree__icon t-folder-icon t-tree__icon--default"
+                    (click)="toggleExpand(node, $event)"
+                  >
+                    <svg
+                      class="t-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      height="1em"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="square"
+                        stroke-width="2"
+                        d="M9.5 17.5L15 12L9.5 6.5"
+                      />
+                    </svg>
+                  </span>
+                }
+                <span [class]="labelClasses(node)" [attr.title]="node.label" (click)="selectNode(node, $event)">
+                  <span style="position: relative">{{ node.label }}</span>
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="t-tree__empty">
+          <div class="t-select__empty">{{ empty() }}</div>
+        </div>
+      }
+
+      @if (panelBottomTemplate(); as panelBottom) {
+        <ng-container [ngTemplateOutlet]="panelBottom" />
+      }
+    </div>
+  </div>
+</t-popup>

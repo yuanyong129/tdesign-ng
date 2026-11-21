@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 文档站导航的单一数据源：侧边栏、上一页/下一页都从这里读，
  * 新增组件页时只要加一项，不会出现三处不同步。
  */
@@ -26,6 +26,7 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/slider', label: '滑块 Slider', group: '数据录入' },
   { path: '/rate', label: '评分 Rate', group: '数据录入' },
   { path: '/cascader', label: '级联选择 Cascader', group: '数据录入' },
+  { path: '/tree-select', label: '树选择 TreeSelect', group: '数据录入' },
   { path: '/popup', label: '弹出层 Popup', group: '反馈' },
   { path: '/tooltip', label: '文字提示 Tooltip', group: '反馈' },
   { path: '/dialog', label: '对话框 Dialog', group: '反馈' },

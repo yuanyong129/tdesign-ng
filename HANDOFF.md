@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-21，对应提交：Cascader 第二层（多选 / 搜索 / 异步加载 / 插槽）之后。
+> 更新日期：2026-11-21，对应提交：TreeSelect 第一层（单选 / 展开 / 面板插槽）之后。
 
 ## 1. 这个项目是什么
 
@@ -21,11 +21,11 @@
 | P2 基础表单 | ✅ | Input / Textarea / Switch / Checkbox / Radio / Select / Form（含 TDesign rules 校验引擎） |
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
 | P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
-| P5 复杂录入 | 🚧 | Slider、Rate、Cascader 已完成（Cascader 已到第二层）；TreeSelect / DatePicker / TimePicker / Upload / Transfer / ColorPicker 未开始 |
+| P5 复杂录入 | 🚧 | Slider、Rate、Cascader（两层）、TreeSelect（第一层）已完成；DatePicker / TimePicker / Upload / Transfer / ColorPicker 未开始 |
 
-当前 `align-check` 覆盖 **39 个组件、415 个输入属性、163 个示例**，合计 `missing 0 / extra 0`（`TCascader 已对齐 21/53`）。
+当前 `align-check` 覆盖 **40 个组件、427 个输入属性、167 个示例**，合计 `missing 0 / extra 0`（`TCascader 已对齐 21/53`、`TTreeSelect 已对齐 12/44`）。
 
-组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、cascader、checkbox、collapse、dialog、divider、drawer、empty、form、input、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、slider、space、switch、table、tabs、tag、textarea、tooltip。
+组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、cascader、checkbox、collapse、dialog、divider、drawer、empty、form、input、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、slider、space、switch、table、tabs、tag、textarea、tooltip、tree-select。
 
 ## 3. 目录与环境
 
@@ -76,40 +76,42 @@ node scripts/align-check.mjs --component TTable
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 - 清理 headless Edge 只杀自己的实例：`Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -match 'local-cache[\\/]+edge-' } | ForEach-Object { taskkill /PID $_.ProcessId /T /F }`。**不要用 `Get-Process msedge | Stop-Process`**，会把用户自己的浏览器一起杀掉；正则要同时匹配 `/` 和 `\`（用 Node `spawn` 拼路径时是正斜杠，只写 `\\` 会漏杀）。
 
-## 7. 当前进行中的工作：Cascader 第二层（已完成）
+## 7. 当前进行中的工作：TreeSelect 第一层（已完成）
 
-Cascader 第一层（单选 / 回显 / 尺寸 / 禁用 / 清空）已提交（`2ea133c`）；本层补齐多选、搜索、异步加载与插槽，已提交并验证。
+Cascader 第二层已在 `036ae9f` 收尾（多选 / 搜索 / 异步加载 / 插槽，细节见 §8 与提交记录）。本层开始 P5 第四个组件 TreeSelect：**第一层只做单选**，多选与搜索留到下一层。
 
 **已完成**：
 
-- **多选**：`multiple` + 复选框面板；标签回显（`t-tag`）、单个删除、清空；`t-cascader--multiple` / `t-select-input--multiple` / `t-tag-input` DOM 对齐上游；面板复选框状态（`t-is-checked` / `t-is-indeterminate`）与 `valueMode`（`onlyLeaf` / `parentFirst` / `all`）联动；`checkStrictly` 父子不关联；`max` 到达上限后未选项禁用。
-- **`cascader-tree.ts`**：把 `options` 展开成 `CascaderNode`（带 `path` / `pathNodes` / `parent` / `children`），并缓存每个节点的叶子列表；选中、展开、多选推导都基于这份索引，不再线性 `findPath`。
-- **搜索**：`filterable` 输入关键字后面板切成 `t-cascader__menu--filter` 扁平列表；默认匹配完整路径（`广东省/深圳市/南山区`），`filter(keyword, option)` 可替换匹配规则；命中片段用 `t-cascader__item-label--filter` 高亮；`reserveKeyword` 控制选中后是否保留关键字；打开面板时清空关键字。
-- **异步加载**：`lazy`（默认 true）+ `load(option): Promise<CascaderOption[]>`；展开时右箭头换成 `t-loading` 小环，返回子节点后合并进 `options`（不改原数组）；返回空数组视为叶子并直接完成本次选择；`option.isLeaf` / `option.leaf` 可显式跳过 load。
-- **加载态**：`loading` + `loadingText`，面板显示 `t-cascader__panel--empty` 文案，后缀图标换成加载环。
-- **插槽**：`<ng-template tCascaderPanelTop>` / `tCascaderPanelBottom` 渲染在面板上下；`<ng-template tCascaderValueDisplay let-value let-selected="selectedOptions" let-onClose="onClose">` 替换默认回显（单选的模板显示在输入框前缀，多选替换标签区）。三个指令随 `TCascaderModule` 一起导出。
-- **DOM 修正**：节点文字类名改为上游的 `t-cascader__item-label`（原先是 `t-cascader__label`）；菜单 / 条目改为 `ul` / `li`；单选时展开路径整条高亮（`t-is-selected`）。
+- **组件骨架**：`t-tree-select`（standalone + module 双出口），输入 `data` / `value` / `defaultValue` / `keys` / `valueType`（`value` | `object`）/ `clearable` / `disabled` / `size` / `placeholder` / `empty` / `loading` / `loadingText`；输出 `(change)`（`{ value, data, trigger }`，trigger 为 `check` / `clear` / `uncheck`）与 `(visibleChange)`。
+- **树索引**：`tree-select-tree.ts` 把 `data` 展开成 `TreeSelectNode`（`path` / `pathNodes` / `parent` / `children` / `disabled`），并按 value 与数据项引用建两份索引；`valueType="object"` 时用数据项引用回查。
+- **面板**：`t-select__dropdown` 弹层 + `t-select__dropdown-inner--size-*`，树 DOM 对齐上游：`t-tree`（`--hoverable` / `--transition`）> `t-tree__list` > `t-tree__item`（`--visible` / `--open` / `t-is-active` / `t-is-disabled`，`--level` 通过 CSS 变量控制缩进）> `t-tree__icon--default` + `t-tree__label`。
+- **交互**：点箭头只展开 / 收起、点文字选中并收起面板；只渲染可见节点（展开状态用 value 集合记录）；打开面板自动展开已选节点的父级；`clearable` 清空；`disabled` 时忽略展开与清空；`valueType="object"` 回传整个数据项。
+- **加载与空态**：`loading` 时面板显示 `t-select-loading-tips` 文案（并隐藏树），`empty` 用 `t-tree__empty > t-select__empty`。
+- **插槽**：`<ng-template tTreeSelectPanelTop>` / `tTreeSelectPanelBottom` 渲染在 `t-select__dropdown-inner` 内、树的上下，两个指令随 `TTreeSelectModule` 导出。
+- **弹层宽度**：宿主用 `ResizeObserver` 记录宽度，`t-select__dropdown-inner` 设 `min-width` 与触发器同宽（对齐上游 SelectInput 的 matchWidth）。
+- **bridge.less**：`t-tree-select { display: block }`；补 `.t-select__dropdown .t-select-loading-tips` 的弹层内布局（上游 tree-select 用单下划线类名，less 里只有双下划线的遮罩版本）。
 
-**已用 CDP 验证**（`http://localhost:4280/cascader`，7 个 demo）：
+**已用 CDP 验证**（`http://localhost:4280/tree-select`，4 个 demo）：
 
-- 多选：`[nanshan, futian]` 初始值 → 深圳市全选、广东省半选（`t-is-indeterminate`）；勾选天河区 → `[nanshan, futian, tianhe]`；勾选广州市父节点 → 连带越秀区；取消深圳市 → 两条被移除；清空后面板收起、`t-tag-input t-is-empty`。
-- `checkStrictly`：勾选深圳市后子节点保持未勾选；`valueMode="parentFirst"`：勾选深圳市父节点得到 `[shenzhen]`。
-- 搜索：输入「南山」得到 1 条 `广东省/深圳市/南山区` 且「南山」高亮；选中后输入框回显完整路径；重新打开回到 3 列面板且关键字已清空；自定义 `filter` 搜「深圳」无结果（空态"暂无数据"）、搜「福田」命中。
-- 异步加载：点广东省 120ms 后出现 `t-cascader__item-icon t-loading`，900ms 后多出第二列；点深圳市直接选中并收起面板。`loading=true` 时面板显示「正在加载选项…」，切回后面板恢复。
-- 插槽：面板顶部 / 底部文案都在；自定义回显显示「深圳市 / 广州市」两个标签，点 × 后值变为 `guangzhou`，底部计数同步为 1。
-- 单选回归：回显、逐级选择、清空、`showAllLevels`、`keys` 自定义字段、尺寸、禁用（点击不展开）全部正常；`consoleErrors` 为空。
+- 基础：默认值 `nanshan` 回显「南山区」，打开后父级自动展开（广东省 / 深圳市 `__item--open`），可见节点 6 个，南山区 `t-is-active`，`--level` 分别为 0 / 2。
+- 选中：点「广州市」文字 → 输入框回显「广州市」、hint 更新为 `guangzhou`、面板关闭。
+- 展开：点浙江省箭头 → 出现「杭州市」，`t-is-open` 生效，输入框值不变（不误选）。
+- 配置：清空后输入框为空且 wrapper 带 `t-select-input--empty`；`disabled` 点击不展开、箭头带 `t-fake-arrow--disable`；`size="small/large"` 对应 `t-size-s/l`；`keys`（name / code / items）与 `valueType="object"` 选中「前端组」后 hint 显示「前端组」。
+- 加载：`loading=true` 时面板显示「正在加载组织架构…」（宽度与触发器一致 360px、高度 120px、无树），切回后显示技术部 / 产品部两行。
+- 插槽：面板顶部「面板顶部：组织架构」与底部「共 8 个节点」都在；`consoleErrors` 为空。
 
 **下一步（建议顺序）**：
 
-1. 继续 P5：TreeSelect / DatePicker / TimePicker / Upload / Transfer / ColorPicker。
-2. Cascader 余项见 §8（`valueType`、多选折叠、列头列尾、`option` 自定义渲染、各类透传 props）。
+1. TreeSelect 第二层：`multiple` + 复选框树（`max` / `minCollapsedNum` / 折叠标签）、`filterable` / `filter` 搜索、`treeProps` 透传（`checkStrictly` / `valueMode` / `expandAll` / `defaultExpanded`）。
+2. 继续 P5：DatePicker / TimePicker / Upload / Transfer / ColorPicker。
+3. Cascader 余项见 §8（`valueType`、多选折叠、列头列尾、`option` 自定义渲染、各类透传 props）。
 
 ## 8. 已知缺口与技术债
 
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
-- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）；List 的 `scroll`（虚拟滚动）未实现，`asyncLoading` 不支持模板，`(scrollChange)` 原样透出没有节流。；Slider 的 `inputNumberProps`（两侧数字输入框）与 `tooltipProps` 透传未实现，键盘只支持方向键 / Home / End；Rate 的自定义 `icon` 未实现（固定内置星形），`showText` 不提供每颗星的悬浮 tooltip。Cascader 的 `valueType`、`minCollapsedNum` / `collapsedItems`（多选折叠）、`columnHeader` / `columnFooter`、`option`（自定义选项渲染）、`checkProps` 与各类 `*Props` 透传、`trigger="hover"`、受控 `popupVisible`、`readonly` / `borderless` / `status` / `tips` / 前后缀图标均未实现；`filter` 只能是同步函数（上游允许 Promise）。
+- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）；List 的 `scroll`（虚拟滚动）未实现，`asyncLoading` 不支持模板，`(scrollChange)` 原样透出没有节流。；Slider 的 `inputNumberProps`（两侧数字输入框）与 `tooltipProps` 透传未实现，键盘只支持方向键 / Home / End；Rate 的自定义 `icon` 未实现（固定内置星形），`showText` 不提供每颗星的悬浮 tooltip。Cascader 的 `valueType`、`minCollapsedNum` / `collapsedItems`（多选折叠）、`columnHeader` / `columnFooter`、`option`（自定义选项渲染）、`checkProps` 与各类 `*Props` 透传、`trigger="hover"`、受控 `popupVisible`、`readonly` / `borderless` / `status` / `tips` / 前后缀图标均未实现；`filter` 只能是同步函数（上游允许 Promise）。TreeSelect 的 `multiple` / `max` / `minCollapsedNum` / `collapsedItems` / `tagProps`、`filterable` / `filter` / `inputValue` / `defaultInputValue`、`valueDisplay`、`treeProps` 透传、各类 `*Props` 透传、受控 `popupVisible`、`autoWidth` / `borderless` / `readonly`、`suffix` / `suffixIcon` 与失焦/聚焦/搜索事件均未实现（第一层只做单选 + 展开）。
 - **文档站**：无搜索、无中英切换、无右侧锚点导航；示例卡片视觉可再贴近官网。
 
 ## 9. 怎么验证一个改动

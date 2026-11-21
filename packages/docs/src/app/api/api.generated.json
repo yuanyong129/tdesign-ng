@@ -4809,6 +4809,142 @@
           "en": "Visible change event, used for two-way binding"
         }
       ]
+    },
+    "TTreeSelect": {
+      "className": "TTreeSelect",
+      "selector": "t-tree-select",
+      "file": "packages/ng-components/src/components/tree-select/tree-select.component.ts",
+      "inputs": [
+        {
+          "name": "data",
+          "type": "TreeSelectData[]",
+          "default": "[]",
+          "required": false,
+          "zh": "树形数据。",
+          "en": "Tree data.",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "TreeSelectValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中值，受控用法。",
+          "en": "Selected value in controlled mode.",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "TreeSelectValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认选中值，非受控用法。",
+          "en": "Default selected value in uncontrolled mode.",
+          "values": []
+        },
+        {
+          "name": "keys",
+          "type": "TreeSelectKeys",
+          "default": "{}",
+          "required": false,
+          "zh": "自定义字段名，默认 label / value / children / disabled。",
+          "en": "Custom field names; defaults to label / value / children / disabled.",
+          "values": []
+        },
+        {
+          "name": "valueType",
+          "type": "'value' | 'object'",
+          "default": "'value'",
+          "required": false,
+          "zh": "值的形态：`value` 返回数据项的 value，`object` 返回整个数据项。",
+          "en": "Value form: `value` returns the item value, `object` returns the whole item.",
+          "values": [
+            "value",
+            "object"
+          ]
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空。",
+          "en": "Whether the value can be cleared.",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用。",
+          "en": "Whether the tree select is disabled.",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "'small' | 'medium' | 'large'",
+          "default": "'medium'",
+          "required": false,
+          "zh": "输入框尺寸。",
+          "en": "Size of the input.",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "default": "'请选择'",
+          "required": false,
+          "zh": "占位文案。",
+          "en": "Placeholder text.",
+          "values": []
+        },
+        {
+          "name": "empty",
+          "type": "string",
+          "default": "'暂无数据'",
+          "required": false,
+          "zh": "无数据时的提示文案。",
+          "en": "Text shown when there is no data.",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否处于加载中。",
+          "en": "Whether the panel is loading.",
+          "values": []
+        },
+        {
+          "name": "loadingText",
+          "type": "string",
+          "default": "'加载中'",
+          "required": false,
+          "zh": "加载中的提示文案。",
+          "en": "Text shown while loading.",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "TreeSelectChangeEvent",
+          "zh": "选中值变化时触发。",
+          "en": "Emitted when the selected value changes."
+        },
+        {
+          "name": "visibleChange",
+          "type": "boolean",
+          "zh": "弹层显隐变化",
+          "en": "Emitted when the popup visibility changes"
+        }
+      ]
     }
   }
 }

@@ -238,3 +238,20 @@ t-avatar.t-avatar--hidden {
   width: auto;
 }
 
+// 树选择：根元素 .t-select-input 是 width: 100% 的 inline-block，宿主也必须是块级
+t-tree-select {
+  display: block;
+}
+
+// 树选择的加载文案：上游 tree-select 用的是 .t-select-loading-tips（单下划线），
+// less 里只有 .t-select__loading-tips（双下划线，Select 的整块遮罩），这里补一份弹层内可用的等价样式
+.t-select__dropdown .t-select-loading-tips {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  color: var(--td-text-color-placeholder, #999);
+}
+
+
+
