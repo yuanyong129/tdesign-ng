@@ -16,6 +16,8 @@ export type DatePickerValueType =
   | 'Date'
   | 'YYYY'
   | 'YYYY-MM'
+  | 'YYYY-[Q]Q'
+  | 'YYYY-[W]WW'
   | 'YYYY-MM-DD'
   | 'YYYY-MM-DD HH'
   | 'YYYY-MM-DD HH:mm'
@@ -88,6 +90,12 @@ export interface DatePickerChangeEvent {
   /** @zh 变化来源 @en Source of the change */
   trigger: DatePickerTrigger;
 }
+
+/**
+ * @zh 选择器模式：日 / 周 / 月 / 季度 / 年。
+ * @en Picker mode: date, week, month, quarter or year.
+ */
+export type DatePickerMode = 'date' | 'week' | 'month' | 'quarter' | 'year';
 
 /**
  * @zh 面板里的一个日期格。

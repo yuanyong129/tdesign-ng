@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { ApiTable } from '../../api/api-table.component';
 import { DemoBlock } from '../demo-block';
 import { PageNav } from '../page-nav';
@@ -8,6 +8,8 @@ import { DemoDatePickerOptions } from './demos/date-picker-options';
 import { DemoDatePickerPresets } from './demos/date-picker-presets';
 import { DemoDatePickerTime } from './demos/date-picker-time';
 import { DemoDatePickerMode } from './demos/date-picker-mode';
+import { DemoDatePickerQuarter } from './demos/date-picker-quarter';
+import { DemoDatePickerWeek } from './demos/date-picker-week';
 
 @Component({
   selector: 'date-picker-docs',
@@ -20,13 +22,15 @@ import { DemoDatePickerMode } from './demos/date-picker-mode';
     DemoDatePickerPresets,
     DemoDatePickerTime,
     DemoDatePickerMode,
+    DemoDatePickerWeek,
+    DemoDatePickerQuarter,
     DemoDatePickerDisabled,
   ],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">日期选择器 DatePicker</h1>
       <p class="docs-page__lead">
-        日期选择器支持单日期、日期 + 时间与月份 / 年份模式：自定义回传格式（格式串 / 时间戳 / Date）、显示格式、
+        日期选择器支持单日期、日期 + 时间，以及周 / 月份 / 季度 / 年份模式：自定义回传格式（格式串 / 时间戳 / Date）、显示格式、
         一周起始日、禁用日期、预设日期、手动输入、清空、禁用与三种尺寸。范围选择请使用 DateRangePicker。
       </p>
 
@@ -50,7 +54,14 @@ import { DemoDatePickerMode } from './demos/date-picker-mode';
         <demo-date-picker-mode />
       </docs-demo>
 
-      <docs-demo id="date-picker-disabled" title="禁用日期" description="disableDate 支持函数、日期数组与范围对象（from / to / before / after）。">
+            <docs-demo id="date-picker-week" title="周选择" description="mode=week 时每行代表一整周，首列为 ISO 周号，点击任意一天选中整周，回传 YYYY-[W]WW。">
+        <demo-date-picker-week />
+      </docs-demo>
+
+      <docs-demo id="date-picker-quarter" title="季度选择" description="mode=quarter 时面板展示四个季度，选中后回传 YYYY-[Q]Q。">
+        <demo-date-picker-quarter />
+      </docs-demo>
+<docs-demo id="date-picker-disabled" title="禁用日期" description="disableDate 支持函数、日期数组与范围对象（from / to / before / after）。">
         <demo-date-picker-disabled />
       </docs-demo>
 
@@ -64,3 +75,5 @@ import { DemoDatePickerMode } from './demos/date-picker-mode';
   `,
 })
 export class DatePickerDocs {}
+
+

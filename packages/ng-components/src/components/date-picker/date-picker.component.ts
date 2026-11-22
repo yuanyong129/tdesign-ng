@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
+﻿import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,11 +20,15 @@ import {
 import { TimePickerColumn, TimePickerColumnType } from '../time-picker/time-picker.types';
 import {
   buildMonthCells,
+  buildQuarterCells,
+  buildWeekRows,
   defaultFormat,
   endOfDay,
   formatDate,
   formatValue,
   isSameDay,
+  isoWeekOf,
+  isoWeekStart,
   parseDate,
   parseDateByFormat,
   startOfDay,
@@ -33,6 +37,7 @@ import {
 import {
   DatePickerCell,
   DatePickerChangeEvent,
+  DatePickerMode,
   DatePickerValueType,
   DateValue,
   DisableDate,
@@ -89,9 +94,9 @@ export class TDatePicker {
    * @zh 选择器模式：日期 / 月份 / 年份。
    * @en Picker mode: date, month or year.
    * @defaultValue 'date'
-   * @values date, month, year
+   * @values date, week, month, quarter, year
    */
-  readonly mode = input<'date' | 'month' | 'year'>('date');
+  readonly mode = input<DatePickerMode>('date');
 
   /**
    * @zh 输入框里显示的日期格式，默认与 valueType 一致。
@@ -214,6 +219,8 @@ export class TDatePicker {
     if (this.valueType()) return this.valueType() as DatePickerValueType;
     if (this.mode() === 'year') return 'YYYY';
     if (this.mode() === 'month') return 'YYYY-MM';
+    if (this.mode() === 'quarter') return 'YYYY-[Q]Q';
+    if (this.mode() === 'week') return 'YYYY-[W]WW';
     return this.isTimeMode() ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD';
   });
 
@@ -236,6 +243,8 @@ export class TDatePicker {
     if (this.format()) return this.format() as string;
     if (this.mode() === 'year') return 'YYYY';
     if (this.mode() === 'month') return 'YYYY-MM';
+    if (this.mode() === 'quarter') return 'YYYY-[Q]Q';
+    if (this.mode() === 'week') return 'YYYY-[W]WW';
     const valueType = this.effectiveValueType();
     if (valueType === 'Date' || valueType === 'time-stamp') {
       return this.isTimeMode() ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD';
@@ -340,6 +349,36 @@ export class TDatePicker {
   });
 
   protected readonly decadeStart = computed(() => Math.floor(this.viewYear() / 10) * 10);
+
+  /** 周面板：整月 6 行，每行带 ISO 周号与是否选中。 */
+  protected readonly weekRows = computed(() => {
+    const selected = this.selectedDate();
+    const selectedWeek = selected ? isoWeekOf(selected) : null;
+    return buildWeekRows(this.weeks()).map((row) => ({
+      week: row.week,
+      weekYear: row.weekYear,
+      cells: row.cells,
+      disabled: row.cells.every((cell) => this.isCellDisabled(cell)),
+      active:
+        !!selectedWeek && selectedWeek.year === row.weekYear && selectedWeek.week === row.week,
+    }));
+  });
+
+  /** 周面板表头：首列「周」，其余星期标签。 */
+  protected readonly weekHeaderLabels = computed(() => ['周', ...this.weekLabels()]);
+
+  /** 季度面板：一年 4 个季度，一行展示。 */
+  protected readonly quarterRows = computed(() => {
+    const selected = this.selectedDate();
+    const cells = buildQuarterCells(this.viewYear()).map((cell) => ({
+      ...cell,
+      active:
+        !!selected &&
+        selected.getFullYear() === this.viewYear() &&
+        Math.floor(selected.getMonth() / 3) === cell.quarter - 1,
+    }));
+    return this.chunkRows(cells, 4);
+  });
 
   /** 年份面板的 12 年（当前十年），按 3 个一行分块。 */
   protected readonly yearRows = computed(() => {
@@ -526,12 +565,12 @@ export class TDatePicker {
   }
 
   protected stepBackward(): void {
-    if (this.mode() === 'year') this.jumpYear(-1);
+    if (this.mode() === 'year' || this.mode() === 'quarter') this.jumpYear(-1);
     else this.jumpMonth(-1);
   }
 
   protected stepForward(): void {
-    if (this.mode() === 'year') this.jumpYear(1);
+    if (this.mode() === 'year' || this.mode() === 'quarter') this.jumpYear(1);
     else this.jumpMonth(1);
   }
 
@@ -545,6 +584,29 @@ export class TDatePicker {
     const date = new Date(year, 0, 1);
     this.commit(formatValue(date, this.effectiveValueType()), 'pick');
     this.closePanel();
+  }
+
+  /** 周模式：点任意格选中整周，提交该周周一。 */
+  protected selectWeek(row: { week: number; weekYear: number; disabled: boolean }): void {
+    if (row.disabled || this.disabled()) return;
+    this.commit(formatValue(isoWeekStart(row.weekYear, row.week), this.effectiveValueType()), 'pick');
+    this.closePanel();
+  }
+
+  /** 季度模式：点选季度，提交该季度首日。 */
+  protected selectQuarter(quarter: number): void {
+    this.commit(formatValue(new Date(this.viewYear(), (quarter - 1) * 3, 1), this.effectiveValueType()), 'pick');
+    this.closePanel();
+  }
+
+  protected weekRowClasses(active: boolean, disabled: boolean): string {
+    return [
+      't-date-picker__table-week-row',
+      active ? 't-date-picker__table-week-row--active' : '',
+      disabled ? 't-date-picker__table-week-row--disabled' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
   }
 
   protected periodCellClass(active: boolean): string {
@@ -667,3 +729,10 @@ export class TDatePicker {
     }
   }
 }
+
+
+
+
+
+
+

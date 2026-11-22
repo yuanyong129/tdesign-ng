@@ -68,7 +68,7 @@
         <div [class]="panelClass()">
           <div class="t-date-picker__header">
             <div class="t-date-picker__header-controller">
-              @if (mode() === 'date') {
+              @if (mode() === 'date' || mode() === 'week') {
                 <div class="t-date-picker__header-controller-month">
                   <t-select
                     size="small"
@@ -180,6 +180,32 @@
                 </tbody>
               </table>
             </div>
+          } @else if (mode() === 'week') {
+            <div class="t-date-picker__table">
+              <table>
+                <thead>
+                  <tr class="t-date-picker__table-header-row">
+                    @for (label of weekHeaderLabels(); track $index) {
+                      <th class="t-date-picker__table-header-cell">{{ label }}</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of weekRows(); track row.week) {
+                    <tr [class]="weekRowClasses(row.active, row.disabled)">
+                      <td class="t-date-picker__cell t-date-picker__cell--week-number">
+                        <div class="t-date-picker__cell-inner">{{ row.week }}</div>
+                      </td>
+                      @for (cell of row.cells; track $index) {
+                        <td [class]="cellClasses(cell)" (click)="selectWeek(row)">
+                          <div class="t-date-picker__cell-inner">{{ cell.day }}</div>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           } @else if (mode() === 'month') {
             <div class="t-date-picker__table">
               <table>
@@ -188,6 +214,22 @@
                     <tr>
                       @for (cell of row; track cell.month) {
                         <td [class]="periodCellClass(cell.active)" (click)="selectMonth(cell.month)">
+                          <div class="t-date-picker__cell-inner">{{ cell.label }}</div>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else if (mode() === 'quarter') {
+            <div class="t-date-picker__table">
+              <table>
+                <tbody>
+                  @for (row of quarterRows(); track $index) {
+                    <tr>
+                      @for (cell of row; track cell.quarter) {
+                        <td [class]="periodCellClass(cell.active)" (click)="selectQuarter(cell.quarter)">
                           <div class="t-date-picker__cell-inner">{{ cell.label }}</div>
                         </td>
                       }
@@ -276,3 +318,4 @@
     }
   </div>
 </ng-template>
+

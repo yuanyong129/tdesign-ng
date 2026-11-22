@@ -1,6 +1,6 @@
 import { DatePickerCell, DatePickerValueType, DateValue } from './date-picker.types';
 
-const TOKEN_PATTERN = /YYYY|YY|MM|DD|HH|mm|ss|SSS/g;
+const TOKEN_PATTERN = /\[[^\]]*\]|YYYY|YY|MM|DD|HH|mm|ss|SSS|WW|Q/g;
 
 const WEEK_LABELS = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -8,9 +8,36 @@ function pad(value: number, length = 2): string {
   return String(value).padStart(length, '0');
 }
 
-/** 按格式串格式化日期，支持 YYYY / YY / MM / DD / HH / mm / ss / SSS。 */
+/** ISO 8601 周信息：周一为一周第一天，跨年周归属到「周四所在年」。 */
+export function isoWeekOf(date: Date): { year: number; week: number } {
+  const target = startOfDay(date);
+  const day = (target.getDay() + 6) % 7;
+  target.setDate(target.getDate() - day + 3);
+  const firstThursday = new Date(target.getFullYear(), 0, 4);
+  const offset = (firstThursday.getDay() + 6) % 7;
+  firstThursday.setDate(firstThursday.getDate() - offset + 3);
+  const week = 1 + Math.round((target.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000));
+  return { year: target.getFullYear(), week };
+}
+
+/** ISO 周的周一日期。 */
+export function isoWeekStart(year: number, week: number): Date {
+  const firstThursday = new Date(year, 0, 4);
+  const offset = (firstThursday.getDay() + 6) % 7;
+  const monday = new Date(year, 0, 4 - offset);
+  monday.setDate(monday.getDate() + (week - 1) * 7);
+  return monday;
+}
+
+/** 季度：1~4。 */
+export function quarterOf(date: Date): number {
+  return Math.floor(date.getMonth() / 3) + 1;
+}
+
+/** 按格式串格式化日期，支持 YYYY / YY / MM / DD / HH / mm / ss / SSS / WW / Q，`[...]` 内为字面量。 */
 export function formatDate(date: Date, format: string): string {
   return format.replace(TOKEN_PATTERN, (token) => {
+    if (token.startsWith('[') && token.endsWith(']')) return token.slice(1, -1);
     switch (token) {
       case 'YYYY':
         return String(date.getFullYear());
@@ -28,6 +55,10 @@ export function formatDate(date: Date, format: string): string {
         return pad(date.getSeconds());
       case 'SSS':
         return pad(date.getMilliseconds(), 3);
+      case 'WW':
+        return pad(isoWeekOf(date).week);
+      case 'Q':
+        return String(quarterOf(date));
       default:
         return token;
     }
@@ -61,18 +92,24 @@ export function parseDateByFormat(value: string, format: string): Date | null {
     const index = match.index ?? 0;
     pattern += escapeRegExp(format.slice(lastIndex, index));
     const token = match[0];
-    tokens.push(token);
-    pattern +=
-      {
-        YYYY: '(\\d{4})',
-        YY: '(\\d{2})',
-        MM: '(\\d{1,2})',
-        DD: '(\\d{1,2})',
-        HH: '(\\d{1,2})',
-        mm: '(\\d{1,2})',
-        ss: '(\\d{1,2})',
-        SSS: '(\\d{1,3})',
-      }[token] ?? '(\\d+)';
+    if (token.startsWith('[') && token.endsWith(']')) {
+      pattern += escapeRegExp(token.slice(1, -1));
+    } else {
+      tokens.push(token);
+      pattern +=
+        {
+          YYYY: '(\\d{4})',
+          YY: '(\\d{2})',
+          MM: '(\\d{1,2})',
+          DD: '(\\d{1,2})',
+          HH: '(\\d{1,2})',
+          mm: '(\\d{1,2})',
+          ss: '(\\d{1,2})',
+          SSS: '(\\d{1,3})',
+          WW: '(\\d{1,2})',
+          Q: '(\\d)',
+        }[token] ?? '(\\d+)';
+    }
     lastIndex = index + token.length;
   }
   pattern += `${escapeRegExp(format.slice(lastIndex))}$`;
@@ -86,17 +123,24 @@ export function parseDateByFormat(value: string, format: string): Date | null {
   });
 
   const year = parts['YYYY'] ?? (parts['YY'] !== undefined ? 2000 + parts['YY'] : 1970);
+  const hour = parts['HH'] ?? 0;
+  const minute = parts['mm'] ?? 0;
+  const second = parts['ss'] ?? 0;
+  const millisecond = parts['SSS'] ?? 0;
+
+  if (parts['WW'] !== undefined) {
+    const monday = isoWeekStart(year, Math.min(Math.max(parts['WW'], 1), 53));
+    return new Date(monday.getFullYear(), monday.getMonth(), monday.getDate(), hour, minute, second, millisecond);
+  }
+
+  if (parts['Q'] !== undefined) {
+    const quarter = Math.min(Math.max(parts['Q'], 1), 4);
+    return new Date(year, (quarter - 1) * 3, 1, hour, minute, second, millisecond);
+  }
+
   const month = (parts['MM'] ?? 1) - 1;
   const day = parts['DD'] ?? 1;
-  const date = new Date(
-    year,
-    month,
-    day,
-    parts['HH'] ?? 0,
-    parts['mm'] ?? 0,
-    parts['ss'] ?? 0,
-    parts['SSS'] ?? 0,
-  );
+  const date = new Date(year, month, day, hour, minute, second, millisecond);
   if (Number.isNaN(date.getTime())) return null;
   if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
     // 2024-02-31 这类非法日期会被 Date 进位，这里视为解析失败
@@ -171,4 +215,39 @@ export function buildMonthCells(
       };
     }),
   );
+}
+
+
+/** 面板里的一行周：ISO 周号 + 7 天。 */
+export interface DatePickerWeekRow {
+  week: number;
+  weekYear: number;
+  cells: DatePickerCell[];
+  /** 该行 7 天是否全部禁用 */
+  disabled: boolean;
+}
+
+/** 把 6×7 的日期格按行归成 ISO 周（用行内第 4 天确定归属年与周号）。 */
+export function buildWeekRows(rows: DatePickerCell[][]): DatePickerWeekRow[] {
+  return rows.map((cells) => {
+    const middle = cells[3] ?? cells[0];
+    const { year, week } = isoWeekOf(middle.date);
+    return { week, weekYear: year, cells, disabled: false };
+  });
+}
+
+/** 面板里的一个季度格。 */
+export interface DatePickerQuarterCell {
+  quarter: number;
+  label: string;
+  date: Date;
+}
+
+/** 生成一年 4 个季度格。 */
+export function buildQuarterCells(year: number): DatePickerQuarterCell[] {
+  return Array.from({ length: 4 }, (_, index) => ({
+    quarter: index + 1,
+    label: `Q${index + 1}`,
+    date: new Date(year, index * 3, 1),
+  }));
 }

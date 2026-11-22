@@ -937,14 +937,16 @@
         },
         {
           "name": "mode",
-          "type": "'date' | 'month' | 'year'",
+          "type": "DatePickerMode",
           "default": "'date'",
           "required": false,
           "zh": "选择器模式：日期 / 月份 / 年份。",
           "en": "Picker mode: date, month or year.",
           "values": [
             "date",
+            "week",
             "month",
+            "quarter",
             "year"
           ]
         },
