@@ -940,8 +940,8 @@
           "type": "DatePickerMode",
           "default": "'date'",
           "required": false,
-          "zh": "选择器模式：日期 / 月份 / 年份。",
-          "en": "Picker mode: date, month or year.",
+          "zh": "选择器模式：日期 / 周 / 月份 / 季度 / 年份。",
+          "en": "Picker mode: date, week, month, quarter or year.",
           "values": [
             "date",
             "week",
@@ -975,6 +975,15 @@
           "required": false,
           "zh": "禁用日期：精确日期数组、范围对象或判断函数。",
           "en": "Disabled dates: an array, a range object or a predicate.",
+          "values": []
+        },
+        {
+          "name": "range",
+          "type": "DatePickerRange | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "可选范围：`[start, end]` 数组窗口，或返回是否可选的判断函数。",
+          "en": "Selectable range: a `[start, end]` window or a predicate.",
           "values": []
         },
         {

@@ -25,6 +25,12 @@ export type DatePickerValueType =
   | 'YYYY-MM-DD HH:mm:ss:SSS';
 
 /**
+ * @zh 可选范围：`[start, end]` 数组窗口，或返回是否可选的判断函数。
+ * @en Selectable range: a `[start, end]` window or a predicate.
+ */
+export type DatePickerRange = DateValue[] | ((date: DateValue) => boolean);
+
+/**
  * @zh 禁用日期的范围配置。
  * @en Disabled date range configuration.
  */

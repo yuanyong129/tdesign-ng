@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 /**
  * 把本仓库组件的 API 与 tdesign-vue-next 的 props 定义做机器比对。
  *
@@ -298,7 +298,6 @@ const CONFIG = {
       'disableTime': '时间选择的禁用候选在后续版本实现',
       'timePickerProps': '时间面板透传在后续版本实现',
       'multiple': '多选日期在后续版本实现',
-      'range': '范围限制在后续版本实现',
       'prefixIcon': 'Angular 用 <t-icon tDatePickerPrefixIcon> 投影',
       'suffixIcon': '默认日历图标，未支持替换',
       'borderless': '无边框模式在后续版本实现',

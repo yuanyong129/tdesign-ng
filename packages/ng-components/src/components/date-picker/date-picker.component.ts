@@ -1,4 +1,4 @@
-﻿import { NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -39,6 +39,7 @@ import {
   DatePickerCellRender,
   DatePickerChangeEvent,
   DatePickerMode,
+  DatePickerRange,
   DatePickerValueDisplay,
   DatePickerValueType,
   DateValue,
@@ -93,8 +94,8 @@ export class TDatePicker {
   readonly valueType = input<DatePickerValueType | undefined>(undefined);
 
   /**
-   * @zh 选择器模式：日期 / 月份 / 年份。
-   * @en Picker mode: date, month or year.
+   * @zh 选择器模式：日期 / 周 / 月份 / 季度 / 年份。
+   * @en Picker mode: date, week, month, quarter or year.
    * @defaultValue 'date'
    * @values date, week, month, quarter, year
    */
@@ -119,6 +120,12 @@ export class TDatePicker {
    */
   readonly disableDate = input<DisableDate | undefined>(undefined);
 
+  /**
+   * @zh 可选范围：`[start, end]` 数组窗口，或返回是否可选的判断函数。
+   * @en Selectable range: a `[start, end]` window or a predicate.
+   * @defaultValue undefined
+   */
+  readonly range = input<DatePickerRange | undefined>(undefined);
   /**
    * @zh 是否可清空。
    * @en Whether the value can be cleared.
@@ -555,8 +562,30 @@ export class TDatePicker {
     this.viewMonth.set(now.getMonth());
   }
 
+  /** 是否不可选：禁用状态 / disableDate / range 任一命中。 */
   protected isCellDisabled(cell: DatePickerCell): boolean {
     if (this.disabled()) return true;
+    if (this.isCellDisabledByDisableDate(cell)) return true;
+    return this.isCellOutOfRange(cell.date);
+  }
+
+  /** 是否落在 range 之外。 */
+  private isCellOutOfRange(date: Date): boolean {
+    const range = this.range();
+    if (!range) return false;
+    const day = startOfDay(date);
+    if (typeof range === 'function') {
+      return !range(formatValue(date, this.effectiveValueType()));
+    }
+    const [startValue, endValue] = range;
+    const start = startValue === undefined ? null : parseDate(startValue, this.effectiveValueType());
+    const end = endValue === undefined ? null : parseDate(endValue, this.effectiveValueType());
+    if (start && day < startOfDay(start)) return true;
+    if (end && day > startOfDay(end)) return true;
+    return false;
+  }
+
+  private isCellDisabledByDisableDate(cell: DatePickerCell): boolean {
     const disableDate = this.disableDate();
     if (!disableDate) return false;
 

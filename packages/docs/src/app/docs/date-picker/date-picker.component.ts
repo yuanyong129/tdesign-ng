@@ -9,6 +9,7 @@ import { DemoDatePickerPresets } from './demos/date-picker-presets';
 import { DemoDatePickerTime } from './demos/date-picker-time';
 import { DemoDatePickerMode } from './demos/date-picker-mode';
 import { DemoDatePickerQuarter } from './demos/date-picker-quarter';
+import { DemoDatePickerRange } from './demos/date-picker-range';
 import { DemoDatePickerRender } from './demos/date-picker-render';
 import { DemoDatePickerWeek } from './demos/date-picker-week';
 
@@ -25,6 +26,7 @@ import { DemoDatePickerWeek } from './demos/date-picker-week';
     DemoDatePickerMode,
     DemoDatePickerWeek,
     DemoDatePickerQuarter,
+  DemoDatePickerRange,
   DemoDatePickerRender,
     DemoDatePickerDisabled,
   ],
@@ -66,6 +68,10 @@ import { DemoDatePickerWeek } from './demos/date-picker-week';
 
       <docs-demo id="date-picker-render" title="自定义单元格与回显" description="cell 返回每个日期格的文案，valueDisplay 改写输入框回显。">
         <demo-date-picker-render />
+      </docs-demo>
+
+      <docs-demo id="date-picker-range" title="可选范围" description="range 传 [start, end] 限制可选窗口，或传函数按日期判断是否可选。">
+        <demo-date-picker-range />
       </docs-demo>
 
       <docs-demo id="date-picker-disabled" title="禁用日期" description="disableDate 支持函数、日期数组与范围对象（from / to / before / after）。">

@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-22，对应提交：DatePicker 第六层（cell / valueDisplay）之后。
+> 更新日期：2026-11-22，对应提交：DatePicker 第七层（range 可选范围）之后。
 
 ## 1. 这个项目是什么
 
@@ -21,9 +21,9 @@
 | P2 基础表单 | ✅ | Input / Textarea / Switch / Checkbox / Radio / Select / Form（含 TDesign rules 校验引擎） |
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
 | P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
-| P5 复杂录入 | 🚧 | Slider、Rate、Cascader（两层）、TreeSelect（两层）、DatePicker（六层）、DateRangePicker（四层）、TimePicker（两层）已完成；Upload / Transfer / ColorPicker 未开始 |
+| P5 复杂录入 | 🚧 | Slider、Rate、Cascader（两层）、TreeSelect（两层）、DatePicker（七层）、DateRangePicker（四层）、TimePicker（两层）已完成；Upload / Transfer / ColorPicker 未开始 |
 
-当前 `align-check` 覆盖 **43 个组件、491 个输入属性、186 个示例**，合计 `missing 0 / extra 0`（`TCascader 已对齐 21/53`、`TTreeSelect 已对齐 20/44`、`TDatePicker 已对齐 18/44`、`TDateRangePicker 已对齐 23/44`、`TTimePicker 已对齐 12/33`）。
+当前 `align-check` 覆盖 **43 个组件、492 个输入属性、187 个示例**，合计 `missing 0 / extra 0`（`TCascader 已对齐 21/53`、`TTreeSelect 已对齐 20/44`、`TDatePicker 已对齐 18/44`、`TDateRangePicker 已对齐 23/44`、`TTimePicker 已对齐 12/33`）。
 
 组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、cascader、checkbox、collapse、date-picker、date-range-picker、dialog、divider、drawer、empty、form、input、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、slider、space、switch、table、tabs、tag、textarea、time-picker、tooltip、tree-select。
 
@@ -76,26 +76,28 @@ node scripts/align-check.mjs --component TTable
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 - 清理 headless Edge 只杀自己的实例：`Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -match 'local-cache[\\/]+edge-' } | ForEach-Object { taskkill /PID $_.ProcessId /T /F }`。**不要用 `Get-Process msedge | Stop-Process`**，会把用户自己的浏览器一起杀掉；正则要同时匹配 `/` 和 `\`（用 Node `spawn` 拼路径时是正斜杠，只写 `\\` 会漏杀）。
 
-## 7. 当前进行中的工作：DatePicker 第六层（已完成）
+## 7. 当前进行中的工作：DatePicker 第七层（已完成）
 
-DatePicker 第一~五层已分别提交：单日期 + 输入/清空/尺寸（第一层）、面板翻页与快捷预设（第二层）、时间模式与 `needConfirm`（第三层）、`mode` 的月份/年份（`ce33e6d`，第四层）、`mode` 的周/季度（`cdb84f5` + `9043574`，第五层）。本层补上面板单元格与输入框回显的自定义。
+DatePicker 前六层已提交：单日期 + 输入/清空/尺寸、面板翻页与快捷预设、时间模式与 `needConfirm`、`mode` 月份/年份（`ce33e6d`）、`mode` 周/季度（`cdb84f5` + `9043574`）、`cell` / `valueDisplay` 自定义（`4723a3e`）。本层补上「可选范围」限制。
 
-**已完成（第六层）**：
+**已完成（第七层）**：
 
-- **`cell`**：`input<DatePickerCellRender | undefined>`，签名 `(value: DateValue) => string`；每个日期格调用一次，入参是该格格式化后的值（`formatValue(cell.date, effectiveValueType())`），返回值替换默认的「几号」。日期面板与周面板共用同一逻辑（`cellText()`）。
-- **`valueDisplay`**：`input<DatePickerValueDisplay | undefined>`，签名 `(value: DateValue, displayValue: string) => string`；只改写输入框回显，选中值与 `(change)` 事件不受影响；允许手动输入时 `draftText` 优先。
-- 两个回调都只返回字符串（上游是 `TNode`），需要富内容时走模板投影，差异记在 §8。
-- `scripts/align-check.mjs` 从 `TDatePicker` 的 `ignoreUpstream` 移除 `cell` / `valueDisplay`（DateRangePicker 仍保留）。
+- **`range`**：`input<DatePickerRange | undefined>`，类型 `DateValue[] | ((date: DateValue) => boolean)`（与上游 `PickerDateRange` 一致）。
+  - 数组形式取前两个值作为 `[start, end]` 窗口，窗口外（含 start/end 之外）一律不可选；缺省一端表示不限。
+  - 函数形式按日期判断是否可选：返回 `false` 的日期禁用，与上游「`allow(date)` 取反」一致；入参是该格格式化后的值。
+- 实现拆成 `isCellDisabled()`（禁用状态 → `disableDate` → `range`）与两个私有方法 `isCellDisabledByDisableDate()` / `isCellOutOfRange()`，`disableDate` 与 `range` 可以叠加。
+- 因为所有选择路径（日期格、周行、季度格、手输 Enter、预设）都走 `isCellDisabled`，窗口外的输入与预设也会被拒绝。
+- `scripts/align-check.mjs` 从 `TDatePicker` 的 `ignoreUpstream` 移除 `range`（DateRangePicker 的 `range` 是另一套语义，仍保留）。
 
-**已用 CDP 验证**（`http://localhost:4280/date-picker`，`date-picker-render` demo）：
+**已用 CDP 验证**（`http://localhost:4280/date-picker`，`date-picker-range` demo）：
 
-- 输入框回显为 `📅 2024-05-20`（`valueDisplay` 生效），清空后为空字符串。
-- 面板 42 个日期格：周末 12 个格显示「休」、2 号显示「会」，其余仍为数字；选中格样式不受影响。
-- `consoleErrors` 为空；`align-check` 回到 `TDatePicker 已对齐 20/44`、合计 `missing 0 / extra 0`；`gen:api` 为 43 组件 / 491 属性，`gen:demos` 为 186 示例。
+- 数组窗口 `['2024-05-10','2024-05-20']`：面板里 5 月 9 日与 21 日及之外全部 `t-date-picker__cell--disabled`，15 日可选。
+- 函数形式（只允许周一至周五）：11 月面板里 1/7/8/14/15/21/22/28/29 这些周末格禁用，其余 21 个工作日可选。
+- `align-check` 合计 `missing 0 / extra 0`（`TDatePicker 已对齐 21/44`）；`gen:api` 43 组件 / 492 属性，`gen:demos` 187 示例；`consoleErrors` 为空。
 
 **下一步（建议顺序）**：
 
-1. DatePicker 余项：`multiple`（多选与标签）、`range`（可选范围限制）、`disableTime` / `timePickerProps`、`label` / `tips` / `status` / `borderless` / `readonly` 与各类 `*Props` 透传（见 §8）。
+1. DatePicker 余项：`multiple`（多选与标签回显）、`disableTime` / `timePickerProps`、`label` / `tips` / `status` / `borderless` / `readonly` 与各类 `*Props` 透传。
 2. DateRangePicker 余项：`disableTime` / `timePickerProps`、`mode`、`panelActiveDate`、`panelPreselection` / `cancelRangeSelectLimit`、`cell` / `valueDisplay`、`prefixIcon` / `suffixIcon` 与各类 `*Props` 透传。
 3. 继续 P5：Upload / Transfer / ColorPicker。
 4. TimePicker / TreeSelect / Cascader 余项见 §8。
@@ -105,7 +107,7 @@ DatePicker 第一~五层已分别提交：单日期 + 输入/清空/尺寸（第
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
-- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）；List 的 `scroll`（虚拟滚动）未实现，`asyncLoading` 不支持模板，`(scrollChange)` 原样透出没有节流。；Slider 的 `inputNumberProps`（两侧数字输入框）与 `tooltipProps` 透传未实现，键盘只支持方向键 / Home / End；Rate 的自定义 `icon` 未实现（固定内置星形），`showText` 不提供每颗星的悬浮 tooltip。Cascader 的 `valueType`、`minCollapsedNum` / `collapsedItems`（多选折叠）、`columnHeader` / `columnFooter`、`option`（自定义选项渲染）、`checkProps` 与各类 `*Props` 透传、`trigger="hover"`、受控 `popupVisible`、`readonly` / `borderless` / `status` / `tips` / 前后缀图标均未实现；`filter` 只能是同步函数（上游允许 Promise）。TreeSelect 的 `collapsedItems`（折叠标签的自定义内容，目前用内置 +N）、`valueDisplay`、`inputProps` / `selectInputProps` / `popupProps` 透传、受控 `popupVisible`、`autoWidth` / `borderless` / `readonly`、`suffix` / `suffixIcon` 与失焦/聚焦事件未实现；`treeProps` 目前只支持 `checkStrictly` / `valueMode` / `expandAll`，其余 Tree 能力（拖拽、虚拟滚动、懒加载、自定义图标/标签、`checkProps`）未透传。DatePicker 的 `mode` 已支持 date / week / month / quarter / year，但 week 的值格式用 `YYYY-[W]WW`（上游 dayjs 为 `gggg-wo`，依赖 weekOfYear 插件与本地化），未实现 `range`（范围限制）、`multiple`、`disableTime` / `timePickerProps` 与各类 `*Props` 透传；`cell` / `valueDisplay` 已支持但只接受返回字符串的回调（上游支持 `TNode`）、`borderless` / `readonly` / `status` / `tips` / `label`。DateRangePicker 未实现 `disableTime` / `timePickerProps`、`mode`、`panelActiveDate`、`panelPreselection` / `cancelRangeSelectLimit`、`cell` / `valueDisplay`、`prefixIcon` / `suffixIcon` 与 `inputProps` / `rangeInputProps` / `selectInputProps` / `popupProps` 透传、打开/关闭/失焦/聚焦事件。TimePicker 未实现 `t-time-range-picker`（区间）、`borderless` / `readonly` / `status` / `tips` / `label`、`suffixIcon` 替换与 `inputProps` / `selectInputProps` / `popupProps` 透传、打开 / 关闭 / 失焦 / 聚焦事件。
+- **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）；List 的 `scroll`（虚拟滚动）未实现，`asyncLoading` 不支持模板，`(scrollChange)` 原样透出没有节流。；Slider 的 `inputNumberProps`（两侧数字输入框）与 `tooltipProps` 透传未实现，键盘只支持方向键 / Home / End；Rate 的自定义 `icon` 未实现（固定内置星形），`showText` 不提供每颗星的悬浮 tooltip。Cascader 的 `valueType`、`minCollapsedNum` / `collapsedItems`（多选折叠）、`columnHeader` / `columnFooter`、`option`（自定义选项渲染）、`checkProps` 与各类 `*Props` 透传、`trigger="hover"`、受控 `popupVisible`、`readonly` / `borderless` / `status` / `tips` / 前后缀图标均未实现；`filter` 只能是同步函数（上游允许 Promise）。TreeSelect 的 `collapsedItems`（折叠标签的自定义内容，目前用内置 +N）、`valueDisplay`、`inputProps` / `selectInputProps` / `popupProps` 透传、受控 `popupVisible`、`autoWidth` / `borderless` / `readonly`、`suffix` / `suffixIcon` 与失焦/聚焦事件未实现；`treeProps` 目前只支持 `checkStrictly` / `valueMode` / `expandAll`，其余 Tree 能力（拖拽、虚拟滚动、懒加载、自定义图标/标签、`checkProps`）未透传。DatePicker 的 `mode` 已支持 date / week / month / quarter / year，但 week 的值格式用 `YYYY-[W]WW`（上游 dayjs 为 `gggg-wo`，依赖 weekOfYear 插件与本地化），未实现 `multiple`（多选）、`disableTime` / `timePickerProps` 与各类 `*Props` 透传；`cell` / `valueDisplay` 已支持但只接受返回字符串的回调（上游支持 `TNode`）、`borderless` / `readonly` / `status` / `tips` / `label`。DateRangePicker 未实现 `disableTime` / `timePickerProps`、`mode`、`panelActiveDate`、`panelPreselection` / `cancelRangeSelectLimit`、`cell` / `valueDisplay`、`prefixIcon` / `suffixIcon` 与 `inputProps` / `rangeInputProps` / `selectInputProps` / `popupProps` 透传、打开/关闭/失焦/聚焦事件。TimePicker 未实现 `t-time-range-picker`（区间）、`borderless` / `readonly` / `status` / `tips` / `label`、`suffixIcon` 替换与 `inputProps` / `selectInputProps` / `popupProps` 透传、打开 / 关闭 / 失焦 / 聚焦事件。
 - **文档站**：无搜索、无中英切换、无右侧锚点导航；示例卡片视觉可再贴近官网。
 
 ## 9. 怎么验证一个改动
