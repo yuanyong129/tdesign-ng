@@ -35,10 +35,10 @@ export class DemoDatePickerOptions {
   protected readonly timestampValue = signal<DateValue | undefined>(undefined);
 
   protected setClearable(event: DatePickerChangeEvent): void {
-    this.clearableValue.set(event.value);
+    this.clearableValue.set(event.value as DateValue);
   }
 
   protected setTimestamp(event: DatePickerChangeEvent): void {
-    this.timestampValue.set(event.value);
+    this.timestampValue.set(event.value as DateValue);
   }
 }

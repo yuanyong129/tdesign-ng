@@ -24,7 +24,7 @@ export class DemoDatePickerQuarter {
   protected readonly quarter = signal<DateValue | undefined>('2024-Q2');
 
   protected handleChange(event: DatePickerChangeEvent): void {
-    this.quarter.set(event.value);
+    this.quarter.set(event.value as DateValue);
   }
 }
 

@@ -1,4 +1,4 @@
-﻿<t-popup
+<t-popup
   trigger="click"
   placement="bottom-left"
   [disabled]="disabled()"
@@ -10,11 +10,23 @@
   <div [class]="wrapperClasses()">
     <div class="t-input__wrap">
       <div [class]="inputClasses()">
+        @if (multiple() && tagItems().length) {
+          <div class="t-input__tag-list">
+            @for (tag of tagItems(); track tag.value) {
+              <t-tag
+                size="small"
+                [closable]="!disabled()"
+                [content]="tag.text"
+                (close)="removeTag(tag.value)"
+              />
+            }
+          </div>
+        }
         <input
           class="t-input__inner"
           [readOnly]="!allowInput()"
           [value]="inputDisplayText()"
-          [attr.placeholder]="placeholder()"
+          [attr.placeholder]="multiple() && tagItems().length ? '' : placeholder()"
           [disabled]="disabled()"
           (input)="handleInputText($event)"
           (click)="handleInputClick($event)"

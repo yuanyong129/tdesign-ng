@@ -38,6 +38,6 @@ export class DemoDatePickerRender {
     `📅 ${displayValue}`;
 
   protected handleChange(event: DatePickerChangeEvent): void {
-    this.date.set(event.value);
+    this.date.set(event.value as DateValue);
   }
 }

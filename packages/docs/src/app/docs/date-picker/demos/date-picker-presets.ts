@@ -72,14 +72,14 @@ export class DemoDatePickerPresets {
   };
 
   protected setBottom(event: DatePickerChangeEvent): void {
-    this.bottomValue.set(event.value);
+    this.bottomValue.set(event.value as DateValue);
   }
 
   protected setRight(event: DatePickerChangeEvent): void {
-    this.rightValue.set(event.value);
+    this.rightValue.set(event.value as DateValue);
   }
 
   protected setInput(event: DatePickerChangeEvent): void {
-    this.inputValue.set(event.value);
+    this.inputValue.set(event.value as DateValue);
   }
 }

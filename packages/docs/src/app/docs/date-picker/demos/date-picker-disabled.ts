@@ -48,14 +48,14 @@ export class DemoDatePickerDisabled {
   protected readonly disabledRange: DisableDate = { from: '2024-05-10', to: '2024-05-25' };
 
   protected setWeekend(event: DatePickerChangeEvent): void {
-    this.weekendValue.set(event.value);
+    this.weekendValue.set(event.value as DateValue);
   }
 
   protected setList(event: DatePickerChangeEvent): void {
-    this.listValue.set(event.value);
+    this.listValue.set(event.value as DateValue);
   }
 
   protected setRange(event: DatePickerChangeEvent): void {
-    this.rangeValue.set(event.value);
+    this.rangeValue.set(event.value as DateValue);
   }
 }

@@ -9,6 +9,7 @@ import { DemoDatePickerPresets } from './demos/date-picker-presets';
 import { DemoDatePickerTime } from './demos/date-picker-time';
 import { DemoDatePickerMode } from './demos/date-picker-mode';
 import { DemoDatePickerQuarter } from './demos/date-picker-quarter';
+import { DemoDatePickerMultiple } from './demos/date-picker-multiple';
 import { DemoDatePickerRange } from './demos/date-picker-range';
 import { DemoDatePickerRender } from './demos/date-picker-render';
 import { DemoDatePickerWeek } from './demos/date-picker-week';
@@ -26,7 +27,8 @@ import { DemoDatePickerWeek } from './demos/date-picker-week';
     DemoDatePickerMode,
     DemoDatePickerWeek,
     DemoDatePickerQuarter,
-  DemoDatePickerRange,
+  DemoDatePickerMultiple,
+    DemoDatePickerRange,
   DemoDatePickerRender,
     DemoDatePickerDisabled,
   ],
@@ -35,7 +37,7 @@ import { DemoDatePickerWeek } from './demos/date-picker-week';
       <h1 class="docs-page__title">日期选择器 DatePicker</h1>
       <p class="docs-page__lead">
         日期选择器支持单日期、日期 + 时间，以及周 / 月份 / 季度 / 年份模式：自定义回传格式（格式串 / 时间戳 / Date）、显示格式、
-        一周起始日、禁用日期、预设日期、手动输入、清空、禁用与三种尺寸。范围选择请使用 DateRangePicker。
+        一周起始日、禁用日期与可选范围、预设日期、自定义单元格、手动输入、多选、清空、禁用与三种尺寸。范围选择请使用 DateRangePicker。
       </p>
 
       <docs-demo id="date-picker-basic" title="基础用法" description="value 控制选中日期，change 抛出 { value, trigger }；选中后自动收起面板。">
@@ -70,7 +72,15 @@ import { DemoDatePickerWeek } from './demos/date-picker-week';
         <demo-date-picker-render />
       </docs-demo>
 
-      <docs-demo id="date-picker-range" title="可选范围" description="range 传 [start, end] 限制可选窗口，或传函数按日期判断是否可选。">
+      <docs-demo
+      id="date-picker-multiple"
+      title="多选"
+      description="multiple 为 true 时值为数组，输入框以标签展示，点击日期可切换选中，面板不自动收起。"
+    >
+      <demo-date-picker-multiple />
+    </docs-demo>
+
+    <docs-demo id="date-picker-range" title="可选范围" description="range 传 [start, end] 限制可选窗口，或传函数按日期判断是否可选。">
         <demo-date-picker-range />
       </docs-demo>
 

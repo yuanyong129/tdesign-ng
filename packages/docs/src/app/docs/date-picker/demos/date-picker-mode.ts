@@ -33,10 +33,10 @@ export class DemoDatePickerMode {
   protected readonly year = signal<DateValue | undefined>('2024');
 
   protected handleMonth(event: DatePickerChangeEvent): void {
-    this.month.set(event.value);
+    this.month.set(event.value as DateValue);
   }
 
   protected handleYear(event: DatePickerChangeEvent): void {
-    this.year.set(event.value);
+    this.year.set(event.value as DateValue);
   }
 }

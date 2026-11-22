@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { TPopup } from '../popup';
 import { TSelect } from '../select';
+import { TTag } from '../tag';
 import {
   buildTimeColumns,
   formatTimeParts,
@@ -40,8 +41,10 @@ import {
   DatePickerChangeEvent,
   DatePickerMode,
   DatePickerRange,
+  DatePickerValue,
   DatePickerValueDisplay,
   DatePickerValueType,
+  DateMultipleValue,
   DateValue,
   DisableDate,
   PanelActiveDate,
@@ -67,24 +70,27 @@ const SIZE_CLASS: Record<'small' | 'medium' | 'large', string> = {
 @Component({
   selector: 't-date-picker',
   standalone: true,
-  imports: [NgTemplateOutlet, TPopup, TSelect],
+  imports: [NgTemplateOutlet, TPopup, TSelect, TTag],
   templateUrl: './date-picker.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { class: 't-date-picker' },
+  host: {
+    class: 't-date-picker',
+    '[class.t-date-picker--multiple]': 'multiple()',
+  },
 })
 export class TDatePicker {
   /**
    * @zh 选中的日期，受控用法。
    * @en Selected date in controlled mode.
    */
-  readonly value = input<DateValue | undefined>(undefined);
+  readonly value = input<DatePickerValue | undefined>(undefined);
 
   /**
    * @zh 默认选中的日期，非受控用法。
    * @en Default selected date in uncontrolled mode.
    */
-  readonly defaultValue = input<DateValue | undefined>(undefined);
+  readonly defaultValue = input<DatePickerValue | undefined>(undefined);
 
   /**
    * @zh 回传值的格式：格式串 / time-stamp / Date；不传时按是否带时间推导。
@@ -100,6 +106,13 @@ export class TDatePicker {
    * @values date, week, month, quarter, year
    */
   readonly mode = input<DatePickerMode>('date');
+
+  /**
+   * @zh 是否多选：开启后值为数组，输入框以标签展示，点击日期可切换选中。
+   * @en Whether multiple dates can be selected; the value becomes an array.
+   * @defaultValue false
+   */
+  readonly multiple = input(false, { transform: booleanAttribute });
 
   /**
    * @zh 输入框里显示的日期格式，默认与 valueType 一致。
@@ -224,18 +237,28 @@ export class TDatePicker {
   readonly visibleChange = output<boolean>();
 
   protected readonly open = signal(false);
-  private readonly innerValue = signal<DateValue | undefined>(undefined);
+  private readonly innerValue = signal<DatePickerValue | undefined>(undefined);
   private readonly draftText = signal<string | null>(null);
   private readonly draftDate = signal<Date | null>(null);
   private readonly draftTime = signal('');
   protected readonly viewYear = signal(new Date().getFullYear());
   protected readonly viewMonth = signal(new Date().getMonth());
 
-  protected readonly currentValue = computed<DateValue | undefined>(() => {
+  protected readonly currentValue = computed<DatePickerValue | undefined>(() => {
     if (this.value() !== undefined) return this.value();
     if (this.innerValue() !== undefined) return this.innerValue();
     return this.defaultValue();
   });
+
+  /** 多选模式下的值列表（单选模式返回单元素或空数组）。 */
+  protected readonly values = computed<DateValue[]>(() => {
+    const value = this.currentValue();
+    if (value === undefined || value === '') return [];
+    return Array.isArray(value) ? value : [value];
+  });
+
+  /** 单选模式下用于解析/高亮的值。 */
+  protected readonly firstValue = computed<DateValue | undefined>(() => this.values()[0]);
 
   /** 实际使用的回传格式；未显式指定时按模式 / 是否带时间推导。 */
   protected readonly effectiveValueType = computed<DatePickerValueType>(() => {
@@ -249,12 +272,12 @@ export class TDatePicker {
 
   /** 时间选择只在日期模式下生效。 */
   protected readonly isTimeMode = computed(
-    () => this.enableTimePicker() && this.mode() === 'date',
+    () => this.enableTimePicker() && this.mode() === 'date' && !this.multiple(),
   );
 
   /** 当前值解析出来的日期。 */
   protected readonly selectedDate = computed<Date | null>(() =>
-    parseDate(this.currentValue(), this.effectiveValueType()),
+    parseDate(this.firstValue(), this.effectiveValueType()),
   );
 
   /** 面板里高亮的日期：时间模式下用草稿日期，否则用已提交值。 */
@@ -302,19 +325,32 @@ export class TDatePicker {
     return date ? formatDate(date, this.displayFormat()) : '';
   });
 
-  protected readonly hasValue = computed(() => this.displayText().length > 0);
+  protected readonly hasValue = computed(() =>
+    this.multiple() ? this.values().length > 0 : this.displayText().length > 0,
+  );
+
+  /** 多选时输入框里展示的标签。 */
+  protected readonly tagItems = computed(() =>
+    this.values().map((value) => ({
+      value,
+      text: formatDate(parseDate(value, this.effectiveValueType()) ?? new Date(), this.displayFormat()),
+    })),
+  );
 
   /** 输入框回显：valueDisplay 可改写默认文本。 */
   protected readonly valueDisplayText = computed(() => {
     const text = this.displayText();
     const render = this.valueDisplay();
-    const value = this.currentValue();
+    const raw = this.currentValue();
+    const value = Array.isArray(raw) ? raw[0] : raw;
     if (!render || !text || value === undefined) return text;
     return render(value, text);
   });
 
   /** 允许输入时优先显示用户正在输入的文本。 */
-  protected readonly inputDisplayText = computed(() => this.draftText() ?? this.valueDisplayText());
+  protected readonly inputDisplayText = computed(() =>
+    this.multiple() ? (this.draftText() ?? '') : (this.draftText() ?? this.valueDisplayText()),
+  );
 
   protected readonly presetEntries = computed(() =>
     Object.entries(this.presets() ?? {}).map(([key, value]) => ({ key, value })),
@@ -498,6 +534,17 @@ export class TDatePicker {
   protected pickDate(cell: DatePickerCell): void {
     if (this.isCellDisabled(cell)) return;
 
+    if (this.multiple()) {
+      const value = formatValue(cell.date, this.effectiveValueType());
+      const exists = this.values().some((item) => {
+        const date = parseDate(item, this.effectiveValueType());
+        return !!date && isSameDay(date, cell.date);
+      });
+      const next = exists ? this.values().filter((item) => item !== value) : [...this.values(), value];
+      this.commit(next, 'pick');
+      return;
+    }
+
     if (this.isTimeMode()) {
       this.draftDate.set(cell.date);
       if (!this.needConfirm()) {
@@ -536,8 +583,14 @@ export class TDatePicker {
   protected handleClear(event: MouseEvent): void {
     event.stopPropagation();
     if (this.disabled()) return;
-    this.commit('', 'clear');
+    this.commit(this.multiple() ? [] : '', 'clear');
     this.closePanel();
+  }
+
+  protected removeTag(value: DateValue): void {
+    if (this.disabled()) return;
+    const next = this.values().filter((item) => item !== value);
+    this.commit(next.length ? next : '', 'clear');
   }
 
   protected handleMonthChange(value: unknown): void {
@@ -683,8 +736,16 @@ export class TDatePicker {
     const classes = ['t-date-picker__cell'];
     const today = new Date();
     if (isSameDay(cell.date, today)) classes.push('t-date-picker__cell--now');
-    const active = this.activeDate();
-    if (active && isSameDay(cell.date, active)) {
+    const isActive = this.multiple()
+      ? this.values().some((value) => {
+          const date = parseDate(value, this.effectiveValueType());
+          return !!date && isSameDay(cell.date, date);
+        })
+      : (() => {
+          const active = this.activeDate();
+          return !!active && isSameDay(cell.date, active);
+        })();
+    if (isActive) {
       classes.push('t-date-picker__cell--active');
     }
     if (this.isCellDisabled(cell)) classes.push('t-date-picker__cell--disabled');
@@ -708,7 +769,7 @@ export class TDatePicker {
     return rows;
   }
 
-  private commit(value: DateValue | '', trigger: DatePickerChangeEvent['trigger']): void {
+  private commit(value: DatePickerValue | '', trigger: DatePickerChangeEvent['trigger']): void {
     if (this.value() === undefined) this.innerValue.set(value);
     this.change.emit({ value, trigger });
   }

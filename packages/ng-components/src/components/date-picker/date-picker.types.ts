@@ -92,7 +92,8 @@ export type DatePickerTrigger =
  */
 export interface DatePickerChangeEvent {
   /** @zh 变化后的值，清空时为 '' @en Value after change; '' when cleared */
-  value: DateValue | '';
+  /** @zh 变化后的值，清空时为 ''；多选为数组 @en Value after change; '' when cleared; array in multiple mode */
+  value: DatePickerValue | '';
   /** @zh 变化来源 @en Source of the change */
   trigger: DatePickerTrigger;
 }
@@ -120,6 +121,11 @@ export interface DatePickerCell {
  * @zh 自定义面板单元格的回调，返回要显示的字符串。
  * @en Callback for custom panel cells; returns the displayed string.
  */
+export type DateMultipleValue = DateValue[];
+
+/** 日期选择器的值：单选是单个值，多选是数组。 */
+export type DatePickerValue = DateValue | DateMultipleValue;
+
 export type DatePickerCellRender = (value: DateValue) => string;
 
 /**

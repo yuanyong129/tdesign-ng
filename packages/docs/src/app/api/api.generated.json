@@ -910,7 +910,7 @@
       "inputs": [
         {
           "name": "value",
-          "type": "DateValue | undefined",
+          "type": "DatePickerValue | undefined",
           "default": "undefined",
           "required": false,
           "zh": "选中的日期，受控用法。",
@@ -919,7 +919,7 @@
         },
         {
           "name": "defaultValue",
-          "type": "DateValue | undefined",
+          "type": "DatePickerValue | undefined",
           "default": "undefined",
           "required": false,
           "zh": "默认选中的日期，非受控用法。",
@@ -949,6 +949,15 @@
             "quarter",
             "year"
           ]
+        },
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否多选：开启后值为数组，输入框以标签展示，点击日期可切换选中。",
+          "en": "Whether multiple dates can be selected; the value becomes an array.",
+          "values": []
         },
         {
           "name": "format",

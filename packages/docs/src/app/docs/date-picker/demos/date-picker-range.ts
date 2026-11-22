@@ -41,10 +41,10 @@ export class DemoDatePickerRange {
   };
 
   protected handleWindowChange(event: DatePickerChangeEvent): void {
-    this.windowed.set(event.value);
+    this.windowed.set(event.value as DateValue);
   }
 
   protected handleWeekdayChange(event: DatePickerChangeEvent): void {
-    this.weekdaysOnly.set(event.value);
+    this.weekdaysOnly.set(event.value as DateValue);
   }
 }

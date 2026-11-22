@@ -25,7 +25,7 @@ export class DemoDatePickerWeek {
   protected readonly week = signal<DateValue | undefined>('2024-W23');
 
   protected handleChange(event: DatePickerChangeEvent): void {
-    this.week.set(event.value);
+    this.week.set(event.value as DateValue);
   }
 }
 

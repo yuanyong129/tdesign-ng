@@ -16,6 +16,6 @@ export class DemoDatePickerBasic {
   protected readonly value = signal<DateValue | undefined>('2024-05-20');
 
   protected handleChange(event: DatePickerChangeEvent): void {
-    this.value.set(event.value);
+    this.value.set(event.value as DateValue);
   }
 }

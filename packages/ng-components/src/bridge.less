@@ -268,3 +268,35 @@ t-tree-select {
 
 
 
+
+// DatePicker 多选：Angular 用 t-tag 列表代替上游的 tag-input，把标签放进输入框内并允许换行。
+.t-date-picker--multiple .t-input {
+  height: auto;
+  min-height: 32px;
+  flex-wrap: wrap;
+  row-gap: 4px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.t-date-picker--multiple .t-input.t-size-s,
+.t-date-picker--multiple .t-size-s .t-input {
+  min-height: 24px;
+}
+
+.t-date-picker--multiple .t-input__tag-list {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.t-date-picker--multiple .t-input__inner {
+  flex: 1 1 48px;
+  min-width: 48px;
+  width: auto;
+}
+
+.t-date-picker--multiple .t-input__suffix {
+  margin-left: auto;
+}

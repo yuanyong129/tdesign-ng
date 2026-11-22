@@ -36,10 +36,10 @@ export class DemoDatePickerTime {
   protected readonly instantValue = signal<DateValue | undefined>(undefined);
 
   protected setValue(event: DatePickerChangeEvent): void {
-    this.value.set(event.value);
+    this.value.set(event.value as DateValue);
   }
 
   protected setInstant(event: DatePickerChangeEvent): void {
-    this.instantValue.set(event.value);
+    this.instantValue.set(event.value as DateValue);
   }
 }
