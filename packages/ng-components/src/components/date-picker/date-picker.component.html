@@ -1,4 +1,4 @@
-<t-popup
+﻿<t-popup
   trigger="click"
   placement="bottom-left"
   [disabled]="disabled()"
@@ -197,7 +197,7 @@
                         <div class="t-date-picker__cell-inner">{{ row.week }}</div>
                       </td>
                       @for (cell of row.cells; track $index) {
-                        <td [class]="cellClasses(cell)" (click)="selectWeek(row)">
+                        <td [class]="cellClasses(cell)" (click)="selectWeek(row, cell)">
                           <div class="t-date-picker__cell-inner">{{ cell.day }}</div>
                         </td>
                       }
@@ -318,4 +318,5 @@
     }
   </div>
 </ng-template>
+
 

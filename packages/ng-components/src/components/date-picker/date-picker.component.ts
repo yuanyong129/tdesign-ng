@@ -587,8 +587,9 @@ export class TDatePicker {
   }
 
   /** 周模式：点任意格选中整周，提交该周周一。 */
-  protected selectWeek(row: { week: number; weekYear: number; disabled: boolean }): void {
+  protected selectWeek(row: { week: number; weekYear: number; disabled: boolean }, cell?: DatePickerCell): void {
     if (row.disabled || this.disabled()) return;
+    if (cell && this.isCellDisabled(cell)) return;
     this.commit(formatValue(isoWeekStart(row.weekYear, row.week), this.effectiveValueType()), 'pick');
     this.closePanel();
   }
@@ -729,6 +730,7 @@ export class TDatePicker {
     }
   }
 }
+
 
 
 
