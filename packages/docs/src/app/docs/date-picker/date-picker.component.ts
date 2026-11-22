@@ -1,4 +1,4 @@
-﻿import { Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { ApiTable } from '../../api/api-table.component';
 import { DemoBlock } from '../demo-block';
 import { PageNav } from '../page-nav';
@@ -9,6 +9,7 @@ import { DemoDatePickerPresets } from './demos/date-picker-presets';
 import { DemoDatePickerTime } from './demos/date-picker-time';
 import { DemoDatePickerMode } from './demos/date-picker-mode';
 import { DemoDatePickerQuarter } from './demos/date-picker-quarter';
+import { DemoDatePickerRender } from './demos/date-picker-render';
 import { DemoDatePickerWeek } from './demos/date-picker-week';
 
 @Component({
@@ -24,6 +25,7 @@ import { DemoDatePickerWeek } from './demos/date-picker-week';
     DemoDatePickerMode,
     DemoDatePickerWeek,
     DemoDatePickerQuarter,
+  DemoDatePickerRender,
     DemoDatePickerDisabled,
   ],
   template: `
@@ -61,7 +63,12 @@ import { DemoDatePickerWeek } from './demos/date-picker-week';
       <docs-demo id="date-picker-quarter" title="季度选择" description="mode=quarter 时面板展示四个季度，选中后回传 YYYY-[Q]Q。">
         <demo-date-picker-quarter />
       </docs-demo>
-<docs-demo id="date-picker-disabled" title="禁用日期" description="disableDate 支持函数、日期数组与范围对象（from / to / before / after）。">
+
+      <docs-demo id="date-picker-render" title="自定义单元格与回显" description="cell 返回每个日期格的文案，valueDisplay 改写输入框回显。">
+        <demo-date-picker-render />
+      </docs-demo>
+
+      <docs-demo id="date-picker-disabled" title="禁用日期" description="disableDate 支持函数、日期数组与范围对象（from / to / before / after）。">
         <demo-date-picker-disabled />
       </docs-demo>
 
@@ -75,5 +82,6 @@ import { DemoDatePickerWeek } from './demos/date-picker-week';
   `,
 })
 export class DatePickerDocs {}
+
 
 

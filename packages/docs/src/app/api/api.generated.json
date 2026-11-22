@@ -1084,6 +1084,24 @@
           "zh": "是否点「确定」后才提交（开启时间选择时生效）。",
           "en": "Whether the value is committed only after clicking confirm (with time selection).",
           "values": []
+        },
+        {
+          "name": "cell",
+          "type": "DatePickerCellRender | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义面板单元格文案：回调收到该格的日期值，返回要显示的字符串。",
+          "en": "Custom panel cell text: receives the cell value and returns the displayed string.",
+          "values": []
+        },
+        {
+          "name": "valueDisplay",
+          "type": "DatePickerValueDisplay | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义输入框回显：回调收到当前值与默认回显文本，返回要显示的字符串。",
+          "en": "Custom input display: receives the value and the default text, returns the displayed string.",
+          "values": []
         }
       ],
       "outputs": [

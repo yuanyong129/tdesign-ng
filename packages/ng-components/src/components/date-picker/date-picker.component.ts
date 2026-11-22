@@ -36,8 +36,10 @@ import {
 } from './date-picker-utils';
 import {
   DatePickerCell,
+  DatePickerCellRender,
   DatePickerChangeEvent,
   DatePickerMode,
+  DatePickerValueDisplay,
   DatePickerValueType,
   DateValue,
   DisableDate,
@@ -194,6 +196,20 @@ export class TDatePicker {
    */
   readonly needConfirm = input(true, { transform: booleanAttribute });
 
+  /**
+   * @zh 自定义面板单元格文案：回调收到该格的日期值，返回要显示的字符串。
+   * @en Custom panel cell text: receives the cell value and returns the displayed string.
+   * @defaultValue undefined
+   */
+  readonly cell = input<DatePickerCellRender | undefined>(undefined);
+
+  /**
+   * @zh 自定义输入框回显：回调收到当前值与默认回显文本，返回要显示的字符串。
+   * @en Custom input display: receives the value and the default text, returns the displayed string.
+   * @defaultValue undefined
+   */
+  readonly valueDisplay = input<DatePickerValueDisplay | undefined>(undefined);
+
   /** @zh 选中值变化 @en Emitted when the selected date changes */
   readonly change = output<DatePickerChangeEvent>();
 
@@ -281,8 +297,17 @@ export class TDatePicker {
 
   protected readonly hasValue = computed(() => this.displayText().length > 0);
 
+  /** 输入框回显：valueDisplay 可改写默认文本。 */
+  protected readonly valueDisplayText = computed(() => {
+    const text = this.displayText();
+    const render = this.valueDisplay();
+    const value = this.currentValue();
+    if (!render || !text || value === undefined) return text;
+    return render(value, text);
+  });
+
   /** 允许输入时优先显示用户正在输入的文本。 */
-  protected readonly inputDisplayText = computed(() => this.draftText() ?? this.displayText());
+  protected readonly inputDisplayText = computed(() => this.draftText() ?? this.valueDisplayText());
 
   protected readonly presetEntries = computed(() =>
     Object.entries(this.presets() ?? {}).map(([key, value]) => ({ key, value })),
@@ -619,6 +644,12 @@ export class TDatePicker {
       .join(' ');
   }
 
+  /** 面板单元格文案：cell 回调优先，默认显示几号。 */
+  protected cellText(cell: DatePickerCell): string {
+    const render = this.cell();
+    if (!render) return String(cell.day);
+    return render(formatValue(cell.date, this.effectiveValueType()));
+  }
   protected cellClasses(cell: DatePickerCell): string {
     const classes = ['t-date-picker__cell'];
     const today = new Date();
@@ -730,6 +761,8 @@ export class TDatePicker {
     }
   }
 }
+
+
 
 
 

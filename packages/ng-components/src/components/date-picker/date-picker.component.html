@@ -172,7 +172,7 @@
                     <tr class="t-date-picker__table-date-row">
                       @for (cell of week; track $index) {
                         <td [class]="cellClasses(cell)" (click)="pickDate(cell)">
-                          <div class="t-date-picker__cell-inner">{{ cell.day }}</div>
+                          <div class="t-date-picker__cell-inner">{{ cellText(cell) }}</div>
                         </td>
                       }
                     </tr>
@@ -198,7 +198,7 @@
                       </td>
                       @for (cell of row.cells; track $index) {
                         <td [class]="cellClasses(cell)" (click)="selectWeek(row, cell)">
-                          <div class="t-date-picker__cell-inner">{{ cell.day }}</div>
+                          <div class="t-date-picker__cell-inner">{{ cellText(cell) }}</div>
                         </td>
                       }
                     </tr>
@@ -318,5 +318,6 @@
     }
   </div>
 </ng-template>
+
 
 

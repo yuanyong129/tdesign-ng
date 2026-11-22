@@ -109,3 +109,15 @@ export interface DatePickerCell {
   /** @zh 是否属于相邻月份 @en Whether it belongs to the previous/next month */
   additional: boolean;
 }
+
+/**
+ * @zh 自定义面板单元格的回调，返回要显示的字符串。
+ * @en Callback for custom panel cells; returns the displayed string.
+ */
+export type DatePickerCellRender = (value: DateValue) => string;
+
+/**
+ * @zh 自定义输入框回显的回调，返回要显示的字符串。
+ * @en Callback for custom input display; returns the displayed string.
+ */
+export type DatePickerValueDisplay = (value: DateValue, displayValue: string) => string;
