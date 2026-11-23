@@ -303,6 +303,249 @@
       ],
       "outputs": []
     },
+    "TAutoComplete": {
+      "className": "TAutoComplete",
+      "selector": "t-auto-complete",
+      "file": "packages/ng-components/src/components/auto-complete/auto-complete.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "值",
+          "en": "value",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "string | undefined",
+          "default": "''",
+          "required": false,
+          "zh": "默认值",
+          "en": "defaultValue",
+          "values": []
+        },
+        {
+          "name": "options",
+          "type": "AutoCompleteOption[]",
+          "default": "[]",
+          "required": false,
+          "zh": "联想数据源",
+          "en": "options",
+          "values": []
+        },
+        {
+          "name": "filter",
+          "type": "AutoCompleteFilter | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义过滤函数",
+          "en": "filter",
+          "values": []
+        },
+        {
+          "name": "filterable",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否过滤选项",
+          "en": "filterable",
+          "values": []
+        },
+        {
+          "name": "highlightKeyword",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否高亮关键字",
+          "en": "highlightKeyword",
+          "values": []
+        },
+        {
+          "name": "empty",
+          "type": "AutoCompleteContent | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "空态内容",
+          "en": "empty",
+          "values": []
+        },
+        {
+          "name": "panelTopContent",
+          "type": "AutoCompleteContent | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "面板顶部内容",
+          "en": "panelTopContent",
+          "values": []
+        },
+        {
+          "name": "panelBottomContent",
+          "type": "AutoCompleteContent | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "面板底部内容",
+          "en": "panelBottomContent",
+          "values": []
+        },
+        {
+          "name": "triggerElement",
+          "type": "AutoCompleteContent | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义触发器",
+          "en": "triggerElement",
+          "values": []
+        },
+        {
+          "name": "placeholder",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "占位符",
+          "en": "placeholder",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "AutoCompleteSize",
+          "default": "medium",
+          "required": false,
+          "zh": "尺寸",
+          "en": "size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "AutoCompleteStatus",
+          "default": "default",
+          "required": false,
+          "zh": "校验状态",
+          "en": "status",
+          "values": [
+            "default",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "tips",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示文字",
+          "en": "tips",
+          "values": []
+        },
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否无边框",
+          "en": "borderless",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空",
+          "en": "clearable",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "disabled",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读",
+          "en": "readonly",
+          "values": []
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否自动聚焦",
+          "en": "autofocus",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "string",
+          "zh": "值变化",
+          "en": "valueChange"
+        },
+        {
+          "name": "change",
+          "type": "AutoCompleteChangeEvent",
+          "zh": "值变化",
+          "en": "change"
+        },
+        {
+          "name": "select",
+          "type": "AutoCompleteSelectEvent",
+          "zh": "选中选项",
+          "en": "select"
+        },
+        {
+          "name": "enter",
+          "type": "AutoCompleteEnterEvent",
+          "zh": "按下回车",
+          "en": "enter"
+        },
+        {
+          "name": "focus",
+          "type": "AutoCompleteFocusEvent",
+          "zh": "获得焦点",
+          "en": "focus"
+        },
+        {
+          "name": "blur",
+          "type": "AutoCompleteBlurEvent",
+          "zh": "失去焦点",
+          "en": "blur"
+        },
+        {
+          "name": "clear",
+          "type": "AutoCompleteClearEvent",
+          "zh": "清空",
+          "en": "clear"
+        },
+        {
+          "name": "compositionstart",
+          "type": "AutoCompleteCompositionEvent",
+          "zh": "组合输入开始",
+          "en": "compositionstart"
+        },
+        {
+          "name": "compositionend",
+          "type": "AutoCompleteCompositionEvent",
+          "zh": "组合输入结束",
+          "en": "compositionend"
+        }
+      ]
+    },
     "TAvatar": {
       "className": "TAvatar",
       "selector": "t-avatar",
@@ -857,6 +1100,212 @@
         }
       ],
       "outputs": []
+    },
+    "TCalendar": {
+      "className": "TCalendar",
+      "selector": "t-calendar",
+      "file": "packages/ng-components/src/components/calendar/calendar.component.ts",
+      "inputs": [
+        {
+          "name": "cell",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义单元格",
+          "en": "cell",
+          "values": []
+        },
+        {
+          "name": "cellAppend",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "单元格附加内容",
+          "en": "cellAppend",
+          "values": []
+        },
+        {
+          "name": "controllerConfig",
+          "type": "boolean | CalendarController | undefined",
+          "default": "true",
+          "required": false,
+          "zh": "控制区配置",
+          "en": "controllerConfig",
+          "values": []
+        },
+        {
+          "name": "fillWithZero",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "日期补零",
+          "en": "fillWithZero",
+          "values": []
+        },
+        {
+          "name": "firstDayOfWeek",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "一周起始日",
+          "en": "firstDayOfWeek",
+          "values": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7"
+          ]
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "default": "YYYY-MM-DD",
+          "required": false,
+          "zh": "日期格式",
+          "en": "format",
+          "values": []
+        },
+        {
+          "name": "head",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "控制区标题",
+          "en": "head",
+          "values": []
+        },
+        {
+          "name": "isShowWeekendDefault",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "默认展示周末",
+          "en": "isShowWeekendDefault",
+          "values": []
+        },
+        {
+          "name": "mode",
+          "type": "CalendarMode",
+          "default": "month",
+          "required": false,
+          "zh": "展示模式",
+          "en": "mode",
+          "values": [
+            "month",
+            "year"
+          ]
+        },
+        {
+          "name": "month",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "月份",
+          "en": "month",
+          "values": []
+        },
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "多选",
+          "en": "multiple",
+          "values": []
+        },
+        {
+          "name": "preventCellContextmenu",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "阻止右键默认行为",
+          "en": "preventCellContextmenu",
+          "values": []
+        },
+        {
+          "name": "range",
+          "type": "CalendarValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "日期范围",
+          "en": "range",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "CalendarTheme",
+          "default": "full",
+          "required": false,
+          "zh": "风格",
+          "en": "theme",
+          "values": [
+            "full",
+            "card"
+          ]
+        },
+        {
+          "name": "value",
+          "type": "CalendarValue | CalendarValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中日期",
+          "en": "value",
+          "values": []
+        },
+        {
+          "name": "week",
+          "type": "string[] | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义表头",
+          "en": "week",
+          "values": []
+        },
+        {
+          "name": "year",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "年份",
+          "en": "year",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "cellClick",
+          "type": "CalendarCellEvent",
+          "zh": "点击单元格",
+          "en": "cellClick"
+        },
+        {
+          "name": "cellDoubleClick",
+          "type": "CalendarCellEvent",
+          "zh": "双击单元格",
+          "en": "cellDoubleClick"
+        },
+        {
+          "name": "cellRightClick",
+          "type": "CalendarCellEvent",
+          "zh": "右键单元格",
+          "en": "cellRightClick"
+        },
+        {
+          "name": "controllerChange",
+          "type": "CalendarControllerOptions",
+          "zh": "控制区变化",
+          "en": "controllerChange"
+        },
+        {
+          "name": "monthChange",
+          "type": "CalendarMonthChangeEvent",
+          "zh": "年月变化",
+          "en": "monthChange"
+        }
+      ]
     },
     "TCard": {
       "className": "TCard",
@@ -1460,6 +1909,142 @@
         }
       ]
     },
+    "TCheckTag": {
+      "className": "TCheckTag",
+      "selector": "t-check-tag",
+      "file": "packages/ng-components/src/components/check-tag/check-tag.component.ts",
+      "inputs": [
+        {
+          "name": "checked",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中状态",
+          "en": "Checked state",
+          "values": []
+        },
+        {
+          "name": "defaultChecked",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "初始选中状态",
+          "en": "Default checked state",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "CheckTagContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签内容",
+          "en": "Tag content",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the tag is disabled",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "CheckTagSize",
+          "default": "medium",
+          "required": false,
+          "zh": "尺寸",
+          "en": "Size of the tag",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "value",
+          "type": "CheckTagValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签的值",
+          "en": "Value of the tag",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "checkedChange",
+          "type": "boolean",
+          "zh": "选中状态变化",
+          "en": "Checked state change event"
+        },
+        {
+          "name": "change",
+          "type": "CheckTagChangeEvent",
+          "zh": "选中状态变化（带上下文）",
+          "en": "Change event with context"
+        }
+      ]
+    },
+    "TCheckTagGroup": {
+      "className": "TCheckTagGroup",
+      "selector": "t-check-tag-group",
+      "file": "packages/ng-components/src/components/check-tag/check-tag-group.component.ts",
+      "inputs": [
+        {
+          "name": "options",
+          "type": "ReadonlyArray<CheckTagGroupOption> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选项列表",
+          "en": "Options of the group",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "CheckTagGroupValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中的值列表",
+          "en": "Value of the group",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "CheckTagGroupValue",
+          "default": "[]",
+          "required": false,
+          "zh": "初始值列表",
+          "en": "Default value",
+          "values": []
+        },
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否多选",
+          "en": "Whether multiple selection is allowed",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "CheckTagGroupValue",
+          "zh": "值变化",
+          "en": "Value change event"
+        },
+        {
+          "name": "change",
+          "type": "CheckTagGroupChangeEvent",
+          "zh": "值变化（带上下文）",
+          "en": "Change event with context"
+        }
+      ]
+    },
     "TCol": {
       "className": "TCol",
       "selector": "t-col",
@@ -1745,6 +2330,219 @@
         }
       ],
       "outputs": []
+    },
+    "TColorPicker": {
+      "className": "TColorPicker",
+      "selector": "t-color-picker",
+      "file": "packages/ng-components/src/components/color-picker/color-picker.component.ts",
+      "inputs": [
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否无边框",
+          "en": "Whether the trigger input is borderless",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空",
+          "en": "Whether the value can be cleared",
+          "values": []
+        },
+        {
+          "name": "colorModes",
+          "type": "ColorPickerMode[]",
+          "default": "['monochrome','linear-gradient']",
+          "required": false,
+          "zh": "颜色模式，渐变能力暂未实现",
+          "en": "Color modes; gradient mode is not implemented yet",
+          "values": [
+            "monochrome",
+            "linear-gradient"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the color picker is disabled",
+          "values": []
+        },
+        {
+          "name": "enableAlpha",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否开启透明度",
+          "en": "Whether alpha is enabled",
+          "values": []
+        },
+        {
+          "name": "enableMultipleGradient",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "渐变模式下是否允许多个渐变点，渐变能力暂未实现",
+          "en": "Whether multiple gradient stops are allowed; gradient mode is not implemented",
+          "values": []
+        },
+        {
+          "name": "format",
+          "type": "ColorPickerFormat",
+          "default": "'RGB'",
+          "required": false,
+          "zh": "颜色格式",
+          "en": "Color format",
+          "values": [
+            "HEX",
+            "HEX8",
+            "RGB",
+            "RGBA",
+            "HSL",
+            "HSLA",
+            "HSV",
+            "HSVA",
+            "CMYK",
+            "CSS"
+          ]
+        },
+        {
+          "name": "inputProps",
+          "type": "Record<string, unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "透传给触发器输入框的属性",
+          "en": "Props passed through to the trigger input",
+          "values": []
+        },
+        {
+          "name": "popupProps",
+          "type": "Record<string, unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "透传给弹层的属性",
+          "en": "Props passed through to the popup",
+          "values": []
+        },
+        {
+          "name": "recentColors",
+          "type": "string[] | boolean | null | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "最近使用颜色，`true` 显示、`false` 隐藏、数组自定义",
+          "en": "Recent colors: true to show, false to hide, or a custom array",
+          "values": []
+        },
+        {
+          "name": "defaultRecentColors",
+          "type": "string[]",
+          "default": "[]",
+          "required": false,
+          "zh": "默认最近使用颜色",
+          "en": "Default recent colors in uncontrolled mode",
+          "values": []
+        },
+        {
+          "name": "selectInputProps",
+          "type": "Record<string, unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "透传给格式选择器的属性",
+          "en": "Props passed through to the format selector",
+          "values": []
+        },
+        {
+          "name": "showPrimaryColorPreview",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示当前颜色预览",
+          "en": "Whether to show the current color preview",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "ColorPickerSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "尺寸",
+          "en": "Size of the trigger input",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "swatchColors",
+          "type": "string[] | null | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "预设颜色，传 `null` 时使用系统预设",
+          "en": "Preset swatches; null falls back to the system palette",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控颜色值",
+          "en": "Controlled color value",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "非受控初始颜色",
+          "en": "Initial color in uncontrolled mode",
+          "values": []
+        },
+        {
+          "name": "modelValue",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控颜色值（v-model 别名）",
+          "en": "Controlled color value (v-model alias)",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "ColorPickerChangeEvent",
+          "zh": "颜色变化",
+          "en": "Emitted when the color changes"
+        },
+        {
+          "name": "clear",
+          "type": "{ e: MouseEvent }",
+          "zh": "点击清空",
+          "en": "Emitted when the value is cleared"
+        },
+        {
+          "name": "paletteBarChange",
+          "type": "{ color: ColorObject }",
+          "zh": "色相条、透明度条变化",
+          "en": "Emitted when the hue or alpha bar changes"
+        },
+        {
+          "name": "recentColorsChange",
+          "type": "string[]",
+          "zh": "最近使用颜色变化",
+          "en": "Emitted when the recent color list changes"
+        }
+      ]
     },
     "TComment": {
       "className": "TComment",
@@ -4494,6 +5292,275 @@
       ],
       "outputs": []
     },
+    "TInputNumber": {
+      "className": "TInputNumber",
+      "selector": "t-input-number",
+      "file": "packages/ng-components/src/components/input-number/input-number.component.ts",
+      "inputs": [
+        {
+          "name": "align",
+          "type": "InputNumberAlign | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "对齐方式",
+          "en": "align",
+          "values": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        {
+          "name": "allowInputOverLimit",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "允许超限输入",
+          "en": "allowInputOverLimit",
+          "values": []
+        },
+        {
+          "name": "autoWidth",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "自适应宽度",
+          "en": "autoWidth",
+          "values": []
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "自动聚焦",
+          "en": "autofocus",
+          "values": []
+        },
+        {
+          "name": "decimalPlaces",
+          "type": "InputNumberDecimalPlaces | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "小数位数",
+          "en": "decimalPlaces",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "禁用",
+          "en": "disabled",
+          "values": []
+        },
+        {
+          "name": "format",
+          "type": "InputNumberFormat | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "格式化函数",
+          "en": "format",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "前缀内容",
+          "en": "label",
+          "values": []
+        },
+        {
+          "name": "largeNumber",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "大数模式",
+          "en": "largeNumber",
+          "values": []
+        },
+        {
+          "name": "max",
+          "type": "InputNumberValue",
+          "default": "Infinity",
+          "required": false,
+          "zh": "最大值",
+          "en": "max",
+          "values": []
+        },
+        {
+          "name": "min",
+          "type": "InputNumberValue",
+          "default": "-Infinity",
+          "required": false,
+          "zh": "最小值",
+          "en": "min",
+          "values": []
+        },
+        {
+          "name": "placeholder",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "占位文本",
+          "en": "placeholder",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "只读",
+          "en": "readonly",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "InputNumberSize",
+          "default": "medium",
+          "required": false,
+          "zh": "尺寸",
+          "en": "size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "InputNumberStatus",
+          "default": "default",
+          "required": false,
+          "zh": "状态",
+          "en": "status",
+          "values": [
+            "default",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "step",
+          "type": "InputNumberValue",
+          "default": "1",
+          "required": false,
+          "zh": "步长",
+          "en": "step",
+          "values": []
+        },
+        {
+          "name": "suffix",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "后缀内容",
+          "en": "suffix",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "InputNumberTheme",
+          "default": "row",
+          "required": false,
+          "zh": "主题",
+          "en": "theme",
+          "values": [
+            "column",
+            "row",
+            "normal"
+          ]
+        },
+        {
+          "name": "tips",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示内容",
+          "en": "tips",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "InputNumberValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "值",
+          "en": "value",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "InputNumberValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认值",
+          "en": "defaultValue",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "InputNumberValue | undefined",
+          "zh": "值变化",
+          "en": "valueChange"
+        },
+        {
+          "name": "change",
+          "type": "InputNumberChangeEvent",
+          "zh": "值变化",
+          "en": "change"
+        },
+        {
+          "name": "blur",
+          "type": "InputNumberFocusEvent",
+          "zh": "失焦",
+          "en": "blur"
+        },
+        {
+          "name": "enter",
+          "type": "InputNumberKeyboardEvent",
+          "zh": "回车",
+          "en": "enter"
+        },
+        {
+          "name": "focus",
+          "type": "InputNumberFocusEvent",
+          "zh": "聚焦",
+          "en": "focus"
+        },
+        {
+          "name": "keydown",
+          "type": "InputNumberKeyboardEvent",
+          "zh": "按键按下",
+          "en": "keydown"
+        },
+        {
+          "name": "keypress",
+          "type": "InputNumberKeyboardEvent",
+          "zh": "按键输入",
+          "en": "keypress"
+        },
+        {
+          "name": "keyup",
+          "type": "InputNumberKeyboardEvent",
+          "zh": "按键抬起",
+          "en": "keyup"
+        },
+        {
+          "name": "validate",
+          "type": "InputNumberValidateEvent",
+          "zh": "数值校验",
+          "en": "validate"
+        }
+      ]
+    },
     "TLayout": {
       "className": "TLayout",
       "selector": "t-layout",
@@ -5966,6 +7033,240 @@
         }
       ]
     },
+    "TRangeInput": {
+      "className": "TRangeInput",
+      "selector": "t-range-input",
+      "file": "packages/ng-components/src/components/range-input/range-input.component.ts",
+      "inputs": [
+        {
+          "name": "activeIndex",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "高亮索引",
+          "en": "activeIndex",
+          "values": []
+        },
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "无边框",
+          "en": "borderless",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "可清空",
+          "en": "clearable",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean | boolean[]",
+          "default": "false",
+          "required": false,
+          "zh": "禁用",
+          "en": "disabled",
+          "values": []
+        },
+        {
+          "name": "format",
+          "type": "RangeInputFormat | RangeInputFormat[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "格式化函数",
+          "en": "format",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "前缀内容",
+          "en": "label",
+          "values": []
+        },
+        {
+          "name": "placeholder",
+          "type": "string | string[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "占位文本",
+          "en": "placeholder",
+          "values": []
+        },
+        {
+          "name": "prefixIcon",
+          "type": "TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "前置图标",
+          "en": "prefixIcon",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "只读",
+          "en": "readonly",
+          "values": []
+        },
+        {
+          "name": "separator",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "-",
+          "required": false,
+          "zh": "分隔符",
+          "en": "separator",
+          "values": []
+        },
+        {
+          "name": "showClearIconOnEmpty",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "空值显示清除图标",
+          "en": "showClearIconOnEmpty",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "RangeInputSize",
+          "default": "medium",
+          "required": false,
+          "zh": "尺寸",
+          "en": "size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "RangeInputStatus",
+          "default": "default",
+          "required": false,
+          "zh": "状态",
+          "en": "status",
+          "values": [
+            "default",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "suffix",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "后缀内容",
+          "en": "suffix",
+          "values": []
+        },
+        {
+          "name": "suffixIcon",
+          "type": "TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "后置图标",
+          "en": "suffixIcon",
+          "values": []
+        },
+        {
+          "name": "tips",
+          "type": "string | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示内容",
+          "en": "tips",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "RangeInputValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "值",
+          "en": "value",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "RangeInputValue",
+          "default": "[]",
+          "required": false,
+          "zh": "默认值",
+          "en": "defaultValue",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "RangeInputValue",
+          "zh": "值变化",
+          "en": "valueChange"
+        },
+        {
+          "name": "change",
+          "type": "RangeInputChangeEvent",
+          "zh": "值变化",
+          "en": "change"
+        },
+        {
+          "name": "clear",
+          "type": "RangeInputClearEvent",
+          "zh": "清除",
+          "en": "clear"
+        },
+        {
+          "name": "click",
+          "type": "RangeInputClickEvent",
+          "zh": "点击",
+          "en": "click"
+        },
+        {
+          "name": "blur",
+          "type": "RangeInputFocusEvent",
+          "zh": "失焦",
+          "en": "blur"
+        },
+        {
+          "name": "enter",
+          "type": "RangeInputEnterEvent",
+          "zh": "回车",
+          "en": "enter"
+        },
+        {
+          "name": "focus",
+          "type": "RangeInputFocusEvent",
+          "zh": "聚焦",
+          "en": "focus"
+        },
+        {
+          "name": "mouseenter",
+          "type": "RangeInputMouseEvent",
+          "zh": "鼠标移入",
+          "en": "mouseenter"
+        },
+        {
+          "name": "mouseleave",
+          "type": "RangeInputMouseEvent",
+          "zh": "鼠标移出",
+          "en": "mouseleave"
+        }
+      ]
+    },
     "TRate": {
       "className": "TRate",
       "selector": "t-rate",
@@ -6374,6 +7675,339 @@
           "type": "FocusEvent",
           "zh": "失去焦点",
           "en": "Blur event"
+        }
+      ]
+    },
+    "TSelectInput": {
+      "className": "TSelectInput",
+      "selector": "t-select-input",
+      "file": "packages/ng-components/src/components/select-input/select-input.component.ts",
+      "inputs": [
+        {
+          "name": "allowInput",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许输入",
+          "en": "allowInput",
+          "values": []
+        },
+        {
+          "name": "autoWidth",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "宽度自适应",
+          "en": "autoWidth",
+          "values": []
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "自动聚焦",
+          "en": "autofocus",
+          "values": []
+        },
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "无边框",
+          "en": "borderless",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "可清空",
+          "en": "clearable",
+          "values": []
+        },
+        {
+          "name": "collapsedItems",
+          "type": "TemplateRef<SelectInputCollapsedItemsContext> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "折叠标签模板",
+          "en": "collapsedItems",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "禁用",
+          "en": "disabled",
+          "values": []
+        },
+        {
+          "name": "inputValue",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "输入框文本",
+          "en": "inputValue",
+          "values": []
+        },
+        {
+          "name": "defaultInputValue",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认输入框文本",
+          "en": "defaultInputValue",
+          "values": []
+        },
+        {
+          "name": "keys",
+          "type": "SelectInputKeys | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "字段映射",
+          "en": "keys",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "SelectInputContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签文字",
+          "en": "label",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "加载中",
+          "en": "loading",
+          "values": []
+        },
+        {
+          "name": "minCollapsedNum",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "折叠数量",
+          "en": "minCollapsedNum",
+          "values": []
+        },
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "多选",
+          "en": "multiple",
+          "values": []
+        },
+        {
+          "name": "panel",
+          "type": "SelectInputContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "下拉面板",
+          "en": "panel",
+          "values": []
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "占位文字",
+          "en": "placeholder",
+          "values": []
+        },
+        {
+          "name": "popupProps",
+          "type": "SelectInputPopupProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层属性",
+          "en": "popupProps",
+          "values": []
+        },
+        {
+          "name": "popupVisible",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层展开",
+          "en": "popupVisible",
+          "values": []
+        },
+        {
+          "name": "defaultPopupVisible",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "默认弹层展开",
+          "en": "defaultPopupVisible",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "只读",
+          "en": "readonly",
+          "values": []
+        },
+        {
+          "name": "reserveKeyword",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "保留关键字",
+          "en": "reserveKeyword",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "SelectInputSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "尺寸",
+          "en": "size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "SelectInputStatus",
+          "default": "'default'",
+          "required": false,
+          "zh": "状态",
+          "en": "status",
+          "values": [
+            "default",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "suffix",
+          "type": "SelectInputContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "后缀内容",
+          "en": "suffix",
+          "values": []
+        },
+        {
+          "name": "tag",
+          "type": "TemplateRef<SelectInputTagContext> | string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义标签",
+          "en": "tag",
+          "values": []
+        },
+        {
+          "name": "tagProps",
+          "type": "SelectInputTagProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签属性",
+          "en": "tagProps",
+          "values": []
+        },
+        {
+          "name": "tips",
+          "type": "SelectInputContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示文字",
+          "en": "tips",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "SelectInputValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "当前值",
+          "en": "value",
+          "values": []
+        },
+        {
+          "name": "valueDisplay",
+          "type": "TemplateRef<SelectInputValueDisplayContext> | string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "值展示模板",
+          "en": "valueDisplay",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "blur",
+          "type": "SelectInputBlurEvent",
+          "zh": "失焦",
+          "en": "blur"
+        },
+        {
+          "name": "clear",
+          "type": "SelectInputClearEvent",
+          "zh": "清空",
+          "en": "clear"
+        },
+        {
+          "name": "enter",
+          "type": "SelectInputEnterEvent",
+          "zh": "回车",
+          "en": "enter"
+        },
+        {
+          "name": "focus",
+          "type": "SelectInputFocusEvent",
+          "zh": "聚焦",
+          "en": "focus"
+        },
+        {
+          "name": "inputChange",
+          "type": "SelectInputInputChangeEvent",
+          "zh": "输入变化",
+          "en": "inputChange"
+        },
+        {
+          "name": "paste",
+          "type": "SelectInputPasteEvent",
+          "zh": "粘贴",
+          "en": "paste"
+        },
+        {
+          "name": "popupVisibleChange",
+          "type": "boolean",
+          "zh": "弹层展开变化",
+          "en": "popupVisibleChange"
+        },
+        {
+          "name": "tagChange",
+          "type": "SelectInputTagChangeEvent",
+          "zh": "标签变化",
+          "en": "tagChange"
+        },
+        {
+          "name": "valueChange",
+          "type": "SelectInputValue",
+          "zh": "值变化",
+          "en": "valueChange"
         }
       ]
     },
@@ -7008,6 +8642,172 @@
           "en": "item hover"
         }
       ]
+    },
+    "TSwiper": {
+      "className": "TSwiper",
+      "selector": "t-swiper",
+      "file": "packages/ng-components/src/components/swiper/swiper.component.ts",
+      "inputs": [
+        {
+          "name": "animation",
+          "type": "SwiperAnimation",
+          "default": "slide",
+          "required": false,
+          "zh": "切换动画",
+          "en": "animation",
+          "values": [
+            "slide",
+            "fade"
+          ]
+        },
+        {
+          "name": "autoplay",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "自动播放",
+          "en": "autoplay",
+          "values": []
+        },
+        {
+          "name": "cardScale",
+          "type": "number",
+          "default": "0.6325301204819277",
+          "required": false,
+          "zh": "卡片缩放比例",
+          "en": "cardScale",
+          "values": []
+        },
+        {
+          "name": "current",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "当前索引",
+          "en": "current",
+          "values": []
+        },
+        {
+          "name": "defaultCurrent",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "默认索引",
+          "en": "defaultCurrent",
+          "values": []
+        },
+        {
+          "name": "direction",
+          "type": "SwiperDirection",
+          "default": "horizontal",
+          "required": false,
+          "zh": "轮播方向",
+          "en": "direction",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "default": "300",
+          "required": false,
+          "zh": "动画时长",
+          "en": "duration",
+          "values": []
+        },
+        {
+          "name": "height",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "轮播高度",
+          "en": "height",
+          "values": []
+        },
+        {
+          "name": "interval",
+          "type": "number",
+          "default": "5000",
+          "required": false,
+          "zh": "播放间隔",
+          "en": "interval",
+          "values": []
+        },
+        {
+          "name": "loop",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "循环播放",
+          "en": "loop",
+          "values": []
+        },
+        {
+          "name": "navigation",
+          "type": "SwiperNavigation | TemplateRef<unknown> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "导航器配置",
+          "en": "navigation",
+          "values": []
+        },
+        {
+          "name": "stopOnHover",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "悬浮暂停",
+          "en": "stopOnHover",
+          "values": []
+        },
+        {
+          "name": "trigger",
+          "type": "SwiperTrigger",
+          "default": "hover",
+          "required": false,
+          "zh": "导航触发方式",
+          "en": "trigger",
+          "values": [
+            "hover",
+            "click"
+          ]
+        },
+        {
+          "name": "type",
+          "type": "SwiperType",
+          "default": "default",
+          "required": false,
+          "zh": "轮播类型",
+          "en": "type",
+          "values": [
+            "default",
+            "card"
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "SwiperChangeEvent",
+          "zh": "切换事件",
+          "en": "change"
+        },
+        {
+          "name": "currentChange",
+          "type": "number",
+          "zh": "索引变化",
+          "en": "currentChange"
+        }
+      ]
+    },
+    "TSwiperItem": {
+      "className": "TSwiperItem",
+      "selector": "t-swiper-item",
+      "file": "packages/ng-components/src/components/swiper/swiper-item.component.ts",
+      "inputs": [],
+      "outputs": []
     },
     "TSwitch": {
       "className": "TSwitch",
@@ -7781,6 +9581,321 @@
           "type": "MouseEvent",
           "zh": "关闭标签",
           "en": "Emitted when the close icon is clicked"
+        }
+      ]
+    },
+    "TTagInput": {
+      "className": "TTagInput",
+      "selector": "t-tag-input",
+      "file": "packages/ng-components/src/components/tag-input/tag-input.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "TagInputValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签列表",
+          "en": "Value of the tag input",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "TagInputValue",
+          "default": "[]",
+          "required": false,
+          "zh": "初始标签列表",
+          "en": "Default value",
+          "values": []
+        },
+        {
+          "name": "inputValue",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "输入框内容",
+          "en": "Input value",
+          "values": []
+        },
+        {
+          "name": "defaultInputValue",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "初始输入内容",
+          "en": "Default input value",
+          "values": []
+        },
+        {
+          "name": "placeholder",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "占位文字",
+          "en": "Placeholder text",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "TagInputSize",
+          "default": "medium",
+          "required": false,
+          "zh": "尺寸",
+          "en": "Size of the tag input",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "TagInputStatus",
+          "default": "default",
+          "required": false,
+          "zh": "状态",
+          "en": "Status of the tag input",
+          "values": [
+            "default",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "max",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "最大标签数量",
+          "en": "Max number of tags",
+          "values": []
+        },
+        {
+          "name": "minCollapsedNum",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "折叠时保留数量",
+          "en": "Number of tags kept when collapsed",
+          "values": []
+        },
+        {
+          "name": "excessTagsDisplayType",
+          "type": "TagInputExcessTagsDisplayType",
+          "default": "break-line",
+          "required": false,
+          "zh": "超出显示方式",
+          "en": "Display type of excess tags",
+          "values": [
+            "scroll",
+            "break-line"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the tag input is disabled",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读",
+          "en": "Whether the tag input is readonly",
+          "values": []
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否可清空",
+          "en": "Whether the tag input is clearable",
+          "values": []
+        },
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否无边框",
+          "en": "Whether the tag input is borderless",
+          "values": []
+        },
+        {
+          "name": "autoWidth",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "宽度自适应",
+          "en": "Whether the width fits the content",
+          "values": []
+        },
+        {
+          "name": "dragSort",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否开启拖拽排序",
+          "en": "Whether drag sort is enabled",
+          "values": []
+        },
+        {
+          "name": "tag",
+          "type": "TagInputRichText",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签内容",
+          "en": "Tag content",
+          "values": []
+        },
+        {
+          "name": "collapsedItems",
+          "type": "TagInputRichText",
+          "default": "undefined",
+          "required": false,
+          "zh": "折叠标签内容",
+          "en": "Content of collapsed tags",
+          "values": []
+        },
+        {
+          "name": "valueDisplay",
+          "type": "TagInputRichText",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义标签列表",
+          "en": "Custom tag list render",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "TagInputRichText",
+          "default": "undefined",
+          "required": false,
+          "zh": "左侧标签文字",
+          "en": "Label on the left",
+          "values": []
+        },
+        {
+          "name": "prefixIcon",
+          "type": "TagInputRichText",
+          "default": "undefined",
+          "required": false,
+          "zh": "前缀图标",
+          "en": "Prefix icon",
+          "values": []
+        },
+        {
+          "name": "suffixIcon",
+          "type": "TagInputRichText",
+          "default": "undefined",
+          "required": false,
+          "zh": "后缀图标",
+          "en": "Suffix icon",
+          "values": []
+        },
+        {
+          "name": "suffix",
+          "type": "TagInputRichText",
+          "default": "undefined",
+          "required": false,
+          "zh": "后缀内容",
+          "en": "Suffix content",
+          "values": []
+        },
+        {
+          "name": "tips",
+          "type": "TagInputRichText",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示文字",
+          "en": "Tips below the tag input",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "TagInputValue",
+          "zh": "标签列表变化",
+          "en": "Value change event"
+        },
+        {
+          "name": "change",
+          "type": "TagInputChangeEvent",
+          "zh": "标签列表变化（带来源）",
+          "en": "Change event with trigger source"
+        },
+        {
+          "name": "inputValueChange",
+          "type": "string",
+          "zh": "输入内容变化",
+          "en": "Input value change event"
+        },
+        {
+          "name": "inputChange",
+          "type": "TagInputInputChangeEvent",
+          "zh": "输入内容变化（带来源）",
+          "en": "Input change event with trigger source"
+        },
+        {
+          "name": "remove",
+          "type": "TagInputRemoveEvent",
+          "zh": "删除标签",
+          "en": "Remove tag event"
+        },
+        {
+          "name": "dragSortChange",
+          "type": "TagInputDragSortEvent",
+          "zh": "拖拽排序",
+          "en": "Drag sort event"
+        },
+        {
+          "name": "enter",
+          "type": "TagInputEnterEvent",
+          "zh": "按下回车",
+          "en": "Enter key event"
+        },
+        {
+          "name": "focus",
+          "type": "TagInputFocusEvent",
+          "zh": "获得焦点",
+          "en": "Focus event"
+        },
+        {
+          "name": "blur",
+          "type": "TagInputFocusEvent",
+          "zh": "失去焦点",
+          "en": "Blur event"
+        },
+        {
+          "name": "clear",
+          "type": "MouseEvent",
+          "zh": "点击清空图标",
+          "en": "Clear icon click event"
+        },
+        {
+          "name": "mouseenter",
+          "type": "MouseEvent",
+          "zh": "鼠标移入",
+          "en": "Mouse enter event"
+        },
+        {
+          "name": "mouseleave",
+          "type": "MouseEvent",
+          "zh": "鼠标移出",
+          "en": "Mouse leave event"
+        },
+        {
+          "name": "paste",
+          "type": "TagInputPasteEvent",
+          "zh": "粘贴",
+          "en": "Paste event"
         }
       ]
     },

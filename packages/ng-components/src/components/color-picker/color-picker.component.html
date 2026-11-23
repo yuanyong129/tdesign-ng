@@ -1,0 +1,180 @@
+<t-popup
+  trigger="click"
+  placement="bottom-left"
+  overlayClassName="t-color-picker"
+  overlayInnerClassName="t-color-picker"
+  ignoreOutsideSelector=".t-select__dropdown"
+  [disabled]="mergedDisabled()"
+  [visible]="panelVisible()"
+  (visibleChange)="handleVisibleChange($event)"
+>
+  <div class="t-color-picker__trigger t-color-picker__trigger--default">
+    <t-input
+      [value]="triggerText()"
+      [size]="size()"
+      [borderless]="borderless()"
+      [clearable]="clearable()"
+      [disabled]="mergedDisabled()"
+      [placeholder]="placeholder()"
+      (valueChange)="onTriggerInput($event)"
+      (enter)="commitTriggerInput()"
+      (blur)="onTriggerBlur()"
+      (clear)="handleClear($event)"
+    >
+      <span
+        tInputPrefixIcon
+        class="t-color-picker__trigger--default__color"
+        [class.t-color-picker--bg-alpha]="enableAlpha()"
+      >
+        <span
+          class="color-inner"
+          [class.t-size-s]="size() === 'small'"
+          [class.t-size-l]="size() === 'large'"
+          [style.backgroundColor]="triggerColor()"
+        ></span>
+      </span>
+    </t-input>
+  </div>
+
+  <div tPopupContent class="t-color-picker__panel" [class.t-is-disabled]="mergedDisabled()">
+    <div class="t-color-picker__body">
+      <div
+        class="t-color-picker__saturation"
+        [style.background]="hueColor()"
+        (pointerdown)="startSaturation($event)"
+        (pointermove)="moveSaturation($event)"
+        (pointerup)="endSaturation($event)"
+        (pointercancel)="endSaturation($event)"
+      >
+        <span
+          class="t-color-picker__thumb"
+          [style.left]="saturationLeft()"
+          [style.top]="saturationTop()"
+          [style.color]="hueColor()"
+        ></span>
+      </div>
+
+      <div class="t-color-picker__sliders-wrapper">
+        <div class="t-color-picker__sliders">
+          <div class="t-color-picker__slider-wrapper t-color-picker__slider-wrapper--hue-type">
+            <div class="t-color-picker__slider-padding"></div>
+            <div
+              class="t-color-picker__slider t-color-picker__hue"
+              (pointerdown)="startHue($event)"
+              (pointermove)="moveHue($event)"
+              (pointerup)="endHue($event)"
+              (pointercancel)="endHue($event)"
+            >
+              <div class="t-color-picker__rail"></div>
+              <span
+                class="t-color-picker__thumb"
+                [style.left]="hueLeft()"
+                [style.color]="hueColor()"
+              ></span>
+            </div>
+          </div>
+
+          @if (enableAlpha()) {
+            <div
+              class="t-color-picker__slider-wrapper t-color-picker__slider-wrapper--alpha-type"
+            >
+              <div class="t-color-picker__slider-padding"></div>
+              <div
+                class="t-color-picker__slider t-color-picker__alpha"
+                [style.color]="opaqueColor()"
+                (pointerdown)="startAlpha($event)"
+                (pointermove)="moveAlpha($event)"
+                (pointerup)="endAlpha($event)"
+                (pointercancel)="endAlpha($event)"
+              >
+                <div class="t-color-picker__rail"></div>
+                <span
+                  class="t-color-picker__thumb"
+                  [style.left]="alphaLeft()"
+                  [style.color]="opaqueColor()"
+                ></span>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (showPrimaryColorPreview()) {
+          <div class="t-color-picker__sliders-preview t-color-picker--bg-alpha">
+            <span
+              class="t-color-picker__sliders-preview-inner"
+              [style.background]="previewColor()"
+            ></span>
+          </div>
+        }
+      </div>
+
+      <div class="t-color-picker__format">
+        <div class="t-color-picker__format--item t-color-picker__format--mode-select">
+          <t-select
+            size="small"
+            [options]="formatOptions()"
+            [value]="effectiveFormat()"
+            (valueChange)="onFormatChange($event)"
+          />
+        </div>
+        <div class="t-color-picker__format--item">
+          <t-input
+            size="small"
+            [value]="formatInputText()"
+            (valueChange)="onFormatInput($event)"
+            (enter)="commitFormatInput()"
+            (blur)="commitFormatInput()"
+          />
+        </div>
+      </div>
+
+      <div class="t-color-picker__swatches-wrap">
+        <div class="t-color-picker__swatches">
+          <div class="t-color-picker__swatches--title">
+            <span>系统预设颜色</span>
+          </div>
+          <ul class="t-color-picker__swatches--items">
+            @for (color of effectiveSwatches(); track color) {
+              <li
+                class="t-color-picker__swatches--item"
+                [class.t-is-active]="isActiveSwatch(color)"
+                (click)="selectSwatch(color, 'preset')"
+              >
+                <div class="t-color-picker__swatches--color">
+                  <span
+                    class="t-color-picker__swatches--inner"
+                    [style.backgroundColor]="color"
+                  ></span>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+
+        @if (recentVisible()) {
+          <div class="t-color-picker__swatches">
+            <div class="t-color-picker__swatches--title">
+              <span>最近使用颜色</span>
+            </div>
+            <ul class="t-color-picker__swatches--items">
+              @for (color of recentList(); track color) {
+                <li
+                  class="t-color-picker__swatches--item"
+                  [class.t-is-active]="isActiveSwatch(color)"
+                  (click)="selectSwatch(color, 'recent')"
+                >
+                  <div class="t-color-picker__swatches--color">
+                    <span
+                      class="t-color-picker__swatches--inner"
+                      [style.backgroundColor]="color"
+                    ></span>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</t-popup>

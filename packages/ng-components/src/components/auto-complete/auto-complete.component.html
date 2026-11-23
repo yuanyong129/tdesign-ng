@@ -1,0 +1,82 @@
+<t-popup
+  trigger="focus"
+  placement="bottom-left"
+  [disabled]="mergedDisabled() || readonly()"
+  [visible]="open()"
+  (visibleChange)="handleVisibleChange($event)"
+  overlayClassName="t-select__dropdown narrow-scrollbar"
+>
+  <div #wrap class="t-auto-complete">
+    @if (triggerContent().template; as triggerTemplate) {
+      <ng-container *ngTemplateOutlet="triggerTemplate" />
+    } @else if (triggerContent().text !== null) {
+      <span>{{ triggerContent().text }}</span>
+    } @else {
+      <t-input
+        [value]="innerValue()"
+        [size]="size()"
+        [status]="status()"
+        [placeholder]="placeholder()"
+        [tips]="tips()"
+        [borderless]="borderless()"
+        [clearable]="clearable()"
+        [disabled]="mergedDisabled()"
+        [readonly]="readonly()"
+        [autofocus]="autofocus()"
+        (change)="handleInputChange($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+        (enter)="handleEnter($event)"
+        (keydown)="handleKeydown($event)"
+        (clear)="handleClear($event)"
+        (compositionstart)="handleCompositionStart($event)"
+        (compositionend)="handleCompositionEnd($event)"
+      />
+    }
+  </div>
+
+  <div tPopupContent (mousedown)="handlePanelMouseDown($event)">
+    <div [class]="panelInnerClasses()" [style.minWidth.px]="hostWidth()">
+      <div class="t-auto-complete__panel">
+        <ng-container *ngTemplateOutlet="panelTop().template" />
+        @if (panelTop().text !== null) {
+          {{ panelTop().text }}
+        }
+
+        @if (filteredOptions().length > 0) {
+          <ul class="t-select__list">
+            @for (option of filteredOptions(); track $index) {
+              <li
+                [class]="optionClasses(option)"
+                [attr.title]="option.text"
+                (click)="selectOption(option, $event)"
+              >
+                @if (option.template; as labelTemplate) {
+                  <ng-container
+                    *ngTemplateOutlet="labelTemplate; context: { $implicit: option, option: option }"
+                  />
+                } @else if (highlightParts(option.content).length > 0) {
+                  <div class="t-select-option__highlight-item" [innerHTML]="highlightHtml(option.content)"></div>
+                } @else {
+                  {{ option.content }}
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="t-auto-complete__panel--empty">
+            <ng-container *ngTemplateOutlet="emptyContent().template" />
+            @if (emptyContent().text !== null) {
+              {{ emptyContent().text }}
+            }
+          </div>
+        }
+
+        <ng-container *ngTemplateOutlet="panelBottom().template" />
+        @if (panelBottom().text !== null) {
+          {{ panelBottom().text }}
+        }
+      </div>
+    </div>
+  </div>
+</t-popup>

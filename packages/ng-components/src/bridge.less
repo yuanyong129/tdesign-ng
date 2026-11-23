@@ -36,6 +36,8 @@ t-textarea {
 
 // 上游把提示文字绝对定位在表单容器内，单独使用时改为文档流
 t-input .t-input__tips,
+t-tag-input .t-input__tips,
+t-input-number .t-input__tips,
 t-select .t-input__tips {
   position: static;
   margin-top: 4px;
@@ -390,3 +392,24 @@ t-watermark {
 t-guide {
   display: contents;
 }
+
+/* 选择器输入：宿主是块级容器，inline 会让标签行/触发区塌陷；面板与 tips 的定位由内部结构负责。 */
+t-select-input { display: block; }
+
+/* 自动补全：宿主包着 width:100% 的 div.t-auto-complete，inline 会让输入框与面板塌宽。 */
+t-auto-complete { display: block; }
+
+/* 颜色选择器：less 里没有宿主选择器，自定义元素默认 inline，父级非 flex 时宽度会坍缩。 */
+t-color-picker { display: inline-block; vertical-align: middle; }
+
+/* 范围输入框：宿主默认 inline，内部 .t-range-input 的 width:100% 撑不开。 */
+t-range-input { display: block; }
+
+/* 标签输入框：宿主包着 width:100% 的输入框容器，inline 会让标签行塌宽。 */
+t-tag-input { display: block; }
+
+/* 日历：.t-calendar 自身只有边框/圆角，没有 display，inline 宿主会让控制区 flex 与 100% 宽表格塌掉。 */
+t-calendar { display: block; }
+
+/* 轮播：.t-swiper 是 position: relative + height: fit-content，inline 宿主高度失效且 __wrap 的 100% 无处参照。 */
+t-swiper { display: block; }

@@ -1,0 +1,130 @@
+@if (controllerVisible()) {
+  <div class="t-calendar__control">
+    <div class="t-calendar__title">
+      @if (headTemplate(); as headRef) {
+        <ng-container *ngTemplateOutlet="headRef; context: headContext()" />
+      } @else {
+        {{ headText() }}
+      }
+    </div>
+    <div class="t-calendar__control-section">
+      @if (yearVisible()) {
+        <div class="t-calendar__control-section-cell">
+          <t-select
+            [value]="selectedYear()"
+            [options]="yearOptions()"
+            [size]="controlSize()"
+            [disabled]="yearDisabled()"
+            (valueChange)="onYearSelect($event)"
+          />
+        </div>
+      }
+      @if (monthVisible()) {
+        <div class="t-calendar__control-section-cell">
+          <t-select
+            [value]="selectedMonth()"
+            [options]="monthOptions()"
+            [size]="controlSize()"
+            [disabled]="monthDisabled()"
+            (valueChange)="onMonthSelect($event)"
+          />
+        </div>
+      }
+      @if (modeVisible()) {
+        <div class="t-calendar__control-section-cell" style="height: auto">
+          <t-radio-group
+            theme="button"
+            variant="default-filled"
+            [value]="selectedMode()"
+            [options]="modeOptions"
+            [size]="controlSize()"
+            [disabled]="modeDisabled()"
+            (valueChange)="onModeSelect($event)"
+          />
+        </div>
+      }
+      @if (weekendVisible()) {
+        <div class="t-calendar__control-section-cell">
+          <t-button
+            class="t-calendar__control-tag"
+            [size]="weekendButtonProps().size ?? controlSize()"
+            [variant]="weekendButtonProps().variant ?? 'base'"
+            [theme]="weekendButtonProps().theme ?? 'default'"
+            [shape]="weekendButtonProps().shape ?? 'rectangle'"
+            [ghost]="weekendButtonProps().ghost ?? false"
+            [disabled]="weekendDisabled()"
+            (click)="toggleWeekend()"
+          >
+            {{ weekendButtonText() }}
+          </t-button>
+        </div>
+      }
+      @if (currentVisible()) {
+        <div class="t-calendar__control-section-cell">
+          <t-button
+            [size]="currentButtonProps().size ?? controlSize()"
+            [variant]="currentButtonProps().variant ?? 'base'"
+            [theme]="currentButtonProps().theme ?? 'default'"
+            [shape]="currentButtonProps().shape ?? 'rectangle'"
+            [ghost]="currentButtonProps().ghost ?? false"
+            [disabled]="currentDisabled()"
+            (click)="goToday()"
+          >
+            {{ currentButtonText() }}
+          </t-button>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<div [class]="panelClasses()">
+  <table class="t-calendar__table">
+    @if (selectedMode() === 'month') {
+      <thead class="t-calendar__table-head">
+        <tr class="t-calendar__table-head-row">
+          @for (header of weekHeaders(); track header.day) {
+            <th class="t-calendar__table-head-cell">
+              @if (weekTemplate(); as weekRef) {
+                <ng-container *ngTemplateOutlet="weekRef; context: weekContext(header)" />
+              } @else {
+                <span>{{ header.display }}</span>
+              }
+            </th>
+          }
+        </tr>
+      </thead>
+    }
+    <tbody class="t-calendar__table-body">
+      @for (row of rows(); track $index) {
+        <tr class="t-calendar__table-body-row">
+          @for (cell of row; track cell.date.getTime()) {
+            <td
+              [class]="cellClasses(cell)"
+              (click)="onCellClick(cell, $event)"
+              (dblclick)="onCellDoubleClick(cell, $event)"
+              (contextmenu)="onCellRightClick(cell, $event)"
+            >
+              @if (cellTemplate(); as cellRef) {
+                <ng-container *ngTemplateOutlet="cellRef; context: cellContext(cell)" />
+              } @else if (cellText()) {
+                {{ cellText() }}
+              } @else {
+                <div class="t-calendar__table-body-cell-display">{{ cellDisplay(cell) }}</div>
+                <div class="t-calendar__table-body-cell-content">
+                  @if (theme() === 'full') {
+                    @if (cellAppendTemplate(); as appendRef) {
+                      <ng-container *ngTemplateOutlet="appendRef; context: cellContext(cell)" />
+                    } @else {
+                      {{ cellAppendText() }}
+                    }
+                  }
+                </div>
+              }
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

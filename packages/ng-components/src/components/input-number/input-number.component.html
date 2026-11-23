@@ -1,0 +1,83 @@
+@if (theme() !== 'normal') {
+  <button
+    type="button"
+    [class]="decreaseClasses()"
+    [disabled]="!canReduce()"
+    aria-label="减少数值"
+    (click)="handleReduce($event)"
+  >
+    @if (theme() === 'column') {
+      <svg class="t-icon t-icon-chevron-down" viewBox="0 0 24 24" width="1em" height="1em" fill="none" aria-hidden="true">
+        <path d="M17.5 9.5L12 15L6.5 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+      </svg>
+    } @else {
+      <svg class="t-icon t-icon-remove" viewBox="0 0 24 24" width="1em" height="1em" fill="none" aria-hidden="true">
+        <path d="M16.502 12L7.50195 12" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+      </svg>
+    }
+  </button>
+}
+
+<div class="t-input__wrap">
+  <div [class]="inputClasses()">
+    @if (label()) {
+      <div class="t-input__prefix">
+        <ng-container *ngTemplateOutlet="richText; context: { $implicit: label() }" />
+      </div>
+    }
+    <input
+      class="t-input__inner"
+      type="text"
+      autocomplete="off"
+      [attr.autofocus]="autofocus() ? '' : null"
+      [disabled]="mergedDisabled()"
+      [readOnly]="readonly()"
+      [placeholder]="placeholder() ?? ''"
+      [value]="userInput()"
+      (input)="handleInput($event)"
+      (focus)="handleFocus($event)"
+      (blur)="handleBlur($event)"
+      (keydown)="handleKeydown($event)"
+      (keypress)="handleKeypress($event)"
+      (keyup)="handleKeyup($event)"
+    />
+    @if (suffix()) {
+      <div class="t-input__suffix">
+        <ng-container *ngTemplateOutlet="richText; context: { $implicit: suffix() }" />
+      </div>
+    }
+  </div>
+  @if (tips()) {
+    <div [class]="tipsClasses()">
+      <ng-container *ngTemplateOutlet="richText; context: { $implicit: tips() }" />
+    </div>
+  }
+</div>
+
+@if (theme() !== 'normal') {
+  <button
+    type="button"
+    [class]="increaseClasses()"
+    [disabled]="!canAdd()"
+    aria-label="增加数值"
+    (click)="handleAdd($event)"
+  >
+    @if (theme() === 'column') {
+      <svg class="t-icon t-icon-chevron-up" viewBox="0 0 24 24" width="1em" height="1em" fill="none" aria-hidden="true">
+        <path d="M17.5 14.5L12 9L6.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+      </svg>
+    } @else {
+      <svg class="t-icon t-icon-add" viewBox="0 0 24 24" width="1em" height="1em" fill="none" aria-hidden="true">
+        <path d="M12 5L12 19M19 12L5 12" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+      </svg>
+    }
+  </button>
+}
+
+<ng-template #richText let-value>
+  @if (asTemplate(value); as template) {
+    <ng-container *ngTemplateOutlet="template" />
+  } @else {
+    {{ value }}
+  }
+</ng-template>

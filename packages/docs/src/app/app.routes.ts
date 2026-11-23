@@ -257,6 +257,51 @@ export const routes: Routes = [
       import('./docs/config-provider/config-provider.component').then((m) => m.ConfigProviderDocs),
   },
   {
+    path: 'select-input',
+    loadComponent: () =>
+      import('./docs/select-input/select-input.component').then((m) => m.SelectInputDocs),
+  },
+  {
+    path: 'auto-complete',
+    loadComponent: () =>
+      import('./docs/auto-complete/auto-complete.component').then((m) => m.AutoCompleteDocs),
+  },
+  {
+    path: 'color-picker',
+    loadComponent: () =>
+      import('./docs/color-picker/color-picker.component').then((m) => m.ColorPickerDocs),
+  },
+  {
+    path: 'input-number',
+    loadComponent: () =>
+      import('./docs/input-number/input-number.component').then((m) => m.InputNumberDocs),
+  },
+  {
+    path: 'range-input',
+    loadComponent: () =>
+      import('./docs/range-input/range-input.component').then((m) => m.RangeInputDocs),
+  },
+  {
+    path: 'tag-input',
+    loadComponent: () =>
+      import('./docs/tag-input/tag-input.component').then((m) => m.TagInputDocs),
+  },
+  {
+    path: 'check-tag',
+    loadComponent: () =>
+      import('./docs/check-tag/check-tag.component').then((m) => m.CheckTagDocs),
+  },
+  {
+    path: 'calendar',
+    loadComponent: () =>
+      import('./docs/calendar/calendar.component').then((m) => m.CalendarDocs),
+  },
+  {
+    path: 'swiper',
+    loadComponent: () =>
+      import('./docs/swiper/swiper.component').then((m) => m.SwiperDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

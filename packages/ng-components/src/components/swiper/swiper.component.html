@@ -1,0 +1,111 @@
+<div [class]="wrapClasses()">
+  <div
+    [class]="contentClasses()"
+    [style.touchAction]="touchAction()"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp($event)"
+    (pointercancel)="onPointerCancel()"
+  >
+    <div
+      class="t-swiper__container"
+      [style.height]="heightStyle()"
+      [style.transform]="containerTransform()"
+      [style.transition]="containerTransition()"
+    >
+      <ng-content />
+    </div>
+  </div>
+
+  @if (navigationTemplate(); as template) {
+    <ng-container *ngTemplateOutlet="template; context: navigationContext()" />
+  } @else if (navType() === 'fraction') {
+    <div class="t-swiper__navigation t-swiper__navigation--fraction">
+      <div class="t-swiper__arrow">
+        <div class="t-swiper__arrow-left" (click)="prev('click')">
+          <svg
+            class="t-icon t-icon-chevron-left"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M14.5 17.5L9 12L14.5 6.5"
+            />
+          </svg>
+        </div>
+        <div class="t-swiper__navigation-text-fraction">{{ fractionText() }}</div>
+        <div class="t-swiper__arrow-right" (click)="next('click')">
+          <svg
+            class="t-icon t-icon-chevron-right"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+            style="transform: rotate(180deg)"
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M14.5 17.5L9 12L14.5 6.5"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <ul [class]="navigationClasses()">
+      @for (index of navItems(); track index) {
+        <li
+          class="t-swiper__navigation-item"
+          [class.t-is-active]="index === currentIndex()"
+          (mouseenter)="onNavigationEnter(index)"
+          (click)="onNavigationClick(index)"
+        >
+          <span></span>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (navType() !== 'fraction' && arrowVisible()) {
+    <div class="t-swiper__arrow t-swiper__arrow--default">
+      <div class="t-swiper__arrow-left" (click)="prev('click')">
+        <svg class="t-icon t-icon-chevron-left" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M14.5 17.5L9 12L14.5 6.5"
+          />
+        </svg>
+      </div>
+      <div class="t-swiper__arrow-right" (click)="next('click')">
+        <svg
+          class="t-icon t-icon-chevron-right"
+          viewBox="0 0 24 24"
+          width="1em"
+          height="1em"
+          aria-hidden="true"
+          style="transform: rotate(180deg)"
+        >
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M14.5 17.5L9 12L14.5 6.5"
+          />
+        </svg>
+      </div>
+    </div>
+  }
+</div>

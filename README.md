@@ -71,10 +71,19 @@
 | Dropdown / DropdownItem | ✅ options 数据驱动、子菜单、分割线与禁用、主题与图标 |
 | Image | ✅ 三种形状、`fit` 与定位、加载/错误占位、相册阴影、浮层、点击预览 |
 | ImageViewer | ✅ 缩放/旋转/翻转/拖拽、键盘操作、缩略图切换、下载、modal 与 modeless |
+| InputNumber | ✅ 步进/加法减法按钮、`theme` 三态、小数位与 `format`、`largeNumber` BigInt 步进、`(validate)` |
+| RangeInput | ✅ 双输入 + 分隔符、`activeIndex`、逐段 `format`/`placeholder`、`clearable`、焦点与鼠标事件带 `position` |
+| TagInput | ✅ 回车建标签、折叠 `+N`、`max`/`minCollapsedNum`、拖拽排序、`excessTagsDisplayType`、CVA |
+| CheckTag / CheckTagGroup | ✅ 受控/非受控、禁用与三档尺寸、组内单选/多选、`(change)` 带上下文 |
+| SelectInput | ✅ 可输入、标签回显与折叠、面板插槽、`popupVisible` 受控、前后缀图标投影、CVA |
+| AutoComplete | ✅ 关键字过滤与高亮、键盘上下选中/回车、自定义选项模板、异步联想、CVA |
+| Calendar | ✅ 月/年视图、`card`/`full` 主题、单/多/区间选择、周末隐藏、控制器配置、自定义单元格 |
+| Swiper | ✅ 滑动/淡入淡出、自动播放、循环、水平/垂直、卡片模式、多形态导航器、`(change)` 带来源 |
+| ColorPicker | ✅ 单色面板（饱和度/色相/透明度）、预设与最近使用、10 种格式互转（自研，零依赖）、CVA |
 
 P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / TreeSelect / DatePicker / TimePicker，剩余 Upload / Transfer / ColorPicker 转入下面的广度路线。
 
-广度阶段 B1（布局与静态展示）已全部落地 15/15，B2（弹层与媒体）已全部落地 8/8。
+广度阶段 B1（布局与静态展示）已全部落地 15/15，B2（弹层与媒体）8/8，B3（录入补全）12/12。
 
 ### 广度优先路线（2026-11-23 起）
 

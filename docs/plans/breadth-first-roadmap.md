@@ -226,26 +226,34 @@
   - 新增共享能力：`ConfigProvider`（`globalConfig` + `TConfigService`）先只接二维码文案，其余分组在 D0 统一接。
 - **估算**：3~5 天。
 
-### B3 数据录入补全（12 项 / 285 props）
+### B3 数据录入补全（12 项 / 285 props）— **进度 12/12（2026-11-23 完成）**
 
 目标：补齐"输入类组件矩阵"，为深度线的 Select/TreeSelect/AutoComplete 打地基。
 
 | 组件 | 上游 | 关键点 | 量级 |
 | --- | --- | --- | --- |
 | input-adornment ✅ | 2 | 前置/后置内容，尺寸与状态类 | S |
-| select-input | 43 | 组合选择器基座：标签回显、折叠、面板、清空 | L |
-| tag-input | 39 | 标签输入：增删、折叠、拖拽排序（拖拽标 `[D3]`） | L |
-| range-input | 42 | 双输入框、分隔符、清空、面板 | M |
-| input-number | 31 | CVA、步进、精度、格式化、键盘、长按 | L |
-| auto-complete | 32 | 基于 select-input + 输入过滤、异步 | L |
-| calendar | 22 | 月/年视图、单元格自定义、事件 | L |
-| color-picker | 38 | 颜色转换、面板、透明度、预设、最近使用 | XL |
-| swiper | 15 | 轮播、自动播放、指示点、触摸/拖拽 | L |
+| select-input ✅ | 43 | 组合选择器基座：标签回显、折叠、面板、清空 | L |
+| tag-input ✅ | 39 | 标签输入：增删、折叠、拖拽排序（拖拽标 `[D3]`） | L |
+| range-input ✅ | 42 | 双输入框、分隔符、清空、面板 | M |
+| input-number ✅ | 31 | CVA、步进、精度、格式化、键盘、长按 | L |
+| auto-complete ✅ | 32 | 基于 select-input + 输入过滤、异步 | L |
+| calendar ✅ | 22 | 月/年视图、单元格自定义、事件 | L |
+| color-picker ✅ | 38 | 颜色转换、面板、透明度、预设、最近使用 | XL |
+| swiper ✅ | 15 | 轮播、自动播放、指示点、触摸/拖拽 | L |
 | config-provider ✅ | 1 | 全局配置/前缀/主题，影响面大但 API 小 | S |
-| check-tag | 20 | CheckTag + CheckTagGroup，复用 tag 样式 | M |
+| check-tag ✅ | 20 | CheckTag + CheckTagGroup，复用 tag 样式 | M |
 
-- **顺序**：input-adornment ✅ → config-provider ✅ → select-input → tag-input → range-input → input-number → auto-complete → calendar → color-picker → swiper → check-tag。
+- **顺序（已完成）**：input-adornment → config-provider → select-input → tag-input → range-input → input-number → auto-complete → calendar → color-picker → swiper → check-tag。
 - **验收**：CVA 组件同时支持 `[(value)]`、`ngModel`、`formControl`；金额/百分比类 demo 可交互。
+- **验收结论（2026-11-23）**：11 个组件页面本地 CDP 实拍 0 console error、0 4xx；`align-check` missing 0 / extra 0（TInputNumber 31、TRangeInput 28、TTagInput 39、TCheckTag 20、TCheckTagGroup 10、TSelectInput 43、TAutoComplete 32、TCalendar 22、TSwiper 15、TColorPicker 22、TInputAdornment 2）。
+- **落地要点**：
+  - InputNumber / RangeInput / TagInput / SelectInput / AutoComplete / Calendar / ColorPicker 均实现 `ControlValueAccessor`，同时支持 `[(value)]`、`ngModel`、`formControl`。
+  - `t-input__tips` 在 vendor 里是绝对定位（依赖表单容器），bridge 已把 `t-input` / `t-input-number` / `t-select` / `t-tag-input` 的 tips 统一改为文档流。
+  - 新增宿主 block 规则：`t-range-input`、`t-tag-input`、`t-auto-complete`、`t-calendar`、`t-swiper`、`t-select-input`；`t-color-picker` 用 `inline-block`（触发器是色块）。
+  - ColorPicker 的颜色转换（hex/rgb/hsl/hsv/cmyk 互转）自研在 `color-picker.utils.ts`，零新增依赖；渐变面板与吸管标 `[D3]`。
+  - Calendar 复用 `date-picker-utils` 的 `formatDate`/`parseDateByFormat`/`isSameDay`/`startOfDay`，未引 dayjs；月/年网格自写（固定 6 行）。
+  - Swiper 用 `translate3d` + transition 自实现，无第三方库；loop 首尾跳转为「瞬时归位」，单步动画与 autoplay 与上游一致。
 - **估算**：5~8 天。
 
 ### B4 重型组件（4 项 / 184 props）

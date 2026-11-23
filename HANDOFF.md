@@ -22,14 +22,14 @@
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
 | P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
 | P5 复杂录入 | ✅ | Slider、Rate、Cascader（两层）、TreeSelect（两层）、DatePicker（八层）、DateRangePicker（四层）、TimePicker（两层）已完成；Upload / Transfer / ColorPicker 转入广度路线 |
-| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 60 个组件目录，B1 的 15 项与 B2 的 8 项已全部落地），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
+| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 72 个组件目录，B1 的 15 项、B2 的 8 项与 B3 的 12 项已全部落地），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
 
 **两个数字要分清**：
 
-- `pnpm gen:api` 统计的是**本仓库现有 API**：81 个组件、770 个输入属性、262 个示例。
-- `node scripts/align-check.mjs` 统计的是**对齐契约**：77 个组件、上游 1151 个属性、已对齐 726（63.1%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
+- `pnpm gen:api` 统计的是**本仓库现有 API**：92 个组件、940 个输入属性、289 个示例。
+- `node scripts/align-check.mjs` 统计的是**对齐契约**：87 个组件、上游 1403 个属性、已对齐 896（63.9%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
 
-组件清单（`packages/ng-components/src/index.ts`，50 条导出）：affix、alert、avatar、back-top、badge、breadcrumb、button、card、cascader、checkbox、collapse、comment、date-picker、date-range-picker、descriptions、dialog、divider、drawer、empty、form、grid、input、layout、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、skeleton、slider、space、statistic、steps、sticky-tool、switch、table、tabs、tag、textarea、time-picker、timeline、tooltip、tree-select、typography（含 DateRangePicker 独立实现）。
+组件清单（`packages/ng-components/src/index.ts`，69 条导出）：affix、alert、anchor、auto-complete、avatar、back-top、badge、breadcrumb、button、calendar、card、cascader、checkbox、check-tag、collapse、color-picker、comment、config-provider、date-picker、date-range-picker、descriptions、dialog、divider、drawer、dropdown、empty、form、grid、guide、image、image-viewer、input、input-adornment、input-number、layout、link、list、loading、message、notification、pagination、popconfirm、popup、progress、qrcode、radio、range-input、rate、select、select-input、skeleton、slider、space、statistic、steps、sticky-tool、switch、swiper、table、tabs、tag、tag-input、textarea、time-picker、timeline、tooltip、tree-select、typography、watermark（含 DateRangePicker 独立实现）。
 
 ## 3. 目录与环境
 
@@ -85,87 +85,37 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 - 清理 headless Edge 只杀自己的实例：`Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -match 'local-cache[\\/]+edge-' } | ForEach-Object { taskkill /PID $_.ProcessId /T /F }`。**不要用 `Get-Process msedge | Stop-Process`**，会把用户自己的浏览器一起杀掉；正则要同时匹配 `/` 和 `\`（用 Node `spawn` 拼路径时是正斜杠，只写 `\\` 会漏杀）。
 
-## 7. 当前进行中的工作：广度优先 B3
+## 7. 当前进行中的工作：广度优先 B4
 
 2026-11-23 起路线改为**广度优先**：先把上游 71 个组件目录补齐到 L1 可用基线，再回填深度。完整计划见 [`docs/plans/breadth-first-roadmap.md`](./docs/plans/breadth-first-roadmap.md)。
 
-**已完成（B0 基建）**：
+**已完成（B0~B3）**：
 
-- 新建 `docs/plans/breadth-first-roadmap.md`：39 项缺口按 B1~B4 分波（15 / 8 / 12 / 4 项，共 815 个上游属性）、L1 六条门槛、D0~D3 深度分批、风险表、单组件 8 步工作流。
-- README 与旧计划已加路线指针（旧文件 §22）；本文件 §2 / §5 / §7 / §8 同步更新。
-- `scripts/align-check.mjs` 支持 `--json`，输出 `{ upstreamVersion, totals, components[] }`；每个组件的 `ignored[]` 带 `inUpstream`（区分真上游属性与插槽/事件映射）。
-- 新增 `scripts/depth-report.mjs`（`pnpm depth:report`）：读 align-check 的 JSON，按 `[D1]/[D2]/[D3]`（reason 无前缀则按组件默认归属）聚合债务，输出「分布表 + 组件债务表 + 每条债务明细」的 markdown。
+- **B0 基建**：`scripts/align-check.mjs` 支持 `--json`（`ignored[]` 带 `inUpstream` 区分真上游属性与插槽/事件映射）；新增 `scripts/depth-report.mjs`（`pnpm depth:report`）按 `[D1]/[D2]/[D3]` 聚合债务。
+- **B1 布局与静态展示 15/15**：Layout/Header/Aside/Content/Footer、Row/Col、Card、Alert、Skeleton、Typography（Text/Title/Paragraph）、Breadcrumb(+Item)、Steps(+Item)、Descriptions(+Item)、Comment、Timeline(+Item)、Statistic、StickyTool、Affix、BackTop。
+- **B2 弹层与媒体 8/8**：Popconfirm、Dropdown(+Item)、Guide、Image、ImageViewer、Anchor(+Item)、QRCode（可选 peer 依赖 `qrcode`）、Watermark；新增横切组件 **ConfigProvider**（`TConfigService` 暴露 `config` signal，二维码文案已接入）。
+- **B3 录入补全 12/12**：InputAdornment、SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、CheckTag(+Group)、ConfigProvider。
 
-**当前债务基线（2026-11-23，`pnpm depth:report`）**：上游 1151 props，已对齐 726（63.1%）；未实现 425 项里 190 项是 Angular 惯用映射（插槽/双向绑定/事件名，不算债），**真实欠账 235 项**：D1 159（67.7%）、D2 44（18.7%）、D3 32（13.6%）。显式 `[D#]` 前缀 15 项——存量按组件默认归属统计，新写的债必须带前缀。
+**当前债务基线（2026-11-23，`pnpm depth:report`）**：上游 1403 props，已对齐 896（63.9%）；未实现 507 项里 253 项是 Angular 惯用映射（插槽/双向绑定/事件名，不算债），**真实欠账 254 项**：D1 166（65.4%）、D2 48（18.9%）、D3 40（15.7%）。显式 `[D#]` 前缀 38 项。
 
-**B1 全部完成（15/15）**：
+**下一步：B4 重型组件（4 项 / 184 props）**
 
-| 组件 | 落地要点 |
-| --- | --- |
-| Layout / Header / Aside / Content / Footer | 五个组件一个目录；`direction` 缺省时用 `contentChildren(TAside)` 判断横竖，`t-layout--with-sider` 同步 |
-| Grid / Row / Col | `T_ROW` 注入 token 把 gutter 传给列；gutter 支持 `number`（水平）/ `[水平, 垂直]` / 断点对象；响应式靠 CSS 媒体查询，列不监听 viewport；六个断点的 span/offset/order/pull/push 全支持 |
-| Card | 头部四段（头像/标题副标题描述/操作区）、封面、主体、底部；`poster2` 把 actions 移到底部；加载态直接渲染 `t-loading`，不自写占位视觉 |
-| Alert | 四主题图标内联 SVG、`maxLine` 用 `-webkit-line-clamp`、关闭走 `t-alert--closing` → `transitionend`（宿主 opacity）→ `t-is-hidden`，260ms 兜底 |
-| Skeleton | `rowCol` 展开成行/列视图，六种 theme 预设；`loading=false` 时宿主不带类并投影真实内容 |
-| Typography / Text / Title / Paragraph | 样式根落在内部语义元素（`span` / `h1~h6` / `p`），因为 `.t-typography` 的字号选择器是 `h1&`~`h6&`；装饰嵌套顺序 `<i><kbd><mark><code><del><u><strong>`；宿主 `display: contents` |
-| Breadcrumb / BreadcrumbItem | 投影与 `options` 两种用法；`separator` 支持字符串与模板；`maxItemWidth` 截断；文字层统一渲染成 `<a>`（两支 span/a 各带一个 `ng-content` 会让投影只进第一个槽） |
-| Steps / StepItem | 横向/竖向、`theme="dot"`、三种 `separator`、`readonly`、单项 `status` 覆盖、`(currentChange)`；`state` 用 protected 供子项读取 |
-| Descriptions / DescriptionItem | `layout` × `itemLayout` 四种组合的 cell 模型照上游 `getRows`；`span` 与「末项吸收剩余列」一致；带边框 / `colon` / 单元格样式 |
-| Comment | 头像（字符串当 URL）、作者与时间、引用块 `__quote`、回复区嵌套 `t-comment`、操作区数组或模板 |
-| Timeline / TimelineItem | `labelAlign` 按 layout 自动换算、`mode` 交替/同侧、`reverse` 用 DOM 重排、`theme="dot"` 虚线、自定义与 loading 圆点（`dotColor` 默认 `primary`，与上游一致） |
-| Statistic | 数值格式化复刻 `getFormatValue`（小数位上下限 + 分隔符替换）、`format` 接管、趋势箭头、loading 骨架 |
-| StickyTool | 六个停靠方向、普通/紧凑、方形/圆角、`width` 居中、子项弹层走 `[tPopupContent]`、`(itemClick)` / `(itemHover)` |
-| Affix | `measure()` 与上游逐行对齐（先 offsetTop、再 offsetBottom 夹紧）、`(fixedChange)` 只在吸附状态翻转时派发 |
-| BackTop | `rAF` + `easeOutCubic` 平滑滚动、`visibleHeight` 阈值、三种主题与两种形状、不提供 `onClick` 输出（原生 click 冒泡） |
+| 组件 | 上游 | 第一层（必须） | 第二层（可后置） |
+| --- | ---: | --- | --- |
+| Tree | 50 | 展开/选中/勾选、父子联动、禁用、异步加载、自定义节点模板 | 拖拽、虚拟滚动、懒加载大数据 |
+| Menu | 45 | 递归菜单、展开/收起、选中、子菜单弹层 | 折叠态、键盘导航、主题 |
+| Transfer | 26 | 双列表、勾选、搜索、移动 | 树形穿梭、分页、拖拽排序 |
+| Upload | 63 | 选择/拖拽、文件列表、进度、删除、自定义请求 | 图片预览、多选、目录、失败重试 |
 
-新增共享基建：`packages/ng-components/src/_utils/breakpoint.ts`（`BREAKPOINTS`、`BREAKPOINT_MIN_WIDTH`、`matchBreakpoint`、`TViewportService`，SSR 下不注册 resize 监听）。
+顺序：Tree 优先（TreeSelect 深度工作依赖抽出公共核心）→ Menu → Transfer → Upload。
 
-**B2 全部完成（8/8，2026-11-23）**：
+**每波收尾固定动作**：`gen:api` → `gen:demos` → `align-check`（missing/extra 必须 0）→ `tsc` → `ngc -p packages/docs/tsconfig.json` → `build:lib` → 本地 dev server + `cdp-page.mjs` 实拍 → 同步 README/HANDOFF/roadmap → 提交推送。
 
-| 组件 | 落地要点 |
-| --- | --- |
-| Popconfirm | 复用 `t-popup` 定位；`(visibleChange)` 带 `{ visible, trigger, e }`，不做 `[(visible)]`；`popupProps` 标 `[D2]` |
-| Dropdown / DropdownItem | options 数据驱动 + `children` 子菜单、分割线/禁用/主题；默认 `trigger="hover"`；子菜单纵向位置实时测量 |
-| Guide | 不套 CDK Overlay（z-index 低于 999999），宿主内手写 `position: fixed` + 视口夹紧 + 主轴翻转；气泡/对话框两种模式 |
-| Image | `src` 支持 `字符串或 File`；形状 / `fit` / `position` / 浮层 / 相册阴影；点击预览交给使用方监听原生 click |
-| ImageViewer | modal / modeless；缩放旋转翻转拖拽、键盘、缩略图、下载；`attach` 标 `[D2]`、`viewerScale` 标 `[D3]` |
-| Anchor / AnchorItem | scroll spy + `targetOffset`；**只有一个默认投影槽**，吸顶改用 `position: sticky`（多 `<ng-content>` 会丢内容）；自写 300ms 缓动滚动 |
-| QRCode | 引入 `qrcode`（可选 peer + 根 devDependency，docs 直接编译库源码时必须提升）；canvas/svg 双渲染、图标挖空、过期/已扫描/加载遮罩 |
-| Watermark | canvas 平铺、多行/图片、透明度与旋转、移动/删除；复用单个 `<style>` 注入 keyframes（上游会泄漏） |
+**待拍板**：
 
-新增共享基建：`ConfigProvider`（`globalConfig` 输入 + `TConfigService` 注入 + `effect` 同步、销毁时清空）。当前只接二维码文案，其余分组在 D0 统一接。
-
-**下一步（按此顺序执行）**：
-
-1. **B3 剩余 10 项**：SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、CheckTag（InputAdornment ✅、ConfigProvider ✅ 已完成）。
-2. 每完成 5 个组件，更新 README 组件表与 roadmap §3 状态。
-3. 波次结束：`gen:api` → `align-check` → `tsc` / `ngc` → `pnpm build:lib` → CDP 冒烟 → 提交 + 更新本文件。
-
-**待拍板（B3 开工前确认）**：
-
-- ColorPicker：颜色转换自研约 150 行（默认），不引依赖。
-- Calendar：复用现有日期工具，不引 dayjs。
-- 广度期不引入 Vitest（保持速度），D0 统一落地；日期/颜色等纯函数可先用 `node --test` 兜底。
-
-### 上一个任务：DatePicker 第八层（2026-11-22 完成，留作记录）
-
-DatePicker 前七层已提交：单日期、面板翻页/预设、时间模式、mode 月份/年份、mode 周/季度、cell / valueDisplay、range 可选范围。第八层补上「多选」。
-
-- **multiple**：`input(false, { transform: booleanAttribute })`；开启后值类型变为数组（`DatePickerValue = DateValue | DateValue[]`，新增 `DateMultipleValue`）。
-  - `values` computed 统一把单选/多选都归一成 `DateValue[]`，`firstValue` 供单选相关逻辑（解析、时间草稿、`valueDisplay`）使用。
-  - `pickDate` 在多选时切换选中并**保持面板打开**；`cellClasses` 的 active 判定改为「值列表里存在同一天」，因此可同时高亮多个格子。
-  - 输入框渲染 `t-tag` 列表（复用 `TTag`，`closable` 时点击可单独删除，`removeTag` 过滤后提交），`handleClear` 提交 `[]`，`(change)` 事件值同步为数组。
-  - `enableTimePicker` 与 `multiple` 互斥（多选时 `isTimeMode` 为 false）；`week` / `quarter` 模式仍走整周/整季提交，不支持多选（与上游一致）。
-- `scripts/align-check.mjs` 从 `TDatePicker` 的 `ignoreUpstream` 移除 `multiple`（DateRangePicker 保留）。
-- **样式桥接**：上游多选走 `tag-input` 布局，我方用 `t-tag` + 输入框组合，在 `bridge.less` 补了最小规则（`.t-date-picker--multiple .t-input` 允许换行、标签行内排列、`__inner` 弹性收缩、`__suffix` 靠右），原因写在注释里。
-
-**已用 CDP 验证**（`http://localhost:4280/date-picker`，`date-picker-multiple` demo）：
-
-- 初值 `['2024-05-01','2024-05-08']`：宿主类 `t-date-picker--multiple`，输入框内 2 个标签，面板里 1 日与 8 日同时高亮。
-- 依次点 15、16 日：标签依次增加且面板保持打开；点标签上的关闭图标只移除该日期；清空后标签与高亮全部消失、hint 显示「已选 0 个日期」。
-- `align-check` 合计 `missing 0 / extra 0`（`TDatePicker 已对齐 22/44`）；`gen:api` 43 组件 / 493 属性，`gen:demos` 188 示例；`consoleErrors` 为空。
-
-DatePicker / DateRangePicker / TimePicker / Cascader / TreeSelect 的余项不再占用当前窗口，已转为深度债（`[D1]`），与 §8 合并记录。
+- ColorPicker 渐变面板与吸管（`[D3]`，依赖渐变编辑器工作量）；
+- 广度期不引 Vitest（组件交互目前靠 CDP 探针 + strictTemplates 校验）；
+- Upload 自定义请求是否需要 `HttpClient` 依赖。
 
 ## 8. 已知缺口与技术债
 
