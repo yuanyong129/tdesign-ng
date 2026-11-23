@@ -13,6 +13,7 @@
  *   node scripts/align-check.mjs              # 打印报告
  *   node scripts/align-check.mjs --strict     # 有任何 missing 就退出码 1（CI 用）
  *   node scripts/align-check.mjs --component TButton
+ *   node scripts/align-check.mjs --json       # 输出结构化报告（供 depth-report 消费）
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -755,6 +756,7 @@ const CONFIG = {
 
 const argv = process.argv.slice(2);
 const STRICT = argv.includes('--strict');
+const JSON_OUT = argv.includes('--json');
 const ONLY = argv.includes('--component') ? argv[argv.indexOf('--component') + 1] : null;
 
 /** 读取（并缓存）上游某个组件的 type.d.ts。 */
@@ -828,18 +830,25 @@ async function main() {
   const api = JSON.parse(await fs.readFile(API_FILE, 'utf8'));
   let totalMissing = 0;
   let totalExtra = 0;
+  let totalUpstream = 0;
+  let totalAligned = 0;
   const rows = [];
+  const results = [];
 
   for (const [className, cfg] of Object.entries(CONFIG)) {
     if (ONLY && className !== ONLY) continue;
     const ours = api.components[className];
     if (!ours) {
-      rows.push({ className, status: 'skip', note: 'API 数据里没有这个组件' });
+      const note = 'API 数据里没有这个组件';
+      rows.push({ className, status: 'skip', note });
+      results.push({ className, status: 'skip', note });
       continue;
     }
 
     if (!cfg.upstream) {
-      rows.push({ className, status: 'n/a', note: cfg.reason ?? '上游没有对应组件' });
+      const note = cfg.reason ?? '上游没有对应组件';
+      rows.push({ className, status: 'n/a', note });
+      results.push({ className, status: 'n/a', note });
       continue;
     }
 
@@ -848,6 +857,7 @@ async function main() {
       upstream = parseProps(await fetchUpstreamTypes(cfg.upstream), cfg.upstream, cfg.upstreamInterface);
     } catch (err) {
       rows.push({ className, status: 'error', note: err.message });
+      results.push({ className, status: 'error', note: err.message });
       continue;
     }
 
@@ -874,6 +884,28 @@ async function main() {
 
     totalMissing += missing.length;
     totalExtra += extra.length;
+    totalUpstream += upstream.size;
+    totalAligned += present.length;
+
+    results.push({
+      className,
+      upstream: cfg.upstream,
+      status: missing.length || extra.length ? 'drift' : 'ok',
+      upstreamTotal: upstream.size,
+      aligned: present.length,
+      missing,
+      extra,
+      // ignoreUpstream 是「已决策不实现」的清单，reason 里的 [D1]/[D2]/[D3] 前缀
+      // 供 scripts/depth-report.mjs 做深度债分组。inUpstream 区分「真的是上游属性」
+      // 与「插槽/事件名的映射说明」，只有前者算深度债。
+      ignored: Object.entries(ignoreUpstream).map(([name, reason]) => ({
+        name,
+        reason,
+        inUpstream: upstream.has(name),
+      })),
+    });
+
+    if (JSON_OUT) continue;
 
     console.log(`\n${className}  (上游 ${cfg.upstream}@${UPSTREAM_VERSION})`);
     console.log(`  已对齐 ${present.length}/${upstream.size}`);
@@ -888,11 +920,32 @@ async function main() {
     }
   }
 
-  for (const row of rows) {
-    console.log(`\n${row.className}: ${row.status} —— ${row.note}`);
-  }
+  if (JSON_OUT) {
+    console.log(
+      JSON.stringify(
+        {
+          upstreamVersion: UPSTREAM_VERSION,
+          generatedAt: new Date().toISOString(),
+          totals: {
+            components: results.filter((r) => r.status === 'ok' || r.status === 'drift').length,
+            upstreamProps: totalUpstream,
+            aligned: totalAligned,
+            missing: totalMissing,
+            extra: totalExtra,
+          },
+          components: results,
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    for (const row of rows) {
+      console.log(`\n${row.className}: ${row.status} —— ${row.note}`);
+    }
 
-  console.log(`\n合计：missing ${totalMissing} 项，extra ${totalExtra} 项。`);
+    console.log(`\n合计：missing ${totalMissing} 项，extra ${totalExtra} 项。`);
+  }
 
   if (STRICT && totalMissing > 0) {
     console.error('\n--strict 失败：仍有未对齐的上游属性。');

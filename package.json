@@ -23,6 +23,8 @@
     "check:api": "node scripts/gen-api-docs.mjs --check",
     "check:icons": "node scripts/gen-icons.mjs --check",
     "check:align": "node scripts/align-check.mjs",
+    "check:align:json": "node scripts/align-check.mjs --json",
+    "depth:report": "node scripts/depth-report.mjs",
     "vendor:styles": "node scripts/vendor-tdesign-common.mjs",
     "preview:pages": "node scripts/preview-pages.mjs"
   },

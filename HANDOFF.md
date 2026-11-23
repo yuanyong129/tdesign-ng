@@ -57,6 +57,8 @@ pnpm gen:api          # 由 TSDoc 生成 packages/docs/.../api.generated.json
 pnpm gen:demos        # 由 demo 源码生成 demo-sources.generated.json
 node scripts/align-check.mjs            # 全部组件对齐检查
 node scripts/align-check.mjs --component TTable
+node scripts/align-check.mjs --json     # 结构化报告（depth-report 的数据源）
+node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统计债务）
 ```
 
 ## 5. 必须遵守的约定
@@ -87,17 +89,20 @@ node scripts/align-check.mjs --component TTable
 
 2026-11-23 起路线改为**广度优先**：先把上游 71 个组件目录补齐到 L1 可用基线，再回填深度。完整计划见 [`docs/plans/breadth-first-roadmap.md`](./docs/plans/breadth-first-roadmap.md)。
 
-**已完成（B0 文档层）**：
+**已完成（B0 基建）**：
 
 - 新建 `docs/plans/breadth-first-roadmap.md`：39 项缺口按 B1~B4 分波（15 / 8 / 12 / 4 项，共 815 个上游属性）、L1 六条门槛、D0~D3 深度分批、风险表、单组件 8 步工作流。
 - README 与旧计划已加路线指针（旧文件 §22）；本文件 §2 / §5 / §7 / §8 同步更新。
+- `scripts/align-check.mjs` 支持 `--json`，输出 `{ upstreamVersion, totals, components[] }`；每个组件的 `ignored[]` 带 `inUpstream`（区分真上游属性与插槽/事件映射）。
+- 新增 `scripts/depth-report.mjs`（`pnpm depth:report`）：读 align-check 的 JSON，按 `[D1]/[D2]/[D3]`（reason 无前缀则按组件默认归属）聚合债务，输出「分布表 + 组件债务表 + 每条债务明细」的 markdown。
+
+**当前债务基线（2026-11-23，`pnpm depth:report`）**：上游 811 props，已对齐 452（55.7%）；未实现 359 项里 143 项是 Angular 惯用映射（插槽/双向绑定/事件名，不算债），**真实欠账 216 项**：D1 159（73.6%）、D2 40（18.5%）、D3 17（7.9%）。显式 `[D#]` 前缀目前 0 项——存量按组件默认归属统计，新写的债必须带前缀。
 
 **下一步（按此顺序执行）**：
 
-1. **B0 代码层**：`scripts/align-check.mjs` 加 `--json`；新增 `scripts/depth-report.mjs`（按 `[D1]/[D2]/[D3]` 统计每个组件的债务）。
-2. **B1 首批 5 个**：layout → grid → card → alert → skeleton（预计 1 天，每个按 §5 第 8 条 L1 六条交付）。
-3. 每完成 5 个组件，更新 README 组件表与 roadmap §3 状态。
-4. 波次结束：`pnpm build:lib` + CDP 冒烟 + 提交 + 更新本文件。
+1. **B1 首批 5 个**：layout → grid → card → alert → skeleton（预计 1 天，每个按 §5 第 8 条 L1 六条交付）。
+2. 每完成 5 个组件，更新 README 组件表与 roadmap §3 状态。
+3. 波次结束：`pnpm build:lib` + CDP 冒烟 + 提交 + 更新本文件。
 
 **待拍板（B2 / B3 开工前确认）**：
 

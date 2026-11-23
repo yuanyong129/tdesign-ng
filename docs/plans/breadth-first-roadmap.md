@@ -138,8 +138,9 @@
   - `[D1]` 表格与选择线（Table / Select / Cascader / Tree / DatePicker / TimePicker / InputNumber / AutoComplete）
   - `[D2]` 录入与反馈线（Input / Textarea / Form / Upload / Transfer / Dialog / Drawer / Popup / Menu / Dropdown / Guide）
   - `[D3]` 其余组件与边角能力
-- B0 给 `align-check` 加 `--json`，并新增 `scripts/depth-report.mjs`：输出每个组件的「已实现 / 债务（按 D 分组）」与全局覆盖率。这样"广度完成"与"深度进度"都能用一条命令回答，而不是靠人记。
-- 已有组件的旧 reason 不强制一次性改写，在进入对应深度批次时顺手补前缀。
+- B0 给 `align-check` 加 `--json`，并新增 `scripts/depth-report.mjs`：输出每个组件的「已实现 / 债务（按 D 分组）」与全局覆盖率。这样"广度完成"与"深度进度"都能用一条命令回答，而不是靠人记。**（已完成：`pnpm check:align:json` / `pnpm depth:report`）**
+- 报表会把「Angular 惯用映射」从债务里剔除（`modelValue`/`onChange`/`default`/`content` 这类是 API 形态差异，reason 以「Angular 用 …」「双向绑定」「ng-content」等开头），否则工作单会被零工作量条目稀释。基线：359 项未实现中 143 项是映射，真实欠账 216 项（D1 159 / D2 40 / D3 17）。
+- 已有组件的旧 reason 不强制一次性改写，在进入对应深度批次时顺手补前缀；无前缀的按组件默认归属统计（见 `depth-report.mjs` 的 `LINE_DEFAULTS`）。
 
 ---
 
@@ -167,6 +168,8 @@
 1. **QRCode**：默认引入 `qrcode`（MIT，约 20KB gzip）作为库依赖；若坚持零依赖，则 B2 先做占位并标 `[D3]`，深度期自研编码器。
 2. **ColorPicker**：颜色转换（hex/rgb/hsv/hsl/alpha）自研约 150 行，不引依赖。
 3. **Calendar**：复用现有日期工具，不引 dayjs。
+
+**B0 状态（2026-11-23）**：4 项全部完成。`pnpm check:align:json` 输出结构化报告，`pnpm depth:report` 输出 D 阶段工作单；基线 216 项真实欠账（D1 159 / D2 40 / D3 17）。
 
 ### B1 布局与静态展示（15 项 / 203 props）
 
