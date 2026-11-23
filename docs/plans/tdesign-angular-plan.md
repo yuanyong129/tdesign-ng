@@ -538,6 +538,17 @@ tdesign-ng/
 - 表头筛选（`filter` / `filterValue` / `filterChange`）、固定列、行选择与展开行、分页联动、虚拟滚动、多级表头、合并单元格、列宽拖拽。
 - `loader`、`TNode` 级别的表头富内容（如带图标/提示的标题）暂未支持。
 
+## 22. 路线调整：广度优先（2026-11-23）
+
+本文件 §6 的原始分期执行到 P5 后按「深度」推进（继续补 DatePicker / TreeSelect / Table 的高级属性）。**2026-11-23 起改为广度优先**：
+
+1. 先把上游 71 个组件目录全部补齐（当前 34 个，缺 37 个目录 + CheckTag/CheckTagGroup 两个子组件），每个组件达到 L1「可用」基线；
+2. 组件覆盖 100% 之后，再按 D1 表格与选择线 / D2 录入与反馈线 / D3 其余 的顺序回填高级能力。
+
+- 新的执行计划：**[`docs/plans/breadth-first-roadmap.md`](./breadth-first-roadmap.md)**（波次表、L1/L2 定义、时间估算、风险、单组件工作流）。
+- 本文件继续作为模式与实现记录：§14~§21 的组件实现要点仍然有效；§6 的分期被 roadmap §3/§4 取代；§7~§9 的文档站方案、风险、DoD 继续有效。
+- P5 尚未完成的深度项（Upload / Transfer / ColorPicker 以及 DatePicker / DateRangePicker / TimePicker / Cascader / TreeSelect 的余项）**转入深度债**，不再占用广度窗口；待实现项在 `scripts/align-check.mjs` 的 `ignoreUpstream` 里以 `[D1]` / `[D2]` / `[D3]` 前缀标注。
+
 
 
 

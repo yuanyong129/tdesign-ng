@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-22，对应提交：DatePicker 第八层（multiple 多选）之后。
+> 更新日期：2026-11-23，对应路线：**广度优先**（B0 基建 → B1 布局与静态展示，见 §7）。
 
 ## 1. 这个项目是什么
 
@@ -21,11 +21,15 @@
 | P2 基础表单 | ✅ | Input / Textarea / Switch / Checkbox / Radio / Select / Form（含 TDesign rules 校验引擎） |
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
 | P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
-| P5 复杂录入 | 🚧 | Slider、Rate、Cascader（两层）、TreeSelect（两层）、DatePicker（七层）、DateRangePicker（四层）、TimePicker（两层）已完成；Upload / Transfer / ColorPicker 未开始 |
+| P5 复杂录入 | ✅ | Slider、Rate、Cascader（两层）、TreeSelect（两层）、DatePicker（八层）、DateRangePicker（四层）、TimePicker（两层）已完成；Upload / Transfer / ColorPicker 转入广度路线 |
+| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 34 个），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
 
-当前 `align-check` 覆盖 **43 个组件、493 个输入属性、188 个示例**，合计 `missing 0 / extra 0`（`TCascader 已对齐 21/53`、`TTreeSelect 已对齐 20/44`、`TDatePicker 已对齐 18/44`、`TDateRangePicker 已对齐 23/44`、`TTimePicker 已对齐 12/33`）。
+**两个数字要分清**：
 
-组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、cascader、checkbox、collapse、date-picker、date-range-picker、dialog、divider、drawer、empty、form、input、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、slider、space、switch、table、tabs、tag、textarea、time-picker、tooltip、tree-select。
+- `pnpm gen:api` 统计的是**本仓库现有 API**：43 个 API 条目、493 个输入属性、188 个示例。
+- `node scripts/align-check.mjs` 统计的是**对齐契约**：39 个组件、上游 811 个属性、已对齐 452（55.7%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
+
+组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、cascader、checkbox、collapse、date-picker、date-range-picker、dialog、divider、drawer、empty、form、input、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、slider、space、switch、table、tabs、tag、textarea、time-picker、tooltip、tree-select（35 个组件目录，含 DateRangePicker 独立实现；上游 34 个目录 + 1 个自有）。
 
 ## 3. 目录与环境
 
@@ -36,7 +40,8 @@ packages/icons           # TIcon + 内置图标表（脚本生成）
 packages/docs            # 文档站（端口 4280）
 scripts/                 # gen-api-docs / gen-demo-sources / align-check / gen-icons
 vendor/tdesign-common    # 上游样式快照
-docs/plans/tdesign-angular-plan.md   # 分阶段计划与实现记录（§14~§20）
+docs/plans/breadth-first-roadmap.md  # 当前执行计划：广度优先波次、L1/L2 定义  ← 先读这个
+docs/plans/tdesign-angular-plan.md   # 历史分期与实现记录（§14~§22）
 ```
 
 - Node 22 / pnpm 12 / Angular 19.2 / ng-packagr 19.2，zone CD + `provideZoneChangeDetection({ eventCoalescing: true })`。
@@ -62,6 +67,8 @@ node scripts/align-check.mjs --component TTable
 4. **`align-check` 的哲学**：上游每个未实现的属性都必须在 `ignoreUpstream` 里写一句原因；总量必须保持 `missing 0 / extra 0`。上游没有、我们新增的属性放进 `angularOnly` 并注明理由。
 5. **demo 约定**：`packages/docs/src/app/docs/<name>/demos/<name>-xxx.ts`，selector 为 `demo-<name>-<id>`，每个 demo 包在 `<docs-demo id="..." title description>` 里；页面末尾是 `<api-table component="TXxx" />` + `<docs-page-nav current="/xxx" />`。
 6. **新增组件要同步**：`index.ts` 导出、`nav.ts` 导航、`app.routes.ts` 懒加载路由、`packages/docs/src/styles.less` 引入组件 less、`scripts/align-check.mjs` 配置、README 组件表。
+7. **未实现的上游属性必须标深度债**：`ignoreUpstream` 的 reason 以 `[D1]`（表格与选择线）/ `[D2]`（录入与反馈线）/ `[D3]`（其余）开头，后接一句"缺什么、为什么"。这既是文档，也是 `scripts/depth-report.mjs` 的输入。
+8. **广度期每个组件按 L1 六条交付**（roadmap §2.1）：主干可交互、通用维度齐全、契约完整、文档闭环、`build:lib` + CDP 通过、明确写清允许的欠账。不要用"先占位、以后再补"跳过 demo 与 align-check。
 
 ## 6. 环境坑（都踩过）
 
@@ -76,11 +83,30 @@ node scripts/align-check.mjs --component TTable
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 - 清理 headless Edge 只杀自己的实例：`Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -match 'local-cache[\\/]+edge-' } | ForEach-Object { taskkill /PID $_.ProcessId /T /F }`。**不要用 `Get-Process msedge | Stop-Process`**，会把用户自己的浏览器一起杀掉；正则要同时匹配 `/` 和 `\`（用 Node `spawn` 拼路径时是正斜杠，只写 `\\` 会漏杀）。
 
-## 7. 当前进行中的工作：DatePicker 第八层（已完成）
+## 7. 当前进行中的工作：广度优先 B1
 
-DatePicker 前七层已提交：单日期、面板翻页/预设、时间模式、mode 月份/年份、mode 周/季度、cell / valueDisplay、range 可选范围。本层补上「多选」。
+2026-11-23 起路线改为**广度优先**：先把上游 71 个组件目录补齐到 L1 可用基线，再回填深度。完整计划见 [`docs/plans/breadth-first-roadmap.md`](./docs/plans/breadth-first-roadmap.md)。
 
-**已完成（第八层）**：
+**已完成（B0 文档层）**：
+
+- 新建 `docs/plans/breadth-first-roadmap.md`：39 项缺口按 B1~B4 分波（15 / 8 / 12 / 4 项，共 815 个上游属性）、L1 六条门槛、D0~D3 深度分批、风险表、单组件 8 步工作流。
+- README 与旧计划已加路线指针（旧文件 §22）；本文件 §2 / §5 / §7 / §8 同步更新。
+
+**下一步（按此顺序执行）**：
+
+1. **B0 代码层**：`scripts/align-check.mjs` 加 `--json`；新增 `scripts/depth-report.mjs`（按 `[D1]/[D2]/[D3]` 统计每个组件的债务）。
+2. **B1 首批 5 个**：layout → grid → card → alert → skeleton（预计 1 天，每个按 §5 第 8 条 L1 六条交付）。
+3. 每完成 5 个组件，更新 README 组件表与 roadmap §3 状态。
+4. 波次结束：`pnpm build:lib` + CDP 冒烟 + 提交 + 更新本文件。
+
+**待拍板（B2 / B3 开工前确认）**：
+
+- QRCode：引入 `qrcode`（MIT，约 20KB gzip）还是深度期自研编码器？默认前者。
+- 广度期不引入 Vitest（保持速度），D0 统一落地；日期/颜色等纯函数可先用 `node --test` 兜底。
+
+### 上一个任务：DatePicker 第八层（2026-11-22 完成，留作记录）
+
+DatePicker 前七层已提交：单日期、面板翻页/预设、时间模式、mode 月份/年份、mode 周/季度、cell / valueDisplay、range 可选范围。第八层补上「多选」。
 
 - **multiple**：`input(false, { transform: booleanAttribute })`；开启后值类型变为数组（`DatePickerValue = DateValue | DateValue[]`，新增 `DateMultipleValue`）。
   - `values` computed 统一把单选/多选都归一成 `DateValue[]`，`firstValue` 供单选相关逻辑（解析、时间草稿、`valueDisplay`）使用。
@@ -96,15 +122,11 @@ DatePicker 前七层已提交：单日期、面板翻页/预设、时间模式�
 - 依次点 15、16 日：标签依次增加且面板保持打开；点标签上的关闭图标只移除该日期；清空后标签与高亮全部消失、hint 显示「已选 0 个日期」。
 - `align-check` 合计 `missing 0 / extra 0`（`TDatePicker 已对齐 22/44`）；`gen:api` 43 组件 / 493 属性，`gen:demos` 188 示例；`consoleErrors` 为空。
 
-**下一步（建议顺序）**：
-
-1. DatePicker 余项：`disableTime` / `timePickerProps`、`label` / `tips` / `status` / `borderless` / `readonly` 与各类 `*Props` 透传。
-2. DateRangePicker 余项：`disableTime` / `timePickerProps`、`mode`、`panelActiveDate`、`panelPreselection` / `cancelRangeSelectLimit`、`cell` / `valueDisplay`、`prefixIcon` / `suffixIcon` 与各类 `*Props` 透传。
-3. 继续 P5：Upload / Transfer / ColorPicker。
-4. TimePicker / TreeSelect / Cascader 余项见 §8。
+DatePicker / DateRangePicker / TimePicker / Cascader / TreeSelect 的余项不再占用当前窗口，已转为深度债（`[D1]`），与 §8 合并记录。
 
 ## 8. 已知缺口与技术债
 
+- **完整缺口清单与深度分批见 `docs/plans/breadth-first-roadmap.md` §1.3 / §4.2**；本节只记跨组件的共性问题。新登记的未实现属性请按 §5 第 7 条补 `[D1]/[D2]/[D3]` 前缀。
 - **富内容一律走模板**：Message/Notification 的内容还是纯字符串；Table 单元格目前支持 `cell` 函数返回字符串 + `tTableCell` 模板，二者不要混用。
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
@@ -115,7 +137,7 @@ DatePicker 前七层已提交：单日期、面板翻页/预设、时间模式�
 
 1. `node scripts/gen-api-docs.mjs && node scripts/gen-demo-sources.mjs`（有新增输入/示例时）。
 2. `node scripts/align-check.mjs` 必须 `missing 0 / extra 0`。
-3. `pnpm build` 全绿。
+3. `pnpm build:lib` 全绿（`gen:api` / `gen:demos` 的 check 已包含在内）。注意：`pnpm build` 的 docs 阶段在当前 DSH 沙箱会因 Angular CLI `spawn EPERM` 失败（沙箱禁止管道子进程），属环境限制，需在本机终端跑。
 4. 用 `.local-cache/` 下的 CDP 脚本模板（如 `cdp-check-table2.mjs`）打开对应路由，断言 DOM 类名、文本、交互后的状态与 `consoleErrors`。
 5. `node .local-cache/cdp-check-live.mjs https://yuanyong129.github.io/tdesign-ng/<route>` 验证线上页面。
 

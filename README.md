@@ -47,7 +47,22 @@
 | DateRangePicker | ✅ 双面板范围选择、日期 + 时间（enableTimePicker / needConfirm / defaultTime）、开始/结束归一化、范围高亮、custom format / valueType、firstDayOfWeek、disableDate、range 可选范围、预设范围、手动输入、自定义分隔符、label / tips / status、borderless / readonly、清空、禁用、三种尺寸 |
 | TimePicker | ✅ 时分秒三列、format 控制列、steps 步长、面板确认、此刻、预设时间、禁用时间、手动输入、自定义回显、清空、禁用、三种尺寸 |
 
-P4 数据展示已全部落地；P5 复杂录入进行中（Slider、Rate、Cascader、TreeSelect、DatePicker、TimePicker 已完成，Upload / Transfer / ColorPicker 待做），计划见 `docs/plans/tdesign-angular-plan.md`；
+P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / TreeSelect / DatePicker / TimePicker，剩余 Upload / Transfer / ColorPicker 转入下面的广度路线。
+
+### 广度优先路线（2026-11-23 起）
+
+策略：**先把上游组件全部补齐到「可用」基线，再逐个补高级能力。** 完整波次表、L1/L2 验收标准、工作流与风险见 [`docs/plans/breadth-first-roadmap.md`](./docs/plans/breadth-first-roadmap.md)。
+
+| 波次 | 内容 | 项数 / 上游属性 |
+| --- | --- | --- |
+| B0 | 基线：`[D1]/[D2]/[D3]` 债务标记、`align-check --json`、`depth-report` 脚本 | — |
+| B1 | 布局与静态展示：Layout、Grid、Typography、Card、Alert、Skeleton、Comment、Breadcrumb、Steps、Timeline、Statistic、Descriptions、StickyTool、Affix、BackTop | 15 项 / 203 |
+| B2 | 弹层与媒体：Popconfirm、Dropdown、Guide、Image、ImageViewer、Anchor、QRCode、Watermark | 8 项 / 143 |
+| B3 | 录入补全：InputAdornment、SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、ConfigProvider、CheckTag | 12 项 / 285 |
+| B4 | 重型组件：Menu、Tree、Transfer、Upload | 4 项 / 184 |
+
+广度完成后（上游 71 个组件目录 100% 覆盖）进入深度阶段：D0 横切工程（TNode 模板化、`*Props` 透传、受控/非受控统一、SSR、a11y、单测、i18n）→ D1 表格与选择线 → D2 录入与反馈线 → D3 其余组件。
+
 接手开发请先读 [`HANDOFF.md`](./HANDOFF.md)。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
