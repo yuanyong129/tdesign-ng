@@ -3,9 +3,11 @@
  */
 
 // Components
+export * from './components/alert';
 export * from './components/avatar';
 export * from './components/badge';
 export * from './components/button';
+export * from './components/card';
 export * from './components/cascader';
 export * from './components/checkbox';
 export * from './components/collapse';
@@ -16,7 +18,9 @@ export * from './components/divider';
 export * from './components/drawer';
 export * from './components/empty';
 export * from './components/form';
+export * from './components/grid';
 export * from './components/input';
+export * from './components/layout';
 export * from './components/link';
 export * from './components/list';
 export * from './components/loading';
@@ -28,6 +32,7 @@ export * from './components/progress';
 export * from './components/radio';
 export * from './components/rate';
 export * from './components/select';
+export * from './components/skeleton';
 export * from './components/slider';
 export * from './components/space';
 export * from './components/switch';

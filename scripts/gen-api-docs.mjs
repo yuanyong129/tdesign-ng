@@ -222,6 +222,28 @@ function inputAlias(dec) {
   return null;
 }
 
+/**
+ * 取信号式 `input()` / `input.required()` 的别名。
+ *
+ * 选项对象的位置随重载而变：`input(initial, { alias })` 在第二个参数，
+ * `input.required({ alias })` 在第一个参数，所以这里逐个参数找 `alias`。
+ */
+function signalInputAlias(call) {
+  for (const arg of call.arguments) {
+    if (!ts.isObjectLiteralExpression(arg)) continue;
+    for (const prop of arg.properties) {
+      if (
+        ts.isPropertyAssignment(prop) &&
+        ts.isIdentifier(prop.name) &&
+        prop.name.text === 'alias' &&
+        ts.isStringLiteral(prop.initializer)
+      )
+        return prop.initializer.text;
+    }
+  }
+  return null;
+}
+
 /** 取 `@Component({ selector: 't-button' })` 里的选择器。 */
 function componentSelector(dec) {
   if (!ts.isCallExpression(dec.expression) || !dec.expression.arguments.length) return '';
@@ -264,7 +286,7 @@ function parseFile(file, source, valueTuples) {
             if (sig.kind === 'input') {
               const fallback = sig.call.arguments[0]?.getText(source);
               api.inputs.push({
-                name: member.name.text,
+                name: signalInputAlias(sig.call) ?? member.name.text,
                 type: info.type,
                 default: doc.defaultValue ?? fallback ?? (sig.required ? undefined : 'undefined'),
                 required: sig.required,

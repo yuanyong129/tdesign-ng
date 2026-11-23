@@ -300,3 +300,20 @@ t-tree-select {
 .t-date-picker--multiple .t-input__suffix {
   margin-left: auto;
 }
+
+// Grid：t-col 宿主默认是行内元素，未设置 span 时会退化成行内盒，这里补成块级；
+// .t-col-<n> 等类选择器优先级更高，span=0 的 display:none 仍能覆盖本规则。
+t-col {
+  display: block;
+}
+
+// Skeleton：宿主就是 `.t-skeleton` 根节点，自定义元素默认 inline，会导致内部 __row 的
+// flex 排布与上下外边距失效，这里补成块级（与 t-table 同理）。
+t-skeleton {
+  display: block;
+}
+// Card：`.t-card` 只有 position/背景/圆角，没有 display 声明；宿主是自定义元素，默认 inline
+// 会让内部 header/body/footer 的 padding 与 flex 布局无法撑开整行，这里补成块级。
+t-card {
+  display: block;
+}

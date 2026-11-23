@@ -173,16 +173,16 @@
 
 ### B1 布局与静态展示（15 项 / 203 props）
 
-目标：把"纯展示 + 布局"类组件一次清零，组件数从 35 直接推到 50。
+目标：把"纯展示 + 布局"类组件一次清零，组件数从 35 直接推到 50。**进度 5/15（2026-11-23）**：layout、grid、card、alert、skeleton 已落地并接线，剩余 10 项。
 
 | 组件 | 上游 | 关键点 | 量级 |
 | --- | --- | --- | --- |
-| layout | 1+4 | Header/Aside/Content/Footer，纯结构类 | S |
-| grid | 4+13 | 24 栅格、gutter、offset、响应式断点 | S |
+| layout ✅ | 1+4 | Header/Aside/Content/Footer，纯结构类 | S |
+| grid ✅ | 4+13 | 12 栅格（上游 `@grid-columns: 12`）、gutter（数字/数组/断点对象）、offset/order/pull/push、六断点响应式 | S |
 | typography | 13+7 | Text/Title/Paragraph；copyable/editable/ellipsis 标 `[D3]` | M |
-| card | 25 | header/footer/actions/cover/loading，插槽多 | M |
-| alert | 11 | 主题、图标、关闭、滚动（marquee 标 `[D3]`） | S |
-| skeleton | 7 | 行/列组合、动画、加载态包裹 | S |
+| card ✅ | 25 | header/footer/actions/cover/loading，插槽多；加载态复用 `t-loading` | M |
+| alert ✅ | 11 | 主题、图标、关闭（`t-alert--closing` → `t-is-hidden`）、滚动（marquee 标 `[D3]`） | S |
+| skeleton ✅ | 7 | 行/列组合、六种 theme 预设、gradient/flashed、`delay` | S |
 | comment | 7 | 头像、作者、时间、操作区 | S |
 | breadcrumb | 8+11 | 分隔符、当前项、跳转；折叠标 `[D3]` | S |
 | steps | 10+7 | 水平/垂直、点状、当前态、错误态 | M |

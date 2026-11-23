@@ -1,0 +1,87 @@
+<!-- 富文本属性统一渲染入口：模板走 ngTemplateOutlet，其余按文本输出（等价于上游的 renderTNodeJSX）。 -->
+<ng-template #renderNode let-value>
+  @if (asTemplate(value); as template) {
+    <ng-container *ngTemplateOutlet="template" />
+  } @else if (value) {
+    {{ value }}
+  }
+</ng-template>
+
+@if (hasHeader()) {
+  <div [class]="headerClasses()" [style]="headerStyle()">
+    @if (header()) {
+      <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: header() }" />
+    } @else {
+      <div class="t-card__header-wrapper">
+        @if (avatar()) {
+          <div class="t-card__avatar">
+            <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: avatar() }" />
+          </div>
+        }
+        <div>
+          @if (title()) {
+            <div class="t-card__title">
+              <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: title() }" />
+            </div>
+          }
+          @if (subtitle()) {
+            <div class="t-card__subtitle">
+              <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: subtitle() }" />
+            </div>
+          }
+          @if (description()) {
+            <p class="t-card__description">
+              <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: description() }" />
+            </p>
+          }
+        </div>
+      </div>
+      @if (actions() && !isPoster2()) {
+        <div class="t-card__actions">
+          <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: actions() }" />
+        </div>
+      }
+      @if (status()) {
+        <div class="t-card__actions">
+          <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: status() }" />
+        </div>
+      }
+    }
+  </div>
+}
+
+@if (cover()) {
+  <div class="t-card__cover">
+    @if (coverSrc(); as src) {
+      <img [src]="src" alt="" />
+    } @else {
+      <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: cover() }" />
+    }
+  </div>
+}
+
+@if (loading() || hasContent()) {
+  <div [class]="bodyClasses()" [style]="bodyStyle()">
+    @if (loading()) {
+      <!-- 加载态交给 t-loading 渲染，卡片不自带任何加载视觉（上游同样用 Loading 组件包住主体）。 -->
+      <t-loading [loading]="true" />
+    }
+    <!-- 投影内容常驻在主体里，加载态只隐藏不改结构：<ng-content> 若被销毁，内容会落回宿主上直接显示。 -->
+    <div #bodyInner [style.display]="loading() ? 'none' : null">
+      <ng-content />
+    </div>
+  </div>
+}
+
+@if (hasFooter()) {
+  <div [class]="footerClasses()" [style]="footerStyle()">
+    <div class="t-card__footer-wrapper">
+      <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: footer() }" />
+    </div>
+    @if (actions() && isPoster2()) {
+      <div class="t-card__actions">
+        <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: actions() }" />
+      </div>
+    }
+  </div>
+}

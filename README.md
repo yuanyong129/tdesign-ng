@@ -46,8 +46,15 @@
 | DatePicker | ✅ 单日期、日期 + 时间（enableTimePicker / needConfirm / defaultTime）、mode 周/月份/季度/年份模式、面板导航、custom format / valueType、firstDayOfWeek、disableDate、预设日期、手动输入、清空、禁用、三种尺寸、自定义单元格与回显、可选范围限制、多选（标签回显） |
 | DateRangePicker | ✅ 双面板范围选择、日期 + 时间（enableTimePicker / needConfirm / defaultTime）、开始/结束归一化、范围高亮、custom format / valueType、firstDayOfWeek、disableDate、range 可选范围、预设范围、手动输入、自定义分隔符、label / tips / status、borderless / readonly、清空、禁用、三种尺寸 |
 | TimePicker | ✅ 时分秒三列、format 控制列、steps 步长、面板确认、此刻、预设时间、禁用时间、手动输入、自定义回显、清空、禁用、三种尺寸 |
+| Layout / Header / Aside / Content / Footer | ✅ 五件套，`direction` 未设置时按内容里有没有 Aside 自动判断横竖 |
+| Grid / Row / Col | ✅ 12 栅格、gutter（数字/数组/断点对象）、justify / align、offset / order / pull / push、六个断点响应式 |
+| Card | ✅ 头部（头像/标题/副标题/描述/操作区）、封面、主体、底部、poster 主题、加载态复用 `t-loading` |
+| Alert | ✅ 四种主题、标题与操作区、`maxLine` 截断、淡出关闭与 `(close)` / `(closed)` |
+| Skeleton | ✅ 六个预设主题、`rowCol` 自定义行、gradient / flashed 动画与 `delay` |
 
 P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / TreeSelect / DatePicker / TimePicker，剩余 Upload / Transfer / ColorPicker 转入下面的广度路线。
+
+广度阶段 B1（布局与静态展示）已落地 5/15：Layout、Grid、Card、Alert、Skeleton。
 
 ### 广度优先路线（2026-11-23 起）
 

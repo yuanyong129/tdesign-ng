@@ -1,6 +1,121 @@
 {
   "generatedBy": "scripts/gen-api-docs.mjs",
   "components": {
+    "TAlert": {
+      "className": "TAlert",
+      "selector": "t-alert",
+      "file": "packages/ng-components/src/components/alert/alert.component.ts",
+      "inputs": [
+        {
+          "name": "close",
+          "type": "string | boolean",
+          "default": "false",
+          "required": false,
+          "zh": "关闭按钮",
+          "en": "close button",
+          "values": []
+        },
+        {
+          "name": "closeBtn",
+          "type": "string | boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示关闭按钮",
+          "en": "close button visibility",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "AlertContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义图标",
+          "en": "icon",
+          "values": []
+        },
+        {
+          "name": "maxLine",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "消息最多行数",
+          "en": "max line",
+          "values": []
+        },
+        {
+          "name": "message",
+          "type": "AlertContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "消息正文",
+          "en": "message",
+          "values": []
+        },
+        {
+          "name": "operation",
+          "type": "AlertContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "操作区",
+          "en": "operation",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "AlertTheme",
+          "default": "info",
+          "required": false,
+          "zh": "主题",
+          "en": "theme",
+          "values": [
+            "success",
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "title",
+          "type": "AlertContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标题",
+          "en": "title",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "close",
+          "type": "AlertCloseEvent",
+          "zh": "点击关闭按钮",
+          "en": "close"
+        },
+        {
+          "name": "closed",
+          "type": "AlertClosedEvent",
+          "zh": "关闭动画结束",
+          "en": "closed"
+        }
+      ]
+    },
+    "TAside": {
+      "className": "TAside",
+      "selector": "t-aside",
+      "file": "packages/ng-components/src/components/layout/aside.component.ts",
+      "inputs": [
+        {
+          "name": "width",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "宽度",
+          "en": "width",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TAvatar": {
       "className": "TAvatar",
       "selector": "t-avatar",
@@ -339,6 +454,219 @@
           "required": false,
           "zh": "关联的表单 id",
           "en": "Id of the associated form",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TCard": {
+      "className": "TCard",
+      "selector": "t-card",
+      "file": "packages/ng-components/src/components/card/card.component.ts",
+      "inputs": [
+        {
+          "name": "actions",
+          "type": "CardContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片操作区",
+          "en": "actions",
+          "values": []
+        },
+        {
+          "name": "avatar",
+          "type": "CardContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片头像",
+          "en": "avatar",
+          "values": []
+        },
+        {
+          "name": "bordered",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示卡片边框",
+          "en": "bordered",
+          "values": []
+        },
+        {
+          "name": "bodyClassName",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片主体区域的类名",
+          "en": "body class name",
+          "values": []
+        },
+        {
+          "name": "bodyStyle",
+          "type": "CardStyles",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片主体区域的样式",
+          "en": "body style",
+          "values": []
+        },
+        {
+          "name": "cover",
+          "type": "CardContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片封面",
+          "en": "cover",
+          "values": []
+        },
+        {
+          "name": "description",
+          "type": "CardContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片描述",
+          "en": "description",
+          "values": []
+        },
+        {
+          "name": "footer",
+          "type": "CardContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片底部内容",
+          "en": "footer",
+          "values": []
+        },
+        {
+          "name": "footerClassName",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片底部区域的类名",
+          "en": "footer class name",
+          "values": []
+        },
+        {
+          "name": "footerStyle",
+          "type": "CardStyles",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片底部区域的样式",
+          "en": "footer style",
+          "values": []
+        },
+        {
+          "name": "header",
+          "type": "CardContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义卡片头部",
+          "en": "header",
+          "values": []
+        },
+        {
+          "name": "headerClassName",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片头部区域的类名",
+          "en": "header class name",
+          "values": []
+        },
+        {
+          "name": "headerStyle",
+          "type": "CardStyles",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片头部区域的样式",
+          "en": "header style",
+          "values": []
+        },
+        {
+          "name": "headerBordered",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "卡片头部是否显示下边框",
+          "en": "header bordered",
+          "values": []
+        },
+        {
+          "name": "hoverShadow",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "鼠标悬浮时是否显示阴影",
+          "en": "hover shadow",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示加载态",
+          "en": "loading",
+          "values": []
+        },
+        {
+          "name": "shadow",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示卡片阴影",
+          "en": "shadow",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "CardSize",
+          "default": "'medium'",
+          "required": false,
+          "zh": "卡片尺寸",
+          "en": "size",
+          "values": [
+            "medium",
+            "small"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片状态",
+          "en": "status",
+          "values": []
+        },
+        {
+          "name": "subtitle",
+          "type": "CardContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片副标题",
+          "en": "subtitle",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "CardTheme",
+          "default": "'normal'",
+          "required": false,
+          "zh": "卡片主题",
+          "en": "theme",
+          "values": [
+            "normal",
+            "poster1",
+            "poster2"
+          ]
+        },
+        {
+          "name": "title",
+          "type": "CardContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "卡片标题",
+          "en": "title",
           "values": []
         }
       ],
@@ -733,6 +1061,122 @@
         }
       ]
     },
+    "TCol": {
+      "className": "TCol",
+      "selector": "t-col",
+      "file": "packages/ng-components/src/components/grid/col.component.ts",
+      "inputs": [
+        {
+          "name": "flex",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "列宽度",
+          "en": "flex",
+          "values": []
+        },
+        {
+          "name": "span",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "占位格数",
+          "en": "span",
+          "values": []
+        },
+        {
+          "name": "offset",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "偏移格数",
+          "en": "offset",
+          "values": []
+        },
+        {
+          "name": "order",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "排序",
+          "en": "order",
+          "values": []
+        },
+        {
+          "name": "pull",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "向右移动格数",
+          "en": "pull",
+          "values": []
+        },
+        {
+          "name": "push",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "向左移动格数",
+          "en": "push",
+          "values": []
+        },
+        {
+          "name": "xs",
+          "type": "ColSize | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "视口 ≥ 320px",
+          "en": "xs",
+          "values": []
+        },
+        {
+          "name": "sm",
+          "type": "ColSize | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "视口 ≥ 768px",
+          "en": "sm",
+          "values": []
+        },
+        {
+          "name": "md",
+          "type": "ColSize | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "视口 ≥ 992px",
+          "en": "md",
+          "values": []
+        },
+        {
+          "name": "lg",
+          "type": "ColSize | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "视口 ≥ 1200px",
+          "en": "lg",
+          "values": []
+        },
+        {
+          "name": "xl",
+          "type": "ColSize | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "视口 ≥ 1400px",
+          "en": "xl",
+          "values": []
+        },
+        {
+          "name": "xxl",
+          "type": "ColSize | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "视口 ≥ 1880px",
+          "en": "xxl",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TCollapse": {
       "className": "TCollapse",
       "selector": "t-collapse",
@@ -901,6 +1345,13 @@
           "values": []
         }
       ],
+      "outputs": []
+    },
+    "TContent": {
+      "className": "TContent",
+      "selector": "t-content",
+      "file": "packages/ng-components/src/components/layout/content.component.ts",
+      "inputs": [],
       "outputs": []
     },
     "TDatePicker": {
@@ -1962,6 +2413,23 @@
       ],
       "outputs": []
     },
+    "TFooter": {
+      "className": "TFooter",
+      "selector": "t-footer",
+      "file": "packages/ng-components/src/components/layout/footer.component.ts",
+      "inputs": [
+        {
+          "name": "height",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "高度",
+          "en": "height",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TForm": {
       "className": "TForm",
       "selector": "t-form",
@@ -2271,6 +2739,23 @@
       ],
       "outputs": []
     },
+    "THeader": {
+      "className": "THeader",
+      "selector": "t-header",
+      "file": "packages/ng-components/src/components/layout/header.component.ts",
+      "inputs": [
+        {
+          "name": "height",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "高度",
+          "en": "height",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TInput": {
       "className": "TInput",
       "selector": "t-input",
@@ -2533,6 +3018,26 @@
           "en": "Clear icon click event"
         }
       ]
+    },
+    "TLayout": {
+      "className": "TLayout",
+      "selector": "t-layout",
+      "file": "packages/ng-components/src/components/layout/layout.component.ts",
+      "inputs": [
+        {
+          "name": "direction",
+          "type": "LayoutDirection | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "布局方向",
+          "en": "direction",
+          "values": [
+            "vertical",
+            "horizontal"
+          ]
+        }
+      ],
+      "outputs": []
     },
     "TLink": {
       "className": "TLink",
@@ -3804,6 +4309,56 @@
         }
       ]
     },
+    "TRow": {
+      "className": "TRow",
+      "selector": "t-row",
+      "file": "packages/ng-components/src/components/grid/row.component.ts",
+      "inputs": [
+        {
+          "name": "justify",
+          "type": "RowJustify | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "水平排列方式",
+          "en": "justify",
+          "values": [
+            "start",
+            "end",
+            "center",
+            "space-around",
+            "space-between"
+          ]
+        },
+        {
+          "name": "align",
+          "type": "RowAlign | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "垂直对齐方式",
+          "en": "align",
+          "values": [
+            "start",
+            "end",
+            "center",
+            "stretch",
+            "baseline",
+            "top",
+            "middle",
+            "bottom"
+          ]
+        },
+        {
+          "name": "gutter",
+          "type": "RowGutter",
+          "default": "0",
+          "required": false,
+          "zh": "栅格间距",
+          "en": "gutter",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TSelect": {
       "className": "TSelect",
       "selector": "t-select",
@@ -4050,6 +4605,70 @@
           "en": "Blur event"
         }
       ]
+    },
+    "TSkeleton": {
+      "className": "TSkeleton",
+      "selector": "t-skeleton",
+      "file": "packages/ng-components/src/components/skeleton/skeleton.component.ts",
+      "inputs": [
+        {
+          "name": "animation",
+          "type": "SkeletonAnimation",
+          "default": "none",
+          "required": false,
+          "zh": "动画效果",
+          "en": "animation",
+          "values": [
+            "gradient",
+            "flashed",
+            "none"
+          ]
+        },
+        {
+          "name": "delay",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "延迟时间",
+          "en": "delay",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否加载中",
+          "en": "loading",
+          "values": []
+        },
+        {
+          "name": "rowCol",
+          "type": "SkeletonRowCol | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "行列配置",
+          "en": "rowCol",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "SkeletonTheme",
+          "default": "text",
+          "required": false,
+          "zh": "主题",
+          "en": "theme",
+          "values": [
+            "text",
+            "avatar",
+            "paragraph",
+            "avatar-text",
+            "tab",
+            "article"
+          ]
+        }
+      ],
+      "outputs": []
     },
     "TSlider": {
       "className": "TSlider",

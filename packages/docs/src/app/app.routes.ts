@@ -20,6 +20,25 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/divider/divider.component').then((m) => m.DividerDocs),
   },
   {
+    path: 'alert',
+    loadComponent: () => import('./docs/alert/alert.component').then((m) => m.AlertDocs),
+  },
+  {
+    path: 'card',
+    loadComponent: () => import('./docs/card/card.component').then((m) => m.CardDocs),
+  },
+  {
+    path: 'skeleton',
+    loadComponent: () => import('./docs/skeleton/skeleton.component').then((m) => m.SkeletonDocs),
+  },  {
+    path: 'grid',
+    loadComponent: () => import('./docs/grid/grid.component').then((m) => m.GridDocs),
+  },
+  {
+    path: 'layout',
+    loadComponent: () => import('./docs/layout/layout.component').then((m) => m.LayoutDocs),
+  },
+  {
     path: 'input',
     loadComponent: () => import('./docs/input/input.component').then((m) => m.InputDocs),
   },

@@ -22,14 +22,14 @@
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
 | P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
 | P5 复杂录入 | ✅ | Slider、Rate、Cascader（两层）、TreeSelect（两层）、DatePicker（八层）、DateRangePicker（四层）、TimePicker（两层）已完成；Upload / Transfer / ColorPicker 转入广度路线 |
-| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 34 个），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
+| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 39 个，B1 已落地 5 个），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
 
 **两个数字要分清**：
 
-- `pnpm gen:api` 统计的是**本仓库现有 API**：43 个 API 条目、493 个输入属性、188 个示例。
-- `node scripts/align-check.mjs` 统计的是**对齐契约**：39 个组件、上游 811 个属性、已对齐 452（55.7%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
+- `pnpm gen:api` 统计的是**本仓库现有 API**：53 个组件、547 个输入属性、204 个示例。
+- `node scripts/align-check.mjs` 统计的是**对齐契约**：49 个组件、上游 877 个属性、已对齐 506（57.7%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
 
-组件清单（`packages/ng-components/src/index.ts`）：avatar、badge、button、cascader、checkbox、collapse、date-picker、date-range-picker、dialog、divider、drawer、empty、form、input、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、slider、space、switch、table、tabs、tag、textarea、time-picker、tooltip、tree-select（35 个组件目录，含 DateRangePicker 独立实现；上游 34 个目录 + 1 个自有）。
+组件清单（`packages/ng-components/src/index.ts`）：alert、avatar、badge、button、card、cascader、checkbox、collapse、date-picker、date-range-picker、dialog、divider、drawer、empty、form、grid、input、layout、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、skeleton、slider、space、switch、table、tabs、tag、textarea、time-picker、tooltip、tree-select（40 个组件目录，含 DateRangePicker 独立实现；上游 39 个目录 + 1 个自有）。
 
 ## 3. 目录与环境
 
@@ -98,9 +98,21 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 
 **当前债务基线（2026-11-23，`pnpm depth:report`）**：上游 811 props，已对齐 452（55.7%）；未实现 359 项里 143 项是 Angular 惯用映射（插槽/双向绑定/事件名，不算债），**真实欠账 216 项**：D1 159（73.6%）、D2 40（18.5%）、D3 17（7.9%）。显式 `[D#]` 前缀目前 0 项——存量按组件默认归属统计，新写的债必须带前缀。
 
+**B1 进展（5/15）**：
+
+| 组件 | 落地要点 |
+| --- | --- |
+| Layout / Header / Aside / Content / Footer | 五个组件一个目录；`direction` 缺省时用 `contentChildren(TAside)` 判断横竖，`t-layout--with-sider` 同步 |
+| Grid / Row / Col | `T_ROW` 注入 token 把 gutter 传给列；gutter 支持 `number`（水平）/ `[水平, 垂直]` / 断点对象；响应式靠 CSS 媒体查询，列不监听 viewport；六个断点的 span/offset/order/pull/push 全支持 |
+| Card | 头部四段（头像/标题副标题描述/操作区）、封面、主体、底部；`poster2` 把 actions 移到底部；加载态直接渲染 `t-loading`，不自写占位视觉 |
+| Alert | 四主题图标内联 SVG、`maxLine` 用 `-webkit-line-clamp`、关闭走 `t-alert--closing` → `transitionend`（宿主 opacity）→ `t-is-hidden`，260ms 兜底 |
+| Skeleton | `rowCol` 展开成行/列视图，六种 theme 预设；`loading=false` 时宿主不带类并投影真实内容 |
+
+新增共享基建：`packages/ng-components/src/_utils/breakpoint.ts`（`BREAKPOINTS`、`BREAKPOINT_MIN_WIDTH`、`matchBreakpoint`、`TViewportService`，SSR 下不注册 resize 监听）。
+
 **下一步（按此顺序执行）**：
 
-1. **B1 首批 5 个**：layout → grid → card → alert → skeleton（预计 1 天，每个按 §5 第 8 条 L1 六条交付）。
+1. **B1 剩余 10 个**：typography、breadcrumb、steps、timeline、statistic、descriptions、comment、sticky-tool、affix、back-top（每个按 §5 第 8 条 L1 六条交付）。
 2. 每完成 5 个组件，更新 README 组件表与 roadmap §3 状态。
 3. 波次结束：`pnpm build:lib` + CDP 冒烟 + 提交 + 更新本文件。
 

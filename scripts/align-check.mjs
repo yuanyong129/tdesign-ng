@@ -752,6 +752,95 @@ const CONFIG = {
       'indicator': '自定义加载图标尚未实现，使用内置的渐变环',
     },
   },
+  // ---- B1 布局与静态展示 ----
+  TLayout: {
+    upstream: 'layout',
+    upstreamInterface: 'TdLayoutProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {},
+  },
+  THeader: {
+    upstream: 'layout',
+    upstreamInterface: 'TdHeaderProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {},
+  },
+  TAside: {
+    upstream: 'layout',
+    upstreamInterface: 'TdAsideProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {},
+  },
+  TContent: {
+    upstream: 'layout',
+    upstreamInterface: 'TdContentProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      content: 'Angular 用 <ng-content> 承载内容',
+      default: '同 content，Vue 的默认插槽',
+    },
+  },
+  TFooter: {
+    upstream: 'layout',
+    upstreamInterface: 'TdFooterProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {},
+  },
+  TRow: {
+    upstream: 'grid',
+    upstreamInterface: 'TdRowProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      tag: '[D3] Angular 组件宿主标签固定为 <t-row>，自定义标签需要改用指令形态（<div tRow>）',
+    },
+  },
+  TCol: {
+    upstream: 'grid',
+    upstreamInterface: 'TdColProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      tag: '[D3] Angular 组件宿主标签固定为 <t-col>，自定义标签需要改用指令形态（<div tCol>）',
+    },
+  },
+  TCard: {
+    upstream: 'card',
+    upstreamInterface: 'TdCardProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      content: 'Angular 用 <ng-content> 承载卡片主体内容',
+      default: '同 content，Vue 的默认插槽',
+      loadingProps: '[D2] 加载态目前是内置骨架，透传 t-loading 全部属性留到深度期',
+    },
+  },
+  TAlert: {
+    upstream: 'alert',
+    upstreamInterface: 'TdAlertProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载消息主体',
+      onClose: 'Angular 用 (close) 输出，参数为 { e }',
+      onClosed: 'Angular 用 (closed) 输出，参数为 { e }',
+    },
+  },
+  TSkeleton: {
+    upstream: 'skeleton',
+    upstreamInterface: 'TdSkeletonProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      content: 'Angular 用 <ng-content> 承载被包裹的内容',
+      default: '同 content，Vue 的默认插槽',
+    },
+  },
 };
 
 const argv = process.argv.slice(2);

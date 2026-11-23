@@ -14,6 +14,8 @@ export interface DocsNavItem {
 export const DOCS_NAV: DocsNavItem[] = [
   { path: '/button', label: '按钮 Button', group: '通用' },
   { path: '/link', label: '链接 Link', group: '通用' },
+  { path: '/layout', label: '布局 Layout', group: '布局' },
+  { path: '/grid', label: '栅格 Grid', group: '布局' },
   { path: '/divider', label: '分割线 Divider', group: '布局' },
   { path: '/space', label: '间距 Space', group: '布局' },
   { path: '/input', label: '输入框 Input', group: '数据录入' },
@@ -36,7 +38,9 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/drawer', label: '抽屉 Drawer', group: '反馈' },
   { path: '/message', label: '全局提示 Message', group: '反馈' },
   { path: '/notification', label: '通知 Notification', group: '反馈' },
+  { path: '/alert', label: '警告提示 Alert', group: '反馈' },
   { path: '/loading', label: '加载 Loading', group: '反馈' },
+  { path: '/card', label: '卡片 Card', group: '数据展示' },
   { path: '/tag', label: '标签 Tag', group: '数据展示' },
   { path: '/badge', label: '徽标 Badge', group: '数据展示' },
   { path: '/avatar', label: '头像 Avatar', group: '数据展示' },
@@ -45,6 +49,7 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/tabs', label: '选项卡 Tabs', group: '数据展示' },
   { path: '/collapse', label: '折叠面板 Collapse', group: '数据展示' },
   { path: '/empty', label: '空状态 Empty', group: '数据展示' },
+  { path: '/skeleton', label: '骨架屏 Skeleton', group: '数据展示' },
   { path: '/progress', label: '进度条 Progress', group: '数据展示' },
   { path: '/list', label: '列表 List', group: '数据展示' },
 ];
