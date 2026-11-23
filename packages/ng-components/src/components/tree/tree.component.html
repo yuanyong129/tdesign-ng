@@ -1,0 +1,151 @@
+@if (loading()) {
+  <div class="t-tree__empty">
+    <t-loading size="small" />
+  </div>
+} @else if (rows().length) {
+  <div class="t-tree__list">
+    @for (row of rows(); track row.value) {
+      <div
+        [class]="row.classes"
+        [attr.data-value]="row.value"
+        [attr.data-level]="row.level"
+        [attr.role]="'treeitem'"
+        [attr.aria-level]="row.level + 1"
+        [attr.aria-expanded]="row.ariaExpanded"
+        [attr.aria-selected]="row.ariaSelected"
+        [attr.aria-checked]="row.ariaChecked"
+        [attr.aria-disabled]="row.disabled ? 'true' : null"
+        [attr.tabindex]="row.tabindex"
+        [style.--level]="row.level"
+        (click)="handleRowClick(row, $event)"
+        (focus)="handleRowFocus(row)"
+      >
+        @if (row.lineClasses) {
+          <span
+            [class]="row.lineClasses"
+            [style.--level]="row.lineLevel"
+            [style.box-shadow]="row.lineShadow"
+            aria-hidden="true"
+          ></span>
+        }
+
+        <span
+          class="t-tree__icon t-folder-icon"
+          [class.t-tree__icon--default]="icon() && !row.leaf && !iconTemplate() && !row.loading"
+          (mousedown)="$event.preventDefault()"
+        >
+          @if (row.loading) {
+            <t-loading size="small" />
+          } @else {
+            @if (iconTemplate(); as iconTpl) {
+              <ng-container
+                [ngTemplateOutlet]="iconTpl"
+                [ngTemplateOutletContext]="{ $implicit: row.model, node: row.model }"
+              />
+            } @else if (icon() && !row.leaf) {
+              <svg
+                class="t-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="1em"
+                height="1em"
+                aria-hidden="true"
+              >
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="square"
+                  stroke-width="2"
+                  d="M9.5 17.5L15 12L9.5 6.5"
+                />
+              </svg>
+            }
+          }
+        </span>
+
+        @if (checkable()) {
+          <label
+            [class]="row.labelClasses"
+            [attr.title]="label() ? row.label : null"
+            (click)="handleCheckboxClick(row, $event)"
+          >
+            <input
+              type="checkbox"
+              class="t-checkbox__former"
+              [attr.name]="row.value"
+              [checked]="row.checked"
+              [indeterminate]="row.indeterminate"
+              [disabled]="row.checkDisabled"
+            />
+            <span class="t-checkbox__input">
+              @if (row.indeterminate) {
+                <svg
+                  class="t-icon t-icon-minus"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  height="1em"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M16.502 12L7.50195 12"
+                    stroke="currentColor"
+                    stroke-linecap="square"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                </svg>
+              } @else {
+                <svg
+                  class="t-icon t-icon-check"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  height="1em"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M19.5708 7.37842L10.3785 16.5708L5.42871 11.6211"
+                    stroke="currentColor"
+                    stroke-linecap="square"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                </svg>
+              }
+            </span>
+            <span class="t-checkbox__label" [attr.title]="label() ? row.label : null">
+              @if (labelTemplate(); as labelTpl) {
+                <ng-container
+                  [ngTemplateOutlet]="labelTpl"
+                  [ngTemplateOutletContext]="{ $implicit: row.model, node: row.model }"
+                />
+              } @else {
+                {{ label() ? row.label : '' }}
+              }
+            </span>
+          </label>
+        } @else {
+          <span [class]="row.labelClasses" [attr.title]="label() ? row.label : null">
+            @if (labelTemplate(); as labelTpl) {
+              <ng-container
+                [ngTemplateOutlet]="labelTpl"
+                [ngTemplateOutletContext]="{ $implicit: row.model, node: row.model }"
+              />
+            } @else {
+              <span style="position: relative">{{ label() ? row.label : '' }}</span>
+            }
+          </span>
+        }
+      </div>
+    }
+  </div>
+} @else {
+  <div class="t-tree__empty">
+    @if (emptyTemplate(); as emptyTpl) {
+      <ng-container [ngTemplateOutlet]="emptyTpl" />
+    } @else {
+      {{ empty() }}
+    }
+  </div>
+}

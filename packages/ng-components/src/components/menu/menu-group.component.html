@@ -1,0 +1,17 @@
+<div class="t-menu-group__title">
+  @if (title(); as titleContent) {
+    <ng-container
+      [ngTemplateOutlet]="renderNode"
+      [ngTemplateOutletContext]="{ $implicit: titleContent }"
+    />
+  }
+</div>
+<ng-content />
+
+<ng-template #renderNode let-value>
+  @if (toTemplate(value); as template) {
+    <ng-container [ngTemplateOutlet]="template" />
+  } @else if (value) {
+    {{ value }}
+  }
+</ng-template>

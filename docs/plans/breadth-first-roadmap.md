@@ -258,25 +258,34 @@
 
 ### B4 重型组件（4 项 / 184 props）
 
+**进度 4/4（2026-11-23 完成）**：menu、tree、transfer、upload 全部落地并接线，已通过 gen:api / align-check / tsc / ngc / build:lib / 本地 CDP 实拍。
+
 目标：啃掉最后四块硬骨头，允许两层交付。
 
 | 组件 | 上游 | 第一层（必须） | 第二层（可后置，标 `[D1]`/`[D2]`） | 量级 |
 | --- | --- | --- | --- | --- |
-| menu | 45 | 递归菜单、展开/收起、选中、子菜单弹层 | 折叠态、键盘导航、主题 | XL |
-| tree | 50 | 展开/选中/勾选、父子联动、禁用、异步加载 | 拖拽、虚拟滚动、懒加载、自定义图标 | XL |
-| transfer | 26 | 双列表、勾选、搜索、移动 | 树形穿梭、分页、拖拽排序 | L |
-| upload | 63 | 选择/拖拽、文件列表、进度、删除、自定义请求 | 图片预览、多选、目录、请求头、失败重试 | XL |
+| menu ✅ | 45 | 递归菜单、展开/收起、选中、子菜单弹层 | 折叠态、键盘导航、主题 | XL |
+| tree ✅ | 50 | 展开/选中/勾选、父子联动、禁用、异步加载 | 拖拽、虚拟滚动、懒加载、自定义图标 | XL |
+| transfer ✅ | 26 | 双列表、勾选、搜索、移动 | 树形穿梭、分页、拖拽排序 | L |
+| upload ✅ | 63 | 选择/拖拽、文件列表、进度、删除、自定义请求 | 图片预览、多选、目录、请求头、失败重试 | XL |
 
 - **顺序**：tree 优先（TreeSelect 深度工作依赖它抽公共核心）→ menu → transfer → upload。
 - **验收**：每项至少 2 个 demo（基础 + 一个高级），主链路在 CDP 可跑通；未实现能力全部进 `[D1]/[D2]`。
 - **估算**：6~10 天。
+- **落地要点（2026-11-23）**：
+  - tree：32 input / 8 output，父子联动与半选、`load` 懒加载返回 Promise、`line` 用 box-shadow 画祖先线、`[tTreeLabel]`/`[tTreeIcon]`/`[tTreeEmpty]` 三个模板指令；拖拽与过滤标 `[D1]`。
+  - menu：上游 TMenu 与 THeadMenu 合并为 `mode: vertical | horizontal`，子组件 `t-menu-item` / `t-submenu` / `t-menu-group`，父子用 `contentChildren` + `inject(T_MENU)`，水平与折叠态子菜单复用 `t-popup`（不用 CDK Overlay）。
+  - transfer：`targetValue` + `[(targetValue)]`，两侧搜索/过滤/勾选/全选，`oneWay` 为 Angular 增量，列表项用外层 div 承载 `role=option` 以避开 `t-checkbox` 内联 DOM。
+  - upload：`files` 用 `model()`（`[(files)]`），XHR 真实进度 + `requestMethod` 自定义请求（demo 零网络），`theme` 仅实现 `file`/`custom`，图片形态与预览标 `[D2]`。
+  - 基建补丁：`gen-api-docs.mjs` 支持 `model()` 入参（此前 `files` 不会进 API 表）；`align-check` 对 `angularOnly` 仍按字符串数组登记，理由写在注释。
 
-### 广度完成标志（B-Exit）
+### 广度完成标志（B-Exit）— 2026-11-23 已达成
 
-- `align-check` 条目约 78 个，`missing 0 / extra 0`。
-- 上游 71 个组件目录 + CheckTag / CheckTagGroup 全部有实现、有文档页、有 2 个以上 demo。
-- README 组件表完整；`HANDOFF.md` 的"下一步"切到深度批次。
-- 打 tag：`v0.4.0-alpha`（广度完成）。
+- `align-check`：**94 个组件 / 上游 1576 个属性 / 已对齐 1001（63.5%）/ missing 0 / extra 0**（条目数比预估的 78 多，因为 TMenu / TTree / TTransfer / TUpload 之外的子组件也各自登记）。
+- 上游公开组件目录 + CheckTag / CheckTagGroup 全部有实现、有文档页（`gen:api`：99 个组件、1052 个输入属性、301 个示例），每项至少 2 个 demo。
+- 73 个组件目录（含独立实现的 DateRangePicker）、73 条 barrel 导出；README 组件表完整。
+- `depth:report` 基线：真实欠账 **298**（D1 180 / 60.4%、D2 71 / 23.8%、D3 47 / 15.8%），显式 `[D#]` 前缀 82 项。
+- 待打 tag：`v0.4.0-alpha`（广度完成）。
 
 ---
 

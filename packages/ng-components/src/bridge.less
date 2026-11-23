@@ -413,3 +413,19 @@ t-calendar { display: block; }
 
 /* 轮播：.t-swiper 是 position: relative + height: fit-content，inline 宿主高度失效且 __wrap 的 100% 无处参照。 */
 t-swiper { display: block; }
+
+/* 树：vendor 的 .t-tree 只有 reset/font/color/position，没有 display；自定义元素默认 inline 会让宽度、高度与滚动异常（与 t-tree-select 同理） */
+t-tree {
+  display: block;
+}
+
+/* 上传：vendor 的 .t-upload 只有 reset，没有 display；宿主是自定义元素默认 inline，会和表单控件基线错位（与 t-color-picker 同理） */
+t-upload {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* 横向菜单：vendor 的 .t-head-menu__inner 用 li + li 表达 8px 兄弟间距，我们的子节点是自定义元素（t-menu-item/t-submenu），选择器不命中，这里用等价规则补上 */
+.t-head-menu .t-menu > * + * {
+  margin-left: var(--td-comp-margin-s);
+}

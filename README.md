@@ -80,10 +80,14 @@
 | Calendar | ✅ 月/年视图、`card`/`full` 主题、单/多/区间选择、周末隐藏、控制器配置、自定义单元格 |
 | Swiper | ✅ 滑动/淡入淡出、自动播放、循环、水平/垂直、卡片模式、多形态导航器、`(change)` 带来源 |
 | ColorPicker | ✅ 单色面板（饱和度/色相/透明度）、预设与最近使用、10 种格式互转（自研，零依赖）、CVA |
+| Tree | ✅ 展开/勾选父子联动与半选、懒加载 `load`、`hover`/`line`/`icon`、自定义节点模板、键盘导航 |
+| Menu / MenuItem / Submenu / MenuGroup | ✅ 垂直/水平、明暗主题、折叠成图标列、子菜单内部展开或 `t-popup` 浮层、`[(value)]` |
+| Transfer | ✅ 双列表移动、两侧搜索与自定义过滤、勾选与全选、`oneWay`、模板化标题/底部/空态、键盘操作 |
+| Upload | ✅ 选择与拖拽、文件列表与进度、删除/取消、`requestMethod` 自定义上传、`beforeUpload`/`format` 钩子 |
 
 P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / TreeSelect / DatePicker / TimePicker，剩余 Upload / Transfer / ColorPicker 转入下面的广度路线。
 
-广度阶段 B1（布局与静态展示）已全部落地 15/15，B2（弹层与媒体）8/8，B3（录入补全）12/12。
+广度阶段 B1（布局与静态展示）15/15、B2（弹层与媒体）8/8、B3（录入补全）12/12、B4（重型组件）4/4，**上游组件已 100% 覆盖**。
 
 ### 广度优先路线（2026-11-23 起）
 
@@ -94,10 +98,10 @@ P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / Tree
 | B0 | 基线：`[D1]/[D2]/[D3]` 债务标记、`align-check --json`、`depth-report` 脚本 | — |
 | B1 ✅ | 布局与静态展示：Layout、Grid、Typography、Card、Alert、Skeleton、Comment、Breadcrumb、Steps、Timeline、Statistic、Descriptions、StickyTool、Affix、BackTop | 15 项 / 203 |
 | B2 ✅ | 弹层与媒体：Popconfirm、Dropdown、Guide、Image、ImageViewer、Anchor、QRCode、Watermark | 8 项 / 143 |
-| B3 | 录入补全：InputAdornment ✅、ConfigProvider ✅、SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、CheckTag | 12 项 / 285 |
-| B4 | 重型组件：Menu、Tree、Transfer、Upload | 4 项 / 184 |
+| B3 ✅ | 录入补全：InputAdornment、ConfigProvider、SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、CheckTag | 12 项 / 285 |
+| B4 ✅ | 重型组件：Menu、Tree、Transfer、Upload | 4 项 / 184 |
 
-广度完成后（上游 71 个组件目录 100% 覆盖）进入深度阶段：D0 横切工程（TNode 模板化、`*Props` 透传、受控/非受控统一、SSR、a11y、单测、i18n）→ D1 表格与选择线 → D2 录入与反馈线 → D3 其余组件。
+广度阶段已完成（73 个组件目录、上游 71 个组件目录 100% 覆盖），当前进入深度阶段：D0 横切工程（TNode 模板化、`*Props` 透传、受控/非受控统一、SSR、a11y、单测、i18n）→ D1 表格与选择线 → D2 录入与反馈线 → D3 其余组件。深度债基线见 `pnpm depth:report`（298 项：D1 180 / D2 71 / D3 47）。
 
 接手开发请先读 [`HANDOFF.md`](./HANDOFF.md)。
 

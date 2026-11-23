@@ -1,0 +1,31 @@
+@if (icon(); as iconContent) {
+  <ng-container
+    [ngTemplateOutlet]="renderNode"
+    [ngTemplateOutletContext]="{ $implicit: iconContent }"
+  />
+}
+
+<a
+  class="t-menu__item-link"
+  tabindex="-1"
+  [attr.href]="disabled() ? null : href() || null"
+  [attr.target]="href() && !disabled() ? target() : null"
+>
+  <span class="t-menu__content">
+    @if (content(); as text) {
+      <ng-container
+        [ngTemplateOutlet]="renderNode"
+        [ngTemplateOutletContext]="{ $implicit: text }"
+      />
+    }
+    <ng-content />
+  </span>
+</a>
+
+<ng-template #renderNode let-value>
+  @if (toTemplate(value); as template) {
+    <ng-container [ngTemplateOutlet]="template" />
+  } @else if (value) {
+    {{ value }}
+  }
+</ng-template>

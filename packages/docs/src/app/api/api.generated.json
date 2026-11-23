@@ -5940,6 +5940,280 @@
       ],
       "outputs": []
     },
+    "TMenu": {
+      "className": "TMenu",
+      "selector": "t-menu",
+      "file": "packages/ng-components/src/components/menu/menu.component.ts",
+      "inputs": [
+        {
+          "name": "collapsed",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否折叠成图标列",
+          "en": "Whether the menu is collapsed",
+          "values": []
+        },
+        {
+          "name": "collapsedWidth",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "折叠后的宽度，不设置时取 `width` 数组的第二项",
+          "en": "Width when collapsed, falls back to the second item of `width`",
+          "values": []
+        },
+        {
+          "name": "defaultExpanded",
+          "type": "MenuValue[]",
+          "default": "[]",
+          "required": false,
+          "zh": "默认展开的子菜单取值，非受控",
+          "en": "Default expanded submenu values, uncontrolled",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "MenuValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认选中的菜单项，非受控",
+          "en": "Default selected value, uncontrolled",
+          "values": []
+        },
+        {
+          "name": "expandMutex",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "同级子菜单是否互斥展开",
+          "en": "Whether sibling submenus expand mutually exclusively",
+          "values": []
+        },
+        {
+          "name": "expandType",
+          "type": "MenuExpandType",
+          "default": "'normal'",
+          "required": false,
+          "zh": "子菜单展开形态",
+          "en": "Submenu expand type",
+          "values": [
+            "normal",
+            "popup"
+          ]
+        },
+        {
+          "name": "expanded",
+          "type": "MenuValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "展开的子菜单取值，可双向绑定",
+          "en": "Expanded submenu values",
+          "values": []
+        },
+        {
+          "name": "expandIcon",
+          "type": "MenuContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "子菜单的展开图标，不设置时用内置箭头",
+          "en": "Expand icon of submenus, falls back to the built-in arrow",
+          "values": []
+        },
+        {
+          "name": "logo",
+          "type": "MenuContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "菜单顶部 logo 区域",
+          "en": "Logo area at the top of the menu",
+          "values": []
+        },
+        {
+          "name": "mode",
+          "type": "MenuMode",
+          "default": "'vertical'",
+          "required": false,
+          "zh": "菜单形态",
+          "en": "Menu mode",
+          "values": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        {
+          "name": "modelValue",
+          "type": "MenuValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中的菜单项，`value` 的别名（v-model 语义）",
+          "en": "Selected value, alias of `value`",
+          "values": []
+        },
+        {
+          "name": "operations",
+          "type": "MenuContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "菜单右上角操作区域",
+          "en": "Operations area at the top right of the menu",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "MenuTheme",
+          "default": "'light'",
+          "required": false,
+          "zh": "菜单主题",
+          "en": "Menu theme",
+          "values": [
+            "light",
+            "dark"
+          ]
+        },
+        {
+          "name": "value",
+          "type": "MenuValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中的菜单项，可双向绑定",
+          "en": "Selected value",
+          "values": []
+        },
+        {
+          "name": "width",
+          "type": "string | number | Array<string | number>",
+          "default": "'232px'",
+          "required": false,
+          "zh": "菜单宽度，折叠时取数组第二项，默认折叠宽度 64px",
+          "en": "Menu width",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "MenuChangeEvent",
+          "zh": "选中项变化，参数为 `{ value }`",
+          "en": "Emitted when the selected value changes"
+        },
+        {
+          "name": "expand",
+          "type": "MenuValue[]",
+          "zh": "展开的子菜单取值变化",
+          "en": "Emitted when expanded values change"
+        },
+        {
+          "name": "expandedChange",
+          "type": "MenuValue[]",
+          "zh": "展开的子菜单取值变化，用于双向绑定",
+          "en": "Emitted when expanded values change, used for two-way binding"
+        },
+        {
+          "name": "collapsedChange",
+          "type": "boolean",
+          "zh": "折叠状态变化，配合 `toggleCollapsed()` 使用",
+          "en": "Emitted when the collapsed state changes"
+        },
+        {
+          "name": "valueChange",
+          "type": "MenuValue | undefined",
+          "zh": "选中值变化，用于双向绑定",
+          "en": "Emitted when the selected value changes, used for two-way binding"
+        }
+      ]
+    },
+    "TMenuGroup": {
+      "className": "TMenuGroup",
+      "selector": "t-menu-group",
+      "file": "packages/ng-components/src/components/menu/menu-group.component.ts",
+      "inputs": [
+        {
+          "name": "title",
+          "type": "MenuContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "分组标题",
+          "en": "Title of the group",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TMenuItem": {
+      "className": "TMenuItem",
+      "selector": "t-menu-item",
+      "file": "packages/ng-components/src/components/menu/menu-item.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "MenuValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "菜单项取值，与菜单的 `value` 比较决定是否选中",
+          "en": "Menu item value",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "MenuContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "菜单项图标",
+          "en": "Icon of the menu item",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "MenuContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "菜单项文本，也可直接用内容投影",
+          "en": "Text of the menu item, or use content projection",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the menu item is disabled",
+          "values": []
+        },
+        {
+          "name": "href",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "链接地址，设置后菜单项渲染为 `a` 标签",
+          "en": "Link href, renders an anchor when set",
+          "values": []
+        },
+        {
+          "name": "target",
+          "type": "MenuTarget",
+          "default": "'_self'",
+          "required": false,
+          "zh": "链接的打开方式",
+          "en": "Link target",
+          "values": [
+            "_blank",
+            "_self",
+            "_parent",
+            "_top"
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "click",
+          "type": "MenuClickEvent",
+          "zh": "点击菜单项，参数为 `{ e, value }`",
+          "en": "Emitted when the menu item is clicked"
+        }
+      ]
+    },
     "TMessage": {
       "className": "TMessage",
       "selector": "t-message",
@@ -8643,6 +8917,59 @@
         }
       ]
     },
+    "TSubmenu": {
+      "className": "TSubmenu",
+      "selector": "t-submenu",
+      "file": "packages/ng-components/src/components/menu/submenu.component.ts",
+      "inputs": [
+        {
+          "name": "value",
+          "type": "MenuValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "子菜单取值，同时是展开状态与选中路径的依据",
+          "en": "Submenu value",
+          "values": []
+        },
+        {
+          "name": "title",
+          "type": "MenuContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "子菜单标题",
+          "en": "Title of the submenu",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "MenuContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "子菜单图标",
+          "en": "Icon of the submenu",
+          "values": []
+        },
+        {
+          "name": "expandIcon",
+          "type": "MenuContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "展开图标，不设置时用内置箭头",
+          "en": "Expand icon, falls back to the built-in arrow",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "Whether the submenu is disabled",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TSwiper": {
       "className": "TSwiper",
       "selector": "t-swiper",
@@ -10610,6 +10937,603 @@
         }
       ]
     },
+    "TTransfer": {
+      "className": "TTransfer",
+      "selector": "t-transfer",
+      "file": "packages/ng-components/src/components/transfer/transfer.component.ts",
+      "inputs": [
+        {
+          "name": "data",
+          "type": "TransferItem[]",
+          "default": "[]",
+          "required": false,
+          "zh": "数据源",
+          "en": "Data source",
+          "values": []
+        },
+        {
+          "name": "targetValue",
+          "type": "TransferValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "目标列表的值，受控；配合 `targetValueChange` 支持双向绑定",
+          "en": "Target values, controlled; pair with `targetValueChange` for two-way binding",
+          "values": []
+        },
+        {
+          "name": "defaultTargetValue",
+          "type": "TransferValue[]",
+          "default": "[]",
+          "required": false,
+          "zh": "目标列表的初始值，非受控",
+          "en": "Initial target values, uncontrolled",
+          "values": []
+        },
+        {
+          "name": "targetSort",
+          "type": "TransferTargetSort",
+          "default": "'original'",
+          "required": false,
+          "zh": "移到右侧后新值的排序策略",
+          "en": "Sorting strategy for new values moved to the right",
+          "values": [
+            "original push unshift"
+          ]
+        },
+        {
+          "name": "direction",
+          "type": "TransferDirection",
+          "default": "'both'",
+          "required": false,
+          "zh": "操作方向限制，`left` 只能左移、`right` 只能右移",
+          "en": "Allowed move direction; `left`/`right` restrict to one way",
+          "values": [
+            "both left right"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "TransferSideOption<boolean>",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用，传数组时依次作用于左右列表",
+          "en": "Whether disabled; an array maps to the left and right lists",
+          "values": []
+        },
+        {
+          "name": "checked",
+          "type": "TransferValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "两侧合并的勾选值，受控",
+          "en": "Checked values of both lists, controlled",
+          "values": []
+        },
+        {
+          "name": "defaultChecked",
+          "type": "TransferValue[]",
+          "default": "[]",
+          "required": false,
+          "zh": "勾选值的初始值，非受控",
+          "en": "Initial checked values, uncontrolled",
+          "values": []
+        },
+        {
+          "name": "sourceChecked",
+          "type": "TransferValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "左侧勾选值，受控；优先于 `checked`",
+          "en": "Checked values of the left list, controlled; takes precedence over `checked`",
+          "values": []
+        },
+        {
+          "name": "targetChecked",
+          "type": "TransferValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "右侧勾选值，受控；优先于 `checked`",
+          "en": "Checked values of the right list, controlled; takes precedence over `checked`",
+          "values": []
+        },
+        {
+          "name": "search",
+          "type": "TransferSideOption<boolean>",
+          "default": "false",
+          "required": false,
+          "zh": "是否开启两侧搜索框，传数组时按侧开启",
+          "en": "Whether to show the search box; an array maps to the left and right lists",
+          "values": []
+        },
+        {
+          "name": "filter",
+          "type": "TransferFilter | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义搜索过滤函数",
+          "en": "Custom search filter",
+          "values": []
+        },
+        {
+          "name": "searchPlaceholder",
+          "type": "string | string[] | undefined",
+          "default": "''",
+          "required": false,
+          "zh": "搜索框占位文字，传数组时按侧设置",
+          "en": "Search placeholder; an array maps to the left and right lists",
+          "values": []
+        },
+        {
+          "name": "title",
+          "type": "TransferListContent[]",
+          "default": "[]",
+          "required": false,
+          "zh": "左右列表标题，依次为左侧、右侧",
+          "en": "List titles, left then right",
+          "values": []
+        },
+        {
+          "name": "footer",
+          "type": "TransferListContent[]",
+          "default": "[]",
+          "required": false,
+          "zh": "左右列表底部内容，依次为左侧、右侧",
+          "en": "Footer content, left then right",
+          "values": []
+        },
+        {
+          "name": "empty",
+          "type": "TransferListContent[]",
+          "default": "[]",
+          "required": false,
+          "zh": "左右列表空态内容，依次为左侧、右侧",
+          "en": "Empty content, left then right",
+          "values": []
+        },
+        {
+          "name": "operation",
+          "type": "string | string[]",
+          "default": "[]",
+          "required": false,
+          "zh": "中间操作按钮文字，传数组时依次为左移、右移按钮",
+          "en": "Text of the operation buttons, left then right",
+          "values": []
+        },
+        {
+          "name": "transferItem",
+          "type": "TemplateRef<TransferItemContext> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义列表项内容",
+          "en": "Custom list item content",
+          "values": []
+        },
+        {
+          "name": "showCheckAll",
+          "type": "TransferSideOption<boolean>",
+          "default": "true",
+          "required": false,
+          "zh": "是否展示列表头部的全选开关，传数组时按侧设置",
+          "en": "Whether to show the check-all switch; an array maps to the left and right lists",
+          "values": []
+        },
+        {
+          "name": "height",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "列表高度，数字按 `px` 处理",
+          "en": "List height; numbers are treated as `px`",
+          "values": []
+        },
+        {
+          "name": "oneWay",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只允许从左向右单向移动",
+          "en": "Whether only left-to-right moving is allowed",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "TransferChangeEvent",
+          "zh": "移动事件，携带移动前后的状态",
+          "en": "Move event with the states before and after the move"
+        },
+        {
+          "name": "targetValueChange",
+          "type": "TransferValue[]",
+          "zh": "目标值变化事件，用于双向绑定",
+          "en": "Target value change event, used for two-way binding"
+        },
+        {
+          "name": "checkedChange",
+          "type": "TransferCheckedChangeEvent",
+          "zh": "勾选变化事件",
+          "en": "Checked change event"
+        },
+        {
+          "name": "sourceCheckedChange",
+          "type": "TransferValue[]",
+          "zh": "左侧勾选变化事件",
+          "en": "Left checked change event"
+        },
+        {
+          "name": "targetCheckedChange",
+          "type": "TransferValue[]",
+          "zh": "右侧勾选变化事件",
+          "en": "Right checked change event"
+        },
+        {
+          "name": "search",
+          "type": "TransferSearchEvent",
+          "zh": "搜索事件",
+          "en": "Search event"
+        },
+        {
+          "name": "scroll",
+          "type": "TransferScrollEvent",
+          "zh": "列表滚动事件",
+          "en": "List scroll event"
+        }
+      ]
+    },
+    "TTree": {
+      "className": "TTree",
+      "selector": "t-tree",
+      "file": "packages/ng-components/src/components/tree/tree.component.ts",
+      "inputs": [
+        {
+          "name": "activable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示激活态",
+          "en": "Whether rows can be activated",
+          "values": []
+        },
+        {
+          "name": "activeMultiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许多个节点同时处于激活态",
+          "en": "Whether multiple rows can be active at the same time",
+          "values": []
+        },
+        {
+          "name": "actived",
+          "type": "TreeValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "激活的节点值，受控用法",
+          "en": "Active values in controlled mode",
+          "values": []
+        },
+        {
+          "name": "defaultActived",
+          "type": "TreeValue[]",
+          "default": "[]",
+          "required": false,
+          "zh": "默认激活的节点值",
+          "en": "Default active values",
+          "values": []
+        },
+        {
+          "name": "checkable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示复选框",
+          "en": "Whether to show checkboxes",
+          "values": []
+        },
+        {
+          "name": "checkStrictly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用复选框的父子联动，为 true 时各节点互不影响",
+          "en": "Whether checkboxes are unlinked; true means each node is independent",
+          "values": []
+        },
+        {
+          "name": "data",
+          "type": "TreeOption[]",
+          "default": "[]",
+          "required": false,
+          "zh": "树形数据",
+          "en": "Tree data",
+          "values": []
+        },
+        {
+          "name": "disableCheck",
+          "type": "boolean | ((node: TreeNodeModel) => boolean)",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用某个节点的复选框，可传布尔值或 `(node) => boolean`",
+          "en": "Disable a node checkbox; a boolean or `(node) => boolean`",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用整棵树",
+          "en": "Whether the whole tree is disabled",
+          "values": []
+        },
+        {
+          "name": "empty",
+          "type": "string",
+          "default": "暂无数据",
+          "required": false,
+          "zh": "空数据时的提示文案",
+          "en": "Text shown when there is no data",
+          "values": []
+        },
+        {
+          "name": "expandAll",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否默认展开全部节点",
+          "en": "Whether to expand all nodes by default",
+          "values": []
+        },
+        {
+          "name": "expandLevel",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "默认展开的层级，节点 `level < expandLevel` 时展开",
+          "en": "Expand nodes whose level is below this value",
+          "values": []
+        },
+        {
+          "name": "expandMutex",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只允许同级的展开一个节点",
+          "en": "Whether only one sibling stays expanded",
+          "values": []
+        },
+        {
+          "name": "expandOnClickNode",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "点击节点时是否展开",
+          "en": "Whether clicking a node expands it",
+          "values": []
+        },
+        {
+          "name": "expandParent",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "展开节点时是否一并展开其祖先",
+          "en": "Whether expanding a node also expands its ancestors",
+          "values": []
+        },
+        {
+          "name": "expanded",
+          "type": "TreeValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "展开的节点值，受控用法",
+          "en": "Expanded values in controlled mode",
+          "values": []
+        },
+        {
+          "name": "defaultExpanded",
+          "type": "TreeValue[]",
+          "default": "[]",
+          "required": false,
+          "zh": "默认展开的节点值",
+          "en": "Default expanded values",
+          "values": []
+        },
+        {
+          "name": "height",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "树的高度，超出后滚动",
+          "en": "Height of the tree; content scrolls when it overflows",
+          "values": []
+        },
+        {
+          "name": "hover",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "节点悬停时是否高亮",
+          "en": "Whether the label is highlighted on hover",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示展开图标",
+          "en": "Whether to show the expand icon",
+          "values": []
+        },
+        {
+          "name": "keys",
+          "type": "TreeKeys",
+          "default": "{}",
+          "required": false,
+          "zh": "自定义字段名，默认 value / label / children / disabled",
+          "en": "Custom field names; defaults to value / label / children / disabled",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示节点文案",
+          "en": "Whether to show node labels",
+          "values": []
+        },
+        {
+          "name": "lazy",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否启用懒加载，`children: true` 的节点在展开时调用 `load`",
+          "en": "Whether lazy loading is enabled; nodes with `children: true` call `load` on expand",
+          "values": []
+        },
+        {
+          "name": "line",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示连接线",
+          "en": "Whether to show the connecting lines",
+          "values": []
+        },
+        {
+          "name": "load",
+          "type": "((node: TreeNodeModel) => TreeOption[] | Promise<TreeOption[]>) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "懒加载回调，返回子节点数组（可返回 Promise）",
+          "en": "Lazy load callback returning the children, optionally as a Promise",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示整棵树的加载态",
+          "en": "Whether the whole tree is loading",
+          "values": []
+        },
+        {
+          "name": "maxHeight",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "树的最大高度，超出后滚动",
+          "en": "Maximum height of the tree; content scrolls when it overflows",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "TreeSize",
+          "default": "medium",
+          "required": false,
+          "zh": "树尺寸；样式表里没有 tree 的尺寸规则，当前只保留接口",
+          "en": "Tree size; the stylesheet has no tree size rules, so this is API-only for now",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "transition",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否开启展开收起的过渡动画",
+          "en": "Whether expand and collapse are animated",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "TreeValue[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "勾选值，受控用法；配合 valueChange 支持 `[(value)]`",
+          "en": "Checked values in controlled mode; supports `[(value)]` with valueChange",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "TreeValue[]",
+          "default": "[]",
+          "required": false,
+          "zh": "默认勾选值",
+          "en": "Default checked values",
+          "values": []
+        },
+        {
+          "name": "valueMode",
+          "type": "TreeValueMode",
+          "default": "onlyLeaf",
+          "required": false,
+          "zh": "勾选值的回传模式：onlyLeaf 只回传叶子，parentFirst 父级全选时回传父级，all 父子都回传",
+          "en": "How checked values are derived",
+          "values": [
+            "onlyLeaf",
+            "parentFirst",
+            "all"
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "valueChange",
+          "type": "TreeValue[]",
+          "zh": "勾选值变化时触发",
+          "en": "Emitted when the checked values change"
+        },
+        {
+          "name": "expandedChange",
+          "type": "TreeValue[]",
+          "zh": "展开值变化时触发",
+          "en": "Emitted when the expanded values change"
+        },
+        {
+          "name": "activedChange",
+          "type": "TreeValue[]",
+          "zh": "激活值变化时触发",
+          "en": "Emitted when the active values change"
+        },
+        {
+          "name": "expand",
+          "type": "TreeExpandEvent",
+          "zh": "节点展开或收起时触发",
+          "en": "Emitted when a node is expanded or collapsed"
+        },
+        {
+          "name": "change",
+          "type": "TreeChangeEvent",
+          "zh": "节点勾选状态变化时触发",
+          "en": "Emitted when a node is checked or unchecked"
+        },
+        {
+          "name": "active",
+          "type": "TreeActiveEvent",
+          "zh": "节点激活状态变化时触发",
+          "en": "Emitted when a node is activated"
+        },
+        {
+          "name": "click",
+          "type": "TreeClickEvent",
+          "zh": "节点被点击时触发",
+          "en": "Emitted when a node is clicked"
+        },
+        {
+          "name": "scroll",
+          "type": "TreeScrollEvent",
+          "zh": "树滚动时触发",
+          "en": "Emitted when the tree scrolls"
+        }
+      ]
+    },
     "TTreeSelect": {
       "className": "TTreeSelect",
       "selector": "t-tree-select",
@@ -10821,6 +11745,411 @@
           "type": "string",
           "zh": "搜索关键字变化",
           "en": "Emitted when the search keyword changes"
+        }
+      ]
+    },
+    "TUpload": {
+      "className": "TUpload",
+      "selector": "t-upload",
+      "file": "packages/ng-components/src/components/upload/upload.component.ts",
+      "inputs": [
+        {
+          "name": "accept",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "接受的文件类型",
+          "en": "accept",
+          "values": []
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "上传地址",
+          "en": "action",
+          "values": []
+        },
+        {
+          "name": "allowUploadDuplicateFile",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许同名文件",
+          "en": "allow duplicate files",
+          "values": []
+        },
+        {
+          "name": "autoUpload",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否自动上传",
+          "en": "auto upload",
+          "values": []
+        },
+        {
+          "name": "beforeAllFilesUpload",
+          "type": "((files: UploadFile[]) => boolean | Promise<boolean>) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "全部文件上传前",
+          "en": "before all files upload",
+          "values": []
+        },
+        {
+          "name": "beforeUpload",
+          "type": "((file: UploadFile) => boolean | Promise<boolean>) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "单个文件上传前",
+          "en": "before upload",
+          "values": []
+        },
+        {
+          "name": "data",
+          "type": "Record<string, unknown> | ((files: UploadFile[]) => Record<string, unknown>)",
+          "default": "{}",
+          "required": false,
+          "zh": "表单数据",
+          "en": "request data",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "disabled",
+          "values": []
+        },
+        {
+          "name": "draggable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否启用拖拽",
+          "en": "draggable",
+          "values": []
+        },
+        {
+          "name": "fileListDisplay",
+          "type": "UploadFileListTemplate | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "文件列表模板",
+          "en": "file list display",
+          "values": []
+        },
+        {
+          "name": "files",
+          "type": "UploadFile[]",
+          "default": "[]",
+          "required": false,
+          "zh": "文件列表",
+          "en": "files",
+          "values": []
+        },
+        {
+          "name": "format",
+          "type": "((file: File) => UploadFile) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "文件格式化",
+          "en": "format",
+          "values": []
+        },
+        {
+          "name": "formatRequest",
+          "type": "((data: Record<string, unknown>) => Record<string, unknown>) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "请求数据格式化",
+          "en": "format request",
+          "values": []
+        },
+        {
+          "name": "formatResponse",
+          "type": "((response: ResponseType, context: FormatResponseContext) => ResponseType) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "响应格式化",
+          "en": "format response",
+          "values": []
+        },
+        {
+          "name": "headers",
+          "type": "Record<string, string>",
+          "default": "{}",
+          "required": false,
+          "zh": "请求头",
+          "en": "headers",
+          "values": []
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "文件数量上限",
+          "en": "max",
+          "values": []
+        },
+        {
+          "name": "method",
+          "type": "UploadRequestMethod",
+          "default": "'POST'",
+          "required": false,
+          "zh": "请求方法",
+          "en": "method",
+          "values": [
+            "POST",
+            "GET",
+            "PUT",
+            "OPTIONS",
+            "PATCH"
+          ]
+        },
+        {
+          "name": "mockProgressDuration",
+          "type": "number",
+          "default": "300",
+          "required": false,
+          "zh": "mock 进度间隔",
+          "en": "mock progress duration",
+          "values": []
+        },
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否多选",
+          "en": "multiple",
+          "values": []
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "default": "'file'",
+          "required": false,
+          "zh": "上传字段名",
+          "en": "name",
+          "values": []
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "占位提示",
+          "en": "placeholder",
+          "values": []
+        },
+        {
+          "name": "requestMethod",
+          "type": "((files: UploadFile | UploadFile[]) => Promise<RequestMethodResponse>) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义上传方法",
+          "en": "request method",
+          "values": []
+        },
+        {
+          "name": "showUploadProgress",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示上传进度",
+          "en": "show upload progress",
+          "values": []
+        },
+        {
+          "name": "sizeLimit",
+          "type": "UploadSizeLimit | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "文件大小限制",
+          "en": "size limit",
+          "values": []
+        },
+        {
+          "name": "status",
+          "type": "UploadTipsStatus",
+          "default": "'default'",
+          "required": false,
+          "zh": "提示状态",
+          "en": "tips status",
+          "values": [
+            "default",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "theme",
+          "type": "UploadTheme",
+          "default": "'file'",
+          "required": false,
+          "zh": "上传形态",
+          "en": "theme",
+          "values": [
+            "custom",
+            "file",
+            "file-input",
+            "file-flow",
+            "image",
+            "image-flow"
+          ]
+        },
+        {
+          "name": "tips",
+          "type": "UploadTips | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示文案",
+          "en": "tips",
+          "values": []
+        },
+        {
+          "name": "trigger",
+          "type": "UploadTriggerTemplate | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "触发器模板",
+          "en": "trigger",
+          "values": []
+        },
+        {
+          "name": "uploadAllFilesInOneRequest",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否单请求上传",
+          "en": "upload all files in one request",
+          "values": []
+        },
+        {
+          "name": "uploadPastedFiles",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否允许粘贴上传",
+          "en": "upload pasted files",
+          "values": []
+        },
+        {
+          "name": "useMockProgress",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否使用 mock 进度",
+          "en": "use mock progress",
+          "values": []
+        },
+        {
+          "name": "withCredentials",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否携带凭证",
+          "en": "with credentials",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "UploadChangeEvent",
+          "zh": "文件列表变化",
+          "en": "change"
+        },
+        {
+          "name": "progress",
+          "type": "UploadProgressContext",
+          "zh": "上传进度",
+          "en": "progress"
+        },
+        {
+          "name": "success",
+          "type": "UploadSuccessContext",
+          "zh": "上传成功",
+          "en": "success"
+        },
+        {
+          "name": "fail",
+          "type": "UploadFailContext",
+          "zh": "上传失败",
+          "en": "fail"
+        },
+        {
+          "name": "remove",
+          "type": "UploadRemoveContext",
+          "zh": "文件移除",
+          "en": "remove"
+        },
+        {
+          "name": "selectChange",
+          "type": "UploadSelectChangeEvent",
+          "zh": "选择文件变化",
+          "en": "select change"
+        },
+        {
+          "name": "cancelUpload",
+          "type": "void",
+          "zh": "取消上传",
+          "en": "cancel upload"
+        },
+        {
+          "name": "preview",
+          "type": "UploadPreviewContext",
+          "zh": "预览文件",
+          "en": "preview"
+        },
+        {
+          "name": "validate",
+          "type": "UploadValidateContext",
+          "zh": "文件校验",
+          "en": "validate"
+        },
+        {
+          "name": "dragenter",
+          "type": "UploadDragEvent",
+          "zh": "拖拽进入",
+          "en": "dragenter"
+        },
+        {
+          "name": "dragleave",
+          "type": "UploadDragEvent",
+          "zh": "拖拽离开",
+          "en": "dragleave"
+        },
+        {
+          "name": "drop",
+          "type": "UploadDragEvent",
+          "zh": "文件释放",
+          "en": "drop"
+        },
+        {
+          "name": "waitingUploadFilesChange",
+          "type": "UploadWaitingFilesContext",
+          "zh": "待上传文件变化",
+          "en": "waiting upload files change"
+        },
+        {
+          "name": "oneFileFail",
+          "type": "UploadFailContext",
+          "zh": "单个文件上传失败",
+          "en": "one file fail"
+        },
+        {
+          "name": "oneFileSuccess",
+          "type": "UploadSuccessContext",
+          "zh": "单个文件上传成功",
+          "en": "one file success"
         }
       ]
     },

@@ -1,0 +1,274 @@
+<input
+  #fileInput
+  type="file"
+  hidden
+  [disabled]="disabled()"
+  [multiple]="multiple()"
+  [attr.accept]="accept() || null"
+  (change)="handleFileChange($event)"
+/>
+
+@if (draggable()) {
+  <div
+    class="t-upload__dragger"
+    [class.t-upload__dragger-center]="!mainFile()"
+    [class.t-upload__dragger-error]="mainFile()?.status === 'fail'"
+    [class.t-is--active]="dragActive()"
+    (drop)="handleDrop($event)"
+    (dragenter)="handleDragenter($event)"
+    (dragover)="handleDragover($event)"
+    (dragleave)="handleDragleave($event)"
+  >
+    @if (trigger(); as triggerTemplate) {
+      <ng-container [ngTemplateOutlet]="triggerTemplate" [ngTemplateOutletContext]="triggerContext()" />
+    } @else {
+      @if (mainFile(); as file) {
+        <div class="t-upload__dragger-progress">
+          <div class="t-upload__dragger-progress-info">
+            @if (fileListDisplay(); as listTemplate) {
+              <ng-container [ngTemplateOutlet]="listTemplate" [ngTemplateOutletContext]="fileListContext()" />
+            } @else {
+              <div class="t-upload__dragger-text">
+                <span class="t-upload__single-name">{{ file.name }}</span>
+                @if (file.status === 'progress') {
+                  <ng-container [ngTemplateOutlet]="spinner" />
+                  @if (showUploadProgress()) {
+                    <span class="t-upload__single-percent">{{ file.percent ?? 0 }}%</span>
+                  }
+                } @else if (file.status === 'success') {
+                  <svg
+                    class="t-icon t-icon-check-circle-filled"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    height="1em"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23ZM7.49985 10.5858L10.4999 13.5858L16.4999 7.58578L17.9141 8.99999L10.4999 16.4142L6.08564 12L7.49985 10.5858Z"
+                    />
+                  </svg>
+                } @else if (file.status === 'fail') {
+                  <svg
+                    class="t-icon t-icon-error-circle-filled"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    height="1em"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M12 1C18.0751 1 23 5.92487 23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1ZM11.0001 14H13.0001V6.49998H11.0001V14ZM13.004 15.5H11.0001V17.5039H13.004V15.5Z"
+                    />
+                  </svg>
+                }
+              </div>
+              <small class="t-size-s">文件大小：{{ fileSizeText(file.size) }}</small>
+              <small class="t-size-s">上传日期：{{ file.uploadTime ?? '-' }}</small>
+            }
+            <div class="t-upload__dragger-btns">
+              @if ((file.status === 'progress' || file.status === 'waiting') && !disabled()) {
+                <span class="t-upload__dragger-progress-cancel">
+                  <t-button theme="primary" variant="text" (click)="handleCancelUpload($event, file)">取消上传</t-button>
+                </span>
+              }
+              @if (!autoUpload() && file.status === 'waiting') {
+                <span class="t-upload__dragger-upload-btn">
+                  <t-button theme="primary" variant="text" [disabled]="disabled()" (click)="uploadFiles()"
+                    >点击上传</t-button
+                  >
+                </span>
+              }
+            </div>
+            @if ((file.status === 'fail' || file.status === 'success') && !disabled()) {
+              <div class="t-upload__dragger-btns">
+                <span class="t-upload__dragger-progress-reupload">
+                  <t-button theme="primary" variant="text" [disabled]="disabled()" (click)="triggerUpload($event)"
+                    >重新选择</t-button
+                  >
+                </span>
+                <span class="t-upload__dragger-delete-btn">
+                  <t-button theme="danger" variant="text" [disabled]="disabled()" (click)="handleRemove($event, file, 0)"
+                    >删除</t-button
+                  >
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div
+          class="t-upload__trigger"
+          role="button"
+          tabindex="0"
+          aria-label="选择要上传的文件"
+          (click)="triggerUpload($event)"
+          (keydown)="handleTriggerKeydown($event)"
+        >
+          @if (dragActive()) {
+            <div>释放鼠标</div>
+          } @else {
+            <div>
+              <span class="t-upload--highlight">点击上传</span>
+              <span>&nbsp;&nbsp;/&nbsp;&nbsp;拖拽到此区域</span>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+} @else if (theme() === 'custom') {
+  <div
+    class="t-upload__trigger"
+    role="button"
+    tabindex="0"
+    aria-label="选择要上传的文件"
+    (click)="triggerUpload($event)"
+    (keydown)="handleTriggerKeydown($event)"
+  >
+    @if (trigger(); as triggerTemplate) {
+      <ng-container [ngTemplateOutlet]="triggerTemplate" [ngTemplateOutletContext]="triggerContext()" />
+    } @else {
+      <ng-content />
+    }
+  </div>
+} @else {
+  <div class="t-upload__single" [class]="'t-upload__single-' + theme()">
+    <div class="t-upload__trigger">
+      @if (trigger(); as triggerTemplate) {
+        <span role="button" tabindex="0" (click)="triggerUpload($event)" (keydown)="handleTriggerKeydown($event)">
+          <ng-container [ngTemplateOutlet]="triggerTemplate" [ngTemplateOutletContext]="triggerContext()" />
+        </span>
+      } @else {
+        <t-button variant="outline" [disabled]="disabled()" (click)="triggerUpload($event)">
+          <svg tButtonIcon class="t-icon t-icon-upload" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+            <g>
+              <path stroke="currentColor" d="M16.5 8.5L12 4L7.5 8.5M12 5.25V15" stroke-linecap="square" stroke-width="2" />
+              <path stroke="currentColor" d="M20.5 15V20H3.5V15" stroke-linecap="square" stroke-width="2" />
+            </g>
+          </svg>
+          {{ triggerText() }}
+        </t-button>
+      }
+    </div>
+
+    @if (placeholder() && !displayFiles().length) {
+      <small class="t-upload__tips t-size-s t-upload__placeholder">{{ placeholder() }}</small>
+    }
+
+    @if (fileListDisplay(); as listTemplate) {
+      <ng-container [ngTemplateOutlet]="listTemplate" [ngTemplateOutletContext]="fileListContext()" />
+    } @else {
+      @for (file of displayFiles(); track $index) {
+        <div class="t-upload__single-display-text t-upload__display-text--margin">
+          @if (file.url) {
+            <a
+              class="t-upload__single-name"
+              [attr.href]="file.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              (click)="handlePreview($event, file, $index)"
+              >{{ file.name }}</a
+            >
+          } @else {
+            <span class="t-upload__single-name">{{ file.name }}</span>
+          }
+
+          @if (file.status === 'fail') {
+            <div class="t-upload__flow-status t-upload__file-fail">
+              <svg
+                class="t-icon t-icon-error-circle-filled"
+                viewBox="0 0 24 24"
+                width="1em"
+                height="1em"
+                aria-hidden="true"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 1C18.0751 1 23 5.92487 23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1ZM11.0001 14H13.0001V6.49998H11.0001V14ZM13.004 15.5H11.0001V17.5039H13.004V15.5Z"
+                />
+              </svg>
+            </div>
+          } @else if (file.status === 'waiting') {
+            <div class="t-upload__flow-status t-upload__file-waiting">
+              <svg
+                class="t-icon t-icon-time-filled"
+                viewBox="0 0 24 24"
+                width="1em"
+                height="1em"
+                aria-hidden="true"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12C23 18.0751 18.0751 23 12 23ZM12.9999 5.49999H10.9999L10.9998 12.4142L14.9999 16.4142L16.4141 15L12.9999 11.5858V5.49999Z"
+                />
+              </svg>
+            </div>
+          } @else if (file.status === 'progress') {
+            <div class="t-upload__single-progress">
+              <ng-container [ngTemplateOutlet]="spinner" />
+              @if (showUploadProgress()) {
+                <span class="t-upload__single-percent">{{ file.percent ?? 0 }}%</span>
+              }
+            </div>
+          }
+
+          @if (!disabled() && file.status !== 'progress') {
+            <svg
+              class="t-icon t-icon-close t-upload__icon-delete"
+              viewBox="0 0 24 24"
+              width="1em"
+              height="1em"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="'删除 ' + (file.name ?? '')"
+              (click)="handleRemove($event, file, $index)"
+              (keydown.enter)="handleRemove($event, file, $index)"
+              (keydown.space)="handleRemove($event, file, $index)"
+            >
+              <path
+                stroke="currentColor"
+                d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
+                stroke-linecap="square"
+                stroke-width="2"
+              />
+            </svg>
+          }
+        </div>
+      }
+    }
+
+    @if (mainFile()?.status === 'fail' && !multiple()) {
+      <small class="t-upload__tips t-size-s t-upload__tips-error t-upload__placeholder">
+        {{ mainFile()?.response?.['error'] ?? '上传失败' }}
+      </small>
+    }
+  </div>
+}
+
+@if (tipsText()) {
+  <small [class]="tipsClasses()">{{ tipsText() }}</small>
+}
+@if (tipsTemplate(); as tipsTpl) {
+  <small [class]="tipsClasses()"><ng-container [ngTemplateOutlet]="tipsTpl" /></small>
+}
+@if (sizeOverLimitMessage()) {
+  <small class="t-upload__tips t-size-s t-upload__tips-error">{{ sizeOverLimitMessage() }}</small>
+}
+
+<ng-template #spinner>
+  <span class="t-loading">
+    <svg
+      class="t-loading__gradient t-icon-loading"
+      viewBox="0 0 12 12"
+      version="1.1"
+      width="1em"
+      height="1em"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <foreignObject x="0" y="0" width="12" height="12">
+        <div class="t-loading__gradient-conic"></div>
+      </foreignObject>
+    </svg>
+  </span>
+</ng-template>

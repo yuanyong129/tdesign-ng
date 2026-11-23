@@ -1,0 +1,31 @@
+<div [class]="innerClasses()">
+  @if (logo(); as logoContent) {
+    <div class="t-menu__logo">
+      <ng-container
+        [ngTemplateOutlet]="renderNode"
+        [ngTemplateOutletContext]="{ $implicit: logoContent }"
+      />
+    </div>
+  }
+
+  <ul [class]="listClasses()" role="menu" [attr.aria-orientation]="orientation()">
+    <ng-content />
+  </ul>
+
+  @if (operations(); as operationsContent) {
+    <div class="t-menu__operations">
+      <ng-container
+        [ngTemplateOutlet]="renderNode"
+        [ngTemplateOutletContext]="{ $implicit: operationsContent }"
+      />
+    </div>
+  }
+</div>
+
+<ng-template #renderNode let-value>
+  @if (toTemplate(value); as template) {
+    <ng-container [ngTemplateOutlet]="template" />
+  } @else if (value) {
+    {{ value }}
+  }
+</ng-template>

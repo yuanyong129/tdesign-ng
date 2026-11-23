@@ -41,6 +41,7 @@ export * from './components/layout';
 export * from './components/link';
 export * from './components/list';
 export * from './components/loading';
+export * from './components/menu';
 export * from './components/message';
 export * from './components/notification';
 export * from './components/pagination';
@@ -69,7 +70,10 @@ export * from './components/textarea';
 export * from './components/time-picker';
 export * from './components/timeline';
 export * from './components/tooltip';
+export * from './components/transfer';
 export * from './components/tree-select';
+export * from './components/tree';
+export * from './components/upload';
 export * from './components/watermark';
 export * from './components/typography';
 

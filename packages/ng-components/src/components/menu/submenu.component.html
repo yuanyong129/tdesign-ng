@@ -1,0 +1,105 @@
+@if (popupMode()) {
+  <t-popup
+    [visible]="opened()"
+    (visibleChange)="handlePopupVisible($event)"
+    [placement]="popupPlacement()"
+    trigger="hover"
+    [delay]="[0, 100]"
+    [disabled]="disabled()"
+    [showArrow]="false"
+    [overlayClassName]="overlayClasses()"
+    [overlayInnerClassName]="overlayInnerClasses()"
+  >
+    <div
+      [class]="headerClasses()"
+      role="menuitem"
+      data-t-menu-node
+      aria-haspopup="true"
+      [attr.tabindex]="disabled() ? -1 : 0"
+      [attr.aria-disabled]="disabled() ? 'true' : null"
+      [attr.aria-expanded]="opened() ? 'true' : 'false'"
+      (click)="toggle($event)"
+      (keydown)="handleKeydown($event)"
+    >
+      <ng-container [ngTemplateOutlet]="headerTemplate" />
+    </div>
+
+    <div tPopupContent>
+      <div [class]="spacerClasses()">
+        <ul [class]="panelClasses()" role="menu">
+          <ng-container [ngTemplateOutlet]="childrenTemplate" />
+        </ul>
+      </div>
+    </div>
+  </t-popup>
+} @else {
+  <div
+    [class]="headerClasses()"
+    role="menuitem"
+    data-t-menu-node
+    [attr.tabindex]="disabled() ? -1 : 0"
+    [attr.aria-disabled]="disabled() ? 'true' : null"
+    [attr.aria-expanded]="opened() ? 'true' : 'false'"
+    (click)="toggle($event)"
+    (keydown)="handleKeydown($event)"
+  >
+    <ng-container [ngTemplateOutlet]="headerTemplate" />
+  </div>
+
+  <ul [class]="subClasses()" role="menu" [hidden]="!opened()">
+    <ng-container [ngTemplateOutlet]="childrenTemplate" />
+  </ul>
+}
+
+<ng-template #headerTemplate>
+  @if (icon(); as iconContent) {
+    <ng-container
+      [ngTemplateOutlet]="renderNode"
+      [ngTemplateOutletContext]="{ $implicit: iconContent }"
+    />
+  }
+  <span class="t-menu__content">
+    @if (title(); as titleContent) {
+      <ng-container
+        [ngTemplateOutlet]="renderNode"
+        [ngTemplateOutletContext]="{ $implicit: titleContent }"
+      />
+    }
+  </span>
+  @if (effectiveExpandIcon(); as expandIconContent) {
+    <span class="t-submenu-icon">
+      <ng-container
+        [ngTemplateOutlet]="renderNode"
+        [ngTemplateOutletContext]="{ $implicit: expandIconContent }"
+      />
+    </span>
+  } @else {
+    <svg
+      class="t-fake-arrow"
+      [class.t-fake-arrow--active]="opened()"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921"
+        stroke="currentColor"
+        stroke-width="1.3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  }
+</ng-template>
+
+<ng-template #childrenTemplate><ng-content /></ng-template>
+
+<ng-template #renderNode let-value>
+  @if (toTemplate(value); as template) {
+    <ng-container [ngTemplateOutlet]="template" />
+  } @else if (value) {
+    {{ value }}
+  }
+</ng-template>

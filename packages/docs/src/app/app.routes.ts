@@ -302,6 +302,26 @@ export const routes: Routes = [
       import('./docs/swiper/swiper.component').then((m) => m.SwiperDocs),
   },
   {
+    path: 'tree',
+    loadComponent: () =>
+      import('./docs/tree/tree.component').then((m) => m.TreeDocs),
+  },
+  {
+    path: 'transfer',
+    loadComponent: () =>
+      import('./docs/transfer/transfer.component').then((m) => m.TransferDocs),
+  },
+  {
+    path: 'upload',
+    loadComponent: () =>
+      import('./docs/upload/upload.component').then((m) => m.UploadDocs),
+  },
+  {
+    path: 'menu',
+    loadComponent: () =>
+      import('./docs/menu/menu.component').then((m) => m.MenuDocs),
+  },
+  {
     path: '**',
     redirectTo: 'button',
   },

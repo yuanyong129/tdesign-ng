@@ -176,7 +176,7 @@ function typeInfo(typeNode, source, valueTuples) {
   return { type, values };
 }
 
-/** 判断属性是否是 `input()` / `input.required()` / `output()` 调用。 */
+/** 判断属性是否是 `input()` / `input.required()` / `output()` / `model()` 调用。 */
 function signalKind(node) {
   if (!ts.isPropertyDeclaration(node) || !node.initializer) return null;
   let init = node.initializer;
@@ -185,6 +185,8 @@ function signalKind(node) {
   const callee = init.expression;
   if (ts.isIdentifier(callee)) {
     if (callee.text === 'input') return { kind: 'input', call: init, required: false };
+    // model() 同时声明输入与 `<name>Change` 输出；这里登记输入，双向绑定由调用方写 [(files)]。
+    if (callee.text === 'model') return { kind: 'input', call: init, required: false };
     if (callee.text === 'output') return { kind: 'output', call: init, required: false };
   }
   if (ts.isPropertyAccessExpression(callee) && ts.isIdentifier(callee.expression)) {

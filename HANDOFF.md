@@ -1,7 +1,7 @@
 # 交接文档 · TDesign Angular
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
-> 更新日期：2026-11-23，对应路线：**广度优先**（B0 基建 → B1 布局与静态展示，见 §7）。
+> 更新日期：2026-11-23，对应路线：**广度已完成（B0~B4 100%）→ 深度阶段 D0 横切工程**（见 §7）。
 
 ## 1. 这个项目是什么
 
@@ -22,14 +22,14 @@
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
 | P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
 | P5 复杂录入 | ✅ | Slider、Rate、Cascader（两层）、TreeSelect（两层）、DatePicker（八层）、DateRangePicker（四层）、TimePicker（两层）已完成；Upload / Transfer / ColorPicker 转入广度路线 |
-| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 72 个组件目录，B1 的 15 项、B2 的 8 项与 B3 的 12 项已全部落地），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
+| **广度阶段** | ✅ | 2026-11-23 完成：上游 71 个组件目录 100% 覆盖（B1 15 + B2 8 + B3 12 + B4 4），当前 73 个组件目录；进入深度阶段。计划见 `docs/plans/breadth-first-roadmap.md` |
 
 **两个数字要分清**：
 
-- `pnpm gen:api` 统计的是**本仓库现有 API**：92 个组件、940 个输入属性、289 个示例。
-- `node scripts/align-check.mjs` 统计的是**对齐契约**：87 个组件、上游 1403 个属性、已对齐 896（63.9%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
+- `pnpm gen:api` 统计的是**本仓库现有 API**：99 个组件、1052 个输入属性、301 个示例。
+- `node scripts/align-check.mjs` 统计的是**对齐契约**：94 个组件、上游 1576 个属性、已对齐 1001（63.5%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
 
-组件清单（`packages/ng-components/src/index.ts`，69 条导出）：affix、alert、anchor、auto-complete、avatar、back-top、badge、breadcrumb、button、calendar、card、cascader、checkbox、check-tag、collapse、color-picker、comment、config-provider、date-picker、date-range-picker、descriptions、dialog、divider、drawer、dropdown、empty、form、grid、guide、image、image-viewer、input、input-adornment、input-number、layout、link、list、loading、message、notification、pagination、popconfirm、popup、progress、qrcode、radio、range-input、rate、select、select-input、skeleton、slider、space、statistic、steps、sticky-tool、switch、swiper、table、tabs、tag、tag-input、textarea、time-picker、timeline、tooltip、tree-select、typography、watermark（含 DateRangePicker 独立实现）。
+组件清单（`packages/ng-components/src/index.ts`，73 条导出）：affix、alert、anchor、auto-complete、avatar、back-top、badge、breadcrumb、button、calendar、card、cascader、checkbox、check-tag、collapse、color-picker、comment、config-provider、date-picker、date-range-picker、descriptions、dialog、divider、drawer、dropdown、empty、form、grid、guide、image、image-viewer、input、input-adornment、input-number、layout、link、list、loading、menu、message、notification、pagination、popconfirm、popup、progress、qrcode、radio、range-input、rate、select、select-input、skeleton、slider、space、statistic、steps、sticky-tool、switch、swiper、table、tabs、tag、tag-input、textarea、time-picker、timeline、tooltip、transfer、tree、tree-select、typography、upload、watermark（含 DateRangePicker 独立实现）。
 
 ## 3. 目录与环境
 
@@ -85,37 +85,39 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 - 清理 headless Edge 只杀自己的实例：`Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -match 'local-cache[\\/]+edge-' } | ForEach-Object { taskkill /PID $_.ProcessId /T /F }`。**不要用 `Get-Process msedge | Stop-Process`**，会把用户自己的浏览器一起杀掉；正则要同时匹配 `/` 和 `\`（用 Node `spawn` 拼路径时是正斜杠，只写 `\\` 会漏杀）。
 
-## 7. 当前进行中的工作：广度优先 B4
+## 7. 当前进行中的工作：深度阶段 D0（广度已完成）
 
-2026-11-23 起路线改为**广度优先**：先把上游 71 个组件目录补齐到 L1 可用基线，再回填深度。完整计划见 [`docs/plans/breadth-first-roadmap.md`](./docs/plans/breadth-first-roadmap.md)。
+2026-11-23 起路线为**广度优先**（先把上游 71 个组件目录补齐到 L1 可用基线），现已全部完成，转入**深度阶段**：D0 横切工程 → D1 表格与选择线 → D2 录入与反馈线 → D3 其余。完整计划见 [`docs/plans/breadth-first-roadmap.md`](./docs/plans/breadth-first-roadmap.md)。
 
-**已完成（B0~B3）**：
+**广度完成（100%）**：
 
-- **B0 基建**：`scripts/align-check.mjs` 支持 `--json`（`ignored[]` 带 `inUpstream` 区分真上游属性与插槽/事件映射）；新增 `scripts/depth-report.mjs`（`pnpm depth:report`）按 `[D1]/[D2]/[D3]` 聚合债务。
+- **B0 基建**：`align-check --json`（`ignored[]` 带 `inUpstream`）、`scripts/depth-report.mjs`（`pnpm depth:report`）按 `[D1]/[D2]/[D3]` 聚合债务、`wire-component.cjs` 一键接线。
 - **B1 布局与静态展示 15/15**：Layout/Header/Aside/Content/Footer、Row/Col、Card、Alert、Skeleton、Typography（Text/Title/Paragraph）、Breadcrumb(+Item)、Steps(+Item)、Descriptions(+Item)、Comment、Timeline(+Item)、Statistic、StickyTool、Affix、BackTop。
 - **B2 弹层与媒体 8/8**：Popconfirm、Dropdown(+Item)、Guide、Image、ImageViewer、Anchor(+Item)、QRCode（可选 peer 依赖 `qrcode`）、Watermark；新增横切组件 **ConfigProvider**（`TConfigService` 暴露 `config` signal，二维码文案已接入）。
 - **B3 录入补全 12/12**：InputAdornment、SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、CheckTag(+Group)、ConfigProvider。
+- **B4 重型 4/4**：Tree（`load` 懒加载、父子和半选、`[tTreeLabel]` 等模板指令）、Menu（合并 TMenu/THeadMenu 为 `mode`、子菜单复用 `t-popup`）、Transfer（`targetValue` 双向绑定、`oneWay`、两侧搜索）、Upload（`model()` 的 `[(files)]`、XHR 真实进度、`requestMethod` 自定义上传）。
 
-**当前债务基线（2026-11-23，`pnpm depth:report`）**：上游 1403 props，已对齐 896（63.9%）；未实现 507 项里 253 项是 Angular 惯用映射（插槽/双向绑定/事件名，不算债），**真实欠账 254 项**：D1 166（65.4%）、D2 48（18.9%）、D3 40（15.7%）。显式 `[D#]` 前缀 38 项。
+**广度验收（2026-11-23 实测）**：`tsc` / `ngc` / `build:lib` 干净；`gen:api` 99 个组件、1052 个输入属性、301 个示例；`align-check` 94 个组件、上游 1576 个属性、已对齐 1001（63.5%）、`missing 0 / extra 0`；73 个组件目录与 73 条 barrel 导出；每个新增页面均本地 CDP 实拍（0 console error / 0 4xx）。
 
-**下一步：B4 重型组件（4 项 / 184 props）**
+**当前债务基线（`pnpm depth:report`）**：真实欠账 **298** 项——D1 180（60.4%）、D2 71（23.8%）、D3 47（15.8%），显式 `[D#]` 前缀 82 项。债务头部：`TTable` 62 上游 / 19 已对齐（30.6%，D1 41）、`TCascader` 53 / 21（D1 26）、`TSelect` 55 / 20（D1 22）。
 
-| 组件 | 上游 | 第一层（必须） | 第二层（可后置） |
-| --- | ---: | --- | --- |
-| Tree | 50 | 展开/选中/勾选、父子联动、禁用、异步加载、自定义节点模板 | 拖拽、虚拟滚动、懒加载大数据 |
-| Menu | 45 | 递归菜单、展开/收起、选中、子菜单弹层 | 折叠态、键盘导航、主题 |
-| Transfer | 26 | 双列表、勾选、搜索、移动 | 树形穿梭、分页、拖拽排序 |
-| Upload | 63 | 选择/拖拽、文件列表、进度、删除、自定义请求 | 图片预览、多选、目录、失败重试 |
+**下一步：D0 横切工程（1~2 周，先做）**
 
-顺序：Tree 优先（TreeSelect 深度工作依赖抽出公共核心）→ Menu → Transfer → Upload。
-
-**每波收尾固定动作**：`gen:api` → `gen:demos` → `align-check`（missing/extra 必须 0）→ `tsc` → `ngc -p packages/docs/tsconfig.json` → `build:lib` → 本地 dev server + `cdp-page.mjs` 实拍 → 同步 README/HANDOFF/roadmap → 提交推送。
+| 主题 | 目标 | 落点 |
+| --- | --- | --- |
+| TNode 模板化 | `content`/`title`/`label` 等从「字符串或 TemplateRef」收口到统一的 `Content` 类型 + 渲染指令 | `_utils/content` 新工具 + 分批替换组件模板 |
+| `*Props` 透传 | `popupProps`/`inputProps`/`treeProps` 等上游透传对象 | 先做 `TPopup` 的 `popupProps`，再由 Select/DatePicker/Cascader 复用 |
+| 受控/非受控统一 | `[(value)]`、`model()` 与 `value`/`defaultValue` 三件套行为一致 | 逐个组件核对 + 回归探针 |
+| SSR 与 a11y | `isPlatformBrowser` 守卫、`aria-*` 补齐 | `TIcon` 的 `DOMParser` 首修 |
+| 单测 | 引入 Vitest，先覆盖 `_utils` 与 5 个纯逻辑组件 | `pnpm test` + CI |
+| i18n | 把内建中文常量收进 ConfigProvider | 从 QRCode/Calendar/Upload 开始 |
 
 **待拍板**：
 
 - ColorPicker 渐变面板与吸管（`[D3]`，依赖渐变编辑器工作量）；
-- 广度期不引 Vitest（组件交互目前靠 CDP 探针 + strictTemplates 校验）；
-- Upload 自定义请求是否需要 `HttpClient` 依赖。
+- 深度期是否引入 Vitest（当前单测为 0，靠 CDP 探针 + strictTemplates）；
+- Upload 自定义请求是否需要 `HttpClient`（当前 XHR，零依赖）；
+- `@angular/router` 是否作为 peer 依赖（Menu/Tree 的 `to`/`routerLink` 需要它）。
 
 ## 8. 已知缺口与技术债
 

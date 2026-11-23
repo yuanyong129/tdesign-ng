@@ -1,0 +1,275 @@
+<div
+  class="t-transfer__list t-transfer__list-source"
+  [class.t-is-disabled]="disabledOptions().source"
+  [style.height]="listHeight()"
+>
+  <div class="t-transfer__list-header">
+    <div>
+      @if (checkAllOptions().source) {
+        <t-checkbox
+          [checked]="sourceAllChecked()"
+          [indeterminate]="sourceIndeterminate()"
+          [disabled]="disabledOptions().source || !sourceItems().length"
+          (checkedChange)="toggleAll('source')"
+        />
+      }
+      <span>{{ sourceCheckedValues().length }}/{{ sourceItems().length }}</span>
+    </div>
+    <span>
+      @if (titleTemplate('source'); as template) {
+        <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="listContext('source')" />
+      } @else {
+        {{ titleText('source') }}
+      }
+    </span>
+  </div>
+
+  <div class="t-transfer__list-body" [class.t-transfer__list--with-search]="searchOptions().source">
+    @if (searchOptions().source) {
+      <div class="t-transfer__search-wrapper">
+        <t-input
+          [value]="queries().source"
+          [clearable]="true"
+          [disabled]="disabledOptions().source"
+          [placeholder]="searchPlaceholderAt('source')"
+          (change)="handleSearch($event, 'source')"
+          (enter)="handleSearchEnter($event, 'source')"
+        >
+          <svg
+            tInputSuffixIcon
+            class="t-icon"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+          >
+            <path
+              d="M15.8033 15.8033C12.8744 18.7322 8.12563 18.7322 5.1967 15.8033C2.26777 12.8744 2.26777 8.12563 5.1967 5.1967C8.12563 2.26777 12.8744 2.26777 15.8033 5.1967C18.7322 8.12563 18.7322 12.8744 15.8033 15.8033Z"
+              fill="transparent"
+            />
+            <path
+              d="M15.8033 15.8033C12.8744 18.7322 8.12563 18.7322 5.1967 15.8033C2.26777 12.8744 2.26777 8.12563 5.1967 5.1967C8.12563 2.26777 12.8744 2.26777 15.8033 5.1967C18.7322 8.12563 18.7322 12.8744 15.8033 15.8033Z"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+            />
+            <path d="M15.8027 15.8037L21.106 21.107" stroke="currentColor" stroke-linecap="square" stroke-width="2" />
+          </svg>
+        </t-input>
+      </div>
+    }
+
+    @if (filteredSourceItems().length) {
+      <div
+        class="t-transfer__list-content narrow-scrollbar"
+        role="listbox"
+        aria-multiselectable="true"
+        [attr.aria-label]="ariaLabel('source')"
+        (scroll)="handleScroll($event, 'source')"
+      >
+        <div class="t-checkbox-group">
+          @for (item of filteredSourceItems(); track item.value) {
+            <div
+              class="t-transfer__list-item"
+              [class.t-is-checked]="isItemChecked(item, 'source')"
+              [class.t-is-disabled]="isItemDisabled(item, 'source')"
+              role="option"
+              [attr.aria-selected]="isItemChecked(item, 'source')"
+              [attr.aria-disabled]="isItemDisabled(item, 'source') || null"
+              [attr.tabindex]="isItemDisabled(item, 'source') ? -1 : 0"
+              (click)="handleItemClick($event, item, 'source')"
+              (keydown)="handleItemKeydown($event, item, 'source')"
+            >
+              <t-checkbox
+                [checked]="isItemChecked(item, 'source')"
+                [disabled]="isItemDisabled(item, 'source')"
+                (checkedChange)="toggleItem(item, 'source')"
+              />
+              @if (transferItem(); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="itemContext(item, 'source')"
+                />
+              } @else {
+                <span>{{ item.label }}</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="t-transfer__empty">
+        @if (emptyTemplate('source'); as template) {
+          <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="listContext('source')" />
+        } @else {
+          <span>{{ emptyText('source') }}</span>
+        }
+      </div>
+    }
+  </div>
+
+  @if (footerTemplate('source'); as template) {
+    <div class="t-transfer__list-footer">
+      <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="listContext('source')" />
+    </div>
+  } @else if (footerText('source')) {
+    <div class="t-transfer__list-footer">{{ footerText('source') }}</div>
+  }
+</div>
+
+<div class="t-transfer__operations">
+  <t-button
+    variant="outline"
+    size="small"
+    [shape]="buttonShape('right')"
+    [disabled]="rightDisabled()"
+    [attr.aria-label]="operationText('right') || '移至右侧'"
+    (click)="transferTo('target')"
+  >
+    <svg tButtonIcon class="t-icon" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+      <path d="M9.5 17.5L15 12L9.5 6.5" fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" />
+    </svg>
+    @if (operationText('right')) {
+      <span>{{ operationText('right') }}</span>
+    }
+  </t-button>
+
+  @if (!oneWay()) {
+    <t-button
+      variant="outline"
+      size="small"
+      [shape]="buttonShape('left')"
+      [disabled]="leftDisabled()"
+      [attr.aria-label]="operationText('left') || '移至左侧'"
+      (click)="transferTo('source')"
+    >
+      <svg tButtonIcon class="t-icon" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+        <path d="M14.5 17.5L9 12L14.5 6.5" fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" />
+      </svg>
+      @if (operationText('left')) {
+        <span>{{ operationText('left') }}</span>
+      }
+    </t-button>
+  }
+</div>
+
+<div
+  class="t-transfer__list t-transfer__list-target"
+  [class.t-is-disabled]="disabledOptions().target"
+  [style.height]="listHeight()"
+>
+  <div class="t-transfer__list-header">
+    <div>
+      @if (checkAllOptions().target && !oneWay()) {
+        <t-checkbox
+          [checked]="targetAllChecked()"
+          [indeterminate]="targetIndeterminate()"
+          [disabled]="disabledOptions().target || !targetItems().length"
+          (checkedChange)="toggleAll('target')"
+        />
+      }
+      <span>{{ targetCheckedValues().length }}/{{ targetItems().length }}</span>
+    </div>
+    <span>
+      @if (titleTemplate('target'); as template) {
+        <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="listContext('target')" />
+      } @else {
+        {{ titleText('target') }}
+      }
+    </span>
+  </div>
+
+  <div class="t-transfer__list-body" [class.t-transfer__list--with-search]="searchOptions().target">
+    @if (searchOptions().target) {
+      <div class="t-transfer__search-wrapper">
+        <t-input
+          [value]="queries().target"
+          [clearable]="true"
+          [disabled]="disabledOptions().target"
+          [placeholder]="searchPlaceholderAt('target')"
+          (change)="handleSearch($event, 'target')"
+          (enter)="handleSearchEnter($event, 'target')"
+        >
+          <svg
+            tInputSuffixIcon
+            class="t-icon"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+          >
+            <path
+              d="M15.8033 15.8033C12.8744 18.7322 8.12563 18.7322 5.1967 15.8033C2.26777 12.8744 2.26777 8.12563 5.1967 5.1967C8.12563 2.26777 12.8744 2.26777 15.8033 5.1967C18.7322 8.12563 18.7322 12.8744 15.8033 15.8033Z"
+              fill="transparent"
+            />
+            <path
+              d="M15.8033 15.8033C12.8744 18.7322 8.12563 18.7322 5.1967 15.8033C2.26777 12.8744 2.26777 8.12563 5.1967 5.1967C8.12563 2.26777 12.8744 2.26777 15.8033 5.1967C18.7322 8.12563 18.7322 12.8744 15.8033 15.8033Z"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+            />
+            <path d="M15.8027 15.8037L21.106 21.107" stroke="currentColor" stroke-linecap="square" stroke-width="2" />
+          </svg>
+        </t-input>
+      </div>
+    }
+
+    @if (filteredTargetItems().length) {
+      <div
+        class="t-transfer__list-content narrow-scrollbar"
+        role="listbox"
+        aria-multiselectable="true"
+        [attr.aria-label]="ariaLabel('target')"
+        (scroll)="handleScroll($event, 'target')"
+      >
+        <div class="t-checkbox-group">
+          @for (item of filteredTargetItems(); track item.value) {
+            <div
+              class="t-transfer__list-item"
+              [class.t-is-checked]="isItemChecked(item, 'target')"
+              [class.t-is-disabled]="isItemDisabled(item, 'target')"
+              role="option"
+              [attr.aria-selected]="isItemChecked(item, 'target')"
+              [attr.aria-disabled]="isItemDisabled(item, 'target') || null"
+              [attr.tabindex]="isItemDisabled(item, 'target') ? -1 : 0"
+              (click)="handleItemClick($event, item, 'target')"
+              (keydown)="handleItemKeydown($event, item, 'target')"
+            >
+              @if (!oneWay()) {
+                <t-checkbox
+                  [checked]="isItemChecked(item, 'target')"
+                  [disabled]="isItemDisabled(item, 'target')"
+                  (checkedChange)="toggleItem(item, 'target')"
+                />
+              }
+              @if (transferItem(); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="itemContext(item, 'target')"
+                />
+              } @else {
+                <span>{{ item.label }}</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="t-transfer__empty">
+        @if (emptyTemplate('target'); as template) {
+          <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="listContext('target')" />
+        } @else {
+          <span>{{ emptyText('target') }}</span>
+        }
+      </div>
+    }
+  </div>
+
+  @if (footerTemplate('target'); as template) {
+    <div class="t-transfer__list-footer">
+      <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="listContext('target')" />
+    </div>
+  } @else if (footerText('target')) {
+    <div class="t-transfer__list-footer">{{ footerText('target') }}</div>
+  }
+</div>
