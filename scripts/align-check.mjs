@@ -1000,6 +1000,119 @@ const CONFIG = {
       popupProps: '[D3] 弹层属性深度透传未实现，当前固定 hideEmptyPopup + 自动 placement',
     },
   },
+  TQRCode: {
+    upstream: 'qrcode',
+    upstreamInterface: 'TdQRCodeProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      onRefresh: 'Angular 用 (refresh) 输出，过期遮罩里的刷新按钮触发',
+    },
+  },
+  TInputAdornment: {
+    upstream: 'input-adornment',
+    upstreamInterface: 'TdInputAdornmentProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {},
+  },
+  TConfigProvider: {
+    upstream: 'config-provider',
+    upstreamInterface: 'TdConfigProviderProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {},
+  },
+  TPopconfirm: {
+    upstream: 'popconfirm',
+    upstreamInterface: 'TdPopconfirmProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> / triggerElement 承载触发器',
+      popupProps: '[D2] 未透传 popupProps，弹层可配置项由组件显式 input 暴露（placement / trigger / showArrow / destroyOnClose）',
+      onCancel: 'Angular 用 (cancel) 输出，参数 { e }',
+      onConfirm: 'Angular 用 (confirm) 输出，参数 { e }',
+      onVisibleChange: 'Angular 用 (visibleChange) 输出，参数 { visible, trigger, e? }（对齐上游两段式参数）',
+    },
+  },
+  TDropdown: {
+    upstream: 'dropdown',
+    upstreamInterface: 'TdDropdownProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      popupProps: '[D2] 未透传 popupProps，弹层可配置项由组件显式 input 暴露',
+      onClick: 'Angular 用 (click) 输出，参数 { item, e }',
+    },
+  },
+  TDropdownItem: {
+    upstream: 'dropdown',
+    upstreamInterface: 'TdDropdownItemProps',
+    renames: {},
+    angularOnly: ['maxColumnWidth', 'minColumnWidth', 'hasSubmenu'],
+    ignoreUpstream: {
+      onClick: 'Angular 用 (click) 输出，参数 { value, e }；数据里的 onClick 仍会被调用',
+    },
+  },
+  TImage: {
+    upstream: 'image',
+    upstreamInterface: 'TdImageProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      onLoad: 'Angular 用 (load) 输出，参数 { e }',
+      onError: 'Angular 用 (error) 输出，参数 { e }',
+    },
+  },
+  TImageViewer: {
+    upstream: 'image-viewer',
+    upstreamInterface: 'TdImageViewerProps',
+    renames: {},
+    angularOnly: ['visibleChange'],
+    ignoreUpstream: {
+      attach: '[D2] Angular 不做 Teleport，预览层本身就是 position: fixed 全屏层',
+      viewerScale: '[D3] 上游桌面端 image-viewer 未消费该属性，属旧版死配置',
+      modelValue: 'Angular 用 [(visible)] 双向绑定 + (visibleChange) 表达同一语义',
+      onClose: 'Angular 用 (close) 输出，参数 { trigger, e }',
+      onDownload: 'Angular 用 (download) 输出，参数 string | File',
+      onIndexChange: 'Angular 用 (indexChange) 输出，参数 { index, trigger }',
+    },
+  },
+  TAnchor: {
+    upstream: 'anchor',
+    upstreamInterface: 'TdAnchorProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      onChange: 'Angular 用 (change) 输出，参数 { href, previousHref }',
+      onClick: 'Angular 用 (click) 输出，参数 { href, e }',
+    },
+  },
+  TAnchorItem: { upstream: 'anchor', upstreamInterface: 'TdAnchorItemProps', renames: {}, angularOnly: [], ignoreUpstream: {} },
+  TWatermark: {
+    upstream: 'watermark',
+    upstreamInterface: 'TdWatermarkProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载被水印覆盖的内容',
+    },
+  },
+  TGuide: {
+    upstream: 'guide',
+    upstreamInterface: 'TdGuideProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      modelValue: '[D3] Angular 用 current 单项绑定 + (change)/(currentChange) 表达向导当前步，未提供双向绑定语法糖',
+      onChange: 'Angular 用 (change) 输出，参数 GuideChangeContext',
+      onFinish: 'Angular 用 (finish) 输出，参数 GuideFinishContext',
+      onNextStepClick: 'Angular 用 (next) 输出',
+      onPrevStepClick: 'Angular 用 (prev) 输出',
+      onSkip: 'Angular 用 (skip) 输出',
+    },
+  },
 };
 
 const argv = process.argv.slice(2);

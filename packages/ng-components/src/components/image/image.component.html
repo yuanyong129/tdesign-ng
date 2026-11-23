@@ -1,0 +1,112 @@
+<!-- 富文本属性统一渲染入口：模板走 ngTemplateOutlet，其余按文本输出（等价于上游的 renderTNodeJSX）。 -->
+<ng-template #renderNode let-value>
+  @if (asTemplate(value); as template) {
+    <ng-container *ngTemplateOutlet="template" />
+  } @else if (value) {
+    {{ value }}
+  }
+</ng-template>
+
+@if (placeholder()) {
+  <div class="t-image__placeholder">
+    <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: placeholder() }" />
+  </div>
+}
+
+@if (gallery()) {
+  <div class="t-image__gallery-shadow"></div>
+}
+
+<!-- 未进入视口或加载失败时，上游用一个空的 `.t-image` 撑住布局。 -->
+@if (!shouldRenderImage()) {
+  <div class="t-image"></div>
+}
+
+<!-- 实际渲染的图片；带 srcset 时外面包一层 `<picture>` 提供 avif / webp 候选。 -->
+<ng-template #imageNode>
+  <img
+    #image
+    [class]="imageClasses()"
+    [attr.src]="displaySrc()"
+    [attr.alt]="alt()"
+    [attr.referrerpolicy]="referrerpolicy()"
+    (load)="handleLoad($event)"
+    (error)="handleImageError($event)"
+  />
+</ng-template>
+
+@if (shouldRenderImage()) {
+  @if (srcsetEntries().length) {
+    <picture>
+      @for (item of srcsetEntries(); track item.type) {
+        <source [attr.type]="item.type" [attr.srcset]="item.url" />
+      }
+      <ng-container *ngTemplateOutlet="imageNode" />
+    </picture>
+  } @else {
+    <ng-container *ngTemplateOutlet="imageNode" />
+  }
+}
+
+@if (showLoadingBox()) {
+  <div class="t-image__loading">
+    @if (loading()) {
+      <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: loading() }" />
+    } @else {
+      <t-space direction="vertical" [size]="8" align="center">
+        <svg class="t-icon t-icon-image" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+          <path fill="transparent" d="M3 21H20L9 10L3 16V21Z" />
+          <circle fill="transparent" cx="15.75" cy="8.25" r="2" />
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            d="M3 16V3H21V21H20M3 16V21H20M3 16L9 10L20 21"
+          />
+          <circle fill="none" stroke="currentColor" stroke-width="2" cx="15.75" cy="8.25" r="2" />
+        </svg>
+        <span>图片加载中</span>
+      </t-space>
+    }
+  </div>
+}
+
+@if (hasError()) {
+  <div class="t-image__error">
+    @if (hasErrorContent()) {
+      <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: errorContent() }" />
+    } @else {
+      <t-space direction="vertical" [size]="8" align="center">
+        <svg
+          class="t-icon t-icon-image-error"
+          viewBox="0 0 24 24"
+          width="1em"
+          height="1em"
+          aria-hidden="true"
+        >
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M21 11V3H3V21H11M13 14L9 10L3.5 15.5M17.75 8.25C17.75 9.35457 16.8546 10.25 15.75 10.25C14.6454 10.25 13.75 9.35457 13.75 8.25C13.75 7.14543 14.6454 6.25 15.75 6.25C16.8546 6.25 17.75 7.14543 17.75 8.25Z"
+          />
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M21.8287 16.1719L19.0003 19.0003M19.0003 19.0003L16.1719 21.8287M19.0003 19.0003L16.1719 16.1719M19.0003 19.0003L21.8287 21.8287"
+          />
+        </svg>
+        <span>图片无法显示</span>
+      </t-space>
+    }
+  </div>
+}
+
+@if (overlayContent()) {
+  <div [class]="overlayClasses()">
+    <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: overlayContent() }" />
+  </div>
+}

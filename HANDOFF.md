@@ -22,12 +22,12 @@
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
 | P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
 | P5 复杂录入 | ✅ | Slider、Rate、Cascader（两层）、TreeSelect（两层）、DatePicker（八层）、DateRangePicker（四层）、TimePicker（两层）已完成；Upload / Transfer / ColorPicker 转入广度路线 |
-| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 50 个组件目录，B1 的 15 项已全部落地），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
+| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 60 个组件目录，B1 的 15 项与 B2 的 8 项已全部落地），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
 
 **两个数字要分清**：
 
-- `pnpm gen:api` 统计的是**本仓库现有 API**：69 个组件、651 个输入属性、235 个示例。
-- `node scripts/align-check.mjs` 统计的是**对齐契约**：65 个组件、上游 1009 个属性、已对齐 610（60.5%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
+- `pnpm gen:api` 统计的是**本仓库现有 API**：81 个组件、770 个输入属性、262 个示例。
+- `node scripts/align-check.mjs` 统计的是**对齐契约**：77 个组件、上游 1151 个属性、已对齐 726（63.1%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
 
 组件清单（`packages/ng-components/src/index.ts`，50 条导出）：affix、alert、avatar、back-top、badge、breadcrumb、button、card、cascader、checkbox、collapse、comment、date-picker、date-range-picker、descriptions、dialog、divider、drawer、empty、form、grid、input、layout、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、skeleton、slider、space、statistic、steps、sticky-tool、switch、table、tabs、tag、textarea、time-picker、timeline、tooltip、tree-select、typography（含 DateRangePicker 独立实现）。
 
@@ -85,7 +85,7 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 - 清理 headless Edge 只杀自己的实例：`Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -match 'local-cache[\\/]+edge-' } | ForEach-Object { taskkill /PID $_.ProcessId /T /F }`。**不要用 `Get-Process msedge | Stop-Process`**，会把用户自己的浏览器一起杀掉；正则要同时匹配 `/` 和 `\`（用 Node `spawn` 拼路径时是正斜杠，只写 `\\` 会漏杀）。
 
-## 7. 当前进行中的工作：广度优先 B2
+## 7. 当前进行中的工作：广度优先 B3
 
 2026-11-23 起路线改为**广度优先**：先把上游 71 个组件目录补齐到 L1 可用基线，再回填深度。完整计划见 [`docs/plans/breadth-first-roadmap.md`](./docs/plans/breadth-first-roadmap.md)。
 
@@ -96,7 +96,7 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 - `scripts/align-check.mjs` 支持 `--json`，输出 `{ upstreamVersion, totals, components[] }`；每个组件的 `ignored[]` 带 `inUpstream`（区分真上游属性与插槽/事件映射）。
 - 新增 `scripts/depth-report.mjs`（`pnpm depth:report`）：读 align-check 的 JSON，按 `[D1]/[D2]/[D3]`（reason 无前缀则按组件默认归属）聚合债务，输出「分布表 + 组件债务表 + 每条债务明细」的 markdown。
 
-**当前债务基线（2026-11-23，`pnpm depth:report`）**：上游 1009 props，已对齐 610（60.5%）；未实现 399 项里 168 项是 Angular 惯用映射（插槽/双向绑定/事件名，不算债），**真实欠账 231 项**：D1 159（68.8%）、D2 41（17.7%）、D3 31（13.4%）。显式 `[D#]` 前缀 15 项——存量按组件默认归属统计，新写的债必须带前缀。
+**当前债务基线（2026-11-23，`pnpm depth:report`）**：上游 1151 props，已对齐 726（63.1%）；未实现 425 项里 190 项是 Angular 惯用映射（插槽/双向绑定/事件名，不算债），**真实欠账 235 项**：D1 159（67.7%）、D2 44（18.7%）、D3 32（13.6%）。显式 `[D#]` 前缀 15 项——存量按组件默认归属统计，新写的债必须带前缀。
 
 **B1 全部完成（15/15）**：
 
@@ -120,15 +120,31 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 
 新增共享基建：`packages/ng-components/src/_utils/breakpoint.ts`（`BREAKPOINTS`、`BREAKPOINT_MIN_WIDTH`、`matchBreakpoint`、`TViewportService`，SSR 下不注册 resize 监听）。
 
+**B2 全部完成（8/8，2026-11-23）**：
+
+| 组件 | 落地要点 |
+| --- | --- |
+| Popconfirm | 复用 `t-popup` 定位；`(visibleChange)` 带 `{ visible, trigger, e }`，不做 `[(visible)]`；`popupProps` 标 `[D2]` |
+| Dropdown / DropdownItem | options 数据驱动 + `children` 子菜单、分割线/禁用/主题；默认 `trigger="hover"`；子菜单纵向位置实时测量 |
+| Guide | 不套 CDK Overlay（z-index 低于 999999），宿主内手写 `position: fixed` + 视口夹紧 + 主轴翻转；气泡/对话框两种模式 |
+| Image | `src` 支持 `字符串或 File`；形状 / `fit` / `position` / 浮层 / 相册阴影；点击预览交给使用方监听原生 click |
+| ImageViewer | modal / modeless；缩放旋转翻转拖拽、键盘、缩略图、下载；`attach` 标 `[D2]`、`viewerScale` 标 `[D3]` |
+| Anchor / AnchorItem | scroll spy + `targetOffset`；**只有一个默认投影槽**，吸顶改用 `position: sticky`（多 `<ng-content>` 会丢内容）；自写 300ms 缓动滚动 |
+| QRCode | 引入 `qrcode`（可选 peer + 根 devDependency，docs 直接编译库源码时必须提升）；canvas/svg 双渲染、图标挖空、过期/已扫描/加载遮罩 |
+| Watermark | canvas 平铺、多行/图片、透明度与旋转、移动/删除；复用单个 `<style>` 注入 keyframes（上游会泄漏） |
+
+新增共享基建：`ConfigProvider`（`globalConfig` 输入 + `TConfigService` 注入 + `effect` 同步、销毁时清空）。当前只接二维码文案，其余分组在 D0 统一接。
+
 **下一步（按此顺序执行）**：
 
-1. **B2 弹层与媒体 8 项**：Popconfirm、Dropdown、Guide、Image、ImageViewer、Anchor、QRCode、Watermark（每个按 §5 第 8 条 L1 六条交付）。
+1. **B3 剩余 10 项**：SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、CheckTag（InputAdornment ✅、ConfigProvider ✅ 已完成）。
 2. 每完成 5 个组件，更新 README 组件表与 roadmap §3 状态。
-3. 波次结束：`pnpm build:lib` + CDP 冒烟 + 提交 + 更新本文件。
+3. 波次结束：`gen:api` → `align-check` → `tsc` / `ngc` → `pnpm build:lib` → CDP 冒烟 → 提交 + 更新本文件。
 
-**待拍板（B2 开工前确认）**：
+**待拍板（B3 开工前确认）**：
 
-- QRCode：引入 `qrcode`（MIT，约 20KB gzip）还是深度期自研编码器？默认前者。
+- ColorPicker：颜色转换自研约 150 行（默认），不引依赖。
+- Calendar：复用现有日期工具，不引 dayjs。
 - 广度期不引入 Vitest（保持速度），D0 统一落地；日期/颜色等纯函数可先用 `node --test` 兜底。
 
 ### 上一个任务：DatePicker 第八层（2026-11-22 完成，留作记录）

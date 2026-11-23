@@ -1,0 +1,114 @@
+<!-- 递归渲染菜单项：`$implicit` 是当前层级的选项数组，`level` 用于逐层加深子菜单。 -->
+<ng-template #itemsTemplate let-items let-level="level">
+  @for (item of items; track $index) {
+    <div>
+      @if (item.children?.length) {
+        <t-dropdown-item
+          [theme]="item.theme ?? 'default'"
+          [active]="item.active ?? false"
+          [disabled]="item.disabled ?? false"
+          [value]="item.value"
+          [prefixIcon]="item.prefixIcon"
+          [maxColumnWidth]="maxColumnWidth()"
+          [minColumnWidth]="minColumnWidth()"
+          [hasSubmenu]="true"
+          (mouseover)="handleSubmenuEnter($event)"
+        >
+          <div class="t-dropdown__item-content">
+            <span class="t-dropdown__item-text">
+              @if (asTemplate(item.content); as contentTpl) {
+                <ng-container [ngTemplateOutlet]="contentTpl" />
+              } @else {
+                {{ item.content }}
+              }
+            </span>
+            <svg
+              class="t-icon t-dropdown__item-direction"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              aria-hidden="true"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="square"
+                stroke-width="2"
+                d="M9.5 17.5L15 12L9.5 6.5"
+              />
+            </svg>
+          </div>
+          <div [class]="submenuWrapperClasses()" style="position: absolute">
+            <div [class]="submenuClasses(item)" style="position: static" [style.maxHeight.px]="maxHeight()">
+              <ul>
+                <ng-container
+                  [ngTemplateOutlet]="itemsTemplate"
+                  [ngTemplateOutletContext]="{ $implicit: item.children, level: level + 1 }"
+                />
+              </ul>
+            </div>
+          </div>
+        </t-dropdown-item>
+      } @else {
+        <t-dropdown-item
+          [theme]="item.theme ?? 'default'"
+          [active]="item.active ?? false"
+          [disabled]="item.disabled ?? false"
+          [value]="item.value"
+          [prefixIcon]="item.prefixIcon"
+          [maxColumnWidth]="maxColumnWidth()"
+          [minColumnWidth]="minColumnWidth()"
+          (click)="handleItemClick(item, $event)"
+        >
+          <span class="t-dropdown__item-text">
+            @if (asTemplate(item.content); as contentTpl) {
+              <ng-container [ngTemplateOutlet]="contentTpl" />
+            } @else {
+              {{ item.content }}
+            }
+          </span>
+        </t-dropdown-item>
+      }
+
+      @if (item.divider) {
+        <t-divider />
+      }
+    </div>
+  }
+</ng-template>
+
+<t-popup
+  [placement]="placement()"
+  [trigger]="trigger()"
+  [disabled]="disabled()"
+  [delay]="popupDelay"
+  [showArrow]="false"
+  [destroyOnClose]="true"
+  [visible]="popupVisible()"
+  (visibleChange)="handlePopupVisibleChange($event)"
+  overlayInnerClassName="t-dropdown"
+>
+  <!-- 触发器：必须是 t-popup 的第一个元素子节点（t-popup 用 firstElementChild 当定位锚点）。 -->
+  <ng-content />
+
+  <div tPopupContent>
+    @if (options().length) {
+      <div [class]="menuClasses()" [style.maxHeight.px]="maxHeight()">
+        @if (panelTopTemplate(); as panelTopTpl) {
+          <div class="t-dropdown__top-content"><ng-container [ngTemplateOutlet]="panelTopTpl" /></div>
+        } @else if (panelTopText()) {
+          <div class="t-dropdown__top-content">{{ panelTopText() }}</div>
+        }
+
+        <ng-container [ngTemplateOutlet]="itemsTemplate" [ngTemplateOutletContext]="{ $implicit: options(), level: 0 }" />
+
+        @if (panelBottomTemplate(); as panelBottomTpl) {
+          <div class="t-dropdown__bottom-content"><ng-container [ngTemplateOutlet]="panelBottomTpl" /></div>
+        } @else if (panelBottomText()) {
+          <div class="t-dropdown__bottom-content">{{ panelBottomText() }}</div>
+        }
+      </div>
+    }
+  </div>
+</t-popup>

@@ -1,0 +1,88 @@
+<t-popup
+  [placement]="placement()"
+  trigger="click"
+  [showArrow]="showArrow()"
+  [destroyOnClose]="destroyOnClose()"
+  [visible]="innerVisible()"
+  (visibleChange)="handlePopupVisibleChange($event)"
+  overlayClassName="t-popconfirm"
+>
+  <!-- 触发器：投影内容优先，其次是 triggerElement；它必须是 t-popup 的第一个元素子节点（t-popup 用 firstElementChild 当锚点）。 -->
+  @if (triggerTemplate(); as triggerTpl) {
+    <ng-container [ngTemplateOutlet]="triggerTpl" />
+  } @else if (triggerText()) {
+    <span>{{ triggerText() }}</span>
+  } @else {
+    <ng-content />
+  }
+
+  <div tPopupContent>
+    <div class="t-popconfirm__content">
+      <div class="t-popconfirm__body">
+        @if (iconTemplate(); as iconTpl) {
+          <ng-container [ngTemplateOutlet]="iconTpl" />
+        } @else if (iconText()) {
+          {{ iconText() }}
+        } @else {
+          <svg
+            [class]="iconClasses()"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path fill="currentColor" [attr.d]="iconPath()" />
+          </svg>
+        }
+        <div class="t-popconfirm__inner">
+          @if (contentTemplate(); as contentTpl) {
+            <ng-container [ngTemplateOutlet]="contentTpl" />
+          } @else if (contentText()) {
+            {{ contentText() }}
+          }
+        </div>
+      </div>
+
+      @if (showButtons()) {
+        <div class="t-popconfirm__buttons">
+          @if (showCancel()) {
+            <span class="t-popconfirm__cancel">
+              @if (cancelTemplate(); as cancelTpl) {
+                <ng-container [ngTemplateOutlet]="cancelTpl" />
+              } @else {
+                <t-button
+                  [theme]="cancelButtonProps().theme ?? 'default'"
+                  [variant]="cancelButtonProps().variant ?? 'base'"
+                  [size]="cancelButtonProps().size ?? 'small'"
+                  [disabled]="cancelButtonProps().disabled ?? false"
+                  [loading]="cancelButtonProps().loading ?? false"
+                  (click)="handleCancel($event)"
+                  >{{ cancelText() }}</t-button
+                >
+              }
+            </span>
+          }
+          @if (showConfirm()) {
+            <span class="t-popconfirm__confirm">
+              @if (confirmTemplate(); as confirmTpl) {
+                <ng-container [ngTemplateOutlet]="confirmTpl" />
+              } @else {
+                <t-button
+                  [theme]="confirmButtonProps().theme ?? 'primary'"
+                  [variant]="confirmButtonProps().variant ?? 'base'"
+                  [size]="confirmButtonProps().size ?? 'small'"
+                  [disabled]="confirmButtonProps().disabled ?? false"
+                  [loading]="confirmButtonProps().loading ?? false"
+                  (click)="handleConfirm($event)"
+                  >{{ confirmText() }}</t-button
+                >
+              }
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</t-popup>

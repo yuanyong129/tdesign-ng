@@ -159,6 +159,133 @@
         }
       ]
     },
+    "TAnchor": {
+      "className": "TAnchor",
+      "selector": "t-anchor",
+      "file": "packages/ng-components/src/components/anchor/anchor.component.ts",
+      "inputs": [
+        {
+          "name": "affixProps",
+          "type": "AnchorAffixProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "固钉参数",
+          "en": "affix props",
+          "values": []
+        },
+        {
+          "name": "bounds",
+          "type": "number",
+          "default": "5",
+          "required": false,
+          "zh": "判定激活项的偏移",
+          "en": "bounds",
+          "values": []
+        },
+        {
+          "name": "container",
+          "type": "AnchorScrollContainer",
+          "default": "window",
+          "required": false,
+          "zh": "滚动容器",
+          "en": "scroll container",
+          "values": []
+        },
+        {
+          "name": "cursor",
+          "type": "AnchorContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义游标",
+          "en": "cursor",
+          "values": []
+        },
+        {
+          "name": "size",
+          "type": "SizeType",
+          "default": "medium",
+          "required": false,
+          "zh": "尺寸",
+          "en": "size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "targetOffset",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "滚动目标偏移",
+          "en": "target offset",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "AnchorChangeEvent",
+          "zh": "激活链接变化",
+          "en": "change"
+        },
+        {
+          "name": "click",
+          "type": "AnchorClickEvent",
+          "zh": "点击链接",
+          "en": "click"
+        }
+      ]
+    },
+    "TAnchorItem": {
+      "className": "TAnchorItem",
+      "selector": "t-anchor-item",
+      "file": "packages/ng-components/src/components/anchor/anchor-item.component.ts",
+      "inputs": [
+        {
+          "name": "href",
+          "type": "string",
+          "required": true,
+          "zh": "链接",
+          "en": "href",
+          "values": []
+        },
+        {
+          "name": "target",
+          "type": "AnchorTarget",
+          "default": "_self",
+          "required": false,
+          "zh": "跳转方式",
+          "en": "target",
+          "values": [
+            "_self",
+            "_blank",
+            "_parent",
+            "_top"
+          ]
+        },
+        {
+          "name": "title",
+          "type": "AnchorContent",
+          "default": "''",
+          "required": false,
+          "zh": "链接文本",
+          "en": "title",
+          "values": []
+        },
+        {
+          "name": "customScroll",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否自定义滚动",
+          "en": "custom-scroll",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TAside": {
       "className": "TAside",
       "selector": "t-aside",
@@ -1690,6 +1817,23 @@
       ],
       "outputs": []
     },
+    "TConfigProvider": {
+      "className": "TConfigProvider",
+      "selector": "t-config-provider",
+      "file": "packages/ng-components/src/components/config-provider/config-provider.component.ts",
+      "inputs": [
+        {
+          "name": "globalConfig",
+          "type": "TGlobalConfig | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "全局配置",
+          "en": "globalConfig",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TContent": {
       "className": "TContent",
       "selector": "t-content",
@@ -2839,6 +2983,254 @@
         }
       ]
     },
+    "TDropdown": {
+      "className": "TDropdown",
+      "selector": "t-dropdown",
+      "file": "packages/ng-components/src/components/dropdown/dropdown.component.ts",
+      "inputs": [
+        {
+          "name": "direction",
+          "type": "DropdownDirection",
+          "default": "'right'",
+          "required": false,
+          "zh": "子菜单展开方向",
+          "en": "direction",
+          "values": [
+            "left",
+            "right"
+          ]
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "disabled",
+          "values": []
+        },
+        {
+          "name": "hideAfterItemClick",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "点击选项后是否关闭",
+          "en": "hide after item click",
+          "values": []
+        },
+        {
+          "name": "maxColumnWidth",
+          "type": "string | number",
+          "default": "100",
+          "required": false,
+          "zh": "选项最大宽度",
+          "en": "max column width",
+          "values": []
+        },
+        {
+          "name": "maxHeight",
+          "type": "number",
+          "default": "300",
+          "required": false,
+          "zh": "面板最大高度",
+          "en": "max height",
+          "values": []
+        },
+        {
+          "name": "minColumnWidth",
+          "type": "string | number",
+          "default": "10",
+          "required": false,
+          "zh": "选项最小宽度",
+          "en": "min column width",
+          "values": []
+        },
+        {
+          "name": "options",
+          "type": "DropdownOption[]",
+          "default": "[]",
+          "required": false,
+          "zh": "菜单选项",
+          "en": "options",
+          "values": []
+        },
+        {
+          "name": "panelBottomContent",
+          "type": "DropdownContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "面板底部内容",
+          "en": "panel bottom content",
+          "values": []
+        },
+        {
+          "name": "panelTopContent",
+          "type": "DropdownContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "面板顶部内容",
+          "en": "panel top content",
+          "values": []
+        },
+        {
+          "name": "placement",
+          "type": "DropdownPlacement",
+          "default": "'bottom-left'",
+          "required": false,
+          "zh": "弹层位置",
+          "en": "popup placement",
+          "values": [
+            "top",
+            "left",
+            "right",
+            "bottom",
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+            "left-top",
+            "left-bottom",
+            "right-top",
+            "right-bottom"
+          ]
+        },
+        {
+          "name": "trigger",
+          "type": "DropdownTrigger",
+          "default": "'hover'",
+          "required": false,
+          "zh": "触发方式",
+          "en": "trigger",
+          "values": [
+            "hover",
+            "click",
+            "focus",
+            "context-menu"
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "click",
+          "type": "DropdownClickEvent",
+          "zh": "点击菜单项",
+          "en": "click"
+        }
+      ]
+    },
+    "TDropdownItem": {
+      "className": "TDropdownItem",
+      "selector": "t-dropdown-item",
+      "file": "packages/ng-components/src/components/dropdown/dropdown-item.component.ts",
+      "inputs": [
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否高亮选中",
+          "en": "active",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "DropdownContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "选项内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "disabled",
+          "values": []
+        },
+        {
+          "name": "divider",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示分割线",
+          "en": "divider",
+          "values": []
+        },
+        {
+          "name": "prefixIcon",
+          "type": "DropdownContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "前置图标",
+          "en": "prefix icon",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "DropdownItemTheme",
+          "default": "'default'",
+          "required": false,
+          "zh": "选项主题色",
+          "en": "theme",
+          "values": [
+            "default",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "value",
+          "type": "DropdownValue",
+          "default": "undefined",
+          "required": false,
+          "zh": "选项值",
+          "en": "value",
+          "values": []
+        },
+        {
+          "name": "maxColumnWidth",
+          "type": "string | number",
+          "default": "100",
+          "required": false,
+          "zh": "选项最大宽度",
+          "en": "max column width",
+          "values": [],
+          "internal": true
+        },
+        {
+          "name": "minColumnWidth",
+          "type": "string | number",
+          "default": "10",
+          "required": false,
+          "zh": "选项最小宽度",
+          "en": "min column width",
+          "values": [],
+          "internal": true
+        },
+        {
+          "name": "hasSubmenu",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否含子菜单",
+          "en": "has submenu",
+          "values": [],
+          "internal": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "click",
+          "type": "DropdownItemClickEvent",
+          "zh": "点击选项",
+          "en": "click"
+        }
+      ]
+    },
     "TEmpty": {
       "className": "TEmpty",
       "selector": "t-empty",
@@ -3237,6 +3629,189 @@
       ],
       "outputs": []
     },
+    "TGuide": {
+      "className": "TGuide",
+      "selector": "t-guide",
+      "file": "packages/ng-components/src/components/guide/guide.component.ts",
+      "inputs": [
+        {
+          "name": "counter",
+          "type": "GuideContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "计数器",
+          "en": "counter",
+          "values": []
+        },
+        {
+          "name": "current",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "当前步骤",
+          "en": "current",
+          "values": []
+        },
+        {
+          "name": "defaultCurrent",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认步骤",
+          "en": "defaultCurrent",
+          "values": []
+        },
+        {
+          "name": "finishButtonProps",
+          "type": "GuideButtonProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "完成按钮",
+          "en": "finishButtonProps",
+          "values": []
+        },
+        {
+          "name": "hideCounter",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "隐藏计数器",
+          "en": "hideCounter",
+          "values": []
+        },
+        {
+          "name": "hidePrev",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "隐藏上一步",
+          "en": "hidePrev",
+          "values": []
+        },
+        {
+          "name": "hideSkip",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "隐藏跳过",
+          "en": "hideSkip",
+          "values": []
+        },
+        {
+          "name": "highlightPadding",
+          "type": "number",
+          "default": "8",
+          "required": false,
+          "zh": "高亮内边距",
+          "en": "highlightPadding",
+          "values": []
+        },
+        {
+          "name": "mode",
+          "type": "GuideMode",
+          "default": "popup",
+          "required": false,
+          "zh": "展示模式",
+          "en": "mode",
+          "values": [
+            "popup",
+            "dialog"
+          ]
+        },
+        {
+          "name": "nextButtonProps",
+          "type": "GuideButtonProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "下一步按钮",
+          "en": "nextButtonProps",
+          "values": []
+        },
+        {
+          "name": "prevButtonProps",
+          "type": "GuideButtonProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "上一步按钮",
+          "en": "prevButtonProps",
+          "values": []
+        },
+        {
+          "name": "showOverlay",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "展示遮罩",
+          "en": "showOverlay",
+          "values": []
+        },
+        {
+          "name": "skipButtonProps",
+          "type": "GuideButtonProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "跳过按钮",
+          "en": "skipButtonProps",
+          "values": []
+        },
+        {
+          "name": "steps",
+          "type": "GuideStep[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "步骤列表",
+          "en": "steps",
+          "values": []
+        },
+        {
+          "name": "zIndex",
+          "type": "number",
+          "default": "999999",
+          "required": false,
+          "zh": "层级",
+          "en": "zIndex",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "change",
+          "type": "GuideChangeContext",
+          "zh": "步骤变化",
+          "en": "change"
+        },
+        {
+          "name": "currentChange",
+          "type": "number",
+          "zh": "当前步骤变化",
+          "en": "currentChange"
+        },
+        {
+          "name": "finish",
+          "type": "GuideFinishContext",
+          "zh": "完成",
+          "en": "finish"
+        },
+        {
+          "name": "next",
+          "type": "GuideNextContext",
+          "zh": "下一步",
+          "en": "next"
+        },
+        {
+          "name": "prev",
+          "type": "GuidePrevContext",
+          "zh": "上一步",
+          "en": "prev"
+        },
+        {
+          "name": "skip",
+          "type": "GuideSkipContext",
+          "zh": "跳过",
+          "en": "skip"
+        }
+      ]
+    },
     "THeader": {
       "className": "THeader",
       "selector": "t-header",
@@ -3253,6 +3828,382 @@
         }
       ],
       "outputs": []
+    },
+    "TImage": {
+      "className": "TImage",
+      "selector": "t-image",
+      "file": "packages/ng-components/src/components/image/image.component.ts",
+      "inputs": [
+        {
+          "name": "alt",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "图片描述",
+          "en": "alt",
+          "values": []
+        },
+        {
+          "name": "error",
+          "type": "ImageContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "加载失败提示",
+          "en": "error",
+          "values": []
+        },
+        {
+          "name": "fallback",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "备用图片地址",
+          "en": "fallback",
+          "values": []
+        },
+        {
+          "name": "fit",
+          "type": "ImageFit",
+          "default": "'fill'",
+          "required": false,
+          "zh": "图片填充方式",
+          "en": "fit",
+          "values": [
+            "contain",
+            "cover",
+            "fill",
+            "none",
+            "scale-down"
+          ]
+        },
+        {
+          "name": "gallery",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否开启相册阴影",
+          "en": "gallery",
+          "values": []
+        },
+        {
+          "name": "lazy",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否懒加载",
+          "en": "lazy",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "ImageContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "加载中提示",
+          "en": "loading",
+          "values": []
+        },
+        {
+          "name": "overlayContent",
+          "type": "ImageContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "浮层内容",
+          "en": "overlay content",
+          "values": []
+        },
+        {
+          "name": "overlayTrigger",
+          "type": "ImageOverlayTrigger",
+          "default": "'always'",
+          "required": false,
+          "zh": "浮层显示时机",
+          "en": "overlay trigger",
+          "values": [
+            "always",
+            "hover"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "type": "ImageContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "占位内容",
+          "en": "placeholder",
+          "values": []
+        },
+        {
+          "name": "position",
+          "type": "string",
+          "default": "'center'",
+          "required": false,
+          "zh": "图片对齐位置",
+          "en": "position",
+          "values": []
+        },
+        {
+          "name": "referrerpolicy",
+          "type": "ImageReferrerpolicy",
+          "default": "'strict-origin-when-cross-origin'",
+          "required": false,
+          "zh": "referrer 策略",
+          "en": "referrerpolicy",
+          "values": [
+            "no-referrer",
+            "no-referrer-when-downgrade",
+            "origin",
+            "origin-when-cross-origin",
+            "same-origin",
+            "strict-origin",
+            "strict-origin-when-cross-origin",
+            "unsafe-url"
+          ]
+        },
+        {
+          "name": "shape",
+          "type": "ImageShape",
+          "default": "'square'",
+          "required": false,
+          "zh": "图片形状",
+          "en": "shape",
+          "values": [
+            "circle",
+            "round",
+            "square"
+          ]
+        },
+        {
+          "name": "src",
+          "type": "string | File | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "图片地址",
+          "en": "src",
+          "values": []
+        },
+        {
+          "name": "srcset",
+          "type": "ImageSrcset | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "响应式图片地址",
+          "en": "srcset",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "load",
+          "type": "ImageEvent",
+          "zh": "图片加载完成",
+          "en": "load"
+        },
+        {
+          "name": "error",
+          "type": "ImageEvent",
+          "zh": "图片加载失败",
+          "en": "error"
+        }
+      ]
+    },
+    "TImageViewer": {
+      "className": "TImageViewer",
+      "selector": "t-image-viewer",
+      "file": "packages/ng-components/src/components/image-viewer/image-viewer.component.ts",
+      "inputs": [
+        {
+          "name": "closeBtn",
+          "type": "boolean | ImageViewerContent",
+          "default": "true",
+          "required": false,
+          "zh": "关闭按钮",
+          "en": "close button",
+          "values": []
+        },
+        {
+          "name": "closeOnEscKeydown",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否允许按 Esc 关闭",
+          "en": "close on esc",
+          "values": []
+        },
+        {
+          "name": "closeOnOverlay",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许点击遮罩关闭",
+          "en": "close on overlay",
+          "values": []
+        },
+        {
+          "name": "draggable",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "是否允许拖拽",
+          "en": "draggable",
+          "values": []
+        },
+        {
+          "name": "imageReferrerpolicy",
+          "type": "ImageViewerReferrerpolicy | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "referrer 策略",
+          "en": "image referrerpolicy",
+          "values": [
+            "no-referrer",
+            "no-referrer-when-downgrade",
+            "origin",
+            "origin-when-cross-origin",
+            "same-origin",
+            "strict-origin",
+            "strict-origin-when-cross-origin",
+            "unsafe-url"
+          ]
+        },
+        {
+          "name": "imageScale",
+          "type": "Partial<ImageScale> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "缩放配置",
+          "en": "image scale",
+          "values": []
+        },
+        {
+          "name": "images",
+          "type": "ImageViewerImage[]",
+          "default": "[]",
+          "required": false,
+          "zh": "图片列表",
+          "en": "images",
+          "values": []
+        },
+        {
+          "name": "index",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "当前图片序号",
+          "en": "index",
+          "values": []
+        },
+        {
+          "name": "defaultIndex",
+          "type": "number",
+          "default": "0",
+          "required": false,
+          "zh": "当前图片序号初始值",
+          "en": "default index",
+          "values": []
+        },
+        {
+          "name": "mode",
+          "type": "ImageViewerMode",
+          "default": "'modal'",
+          "required": false,
+          "zh": "展示形态",
+          "en": "mode",
+          "values": [
+            "modal",
+            "modeless"
+          ]
+        },
+        {
+          "name": "navigationArrow",
+          "type": "boolean | ImageViewerContent",
+          "default": "true",
+          "required": false,
+          "zh": "切换箭头",
+          "en": "navigation arrow",
+          "values": []
+        },
+        {
+          "name": "showOverlay",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "是否显示遮罩",
+          "en": "show overlay",
+          "values": []
+        },
+        {
+          "name": "title",
+          "type": "ImageViewerContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标题",
+          "en": "title",
+          "values": []
+        },
+        {
+          "name": "trigger",
+          "type": "ImageViewerContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义触发器",
+          "en": "trigger",
+          "values": []
+        },
+        {
+          "name": "visible",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "是否显示预览器",
+          "en": "visible",
+          "values": []
+        },
+        {
+          "name": "defaultVisible",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否默认显示",
+          "en": "default visible",
+          "values": []
+        },
+        {
+          "name": "zIndex",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "层级",
+          "en": "z index",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "visibleChange",
+          "type": "boolean",
+          "zh": "显示状态变化",
+          "en": "visible change"
+        },
+        {
+          "name": "close",
+          "type": "ImageViewerCloseEvent",
+          "zh": "关闭",
+          "en": "close"
+        },
+        {
+          "name": "indexChange",
+          "type": "ImageViewerIndexChangeEvent",
+          "zh": "当前图片变化",
+          "en": "index change"
+        },
+        {
+          "name": "download",
+          "type": "string | File",
+          "zh": "下载",
+          "en": "download"
+        }
+      ]
     },
     "TInput": {
       "className": "TInput",
@@ -3516,6 +4467,32 @@
           "en": "Clear icon click event"
         }
       ]
+    },
+    "TInputAdornment": {
+      "className": "TInputAdornment",
+      "selector": "t-input-adornment",
+      "file": "packages/ng-components/src/components/input-adornment/input-adornment.component.ts",
+      "inputs": [
+        {
+          "name": "append",
+          "type": "InputAdornmentContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "后缀",
+          "en": "append",
+          "values": []
+        },
+        {
+          "name": "prepend",
+          "type": "InputAdornmentContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "前缀",
+          "en": "prepend",
+          "values": []
+        }
+      ],
+      "outputs": []
     },
     "TLayout": {
       "className": "TLayout",
@@ -4264,6 +5241,149 @@
       ],
       "outputs": []
     },
+    "TPopconfirm": {
+      "className": "TPopconfirm",
+      "selector": "t-popconfirm",
+      "file": "packages/ng-components/src/components/popconfirm/popconfirm.component.ts",
+      "inputs": [
+        {
+          "name": "cancelBtn",
+          "type": "PopconfirmButton",
+          "default": "''",
+          "required": false,
+          "zh": "取消按钮",
+          "en": "cancel button",
+          "values": []
+        },
+        {
+          "name": "confirmBtn",
+          "type": "PopconfirmButton",
+          "default": "''",
+          "required": false,
+          "zh": "确认按钮",
+          "en": "confirm button",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "PopconfirmContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "确认框内容",
+          "en": "popconfirm content",
+          "values": []
+        },
+        {
+          "name": "destroyOnClose",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "关闭时是否销毁弹层内容",
+          "en": "destroy on close",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "PopconfirmContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义图标",
+          "en": "custom icon",
+          "values": []
+        },
+        {
+          "name": "placement",
+          "type": "PopconfirmPlacement",
+          "default": "'top'",
+          "required": false,
+          "zh": "弹层位置",
+          "en": "popup placement",
+          "values": [
+            "top",
+            "left",
+            "right",
+            "bottom",
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+            "left-top",
+            "left-bottom",
+            "right-top",
+            "right-bottom"
+          ]
+        },
+        {
+          "name": "showArrow",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示箭头",
+          "en": "show arrow",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "PopconfirmTheme",
+          "default": "'default'",
+          "required": false,
+          "zh": "主题",
+          "en": "theme",
+          "values": [
+            "default",
+            "warning",
+            "danger"
+          ]
+        },
+        {
+          "name": "triggerElement",
+          "type": "PopconfirmContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "触发元素",
+          "en": "trigger element",
+          "values": []
+        },
+        {
+          "name": "visible",
+          "type": "boolean | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控展开状态",
+          "en": "controlled visible",
+          "values": []
+        },
+        {
+          "name": "defaultVisible",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "默认是否展开",
+          "en": "default visible",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "confirm",
+          "type": "PopconfirmActionEvent",
+          "zh": "点击确认",
+          "en": "confirm"
+        },
+        {
+          "name": "cancel",
+          "type": "PopconfirmActionEvent",
+          "zh": "点击取消",
+          "en": "cancel"
+        },
+        {
+          "name": "visibleChange",
+          "type": "PopconfirmVisibleChangeEvent",
+          "zh": "展开状态变化",
+          "en": "visible change"
+        }
+      ]
+    },
     "TPopup": {
       "className": "TPopup",
       "selector": "t-popup",
@@ -4509,6 +5629,133 @@
         }
       ],
       "outputs": []
+    },
+    "TQRCode": {
+      "className": "TQRCode",
+      "selector": "t-qrcode",
+      "file": "packages/ng-components/src/components/qrcode/qrcode.component.ts",
+      "inputs": [
+        {
+          "name": "bgColor",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "背景色",
+          "en": "Background color",
+          "values": []
+        },
+        {
+          "name": "borderless",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "无边框",
+          "en": "Borderless",
+          "values": []
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "前景色",
+          "en": "Foreground color",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "图标地址",
+          "en": "Icon URL",
+          "values": []
+        },
+        {
+          "name": "iconSize",
+          "type": "number | QRIconSize",
+          "default": "40",
+          "required": false,
+          "zh": "图标尺寸",
+          "en": "Icon size",
+          "values": []
+        },
+        {
+          "name": "level",
+          "type": "QRLevel",
+          "default": "'M'",
+          "required": false,
+          "zh": "纠错级别",
+          "en": "Error correction level",
+          "values": [
+            "L",
+            "M",
+            "Q",
+            "H"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "default": "160",
+          "required": false,
+          "zh": "尺寸",
+          "en": "Size",
+          "values": []
+        },
+        {
+          "name": "status",
+          "type": "QRStatus",
+          "default": "'active'",
+          "required": false,
+          "zh": "状态",
+          "en": "Status",
+          "values": [
+            "active",
+            "expired",
+            "loading",
+            "scanned"
+          ]
+        },
+        {
+          "name": "statusRender",
+          "type": "TemplateRef<QRStatusRenderContext> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义状态内容",
+          "en": "Custom status content",
+          "values": []
+        },
+        {
+          "name": "type",
+          "type": "QRType",
+          "default": "'canvas'",
+          "required": false,
+          "zh": "渲染方式",
+          "en": "Render type",
+          "values": [
+            "canvas",
+            "svg"
+          ]
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "二维码内容",
+          "en": "QR code value",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "refresh",
+          "type": "void",
+          "zh": "刷新",
+          "en": "Refresh"
+        }
+      ]
     },
     "TRadio": {
       "className": "TRadio",
@@ -7461,6 +8708,161 @@
           "en": "Emitted when the search keyword changes"
         }
       ]
+    },
+    "TWatermark": {
+      "className": "TWatermark",
+      "selector": "t-watermark",
+      "file": "packages/ng-components/src/components/watermark/watermark.component.ts",
+      "inputs": [
+        {
+          "name": "alpha",
+          "type": "number",
+          "default": "1",
+          "required": false,
+          "zh": "透明度",
+          "en": "alpha",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "WatermarkNode",
+          "default": "undefined",
+          "required": false,
+          "zh": "内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "height",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "高度",
+          "en": "height",
+          "values": []
+        },
+        {
+          "name": "isRepeat",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否重复",
+          "en": "isRepeat",
+          "values": []
+        },
+        {
+          "name": "layout",
+          "type": "WatermarkLayout",
+          "default": "rectangular",
+          "required": false,
+          "zh": "排布方式",
+          "en": "layout",
+          "values": [
+            "rectangular",
+            "hexagonal"
+          ]
+        },
+        {
+          "name": "lineSpace",
+          "type": "number",
+          "default": "16",
+          "required": false,
+          "zh": "行间距",
+          "en": "lineSpace",
+          "values": []
+        },
+        {
+          "name": "movable",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否移动",
+          "en": "movable",
+          "values": []
+        },
+        {
+          "name": "moveInterval",
+          "type": "number",
+          "default": "3000",
+          "required": false,
+          "zh": "移动周期",
+          "en": "moveInterval",
+          "values": []
+        },
+        {
+          "name": "offset",
+          "type": "number[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "偏移",
+          "en": "offset",
+          "values": []
+        },
+        {
+          "name": "removable",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否允许删除",
+          "en": "removable",
+          "values": []
+        },
+        {
+          "name": "rotate",
+          "type": "number",
+          "default": "-22",
+          "required": false,
+          "zh": "旋转角度",
+          "en": "rotate",
+          "values": []
+        },
+        {
+          "name": "watermarkContent",
+          "type": "WatermarkContent | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "水印内容",
+          "en": "watermarkContent",
+          "values": []
+        },
+        {
+          "name": "width",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "宽度",
+          "en": "width",
+          "values": []
+        },
+        {
+          "name": "x",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "水平间距",
+          "en": "x",
+          "values": []
+        },
+        {
+          "name": "y",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "垂直间距",
+          "en": "y",
+          "values": []
+        },
+        {
+          "name": "zIndex",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "层级",
+          "en": "zIndex",
+          "values": []
+        }
+      ],
+      "outputs": []
     }
   }
 }

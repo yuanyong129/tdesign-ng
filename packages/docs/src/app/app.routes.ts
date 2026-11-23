@@ -44,6 +44,11 @@ export const routes: Routes = [
     loadComponent: () => import('./docs/input/input.component').then((m) => m.InputDocs),
   },
   {
+    path: 'input-adornment',
+    loadComponent: () =>
+      import('./docs/input-adornment/input-adornment.component').then((m) => m.InputAdornmentDocs),
+  },
+  {
     path: 'link',
     loadComponent: () => import('./docs/link/link.component').then((m) => m.LinkDocs),
   },
@@ -213,6 +218,43 @@ export const routes: Routes = [
   {
     path: 'time-picker',
     loadComponent: () => import('./docs/time-picker/time-picker.component').then((m) => m.TimePickerDocs),
+  },
+  {
+    path: 'qrcode',
+    loadComponent: () => import('./docs/qrcode/qrcode.component').then((m) => m.QRCodeDocs),
+  },
+  {
+    path: 'anchor',
+    loadComponent: () => import('./docs/anchor/anchor.component').then((m) => m.AnchorDocs),
+  },
+  {
+    path: 'dropdown',
+    loadComponent: () => import('./docs/dropdown/dropdown.component').then((m) => m.DropdownDocs),
+  },
+  {
+    path: 'guide',
+    loadComponent: () => import('./docs/guide/guide.component').then((m) => m.GuideDocs),
+  },
+  {
+    path: 'image',
+    loadComponent: () => import('./docs/image/image.component').then((m) => m.ImageDocs),
+  },
+  {
+    path: 'image-viewer',
+    loadComponent: () => import('./docs/image-viewer/image-viewer.component').then((m) => m.ImageViewerDocs),
+  },
+  {
+    path: 'popconfirm',
+    loadComponent: () => import('./docs/popconfirm/popconfirm.component').then((m) => m.PopconfirmDocs),
+  },
+  {
+    path: 'watermark',
+    loadComponent: () => import('./docs/watermark/watermark.component').then((m) => m.WatermarkDocs),
+  },
+  {
+    path: 'config-provider',
+    loadComponent: () =>
+      import('./docs/config-provider/config-provider.component').then((m) => m.ConfigProviderDocs),
   },
   {
     path: '**',

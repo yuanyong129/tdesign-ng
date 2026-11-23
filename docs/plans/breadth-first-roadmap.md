@@ -199,21 +199,31 @@
 
 ### B2 弹层与媒体（8 项 / 143 props）
 
-目标：把弹层基座从"能用"扩到"可组合"，同时补齐媒体类组件。
+目标：把弹层基座从"能用"扩到"可组合"，同时补齐媒体类组件。**进度 8/8（2026-11-23 完成）**：8 项全部落地、接线，`align-check` missing 0 / extra 0，`tsc` / `ngc` / `build:lib` 全绿，8 个页面本地 CDP 实拍无 console error。
 
 | 组件 | 上游 | 关键点 | 量级 |
 | --- | --- | --- | --- |
-| popconfirm | 16 | popup + button，确认/取消回调、异步确认 | M |
-| dropdown | 23 | popup + 菜单项、分割线、禁用、方向 | M |
-| guide | 21 | 分步引导、目标定位、上一步/下一步 | L |
-| image | 17 | 加载/错误占位、懒加载、点击预览 | M |
-| image-viewer | 23 | overlay、缩放/旋转/拖拽、键盘、缩略图 | L |
-| anchor | 14 | scroll spy、容器、偏移、平滑滚动 | M |
-| qrcode | 12 | 编码、canvas/svg、下载、纠错级别 | M |
-| watermark | 17 | canvas 平铺、透明度/旋转、防篡改观察 | M |
+| popconfirm ✅ | 16 | popup + button，确认/取消回调、异步确认 | M |
+| dropdown ✅ | 23 | popup + 菜单项、分割线、禁用、方向 | M |
+| guide ✅ | 21 | 分步引导、目标定位、上一步/下一步 | L |
+| image ✅ | 17 | 加载/错误占位、懒加载、点击预览 | M |
+| image-viewer ✅ | 23 | overlay、缩放/旋转/拖拽、键盘、缩略图 | L |
+| anchor ✅ | 14 | scroll spy、容器、偏移、平滑滚动 | M |
+| qrcode ✅ | 12 | 编码、canvas/svg、下载、纠错级别 | M |
+| watermark ✅ | 17 | canvas 平铺、透明度/旋转、防篡改观察 | M |
 
 - **依赖**：popup、button、image → image-viewer；anchor 复用 scroll 工具。
 - **验收**：8 个路由 + 弹层打开/关闭/键盘关闭无 console error；image-viewer 的缩放拖拽在 CDP 里可断言。
+- **落地要点（2026-11-23）**：
+  - popconfirm：复用 `t-popup` 定位；`visibleChange` 带 `{ visible, trigger, e }`，不提供 `[(visible)]`；`popupProps` 标 `[D2]`
+  - dropdown：options 数据驱动 + 子菜单（`children`）；默认 `trigger="hover"`；`popupProps` 标 `[D2]`
+  - guide：不套 CDK Overlay（z-index 低于 999999）：手写 fixed 定位 + 视口夹紧；气泡/对话框两种模式
+  - image：`src` 支持 `string | File`；形状/`fit`/`position`/浮层；点击预览交给使用方监听原生 click
+  - image-viewer：modal / modeless 两种形态；`attach` 与 `viewerScale` 标 `[D2]`/`[D3]`
+  - anchor：只有一个默认投影槽，吸顶改用 `position: sticky`；自写 300ms 缓动滚动
+  - qrcode：引入 `qrcode`（可选 peer 依赖）；图标挖空 + 过期/已扫描/加载遮罩；文案接 `ConfigProvider`
+  - watermark：复用单个 `<style>` 元素注入 keyframes；图片 onerror 也计入加载完成
+  - 新增共享能力：`ConfigProvider`（`globalConfig` + `TConfigService`）先只接二维码文案，其余分组在 D0 统一接。
 - **估算**：3~5 天。
 
 ### B3 数据录入补全（12 项 / 285 props）
@@ -222,7 +232,7 @@
 
 | 组件 | 上游 | 关键点 | 量级 |
 | --- | --- | --- | --- |
-| input-adornment | 2 | 前置/后置内容，尺寸与状态类 | S |
+| input-adornment ✅ | 2 | 前置/后置内容，尺寸与状态类 | S |
 | select-input | 43 | 组合选择器基座：标签回显、折叠、面板、清空 | L |
 | tag-input | 39 | 标签输入：增删、折叠、拖拽排序（拖拽标 `[D3]`） | L |
 | range-input | 42 | 双输入框、分隔符、清空、面板 | M |
@@ -231,10 +241,10 @@
 | calendar | 22 | 月/年视图、单元格自定义、事件 | L |
 | color-picker | 38 | 颜色转换、面板、透明度、预设、最近使用 | XL |
 | swiper | 15 | 轮播、自动播放、指示点、触摸/拖拽 | L |
-| config-provider | 1 | 全局配置/前缀/主题，影响面大但 API 小 | S |
+| config-provider ✅ | 1 | 全局配置/前缀/主题，影响面大但 API 小 | S |
 | check-tag | 20 | CheckTag + CheckTagGroup，复用 tag 样式 | M |
 
-- **顺序**：input-adornment → select-input → tag-input → range-input → input-number → auto-complete → calendar → color-picker → swiper → config-provider → check-tag。
+- **顺序**：input-adornment ✅ → config-provider ✅ → select-input → tag-input → range-input → input-number → auto-complete → calendar → color-picker → swiper → check-tag。
 - **验收**：CVA 组件同时支持 `[(value)]`、`ngModel`、`formControl`；金额/百分比类 demo 可交互。
 - **估算**：5~8 天。
 

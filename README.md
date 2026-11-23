@@ -61,10 +61,20 @@
 | StickyTool | ✅ 六个停靠方向、普通/紧凑模式、方形/圆角、悬浮与点击弹层、子项事件 |
 | Affix | ✅ 顶部吸附与底部夹紧、自定义滚动容器、`offsetTop` / `offsetBottom`、`(fixedChange)` |
 | BackTop | ✅ 滚动阈值、缓出滚动时长、三种主题、方形/圆形、自定义内容与位置 |
+| QRCode | ✅ canvas / svg 两种渲染、四种纠错级别、中间图标、过期/已扫描/加载遮罩与 `(refresh)` |
+| InputAdornment | ✅ 前置/后置内容（字符串或模板）、圆角拼接、与 `t-input` 组合时自动铺满 |
+| ConfigProvider | ✅ `globalConfig` 全局文案（当前接入二维码），`TConfigService` 供组件注入 |
+| Anchor / AnchorItem | ✅ scroll spy、`targetOffset`、自定义滚动容器、容器内吸顶、`(change)` / `(click)` |
+| Watermark | ✅ canvas 平铺水印、多行/图片内容、透明度与旋转、移动与删除 |
+| Guide | ✅ 分步引导、气泡/对话框两种模式、自定义高亮与内容、上一步/下一步/跳过/完成 |
+| Popconfirm | ✅ 三种主题、弹出方向、`(confirm)` / `(cancel)` / `(visibleChange)`、异步确认 |
+| Dropdown / DropdownItem | ✅ options 数据驱动、子菜单、分割线与禁用、主题与图标 |
+| Image | ✅ 三种形状、`fit` 与定位、加载/错误占位、相册阴影、浮层、点击预览 |
+| ImageViewer | ✅ 缩放/旋转/翻转/拖拽、键盘操作、缩略图切换、下载、modal 与 modeless |
 
 P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / TreeSelect / DatePicker / TimePicker，剩余 Upload / Transfer / ColorPicker 转入下面的广度路线。
 
-广度阶段 B1（布局与静态展示）已全部落地 15/15。
+广度阶段 B1（布局与静态展示）已全部落地 15/15，B2（弹层与媒体）已全部落地 8/8。
 
 ### 广度优先路线（2026-11-23 起）
 
@@ -73,9 +83,9 @@ P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / Tree
 | 波次 | 内容 | 项数 / 上游属性 |
 | --- | --- | --- |
 | B0 | 基线：`[D1]/[D2]/[D3]` 债务标记、`align-check --json`、`depth-report` 脚本 | — |
-| B1 | 布局与静态展示：Layout、Grid、Typography、Card、Alert、Skeleton、Comment、Breadcrumb、Steps、Timeline、Statistic、Descriptions、StickyTool、Affix、BackTop | 15 项 / 203 |
-| B2 | 弹层与媒体：Popconfirm、Dropdown、Guide、Image、ImageViewer、Anchor、QRCode、Watermark | 8 项 / 143 |
-| B3 | 录入补全：InputAdornment、SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、ConfigProvider、CheckTag | 12 项 / 285 |
+| B1 ✅ | 布局与静态展示：Layout、Grid、Typography、Card、Alert、Skeleton、Comment、Breadcrumb、Steps、Timeline、Statistic、Descriptions、StickyTool、Affix、BackTop | 15 项 / 203 |
+| B2 ✅ | 弹层与媒体：Popconfirm、Dropdown、Guide、Image、ImageViewer、Anchor、QRCode、Watermark | 8 项 / 143 |
+| B3 | 录入补全：InputAdornment ✅、ConfigProvider ✅、SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、CheckTag | 12 项 / 285 |
 | B4 | 重型组件：Menu、Tree、Transfer、Upload | 4 项 / 184 |
 
 广度完成后（上游 71 个组件目录 100% 覆盖）进入深度阶段：D0 横切工程（TNode 模板化、`*Props` 透传、受控/非受控统一、SSR、a11y、单测、i18n）→ D1 表格与选择线 → D2 录入与反馈线 → D3 其余组件。

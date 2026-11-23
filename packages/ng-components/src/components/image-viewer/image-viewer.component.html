@@ -1,0 +1,445 @@
+<!-- 富文本属性统一渲染入口：模板走 ngTemplateOutlet，其余按文本输出（等价于上游的 renderTNodeJSX）。 -->
+<ng-template #renderNode let-value>
+  @if (asTemplate(value); as template) {
+    <ng-container *ngTemplateOutlet="template" />
+  } @else if (value) {
+    {{ value }}
+  }
+</ng-template>
+
+<!-- 触发器：默认是与上游一致的缩略图 + hover 遮罩，也可以由 trigger 属性替换。 -->
+@if (trigger()) {
+  @if (asTemplate(trigger()); as triggerTemplate) {
+    <ng-container *ngTemplateOutlet="triggerTemplate; context: { $implicit: openViewer, open: openViewer }" />
+  } @else {
+    {{ trigger() }}
+  }
+} @else {
+  <div class="t-image-viewer__trigger">
+    <t-image class="t-image-viewer__trigger-img" [src]="triggerSrc()" alt="preview" fit="contain" />
+    <div class="t-image-viewer__trigger--hover" (click)="openViewer()">
+      <span>
+        <svg
+          class="t-icon t-icon-browse t-image-viewer__trigger-icon"
+          viewBox="0 0 24 24"
+          width="1em"
+          height="1em"
+          style="font-size: 1.4em"
+          aria-hidden="true"
+        >
+          <path
+            fill="transparent"
+            d="M11.9997 4C6.86881 4 2.52275 7.36017 1.04199 12C2.52275 16.6398 6.86881 20 11.9997 20C17.1306 20 21.4766 16.6398 22.9574 12C21.4766 7.36017 17.1306 4 11.9997 4Z"
+          />
+          <path
+            fill="transparent"
+            d="M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z"
+          />
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M11.9997 4C6.86881 4 2.52275 7.36017 1.04199 12C2.52275 16.6398 6.86881 20 11.9997 20C17.1306 20 21.4766 16.6398 22.9574 12C21.4766 7.36017 17.1306 4 11.9997 4Z"
+          />
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z"
+          />
+        </svg>
+        {{ previewText }}
+      </span>
+    </div>
+  </div>
+}
+
+<!-- 图片本体：两种形态共用。 -->
+<ng-template #picture>
+  <div class="t-image-viewer__modal-pic">
+    <div #modalBox class="t-image-viewer__modal-box" [style.transform]="boxTransform()">
+      @if (imageFailed()) {
+        <div class="t-image-viewer__img-error">
+          <div class="t-image-viewer__img-error-content">
+            <svg
+              class="t-icon t-icon-image-error"
+              viewBox="0 0 24 24"
+              width="1em"
+              height="1em"
+              style="font-size: 4em"
+              aria-hidden="true"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="square"
+                stroke-width="2"
+                d="M21 11V3H3V21H11M13 14L9 10L3.5 15.5M17.75 8.25C17.75 9.35457 16.8546 10.25 15.75 10.25C14.6454 10.25 13.75 9.35457 13.75 8.25C13.75 7.14543 14.6454 6.25 15.75 6.25C16.8546 6.25 17.75 7.14543 17.75 8.25Z"
+              />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="square"
+                stroke-width="2"
+                d="M21.8287 16.1719L19.0003 19.0003M19.0003 19.0003L16.1719 21.8287M19.0003 19.0003L16.1719 16.1719M19.0003 19.0003L21.8287 21.8287"
+              />
+            </svg>
+            <div class="t-image-viewer__img-error-text">{{ errorText }}</div>
+          </div>
+        </div>
+      }
+
+      @if (placementSrc()) {
+        <img
+          class="t-image-viewer__modal-image"
+          [attr.src]="placementSrc()"
+          [attr.referrerpolicy]="imageReferrerpolicy()"
+          [style.transform]="imageTransform()"
+          [style.display]="loaded() ? 'none' : 'block'"
+          alt="image"
+          draggable="false"
+          (mousedown)="startDrag($event)"
+          (touchstart)="startDrag($event)"
+          (load)="handleImageLoad()"
+          (error)="imageFailed.set(true)"
+        />
+      }
+
+      <img
+        class="t-image-viewer__modal-image"
+        [attr.src]="currentSrc()"
+        [attr.referrerpolicy]="imageReferrerpolicy()"
+        [style.transform]="imageTransform()"
+        [style.display]="placementSrc() && !loaded() ? 'none' : 'block'"
+        alt="image"
+        draggable="false"
+        (mousedown)="startDrag($event)"
+        (touchstart)="startDrag($event)"
+        (load)="handleImageLoad()"
+        (error)="imageFailed.set(true)"
+      />
+    </div>
+  </div>
+</ng-template>
+
+<!-- 工具条：镜像 / 旋转 / 缩小 / 比例 / 放大 / 原始大小 / 下载。 -->
+<ng-template #utils>
+  <div class="t-image-viewer__utils">
+    <div class="t-image-viewer__utils-content">
+      <t-tooltip
+        [content]="mirrorTip"
+        placement="top"
+        [destroyOnClose]="true"
+        [zIndex]="(zIndex() ?? defaultZIndex) + 1"
+      >
+        <div class="t-image-viewer__modal-icon" (click)="toggleMirror()">
+          <svg
+            class="t-icon t-icon-mirror t-size-m"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+          >
+            <path fill="transparent" d="M8 8.5V17.5H3L8 8.5Z" />
+            <path fill="transparent" d="M16 8.5V17.5H21L16 8.5Z" />
+            <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M12 3L12 21" />
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M8 8.5V17.5H3L8 8.5Z"
+            />
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M16 8.5V17.5H21L16 8.5Z"
+            />
+          </svg>
+        </div>
+      </t-tooltip>
+
+      <t-tooltip
+        [content]="rotateTip"
+        placement="top"
+        [destroyOnClose]="true"
+        [zIndex]="(zIndex() ?? defaultZIndex) + 1"
+      >
+        <div class="t-image-viewer__modal-icon" (click)="rotateImage()">
+          <svg
+            class="t-icon t-icon-rotation t-size-m"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M12 20C12 15.5818 8.41828 12 4 12M3 3V21H21"
+            />
+          </svg>
+        </div>
+      </t-tooltip>
+
+      <div class="t-image-viewer__modal-icon" (click)="zoomOut()">
+        <svg
+          class="t-icon t-icon-zoom-out t-size-m"
+          viewBox="0 0 24 24"
+          width="1em"
+          height="1em"
+          aria-hidden="true"
+        >
+          <path
+            fill="transparent"
+            d="M15.8033 15.8033C12.8744 18.7322 8.12563 18.7322 5.1967 15.8033C2.26777 12.8744 2.26777 8.12563 5.1967 5.1967C8.12563 2.26777 12.8744 2.26777 15.8033 5.1967C18.7322 8.12563 18.7322 12.8744 15.8033 15.8033Z"
+          />
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M15.8033 15.8033C12.8744 18.7322 8.12563 18.7322 5.1967 15.8033C2.26777 12.8744 2.26777 8.12563 5.1967 5.1967C8.12563 2.26777 12.8744 2.26777 15.8033 5.1967C18.7322 8.12563 18.7322 12.8744 15.8033 15.8033ZM15.8033 15.8033L21.1066 21.1066"
+          />
+          <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M7.5 10.5H13.5" />
+        </svg>
+      </div>
+
+      <div class="t-image-viewer__modal-icon t-image-viewer__utils-scale">
+        <span class="t-image-viewer__modal-icon-label">{{ scalePercent() }}%</span>
+      </div>
+
+      <div class="t-image-viewer__modal-icon" (click)="zoomIn()">
+        <svg
+          class="t-icon t-icon-zoom-in t-size-m"
+          viewBox="0 0 24 24"
+          width="1em"
+          height="1em"
+          aria-hidden="true"
+        >
+          <path
+            fill="transparent"
+            d="M15.8033 15.8033C12.8744 18.7322 8.12563 18.7322 5.1967 15.8033C2.26777 12.8744 2.26777 8.12563 5.1967 5.1967C8.12563 2.26777 12.8744 2.26777 15.8033 5.1967C18.7322 8.12563 18.7322 12.8744 15.8033 15.8033Z"
+          />
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M15.8033 15.8033C12.8744 18.7322 8.12563 18.7322 5.1967 15.8033C2.26777 12.8744 2.26777 8.12563 5.1967 5.1967C8.12563 2.26777 12.8744 2.26777 15.8033 5.1967C18.7322 8.12563 18.7322 12.8744 15.8033 15.8033ZM15.8033 15.8033L21.1066 21.1066"
+          />
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="square"
+            stroke-width="2"
+            d="M10.5 13.5V10.5M10.5 10.5L10.5 7.5M10.5 10.5H7.5M10.5 10.5H13.5"
+          />
+        </svg>
+      </div>
+
+      <t-tooltip
+        [content]="originalSizeTip"
+        placement="top"
+        [destroyOnClose]="true"
+        [zIndex]="(zIndex() ?? defaultZIndex) + 1"
+      >
+        <div class="t-image-viewer__modal-icon">
+          <div class="t-image-viewer__modal-icon" (click)="resetAll()">
+            <svg
+              class="t-icon t-icon-image t-size-m"
+              viewBox="0 0 24 24"
+              width="1em"
+              height="1em"
+              aria-hidden="true"
+            >
+              <path fill="transparent" d="M3 21H20L9 10L3 16V21Z" />
+              <circle fill="transparent" cx="15.75" cy="8.25" r="2" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                d="M3 16V3H21V21H20M3 16V21H20M3 16L9 10L20 21"
+              />
+              <circle fill="none" stroke="currentColor" stroke-width="2" cx="15.75" cy="8.25" r="2" />
+            </svg>
+          </div>
+        </div>
+      </t-tooltip>
+
+      @if (currentImage().download) {
+        <div class="t-image-viewer__modal-icon" (click)="handleDownload()">
+          <svg
+            class="t-icon t-icon-download t-size-m"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            aria-hidden="true"
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M16.5 10.5L12 15L7.5 10.5M12 13.75V4"
+            />
+            <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M20.5 15V20H3.5V15" />
+          </svg>
+        </div>
+      }
+    </div>
+  </div>
+</ng-template>
+
+@if (isModeless()) {
+  <!-- 弹窗形态：复用 t-dialog 的 modeless 模式，正文与工具条通过插槽传入。 -->
+  <t-dialog
+    class="t-image-viewer__dialog"
+    mode="modeless"
+    placement="center"
+    [width]="modelessWidth"
+    [header]="titleText()"
+    [zIndex]="zIndex()"
+    [visible]="innerVisible()"
+    (visibleChange)="handleDialogVisibleChange($event)"
+    (close)="handleDialogClose($event)"
+  >
+    <div class="t-image-viewer-mini__content">
+      <ng-container *ngTemplateOutlet="picture" />
+    </div>
+    <div tDialogFooter class="t-image-viewer-mini__footer">
+      <ng-container *ngTemplateOutlet="utils" />
+    </div>
+  </t-dialog>
+} @else if (shouldRenderOverlay()) {
+  <div
+    #overlayRoot
+    [class]="overlayClasses()"
+    [style.z-index]="zIndex() ?? defaultZIndex"
+    tabindex="-1"
+    (wheel)="handleWheel($event)"
+  >
+    @if (effectiveShowOverlay()) {
+      <div class="t-image-viewer__modal-mask" (click)="handleOverlayClick($event)"></div>
+    }
+
+    @if (formattedImages().length > 1) {
+      <div [class]="headerClasses()">
+        <div class="t-image-viewer__modal-icon t-image-viewer__header-pre-bt" (click)="toggleExpand()">
+          <svg class="t-icon t-icon-chevron-down" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M17.5 9.5L12 15L6.5 9.5"
+            />
+          </svg>
+        </div>
+        <div class="t-image-viewer__header-prev">
+          <div class="t-image-viewer__header-trans" [style.transform]="headerTransform()">
+            @for (image of formattedImages(); track $index) {
+              <div [class]="headerBoxClasses($index)">
+                <t-image
+                  class="t-image-viewer__header-img"
+                  [src]="image.thumbnail || image.mainImage"
+                  error=""
+                  (click)="handleThumbnailClick($index)"
+                />
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="t-image-viewer__modal-index">
+        @if (title()) {
+          <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: title() }" />
+        } @else {
+          {{ indexLabel() }}
+        }
+      </div>
+
+      @if (showArrows()) {
+        <div class="t-image-viewer__modal-icon t-image-viewer__modal-prev-bt" (click)="prevImage()">
+          @if (arrowContent()) {
+            <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: arrowContent() }" />
+          } @else {
+            <svg
+              class="t-icon t-icon-chevron-left"
+              viewBox="0 0 24 24"
+              width="1em"
+              height="1em"
+              style="font-size: 24px"
+              aria-hidden="true"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="square"
+                stroke-width="2"
+                d="M14.5 17.5L9 12L14.5 6.5"
+              />
+            </svg>
+          }
+        </div>
+        <div class="t-image-viewer__modal-icon t-image-viewer__modal-next-bt" (click)="nextImage()">
+          @if (arrowContent()) {
+            <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: arrowContent() }" />
+          } @else {
+            <svg
+              class="t-icon t-icon-chevron-left"
+              viewBox="0 0 24 24"
+              width="1em"
+              height="1em"
+              style="font-size: 24px; transform: rotate(180deg)"
+              aria-hidden="true"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="square"
+                stroke-width="2"
+                d="M14.5 17.5L9 12L14.5 6.5"
+              />
+            </svg>
+          }
+        </div>
+      }
+    }
+
+    @if (showCloseBtn()) {
+      <div class="t-image-viewer__modal-icon t-image-viewer__modal-close-bt" (click)="handleCloseBtn($event)">
+        @if (closeBtnContent()) {
+          <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: closeBtnContent() }" />
+        } @else {
+          <svg
+            class="t-icon t-icon-close"
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            style="font-size: 24px"
+            aria-hidden="true"
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="square"
+              stroke-width="2"
+              d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
+            />
+          </svg>
+        }
+      </div>
+    }
+
+    <ng-container *ngTemplateOutlet="utils" />
+    <ng-container *ngTemplateOutlet="picture" />
+  </div>
+}

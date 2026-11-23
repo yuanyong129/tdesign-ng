@@ -1,0 +1,15 @@
+<li [class]="classes()" [style]="itemStyle()" (click)="handleClick($event)">
+  @if (prefixIconTemplate(); as prefixTpl) {
+    <div class="t-dropdown__item-icon"><ng-container [ngTemplateOutlet]="prefixTpl" /></div>
+  } @else if (prefixIconText()) {
+    <div class="t-dropdown__item-icon">{{ prefixIconText() }}</div>
+  }
+
+  @if (contentTemplate(); as contentTpl) {
+    <ng-container [ngTemplateOutlet]="contentTpl" />
+  } @else if (contentText()) {
+    {{ contentText() }}
+  } @else {
+    <ng-content />
+  }
+</li>

@@ -1,0 +1,135 @@
+@if (actived()) {
+  <!-- 遮罩层：只有 fixed inset 0，视觉由高亮层的 box-shadow 提供。 -->
+  <div class="t-guide__overlay" [style.z-index]="zIndex() - 2"></div>
+
+  <!-- 高亮层：气泡模式包住目标元素，对话框模式包住对话框自身。 -->
+  <div #highlightEl [class]="highlightClasses()" [style]="highlightStyle()">
+    @if (highlightTemplate(); as highlightTpl) {
+      <ng-container *ngTemplateOutlet="highlightTpl; context: stepContext()" />
+    } @else if (highlightText()) {
+      {{ highlightText() }}
+    }
+  </div>
+
+  @if (isPopup()) {
+    <!-- 定位锚点层：与高亮层同几何，保证层级处于高亮之上、气泡之下。 -->
+    <div [class]="referenceClasses()" [style]="referenceStyle()"></div>
+
+    <div
+      #popupEl
+      [class]="popupClasses()"
+      [attr.data-popper-placement]="popperPlacement()"
+      [style]="popupStyle()"
+    >
+      <div [class]="popupContentClasses()">
+        @if (showArrow()) {
+          <div class="t-popup__arrow"></div>
+        }
+
+        @if (contentTemplate(); as contentTpl) {
+          <ng-container *ngTemplateOutlet="contentTpl; context: contentContext()" />
+        } @else if (contentText()) {
+          {{ contentText() }}
+        } @else {
+          <div class="t-guide__tooltip">
+            <div class="t-guide__title">{{ title() }}</div>
+            <div class="t-guide__desc">
+              @if (bodyTemplate(); as bodyTpl) {
+                <ng-container *ngTemplateOutlet="bodyTpl; context: stepContext()" />
+              } @else {
+                {{ bodyText() }}
+              }
+            </div>
+            <ng-container *ngTemplateOutlet="footerTpl" />
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- 对话框：wrapper 用 fixed flex 定位，dialog 自身是 absolute 的静态位置。 -->
+    <div [class]="dialogWrapperClasses()" [style.z-index]="zIndex()">
+      <div #dialogEl [class]="dialogClasses()">
+        <div class="t-guide__title">{{ title() }}</div>
+        <div class="t-guide__desc">
+          @if (bodyTemplate(); as bodyTpl) {
+            <ng-container *ngTemplateOutlet="bodyTpl; context: stepContext()" />
+          } @else {
+            {{ bodyText() }}
+          }
+        </div>
+        <ng-container *ngTemplateOutlet="footerTpl" />
+      </div>
+    </div>
+  }
+}
+
+<!-- 底部操作区：气泡与对话框共用，尺寸随模式变化。 -->
+<ng-template #footerTpl>
+  <div class="t-guide__footer t-guide__footer--popup">
+    @if (!hideCounter()) {
+      <div class="t-guide__counter">
+        @if (counterTemplate(); as counterTpl) {
+          <ng-container *ngTemplateOutlet="counterTpl; context: counterContext()" />
+        } @else {
+          {{ counterText() }}
+        }
+      </div>
+    }
+
+    <div class="t-guide__action">
+      @if (showSkip()) {
+        <t-button
+          [class]="'t-guide__skip ' + skipButton().className"
+          [theme]="skipButton().theme"
+          [variant]="skipButton().variant"
+          [size]="skipButton().size"
+          [disabled]="skipButton().disabled"
+          [loading]="skipButton().loading"
+          (click)="handleSkip($event)"
+        >
+          {{ skipButton().content }}
+        </t-button>
+      }
+
+      @if (showPrev()) {
+        <t-button
+          [class]="'t-guide__prev ' + prevButton().className"
+          [theme]="prevButton().theme"
+          [variant]="prevButton().variant"
+          [size]="prevButton().size"
+          [disabled]="prevButton().disabled"
+          [loading]="prevButton().loading"
+          (click)="handlePrev($event)"
+        >
+          {{ prevButton().content }}
+        </t-button>
+      }
+
+      @if (!isLast()) {
+        <t-button
+          [class]="'t-guide__next ' + nextButton().className"
+          [theme]="nextButton().theme"
+          [variant]="nextButton().variant"
+          [size]="nextButton().size"
+          [disabled]="nextButton().disabled"
+          [loading]="nextButton().loading"
+          (click)="handleNext($event)"
+        >
+          {{ nextButton().content }}
+        </t-button>
+      } @else {
+        <t-button
+          [class]="'t-guide__finish ' + finishButton().className"
+          [theme]="finishButton().theme"
+          [variant]="finishButton().variant"
+          [size]="finishButton().size"
+          [disabled]="finishButton().disabled"
+          [loading]="finishButton().loading"
+          (click)="handleFinish($event)"
+        >
+          {{ finishButton().content }}
+        </t-button>
+      }
+    </div>
+  </div>
+</ng-template>

@@ -340,3 +340,53 @@ t-comment {
 t-affix {
   display: block;
 }
+
+// InputAdornment：上游 .t-input 自身是 width:100% 的块级容器，宿主 t-input 作为
+// .t-input-adornment 的 flex 子项默认按内容宽度收缩（flex-basis auto），前后缀会被挤在一起；
+// 这里让宿主成为可伸缩的 flex item，与上游「输入框填满剩余宽度」的效果等价。
+t-input-adornment > t-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+// ConfigProvider：宿主不产生任何盒子（上游只在渲染函数里 provide 上下文，没有 DOM），
+// 用 display: contents 让它透明，避免包裹后改变子节点的布局上下文。
+t-config-provider {
+  display: contents;
+}
+
+// Popconfirm / Dropdown / DropdownItem：宿主只是包一层 t-popup（或 li 的容器），不承载样式；
+// 保留实体盒子会多出一层 inline 元素，破坏 popup 的锚点计算与 dropdown 菜单的 li 结构，故透明化。
+t-popconfirm,
+t-dropdown,
+t-dropdown-item {
+  display: contents;
+}
+
+// Image：宿主内部就是 .t-image__wrapper（position: relative 的块级盒子），
+// 自定义元素默认 inline 会让 width/height 与浮层定位失效，故补成块级（与 t-card / t-table 同理）。
+t-image {
+  display: block;
+}
+
+// ImageViewer：视觉层是内部 position: fixed 的全屏遮罩，宿主不应产生盒子，否则会留下零高行内元素。
+t-image-viewer {
+  display: contents;
+}
+
+// Anchor：上游宿主是无类名的 wrap，本身不承载样式，但它要作为滚动定位与 offsetTop 计算的参照，
+// 必须是块级盒子（inline 宿主会把内部列表拆成 fragment，offsetTop 失真）。
+t-anchor {
+  display: block;
+}
+
+// Watermark：宿主自身承载 position: relative / overflow: hidden / width: 100%（与上游根节点一致），
+// width: 100% 对 inline 元素无效，故补成块级。
+t-watermark {
+  display: block;
+}
+
+// Guide：所有视觉层都是内部 position: fixed 节点，宿主不产生盒子。
+t-guide {
+  display: contents;
+}
