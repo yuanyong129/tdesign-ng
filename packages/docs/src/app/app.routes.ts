@@ -30,7 +30,8 @@ export const routes: Routes = [
   {
     path: 'skeleton',
     loadComponent: () => import('./docs/skeleton/skeleton.component').then((m) => m.SkeletonDocs),
-  },  {
+  },
+  {
     path: 'grid',
     loadComponent: () => import('./docs/grid/grid.component').then((m) => m.GridDocs),
   },
@@ -45,6 +46,47 @@ export const routes: Routes = [
   {
     path: 'link',
     loadComponent: () => import('./docs/link/link.component').then((m) => m.LinkDocs),
+  },
+  {
+    path: 'typography',
+    loadComponent: () => import('./docs/typography/typography.component').then((m) => m.TypographyDocs),
+  },
+  {
+    path: 'breadcrumb',
+    loadComponent: () => import('./docs/breadcrumb/breadcrumb.component').then((m) => m.BreadcrumbDocs),
+  },
+  {
+    path: 'steps',
+    loadComponent: () => import('./docs/steps/steps.component').then((m) => m.StepsDocs),
+  },
+  {
+    path: 'descriptions',
+    loadComponent: () =>
+      import('./docs/descriptions/descriptions.component').then((m) => m.DescriptionsDocs),
+  },
+  {
+    path: 'comment',
+    loadComponent: () => import('./docs/comment/comment.component').then((m) => m.CommentDocs),
+  },
+  {
+    path: 'timeline',
+    loadComponent: () => import('./docs/timeline/timeline.component').then((m) => m.TimelineDocs),
+  },
+  {
+    path: 'statistic',
+    loadComponent: () => import('./docs/statistic/statistic.component').then((m) => m.StatisticDocs),
+  },
+  {
+    path: 'affix',
+    loadComponent: () => import('./docs/affix/affix.component').then((m) => m.AffixDocs),
+  },
+  {
+    path: 'back-top',
+    loadComponent: () => import('./docs/back-top/back-top.component').then((m) => m.BackTopDocs),
+  },
+  {
+    path: 'sticky-tool',
+    loadComponent: () => import('./docs/sticky-tool/sticky-tool.component').then((m) => m.StickyToolDocs),
   },
   {
     path: 'space',

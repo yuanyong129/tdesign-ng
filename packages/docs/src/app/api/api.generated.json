@@ -1,6 +1,66 @@
 {
   "generatedBy": "scripts/gen-api-docs.mjs",
   "components": {
+    "TAffix": {
+      "className": "TAffix",
+      "selector": "t-affix",
+      "file": "packages/ng-components/src/components/affix/affix.component.ts",
+      "inputs": [
+        {
+          "name": "container",
+          "type": "AffixScrollContainer",
+          "default": "window",
+          "required": false,
+          "zh": "滚动容器",
+          "en": "scroll container",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "AffixContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "offsetBottom",
+          "type": "number | null",
+          "default": "0",
+          "required": false,
+          "zh": "距离底部的偏移",
+          "en": "offset from bottom",
+          "values": []
+        },
+        {
+          "name": "offsetTop",
+          "type": "number | null",
+          "default": "0",
+          "required": false,
+          "zh": "距离顶部的偏移",
+          "en": "offset from top",
+          "values": []
+        },
+        {
+          "name": "zIndex",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "吸附时的层级",
+          "en": "z-index when affixed",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "fixedChange",
+          "type": "AffixFixedChangeEvent",
+          "zh": "吸附状态变化",
+          "en": "fixed state change"
+        }
+      ]
+    },
     "TAlert": {
       "className": "TAlert",
       "selector": "t-alert",
@@ -236,6 +296,105 @@
       ],
       "outputs": []
     },
+    "TBackTop": {
+      "className": "TBackTop",
+      "selector": "t-back-top",
+      "file": "packages/ng-components/src/components/back-top/back-top.component.ts",
+      "inputs": [
+        {
+          "name": "container",
+          "type": "BackTopAttachNode",
+          "default": "body",
+          "required": false,
+          "zh": "监听滚动的容器",
+          "en": "scroll container",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "BackTopContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "default": "200",
+          "required": false,
+          "zh": "滚动时长",
+          "en": "scroll duration",
+          "values": []
+        },
+        {
+          "name": "offset",
+          "type": "Array<string | number>",
+          "default": "['24px','80px']",
+          "required": false,
+          "zh": "偏移",
+          "en": "offset",
+          "values": []
+        },
+        {
+          "name": "shape",
+          "type": "BackTopShape",
+          "default": "square",
+          "required": false,
+          "zh": "形状",
+          "en": "shape",
+          "values": [
+            "circle",
+            "square"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "BackTopSize",
+          "default": "medium",
+          "required": false,
+          "zh": "尺寸",
+          "en": "size",
+          "values": [
+            "medium",
+            "small"
+          ]
+        },
+        {
+          "name": "target",
+          "type": "BackTopAttachNode",
+          "default": "body",
+          "required": false,
+          "zh": "回滚目标",
+          "en": "scroll target",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "BackTopTheme",
+          "default": "light",
+          "required": false,
+          "zh": "主题",
+          "en": "theme",
+          "values": [
+            "light",
+            "primary",
+            "dark"
+          ]
+        },
+        {
+          "name": "visibleHeight",
+          "type": "string | number",
+          "default": "200px",
+          "required": false,
+          "zh": "显示阈值",
+          "en": "visible height",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TBadge": {
       "className": "TBadge",
       "selector": "t-badge",
@@ -327,6 +486,119 @@
           "zh": "徽标偏移量，[x, y]",
           "en": "Badge offset, [x, y]",
           "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TBreadcrumb": {
+      "className": "TBreadcrumb",
+      "selector": "t-breadcrumb",
+      "file": "packages/ng-components/src/components/breadcrumb/breadcrumb.component.ts",
+      "inputs": [
+        {
+          "name": "maxItemWidth",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "最大宽度",
+          "en": "max item width",
+          "values": []
+        },
+        {
+          "name": "options",
+          "type": "BreadcrumbOption[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选项列表",
+          "en": "options",
+          "values": []
+        },
+        {
+          "name": "separator",
+          "type": "BreadcrumbContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "分隔符",
+          "en": "separator",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "BreadcrumbTheme",
+          "default": "light",
+          "required": false,
+          "zh": "主题",
+          "en": "theme",
+          "values": [
+            "light"
+          ]
+        }
+      ],
+      "outputs": []
+    },
+    "TBreadcrumbItem": {
+      "className": "TBreadcrumbItem",
+      "selector": "t-breadcrumb-item",
+      "file": "packages/ng-components/src/components/breadcrumb/breadcrumb-item.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "BreadcrumbContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "面包屑内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否禁用",
+          "en": "disabled",
+          "values": []
+        },
+        {
+          "name": "href",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "跳转链接",
+          "en": "href",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "BreadcrumbContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "前缀图标",
+          "en": "icon",
+          "values": []
+        },
+        {
+          "name": "maxWidth",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "最大宽度",
+          "en": "max width",
+          "values": []
+        },
+        {
+          "name": "target",
+          "type": "BreadcrumbTarget | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "链接打开位置",
+          "en": "target",
+          "values": [
+            "_blank",
+            "_self",
+            "_parent",
+            "_top"
+          ]
         }
       ],
       "outputs": []
@@ -1347,6 +1619,77 @@
       ],
       "outputs": []
     },
+    "TComment": {
+      "className": "TComment",
+      "selector": "t-comment",
+      "file": "packages/ng-components/src/components/comment/comment.component.ts",
+      "inputs": [
+        {
+          "name": "actions",
+          "type": "CommentActions",
+          "default": "undefined",
+          "required": false,
+          "zh": "操作区",
+          "en": "actions",
+          "values": []
+        },
+        {
+          "name": "author",
+          "type": "CommentContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "作者",
+          "en": "author",
+          "values": []
+        },
+        {
+          "name": "avatar",
+          "type": "CommentContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "头像",
+          "en": "avatar",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "CommentContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "正文内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "datetime",
+          "type": "CommentContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "评论时间",
+          "en": "datetime",
+          "values": []
+        },
+        {
+          "name": "quote",
+          "type": "CommentContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "引用内容",
+          "en": "quote",
+          "values": []
+        },
+        {
+          "name": "reply",
+          "type": "CommentContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "回复内容",
+          "en": "reply",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TContent": {
       "className": "TContent",
       "selector": "t-content",
@@ -1829,6 +2172,161 @@
           "en": "Emitted when the popup visibility changes"
         }
       ]
+    },
+    "TDescriptionItem": {
+      "className": "TDescriptionItem",
+      "selector": "t-descriptions-item",
+      "file": "packages/ng-components/src/components/descriptions/description-item.component.ts",
+      "inputs": [
+        {
+          "name": "label",
+          "type": "DescriptionsContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签",
+          "en": "label",
+          "values": []
+        },
+        {
+          "name": "content",
+          "type": "DescriptionsContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "span",
+          "type": "number",
+          "default": "1",
+          "required": false,
+          "zh": "占用的列数",
+          "en": "span",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TDescriptions": {
+      "className": "TDescriptions",
+      "selector": "t-descriptions",
+      "file": "packages/ng-components/src/components/descriptions/descriptions.component.ts",
+      "inputs": [
+        {
+          "name": "bordered",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否带边框",
+          "en": "bordered",
+          "values": []
+        },
+        {
+          "name": "colon",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "是否显示冒号",
+          "en": "colon",
+          "values": []
+        },
+        {
+          "name": "column",
+          "type": "number",
+          "default": "2",
+          "required": false,
+          "zh": "每行列数",
+          "en": "column",
+          "values": []
+        },
+        {
+          "name": "contentStyle",
+          "type": "DescriptionsStyles",
+          "default": "undefined",
+          "required": false,
+          "zh": "内容样式",
+          "en": "content style",
+          "values": []
+        },
+        {
+          "name": "itemLayout",
+          "type": "DescriptionsItemLayout",
+          "default": "horizontal",
+          "required": false,
+          "zh": "描述项的排列方向",
+          "en": "item layout",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "items",
+          "type": "ReadonlyArray<DescriptionItem> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "描述项",
+          "en": "items",
+          "values": []
+        },
+        {
+          "name": "labelStyle",
+          "type": "DescriptionsStyles",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签样式",
+          "en": "label style",
+          "values": []
+        },
+        {
+          "name": "layout",
+          "type": "DescriptionsLayout",
+          "default": "horizontal",
+          "required": false,
+          "zh": "布局方向",
+          "en": "layout",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "DescriptionsSize",
+          "default": "medium",
+          "required": false,
+          "zh": "尺寸",
+          "en": "size",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        {
+          "name": "tableLayout",
+          "type": "DescriptionsTableLayout",
+          "default": "fixed",
+          "required": false,
+          "zh": "表格布局",
+          "en": "table layout",
+          "values": [
+            "fixed",
+            "auto"
+          ]
+        },
+        {
+          "name": "title",
+          "type": "DescriptionsContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标题",
+          "en": "title",
+          "values": []
+        }
+      ],
+      "outputs": []
     },
     "TDialog": {
       "className": "TDialog",
@@ -3740,6 +4238,32 @@
         }
       ]
     },
+    "TParagraph": {
+      "className": "TParagraph",
+      "selector": "t-paragraph",
+      "file": "packages/ng-components/src/components/typography/paragraph.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "TypographyContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "段落内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "ellipsis",
+          "type": "boolean | TypographyEllipsis",
+          "default": "false",
+          "required": false,
+          "zh": "省略",
+          "en": "ellipsis",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TPopup": {
       "className": "TPopup",
       "selector": "t-popup",
@@ -4858,6 +5382,386 @@
       ],
       "outputs": []
     },
+    "TStatistic": {
+      "className": "TStatistic",
+      "selector": "t-statistic",
+      "file": "packages/ng-components/src/components/statistic/statistic.component.ts",
+      "inputs": [
+        {
+          "name": "color",
+          "type": "string",
+          "default": "''",
+          "required": false,
+          "zh": "颜色，可传预设值（black/blue/red/orange/green）或任意颜色值",
+          "en": "Color, a preset value (black/blue/red/orange/green) or any color value",
+          "values": [
+            "black",
+            "blue",
+            "red",
+            "orange",
+            "green"
+          ]
+        },
+        {
+          "name": "decimalPlaces",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "数值的小数位数，不传时至少 0 位、最多保留 20 位",
+          "en": "Decimal places of the value, defaults to at least 0 and at most 20",
+          "values": []
+        },
+        {
+          "name": "extra",
+          "type": "StatisticContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "额外说明，显示在数值下方",
+          "en": "Extra description shown below the value",
+          "values": []
+        },
+        {
+          "name": "format",
+          "type": "((value: number) => number) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义格式化函数，传入后覆盖 decimalPlaces 与 separator 的处理",
+          "en": "Custom formatter, overrides decimalPlaces and separator",
+          "values": []
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否加载中，加载时显示骨架屏",
+          "en": "Whether the value is loading, a skeleton is shown while loading",
+          "values": []
+        },
+        {
+          "name": "prefix",
+          "type": "StatisticContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "数值前缀",
+          "en": "Value prefix",
+          "values": []
+        },
+        {
+          "name": "separator",
+          "type": "string",
+          "default": ",",
+          "required": false,
+          "zh": "千分位分隔符，传空字符串可关闭分组",
+          "en": "Thousands separator, pass an empty string to disable grouping",
+          "values": []
+        },
+        {
+          "name": "suffix",
+          "type": "StatisticContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "数值后缀",
+          "en": "Value suffix",
+          "values": []
+        },
+        {
+          "name": "title",
+          "type": "StatisticContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标题",
+          "en": "Title",
+          "values": []
+        },
+        {
+          "name": "trend",
+          "type": "StatisticTrend",
+          "default": "undefined",
+          "required": false,
+          "zh": "趋势，会渲染上 / 下箭头",
+          "en": "Trend, renders an up / down arrow",
+          "values": [
+            "increase",
+            "decrease"
+          ]
+        },
+        {
+          "name": "trendPlacement",
+          "type": "StatisticTrendPlacement",
+          "default": "left",
+          "required": false,
+          "zh": "趋势图标的位置，prefix / suffix 有内容时以它们为准",
+          "en": "Position of the trend arrow, prefix / suffix take precedence when provided",
+          "values": [
+            "left",
+            "right"
+          ]
+        },
+        {
+          "name": "unit",
+          "type": "StatisticContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "数值单位",
+          "en": "Value unit",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "default": "undefined",
+          "required": false,
+          "zh": "数值",
+          "en": "Value",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TStepItem": {
+      "className": "TStepItem",
+      "selector": "t-step-item",
+      "file": "packages/ng-components/src/components/steps/step-item.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "StepContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "步骤描述",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "extra",
+          "type": "StepContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "附加内容",
+          "en": "extra",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "StepIcon",
+          "default": "undefined",
+          "required": false,
+          "zh": "图标",
+          "en": "icon",
+          "values": []
+        },
+        {
+          "name": "status",
+          "type": "StepStatus",
+          "default": "default",
+          "required": false,
+          "zh": "状态",
+          "en": "status",
+          "values": [
+            "default",
+            "process",
+            "finish",
+            "error"
+          ]
+        },
+        {
+          "name": "title",
+          "type": "StepContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标题",
+          "en": "title",
+          "values": []
+        },
+        {
+          "name": "value",
+          "type": "StepValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "唯一标识",
+          "en": "value",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TSteps": {
+      "className": "TSteps",
+      "selector": "t-steps",
+      "file": "packages/ng-components/src/components/steps/steps.component.ts",
+      "inputs": [
+        {
+          "name": "current",
+          "type": "StepValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "当前步骤",
+          "en": "current",
+          "values": []
+        },
+        {
+          "name": "defaultCurrent",
+          "type": "StepValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认当前步骤",
+          "en": "default current",
+          "values": []
+        },
+        {
+          "name": "layout",
+          "type": "StepLayout",
+          "default": "horizontal",
+          "required": false,
+          "zh": "排列方向",
+          "en": "layout",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "options",
+          "type": "StepOption[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选项列表",
+          "en": "options",
+          "values": []
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否只读",
+          "en": "readonly",
+          "values": []
+        },
+        {
+          "name": "separator",
+          "type": "StepSeparator",
+          "default": "line",
+          "required": false,
+          "zh": "连接线样式",
+          "en": "separator",
+          "values": [
+            "line",
+            "dashed",
+            "arrow"
+          ]
+        },
+        {
+          "name": "theme",
+          "type": "StepTheme",
+          "default": "default",
+          "required": false,
+          "zh": "主题",
+          "en": "theme",
+          "values": [
+            "default",
+            "dot"
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "currentChange",
+          "type": "StepValue",
+          "zh": "步骤变化",
+          "en": "current change"
+        }
+      ]
+    },
+    "TStickyTool": {
+      "className": "TStickyTool",
+      "selector": "t-sticky-tool",
+      "file": "packages/ng-components/src/components/sticky-tool/sticky-tool.component.ts",
+      "inputs": [
+        {
+          "name": "list",
+          "type": "StickyToolItem[]",
+          "default": "[]",
+          "required": false,
+          "zh": "悬浮项列表",
+          "en": "list of sticky items",
+          "values": []
+        },
+        {
+          "name": "offset",
+          "type": "Array<string | number> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "偏移",
+          "en": "offset",
+          "values": []
+        },
+        {
+          "name": "placement",
+          "type": "StickyToolPlacement",
+          "default": "right-bottom",
+          "required": false,
+          "zh": "停靠位置",
+          "en": "placement",
+          "values": [
+            "right-top",
+            "right-center",
+            "right-bottom",
+            "left-top",
+            "left-center",
+            "left-bottom"
+          ]
+        },
+        {
+          "name": "shape",
+          "type": "StickyToolShape",
+          "default": "square",
+          "required": false,
+          "zh": "形状",
+          "en": "shape",
+          "values": [
+            "square",
+            "round"
+          ]
+        },
+        {
+          "name": "type",
+          "type": "StickyToolType",
+          "default": "normal",
+          "required": false,
+          "zh": "展示形式",
+          "en": "type",
+          "values": [
+            "normal",
+            "compact"
+          ]
+        },
+        {
+          "name": "width",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "宽度",
+          "en": "width",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "itemClick",
+          "type": "StickyToolItemEvent",
+          "zh": "子项点击",
+          "en": "item click"
+        },
+        {
+          "name": "itemHover",
+          "type": "StickyToolItemEvent",
+          "zh": "子项悬浮",
+          "en": "item hover"
+        }
+      ]
+    },
     "TSwitch": {
       "className": "TSwitch",
       "selector": "t-switch",
@@ -5633,6 +6537,119 @@
         }
       ]
     },
+    "TText": {
+      "className": "TText",
+      "selector": "t-text",
+      "file": "packages/ng-components/src/components/typography/text.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "TypographyContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "文本内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "code",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "代码样式",
+          "en": "code",
+          "values": []
+        },
+        {
+          "name": "delete",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "删除线",
+          "en": "delete",
+          "values": []
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "禁用",
+          "en": "disabled",
+          "values": []
+        },
+        {
+          "name": "ellipsis",
+          "type": "boolean | TypographyEllipsis",
+          "default": "false",
+          "required": false,
+          "zh": "省略",
+          "en": "ellipsis",
+          "values": []
+        },
+        {
+          "name": "italic",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "斜体",
+          "en": "italic",
+          "values": []
+        },
+        {
+          "name": "keyboard",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "键盘样式",
+          "en": "keyboard",
+          "values": []
+        },
+        {
+          "name": "mark",
+          "type": "string | boolean",
+          "default": "false",
+          "required": false,
+          "zh": "标记",
+          "en": "mark",
+          "values": []
+        },
+        {
+          "name": "strong",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "加粗",
+          "en": "strong",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "TypographyTheme | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "文本主题",
+          "en": "theme",
+          "values": [
+            "primary",
+            "secondary",
+            "success",
+            "warning",
+            "error"
+          ]
+        },
+        {
+          "name": "underline",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "下划线",
+          "en": "underline",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
     "TTextarea": {
       "className": "TTextarea",
       "selector": "t-textarea",
@@ -5788,6 +6805,148 @@
         }
       ]
     },
+    "TTimeline": {
+      "className": "TTimeline",
+      "selector": "t-timeline",
+      "file": "packages/ng-components/src/components/timeline/timeline.component.ts",
+      "inputs": [
+        {
+          "name": "labelAlign",
+          "type": "TimelineLabelAlign",
+          "default": "left",
+          "required": false,
+          "zh": "标签位置。横向时间轴只能取 top / bottom，纵向时间轴只能取 left / right，传错时会自动换算",
+          "en": "Label position. A horizontal timeline only accepts top / bottom, a vertical one only accepts left / right, and a mismatched value is converted automatically",
+          "values": [
+            "left",
+            "right",
+            "alternate",
+            "top",
+            "bottom"
+          ]
+        },
+        {
+          "name": "layout",
+          "type": "TimelineLayout",
+          "default": "vertical",
+          "required": false,
+          "zh": "时间轴方向",
+          "en": "Timeline layout",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "mode",
+          "type": "TimelineMode",
+          "default": "alternate",
+          "required": false,
+          "zh": "标签与内容的排布模式，alternate 为左右交替，same 为标签与内容同侧",
+          "en": "Whether labels alternate side by side with the content",
+          "values": [
+            "alternate",
+            "same"
+          ]
+        },
+        {
+          "name": "reverse",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否反向排列子项",
+          "en": "Whether to display the items in reverse order",
+          "values": []
+        },
+        {
+          "name": "theme",
+          "type": "TimelineTheme",
+          "default": "default",
+          "required": false,
+          "zh": "主题，dot 把连接线换成虚线",
+          "en": "Timeline theme, dot renders the connector as a dashed line",
+          "values": [
+            "default",
+            "dot"
+          ]
+        }
+      ],
+      "outputs": []
+    },
+    "TTimelineItem": {
+      "className": "TTimelineItem",
+      "selector": "t-timeline-item",
+      "file": "packages/ng-components/src/components/timeline/timeline-item.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "TimelineItemContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "内容，也可以用内容投影传入",
+          "en": "Content, can also be provided by content projection",
+          "values": []
+        },
+        {
+          "name": "dot",
+          "type": "TimelineItemContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义圆点",
+          "en": "Custom dot",
+          "values": []
+        },
+        {
+          "name": "dotColor",
+          "type": "string",
+          "default": "primary",
+          "required": false,
+          "zh": "圆点颜色，可传主题色（default/primary/success/warning/error）或任意颜色值",
+          "en": "Dot color, a theme color (default/primary/success/warning/error) or any color value",
+          "values": []
+        },
+        {
+          "name": "label",
+          "type": "TimelineItemContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签",
+          "en": "Label",
+          "values": []
+        },
+        {
+          "name": "labelAlign",
+          "type": "TimelineItemLabelAlign",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签位置，会覆盖父组件的 labelAlign",
+          "en": "Label position, overrides the parent labelAlign",
+          "values": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ]
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "圆点是否为加载态",
+          "en": "Whether the dot is loading",
+          "values": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "itemClick",
+          "type": "TimelineItemClickEvent",
+          "zh": "点击时间轴子项",
+          "en": "Click the timeline item"
+        }
+      ]
+    },
     "TTimePicker": {
       "className": "TTimePicker",
       "selector": "t-time-picker",
@@ -5920,6 +7079,48 @@
           "en": "Emitted when the popup visibility changes"
         }
       ]
+    },
+    "TTitle": {
+      "className": "TTitle",
+      "selector": "t-title",
+      "file": "packages/ng-components/src/components/typography/title.component.ts",
+      "inputs": [
+        {
+          "name": "content",
+          "type": "TypographyContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "标题内容",
+          "en": "content",
+          "values": []
+        },
+        {
+          "name": "ellipsis",
+          "type": "boolean | TypographyEllipsis",
+          "default": "false",
+          "required": false,
+          "zh": "省略",
+          "en": "ellipsis",
+          "values": []
+        },
+        {
+          "name": "level",
+          "type": "TypographyLevel",
+          "default": "h1",
+          "required": false,
+          "zh": "层级",
+          "en": "level",
+          "values": [
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6"
+          ]
+        }
+      ],
+      "outputs": []
     },
     "TTooltip": {
       "className": "TTooltip",

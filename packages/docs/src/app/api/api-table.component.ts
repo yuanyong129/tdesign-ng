@@ -49,7 +49,7 @@ const COMPONENTS = (apiData as { components: Record<string, ApiComponent> }).com
         <span class="api-table__file">{{ component.file }}</span>
       </div>
 
-      <table class="api-table">
+      <table class="api-table api-table--props">
         <caption>
           Props
         </caption>
@@ -100,7 +100,7 @@ const COMPONENTS = (apiData as { components: Record<string, ApiComponent> }).com
       </table>
 
       @if (outputs().length) {
-        <table class="api-table">
+        <table class="api-table api-table--events">
           <caption>
             Events
           </caption>
@@ -187,6 +187,38 @@ const COMPONENTS = (apiData as { components: Record<string, ApiComponent> }).com
         padding: 0;
         font-size: 13px;
         word-break: break-word;
+      }
+      /* 固定列宽：auto 布局下「类型」列会被挤窄，camelCase 类型名（如 TimelineLabelAlign）
+         会被 break-word 从中间掰断。固定百分比后类型列有足够宽度整词显示。 */
+      .api-table--props {
+        table-layout: fixed;
+      }
+      .api-table--props th:nth-child(1) {
+        width: 16%;
+      }
+      .api-table--props th:nth-child(2) {
+        width: 22%;
+      }
+      .api-table--props th:nth-child(3) {
+        width: 14%;
+      }
+      .api-table--props th:nth-child(4) {
+        width: 21%;
+      }
+      .api-table--props th:nth-child(5) {
+        width: 27%;
+      }
+      .api-table--events {
+        table-layout: fixed;
+      }
+      .api-table--events th:nth-child(1) {
+        width: 20%;
+      }
+      .api-table--events th:nth-child(2) {
+        width: 30%;
+      }
+      .api-table--events th:nth-child(3) {
+        width: 50%;
       }
       .api-table__values {
         display: flex;

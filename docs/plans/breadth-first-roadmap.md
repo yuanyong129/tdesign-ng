@@ -169,32 +169,32 @@
 2. **ColorPicker**：颜色转换（hex/rgb/hsv/hsl/alpha）自研约 150 行，不引依赖。
 3. **Calendar**：复用现有日期工具，不引 dayjs。
 
-**B0 状态（2026-11-23）**：4 项全部完成。`pnpm check:align:json` 输出结构化报告，`pnpm depth:report` 输出 D 阶段工作单；基线 216 项真实欠账（D1 159 / D2 40 / D3 17）。
+**B0 状态（2026-11-23）**：4 项全部完成。`pnpm check:align:json` 输出结构化报告，`pnpm depth:report` 输出 D 阶段工作单。B1 落地后的新基线：上游 1009 props、已对齐 610（60.5%），未实现 399 项里 168 项是 Angular 惯用映射，**真实欠账 231 项**（D1 159 / D2 41 / D3 31），其中 15 项已显式带 `[D#]` 前缀。
 
 ### B1 布局与静态展示（15 项 / 203 props）
 
-目标：把"纯展示 + 布局"类组件一次清零，组件数从 35 直接推到 50。**进度 5/15（2026-11-23）**：layout、grid、card、alert、skeleton 已落地并接线，剩余 10 项。
+目标：把"纯展示 + 布局"类组件一次清零，组件目录从 35 推到 50。**进度 15/15（2026-11-23 完成）**：全部落地、接线、跑过 `gen:api` / `align-check` / `ngc` / `build:lib` / 本地 CDP 实拍。
 
 | 组件 | 上游 | 关键点 | 量级 |
 | --- | --- | --- | --- |
 | layout ✅ | 1+4 | Header/Aside/Content/Footer，纯结构类 | S |
 | grid ✅ | 4+13 | 12 栅格（上游 `@grid-columns: 12`）、gutter（数字/数组/断点对象）、offset/order/pull/push、六断点响应式 | S |
-| typography | 13+7 | Text/Title/Paragraph；copyable/editable/ellipsis 标 `[D3]` | M |
+| typography ✅ | 13+7 | Text/Title/Paragraph；copyable/editable/ellipsis 标 `[D3]` | M |
 | card ✅ | 25 | header/footer/actions/cover/loading，插槽多；加载态复用 `t-loading` | M |
 | alert ✅ | 11 | 主题、图标、关闭（`t-alert--closing` → `t-is-hidden`）、滚动（marquee 标 `[D3]`） | S |
 | skeleton ✅ | 7 | 行/列组合、六种 theme 预设、gradient/flashed、`delay` | S |
-| comment | 7 | 头像、作者、时间、操作区 | S |
-| breadcrumb | 8+11 | 分隔符、当前项、跳转；折叠标 `[D3]` | S |
-| steps | 10+7 | 水平/垂直、点状、当前态、错误态 | M |
-| timeline | 5+7 | 模式、标签、自定义节点/圆点 | S |
-| statistic | 15 | 前缀后缀、精度、颜色 | S |
-| descriptions | 11+4 | 边框、列数、布局、跨列 | M |
-| sticky-tool | 9+5 | 侧边固定、弹出层（复用 popup） | S |
-| affix | 7 | 滚动固定、容器、偏移 | S |
-| back-top | 11 | 滚动阈值、容器、可见回调 | S |
+| comment ✅ | 7 | 头像、作者、时间、操作区 | S |
+| breadcrumb ✅ | 8+11 | 分隔符、当前项、跳转；折叠标 `[D3]` | S |
+| steps ✅ | 10+7 | 水平/垂直、点状、当前态、错误态 | M |
+| timeline ✅ | 5+7 | 模式、标签、自定义节点/圆点 | S |
+| statistic ✅ | 15 | 前缀后缀、精度、颜色 | S |
+| descriptions ✅ | 11+4 | 边框、列数、布局、跨列 | M |
+| sticky-tool ✅ | 9+5 | 侧边固定、弹出层（复用 popup） | S |
+| affix ✅ | 7 | 滚动固定、容器、偏移 | S |
+| back-top ✅ | 11 | 滚动阈值、容器、可见回调 | S |
 
 - **依赖**：无硬依赖（sticky-tool 用 popup）。
-- **验收**：15 个路由可打开，demo 主流程可操作；`align-check` 新增 15 条且 missing 0。
+- **验收**：15 个路由可打开，demo 主流程可操作；`align-check` 新增 15 条且 missing 0。（2026-11-23 已达成：15 个页面本地 CDP 实拍 0 console error、0 4xx；`align-check` missing 0 / extra 0。）
 - **估算**：2~4 天。
 
 ### B2 弹层与媒体（8 项 / 143 props）

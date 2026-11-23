@@ -22,7 +22,6 @@ import { TAlertModule, TSpaceModule } from '@tdesign-ng/components';
         message="当前实例的磁盘使用率已经达到 92%，继续写入会影响告警送达。建议先清理历史日志，或者扩容后继续使用；这条说明超出两行时会被截断。"
       />
     </t-space>
-    <p class="demo-hint">title 显示标题，operation 显示操作区，maxLine 控制正文最多显示的行数（0 表示不限）。</p>
   `,
 })
 export class DemoAlertTitle {

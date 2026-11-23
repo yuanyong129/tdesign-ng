@@ -51,10 +51,20 @@
 | Card | ✅ 头部（头像/标题/副标题/描述/操作区）、封面、主体、底部、poster 主题、加载态复用 `t-loading` |
 | Alert | ✅ 四种主题、标题与操作区、`maxLine` 截断、淡出关闭与 `(close)` / `(closed)` |
 | Skeleton | ✅ 六个预设主题、`rowCol` 自定义行、gradient / flashed 动画与 `delay` |
+| Typography / Text / Title / Paragraph | ✅ 六种标题层级、装饰组合（粗体/斜体/下划线/删除线/代码/键盘/标记）、主题色、省略号截断 |
+| Breadcrumb / BreadcrumbItem | ✅ 投影与 `options` 两种用法、自定义分隔符（字符串或模板）、单项最大宽度、禁用项 |
+| Steps / StepItem | ✅ 横向/竖向、`theme="dot"` 圆点模式、三种连接线、只读、单项状态覆盖、`(currentChange)` |
+| Descriptions / DescriptionItem | ✅ `layout` × `itemLayout` 四种排版、`column` 列数、`span` 跨列、带边框、`colon`、单元格样式 |
+| Comment | ✅ 头像/作者/时间、引用块、嵌套回复、操作区（数组或模板）、文本与模板混用 |
+| Timeline / TimelineItem | ✅ 纵向/横向、标签左右交替或同侧、正/反序、虚线主题、自定义圆点与加载圆点 |
+| Statistic | ✅ 前缀/后缀/单位、小数位与千分位、自定义 `format`、涨跌趋势、加载骨架 |
+| StickyTool | ✅ 六个停靠方向、普通/紧凑模式、方形/圆角、悬浮与点击弹层、子项事件 |
+| Affix | ✅ 顶部吸附与底部夹紧、自定义滚动容器、`offsetTop` / `offsetBottom`、`(fixedChange)` |
+| BackTop | ✅ 滚动阈值、缓出滚动时长、三种主题、方形/圆形、自定义内容与位置 |
 
 P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / TreeSelect / DatePicker / TimePicker，剩余 Upload / Transfer / ColorPicker 转入下面的广度路线。
 
-广度阶段 B1（布局与静态展示）已落地 5/15：Layout、Grid、Card、Alert、Skeleton。
+广度阶段 B1（布局与静态展示）已全部落地 15/15。
 
 ### 广度优先路线（2026-11-23 起）
 

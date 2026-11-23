@@ -841,6 +841,165 @@ const CONFIG = {
       default: '同 content，Vue 的默认插槽',
     },
   },
+  TText: {
+    upstream: 'typography',
+    upstreamInterface: 'TdTextProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载文本内容',
+      copyable: '[D3] 复制交互（图标 + copyable.text/suffix/tooltipProps/onCopy）未实现',
+    },
+  },
+  TTitle: {
+    upstream: 'typography',
+    upstreamInterface: 'TdTitleProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载标题文本',
+    },
+  },
+  TParagraph: {
+    upstream: 'typography',
+    upstreamInterface: 'TdParagraphProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载段落文本',
+    },
+  },
+  TBreadcrumb: {
+    upstream: 'breadcrumb',
+    upstreamInterface: 'TdBreadcrumbProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ellipsis: '[D3] 折叠省略号需要 Popup/Tooltip 门户与溢出测量，本库暂无折叠容器',
+      maxItems: '[D3] 与 ellipsis 配套的折叠阈值',
+      itemsBeforeCollapse: '[D3] 折叠算法参数',
+      itemsAfterCollapse: '[D3] 折叠算法参数',
+    },
+  },
+  TBreadcrumbItem: {
+    upstream: 'breadcrumb',
+    upstreamInterface: 'TdBreadcrumbItemProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载面包屑文字',
+      to: '[D3] Vue Router 的 Route 对象语义，Angular 用 href 或上层 routerLink',
+      replace: '[D3] Vue Router 历史替换语义，Angular 用 routerLink 的 replaceUrl',
+      router: '[D3] Vue Router 实例注入位，Angular 用 Router DI',
+      onClick: 'Angular 用原生 (click)；options 数据驱动项暂不提供回调',
+    },
+  },
+  TSteps: {
+    upstream: 'steps',
+    upstreamInterface: 'TdStepsProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      modelValue: 'Angular 用 [(current)] 双向绑定',
+      onChange: 'Angular 用 (currentChange) 输出，参数为新的 current',
+      sequence: '[D3] 依赖反转渲染顺序，投影内容无法重排且会错位连接线伪元素',
+    },
+  },
+  TStepItem: {
+    upstream: 'steps',
+    upstreamInterface: 'TdStepItemProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载步骤描述',
+    },
+  },
+  TDescriptions: {
+    upstream: 'descriptions',
+    upstreamInterface: 'TdDescriptionsProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 收集 <t-descriptions-item> 子项',
+    },
+  },
+  TDescriptionItem: {
+    upstream: 'descriptions',
+    upstreamInterface: 'TdDescriptionsItemProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: '[D3] 子项默认插槽用 display:none + textContent 快照，仅支持纯文本，富内容用 [content]="tpl"',
+    },
+  },
+  TComment: {
+    upstream: 'comment',
+    upstreamInterface: 'TdCommentProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载评论内容',
+    },
+  },
+  TTimeline: {
+    upstream: 'timeline',
+    upstreamInterface: 'TdTimelineProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {},
+  },
+  TTimelineItem: {
+    upstream: 'timeline',
+    upstreamInterface: 'TdTimelineItemProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载节点内容（未传 content 时渲染投影）',
+      onClick: 'Angular 用 (itemClick) 输出，避开与原生 click 重名',
+    },
+  },
+  TStatistic: {
+    upstream: 'statistic',
+    upstreamInterface: 'TdStatisticProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      animation: '[D3] 数值滚动动画需要 rAF tween 基础设施',
+      animationStart: '[D3] 同上，并依赖组件实例方法 start()',
+    },
+  },
+  TAffix: {
+    upstream: 'affix',
+    upstreamInterface: 'TdAffixProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载被吸附的内容',
+      onFixedChange:
+        'Angular 用 (fixedChange) 输出 { affixed, top }，且只在吸附状态翻转时派发（避免滚动期间反复变更检测）',
+    },
+  },
+  TBackTop: {
+    upstream: 'back-top',
+    upstreamInterface: 'TdBackTopProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 承载自定义按钮内容',
+      onClick: 'Angular 用宿主原生 (click)，避免与内部按钮双触发',
+    },
+  },
+  TStickyTool: {
+    upstream: 'sticky-tool',
+    upstreamInterface: 'TdStickyToolProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      onClick: 'Angular 用 (itemClick) 输出 { e, item }',
+      onHover: 'Angular 用 (itemHover) 输出 { e, item }',
+      popupProps: '[D3] 弹层属性深度透传未实现，当前固定 hideEmptyPopup + 自动 placement',
+    },
+  },
 };
 
 const argv = process.argv.slice(2);

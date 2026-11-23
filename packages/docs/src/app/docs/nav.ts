@@ -14,10 +14,16 @@ export interface DocsNavItem {
 export const DOCS_NAV: DocsNavItem[] = [
   { path: '/button', label: '按钮 Button', group: '通用' },
   { path: '/link', label: '链接 Link', group: '通用' },
+  { path: '/typography', label: '排版 Typography', group: '通用' },
   { path: '/layout', label: '布局 Layout', group: '布局' },
   { path: '/grid', label: '栅格 Grid', group: '布局' },
   { path: '/divider', label: '分割线 Divider', group: '布局' },
   { path: '/space', label: '间距 Space', group: '布局' },
+  { path: '/affix', label: '固钉 Affix', group: '布局' },
+  { path: '/breadcrumb', label: '面包屑 Breadcrumb', group: '导航' },
+  { path: '/steps', label: '步骤条 Steps', group: '导航' },
+  { path: '/sticky-tool', label: '侧边悬浮 StickyTool', group: '导航' },
+  { path: '/back-top', label: '回到顶部 BackTop', group: '导航' },
   { path: '/input', label: '输入框 Input', group: '数据录入' },
   { path: '/textarea', label: '文本域 Textarea', group: '数据录入' },
   { path: '/switch', label: '开关 Switch', group: '数据录入' },
@@ -52,6 +58,10 @@ export const DOCS_NAV: DocsNavItem[] = [
   { path: '/skeleton', label: '骨架屏 Skeleton', group: '数据展示' },
   { path: '/progress', label: '进度条 Progress', group: '数据展示' },
   { path: '/list', label: '列表 List', group: '数据展示' },
+  { path: '/descriptions', label: '描述列表 Descriptions', group: '数据展示' },
+  { path: '/comment', label: '评论 Comment', group: '数据展示' },
+  { path: '/timeline', label: '时间轴 Timeline', group: '数据展示' },
+  { path: '/statistic', label: '统计数值 Statistic', group: '数据展示' },
 ];
 
 /** 按分组统计，保持 DOCS_NAV 里的先后顺序。 */

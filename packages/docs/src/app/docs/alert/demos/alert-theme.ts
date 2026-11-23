@@ -10,7 +10,6 @@ import { TAlertModule, TSpaceModule } from '@tdesign-ng/components';
         <t-alert [theme]="item.theme" [message]="item.message" />
       }
     </t-space>
-    <p class="demo-hint">theme 可选 success、info、warning、error，默认 info，图标随主题变化。</p>
   `,
 })
 export class DemoAlertTheme {

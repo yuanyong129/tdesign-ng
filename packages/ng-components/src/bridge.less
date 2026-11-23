@@ -317,3 +317,26 @@ t-skeleton {
 t-card {
   display: block;
 }
+
+// Typography：`.t-typography` 的字号规则是 `h1&`~`h6&` 元素限定选择器、装饰规则是后代选择器，
+// 类名与语义元素都落在组件内部；宿主只做壳，用 display: contents 让内部元素的行内/块级排版
+// 与 margin 折叠和直接写在页面里一致（同 t-tag / t-badge 先例）。
+t-text,
+t-title,
+t-paragraph {
+  display: contents;
+}
+
+// Descriptions / Comment：`.t-descriptions` 与 `.t-comment` 在 vendor less 里没有 display 声明
+// （`.t-comment` 只有 width:100%），自定义元素默认 inline 会让内部表格宽度收缩、回复区的
+// margin/width 失效，这里补成块级（与 t-card / t-table / t-skeleton 同理）。
+t-descriptions,
+t-comment {
+  display: block;
+}
+
+// Affix：宿主要被当作块级盒测量（getBoundingClientRect 的高度决定 offsetBottom 的夹紧计算），
+// 自定义元素默认 inline；内联宿主包裹块级内容会被拆成多个 fragment，测到的高度会失真。
+t-affix {
+  display: block;
+}

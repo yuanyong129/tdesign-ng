@@ -22,14 +22,14 @@
 | P3 弹层与反馈 | ✅ | Popup / Tooltip / Dialog / Drawer / Message / Notification / Loading |
 | P4 数据展示 | ✅ | Tag / Badge / Avatar(+Group) / Pagination / Table / Tabs / Collapse / Empty / Progress / List 全部落地，余项见 §8 |
 | P5 复杂录入 | ✅ | Slider、Rate、Cascader（两层）、TreeSelect（两层）、DatePicker（八层）、DateRangePicker（四层）、TimePicker（两层）已完成；Upload / Transfer / ColorPicker 转入广度路线 |
-| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 39 个，B1 已落地 5 个），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
+| **广度阶段** | 🚧 | 2026-11-23 起：先补齐上游 71 个组件目录（当前 50 个组件目录，B1 的 15 项已全部落地），再回填深度。计划见 `docs/plans/breadth-first-roadmap.md` |
 
 **两个数字要分清**：
 
-- `pnpm gen:api` 统计的是**本仓库现有 API**：53 个组件、547 个输入属性、204 个示例。
-- `node scripts/align-check.mjs` 统计的是**对齐契约**：49 个组件、上游 877 个属性、已对齐 506（57.7%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
+- `pnpm gen:api` 统计的是**本仓库现有 API**：69 个组件、651 个输入属性、235 个示例。
+- `node scripts/align-check.mjs` 统计的是**对齐契约**：65 个组件、上游 1009 个属性、已对齐 610（60.5%），合计 `missing 0 / extra 0`（未实现项都登记在 `ignoreUpstream`）。
 
-组件清单（`packages/ng-components/src/index.ts`）：alert、avatar、badge、button、card、cascader、checkbox、collapse、date-picker、date-range-picker、dialog、divider、drawer、empty、form、grid、input、layout、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、skeleton、slider、space、switch、table、tabs、tag、textarea、time-picker、tooltip、tree-select（40 个组件目录，含 DateRangePicker 独立实现；上游 39 个目录 + 1 个自有）。
+组件清单（`packages/ng-components/src/index.ts`，50 条导出）：affix、alert、avatar、back-top、badge、breadcrumb、button、card、cascader、checkbox、collapse、comment、date-picker、date-range-picker、descriptions、dialog、divider、drawer、empty、form、grid、input、layout、link、list、loading、message、notification、pagination、popup、progress、radio、rate、select、skeleton、slider、space、statistic、steps、sticky-tool、switch、table、tabs、tag、textarea、time-picker、timeline、tooltip、tree-select、typography（含 DateRangePicker 独立实现）。
 
 ## 3. 目录与环境
 
@@ -85,7 +85,7 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 - 临时脚本、截图、上游缓存都放 `.local-cache/`（已 gitignore）。
 - 清理 headless Edge 只杀自己的实例：`Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -match 'local-cache[\\/]+edge-' } | ForEach-Object { taskkill /PID $_.ProcessId /T /F }`。**不要用 `Get-Process msedge | Stop-Process`**，会把用户自己的浏览器一起杀掉；正则要同时匹配 `/` 和 `\`（用 Node `spawn` 拼路径时是正斜杠，只写 `\\` 会漏杀）。
 
-## 7. 当前进行中的工作：广度优先 B1
+## 7. 当前进行中的工作：广度优先 B2
 
 2026-11-23 起路线改为**广度优先**：先把上游 71 个组件目录补齐到 L1 可用基线，再回填深度。完整计划见 [`docs/plans/breadth-first-roadmap.md`](./docs/plans/breadth-first-roadmap.md)。
 
@@ -96,9 +96,9 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 - `scripts/align-check.mjs` 支持 `--json`，输出 `{ upstreamVersion, totals, components[] }`；每个组件的 `ignored[]` 带 `inUpstream`（区分真上游属性与插槽/事件映射）。
 - 新增 `scripts/depth-report.mjs`（`pnpm depth:report`）：读 align-check 的 JSON，按 `[D1]/[D2]/[D3]`（reason 无前缀则按组件默认归属）聚合债务，输出「分布表 + 组件债务表 + 每条债务明细」的 markdown。
 
-**当前债务基线（2026-11-23，`pnpm depth:report`）**：上游 811 props，已对齐 452（55.7%）；未实现 359 项里 143 项是 Angular 惯用映射（插槽/双向绑定/事件名，不算债），**真实欠账 216 项**：D1 159（73.6%）、D2 40（18.5%）、D3 17（7.9%）。显式 `[D#]` 前缀目前 0 项——存量按组件默认归属统计，新写的债必须带前缀。
+**当前债务基线（2026-11-23，`pnpm depth:report`）**：上游 1009 props，已对齐 610（60.5%）；未实现 399 项里 168 项是 Angular 惯用映射（插槽/双向绑定/事件名，不算债），**真实欠账 231 项**：D1 159（68.8%）、D2 41（17.7%）、D3 31（13.4%）。显式 `[D#]` 前缀 15 项——存量按组件默认归属统计，新写的债必须带前缀。
 
-**B1 进展（5/15）**：
+**B1 全部完成（15/15）**：
 
 | 组件 | 落地要点 |
 | --- | --- |
@@ -107,16 +107,26 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 | Card | 头部四段（头像/标题副标题描述/操作区）、封面、主体、底部；`poster2` 把 actions 移到底部；加载态直接渲染 `t-loading`，不自写占位视觉 |
 | Alert | 四主题图标内联 SVG、`maxLine` 用 `-webkit-line-clamp`、关闭走 `t-alert--closing` → `transitionend`（宿主 opacity）→ `t-is-hidden`，260ms 兜底 |
 | Skeleton | `rowCol` 展开成行/列视图，六种 theme 预设；`loading=false` 时宿主不带类并投影真实内容 |
+| Typography / Text / Title / Paragraph | 样式根落在内部语义元素（`span` / `h1~h6` / `p`），因为 `.t-typography` 的字号选择器是 `h1&`~`h6&`；装饰嵌套顺序 `<i><kbd><mark><code><del><u><strong>`；宿主 `display: contents` |
+| Breadcrumb / BreadcrumbItem | 投影与 `options` 两种用法；`separator` 支持字符串与模板；`maxItemWidth` 截断；文字层统一渲染成 `<a>`（两支 span/a 各带一个 `ng-content` 会让投影只进第一个槽） |
+| Steps / StepItem | 横向/竖向、`theme="dot"`、三种 `separator`、`readonly`、单项 `status` 覆盖、`(currentChange)`；`state` 用 protected 供子项读取 |
+| Descriptions / DescriptionItem | `layout` × `itemLayout` 四种组合的 cell 模型照上游 `getRows`；`span` 与「末项吸收剩余列」一致；带边框 / `colon` / 单元格样式 |
+| Comment | 头像（字符串当 URL）、作者与时间、引用块 `__quote`、回复区嵌套 `t-comment`、操作区数组或模板 |
+| Timeline / TimelineItem | `labelAlign` 按 layout 自动换算、`mode` 交替/同侧、`reverse` 用 DOM 重排、`theme="dot"` 虚线、自定义与 loading 圆点（`dotColor` 默认 `primary`，与上游一致） |
+| Statistic | 数值格式化复刻 `getFormatValue`（小数位上下限 + 分隔符替换）、`format` 接管、趋势箭头、loading 骨架 |
+| StickyTool | 六个停靠方向、普通/紧凑、方形/圆角、`width` 居中、子项弹层走 `[tPopupContent]`、`(itemClick)` / `(itemHover)` |
+| Affix | `measure()` 与上游逐行对齐（先 offsetTop、再 offsetBottom 夹紧）、`(fixedChange)` 只在吸附状态翻转时派发 |
+| BackTop | `rAF` + `easeOutCubic` 平滑滚动、`visibleHeight` 阈值、三种主题与两种形状、不提供 `onClick` 输出（原生 click 冒泡） |
 
 新增共享基建：`packages/ng-components/src/_utils/breakpoint.ts`（`BREAKPOINTS`、`BREAKPOINT_MIN_WIDTH`、`matchBreakpoint`、`TViewportService`，SSR 下不注册 resize 监听）。
 
 **下一步（按此顺序执行）**：
 
-1. **B1 剩余 10 个**：typography、breadcrumb、steps、timeline、statistic、descriptions、comment、sticky-tool、affix、back-top（每个按 §5 第 8 条 L1 六条交付）。
+1. **B2 弹层与媒体 8 项**：Popconfirm、Dropdown、Guide、Image、ImageViewer、Anchor、QRCode、Watermark（每个按 §5 第 8 条 L1 六条交付）。
 2. 每完成 5 个组件，更新 README 组件表与 roadmap §3 状态。
 3. 波次结束：`pnpm build:lib` + CDP 冒烟 + 提交 + 更新本文件。
 
-**待拍板（B2 / B3 开工前确认）**：
+**待拍板（B2 开工前确认）**：
 
 - QRCode：引入 `qrcode`（MIT，约 20KB gzip）还是深度期自研编码器？默认前者。
 - 广度期不引入 Vitest（保持速度），D0 统一落地；日期/颜色等纯函数可先用 `node --test` 兜底。
@@ -154,9 +164,10 @@ DatePicker / DateRangePicker / TimePicker / Cascader / TreeSelect 的余项不�
 
 1. `node scripts/gen-api-docs.mjs && node scripts/gen-demo-sources.mjs`（有新增输入/示例时）。
 2. `node scripts/align-check.mjs` 必须 `missing 0 / extra 0`。
-3. `pnpm build:lib` 全绿（`gen:api` / `gen:demos` 的 check 已包含在内）。注意：`pnpm build` 的 docs 阶段在当前 DSH 沙箱会因 Angular CLI `spawn EPERM` 失败（沙箱禁止管道子进程），属环境限制，需在本机终端跑。
-4. 用 `.local-cache/` 下的 CDP 脚本模板（如 `cdp-check-table2.mjs`）打开对应路由，断言 DOM 类名、文本、交互后的状态与 `consoleErrors`。
-5. `node .local-cache/cdp-check-live.mjs https://yuanyong129.github.io/tdesign-ng/<route>` 验证线上页面。
+3. `pnpm build:lib` 全绿（`gen:api` / `gen:demos` 的 check 已包含在内）。
+4. **本地预览（首选）**：`pnpm start --port 4200 --host 127.0.0.1` 起 dev server（后台任务），再用 `node .local-cache/cdp-page.mjs /card /alert` 探针检查标题 / demo / api 表 / console 报错 / 4xx 资源；`PAGE_BASE` 可改地址，`PAGE_PROBES=".t-card,.t-alert"` 可统计选择器命中数。dev server 的 `prestart` 会自动跑 `gen-api-docs` + `gen-demo-sources`。
+5. 线上验证：`PAGE_BASE=https://yuanyong129.github.io/tdesign-ng node .local-cache/cdp-page.mjs /card`。推送到 main 后 GitHub Pages 约 1~2 分钟生效。
+6. 环境说明（2026-11-23 起）：DSH 会话已切到 `danger-full-access`，`pnpm build`/`ng serve`/管道子进程/`git push`/headless Edge 均可直接运行，不再需要绕 EPERM。
 
 
 

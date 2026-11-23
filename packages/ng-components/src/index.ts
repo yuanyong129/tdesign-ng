@@ -3,16 +3,21 @@
  */
 
 // Components
+export * from './components/affix';
 export * from './components/alert';
 export * from './components/avatar';
+export * from './components/back-top';
 export * from './components/badge';
+export * from './components/breadcrumb';
 export * from './components/button';
 export * from './components/card';
 export * from './components/cascader';
 export * from './components/checkbox';
 export * from './components/collapse';
+export * from './components/comment';
 export * from './components/date-picker';
 export * from './components/date-range-picker';
+export * from './components/descriptions';
 export * from './components/dialog';
 export * from './components/divider';
 export * from './components/drawer';
@@ -35,14 +40,19 @@ export * from './components/select';
 export * from './components/skeleton';
 export * from './components/slider';
 export * from './components/space';
+export * from './components/statistic';
+export * from './components/steps';
+export * from './components/sticky-tool';
 export * from './components/switch';
 export * from './components/table';
 export * from './components/tabs';
 export * from './components/tag';
 export * from './components/textarea';
 export * from './components/time-picker';
+export * from './components/timeline';
 export * from './components/tooltip';
 export * from './components/tree-select';
+export * from './components/typography';
 
 // Core
 export * from './types';
