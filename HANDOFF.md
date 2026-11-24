@@ -8,7 +8,7 @@
 把 `yuanyong129/tdesign-ng`（原 Arco Design Angular 移植）改造成 **TDesign 的 Angular 版本**。
 
 - **API 唯一真源**：`tdesign-vue-next@1.20.11`（`https://unpkg.com/tdesign-vue-next@1.20.11/es/<component>/type.d.ts`）。
-- **视觉唯一真源**：仓库内 `vendor/tdesign-common/style/web`（上游 less 快照，`pnpm vendor:styles` 更新）。
+- **视觉唯一真源**：仓库内 `packages/styles/vendor/tdesign-common/style/web`（上游 less 快照，`pnpm vendor:styles` 更新）。
 - 不兼容原 Arco 的任何属性，不做兼容层；TDesign 没有的组件（ButtonGroup / Scrollbar）已删除。
 - 用户已经明确：**组件功能/API/演示文档优先**（文档站的样式与布局已按官网对齐，见 §8）；**提交不需要问，直接 commit**。
 
@@ -35,12 +35,13 @@
 
 ```
 packages/ng-components   # 组件库（standalone + module 双出口）
-packages/styles          # 上游 less 的单组件入口（脚本生成）
+packages/styles          # 上游 less 的单组件入口（脚本生成）+ vendor 快照，随包发布
 packages/icons           # TIcon + 内置图标表（脚本生成）
 packages/docs            # 文档站（端口 4280）
 scripts/                 # gen-api-docs / gen-demo-sources / align-check / gen-icons
-vendor/tdesign-common    # 上游样式快照
+packages/styles/vendor/tdesign-common  # 上游样式快照（打进 styles 包，不在仓库根）
 docs/plans/breadth-first-roadmap.md  # 当前执行计划：广度优先波次、L1/L2 定义  ← 先读这个
+docs/plans/milestones.md             # 里程碑记录（里程碑不打 tag，发布 tag 只对应 npm 版本）
 docs/plans/tdesign-angular-plan.md   # 历史分期与实现记录（§14~§22）
 ```
 

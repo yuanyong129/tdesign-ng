@@ -29,7 +29,7 @@ pnpm run release         # = node scripts/publish-all.mjs
 
 > 注意：脚本把 `npm_config_cache` 指向仓库内 `.npm-cache/`。某些受限环境（沙箱）无法写用户目录缓存，这个重定向是必须的。
 
-## 版本号
+## 版本与 tag
 
 三个包版本必须完全一致；`CHANGELOG.md` 里补一节，再改三个 `package.json` 的 `version`，然后：
 
@@ -37,7 +37,13 @@ pnpm run release         # = node scripts/publish-all.mjs
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
-推 tag 会触发 `.github/workflows/release.yml`：校验 tag 与 `packages/ng-components/package.json` 的版本一致，然后 `pnpm run release` 真发布，并带 npm provenance。
+**git tag 只用于发布**：tag 名必须是 `v<version>`，且该 version 必须等于 `packages/ng-components/package.json` 的 `version`。`release.yml` 会校验，不一致直接中止——避免出现「tag 说 0.4.0、npm 上却是 0.1.0」这种对不上的情况。
+
+开发阶段的进度里程碑**不打 tag**，记在 [`docs/plans/milestones.md`](docs/plans/milestones.md)。历史上打过一个 `v0.4.0-alpha`（广度完成，2026-11-23），因为和 npm 版本号混用容易让人误以为 npm 上有 `0.4.0`，已在 0.1.0 首发准备时删除，内容保留在那里。
+
+**版本只能往上走**：npm 会记住已发布的最高版本，发出去的版本不能撤回也不能被更低的版本覆盖。首发取低值安全，取高值是单向门。
+
+推 tag 会触发 `.github/workflows/release.yml`：校验 tag 与 `packages/ng-components/package.json` 的版本一致，然后 `pnpm run release` 真发布，并带 npm provenance。也可以在 Actions 页面手动 `workflow_dispatch`（`dry_run` 默认 `true`）。
 
 ## CI 发布需要的东西
 

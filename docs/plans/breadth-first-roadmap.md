@@ -285,7 +285,7 @@
 - 上游公开组件目录 + CheckTag / CheckTagGroup 全部有实现、有文档页（`gen:api`：99 个组件、1052 个输入属性、301 个示例），每项至少 2 个 demo。
 - 73 个组件目录（含独立实现的 DateRangePicker）、73 条 barrel 导出；README 组件表完整。
 - `depth:report` 基线：真实欠账 **298**（D1 180 / 60.4%、D2 71 / 23.8%、D3 47 / 15.8%），显式 `[D#]` 前缀 82 项。
-- 待打 tag：`v0.4.0-alpha`（广度完成）。
+- 里程碑：**0.4（广度完成）**，2026-11-23，记录见 [`milestones.md`](./milestones.md)（原 tag `v0.4.0-alpha` 已删除，里程碑不再打 tag）。
 
 ---
 
@@ -339,7 +339,7 @@
 - `pnpm check:api` / `pnpm check:demos` / `align-check` 全绿。
 - `pnpm build:lib` 绿；本波所有路由 CDP 冒烟无 console error。
 - README / HANDOFF / 本文件的进度表更新。
-- 打 tag（`v0.4.0-alpha` 等）。
+- 里程碑：向 [`milestones.md`](./milestones.md) 追加一条（发布 tag 只对应 npm 版本号，见 `RELEASING.md`）。
 
 ### 5.3 并行策略
 
