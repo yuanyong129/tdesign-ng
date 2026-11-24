@@ -1,10 +1,12 @@
 name: Release
 
-# 打 tag（v0.1.0）即发布三个 npm 包。也可以在 Actions 页面手动触发一次演练。
+# 发布只从 Actions 页面手动触发（workflow_dispatch）。
+#
+# 为什么不用「推 v* tag 就发布」：tag 现在是纯粹的版本标记，发 npm 的动作
+# 要么本地 `pnpm run release`，要么在这里点一次；两件事分开，就不会出现
+# 「推个 tag 顺手把包发了」或者「tag 推了但没配 NPM_TOKEN 直接红」的意外。
+# 打完 tag 再推也不会触发任何发布。
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -13,7 +15,8 @@ on:
         default: true
 
 concurrency:
-  group: release-${{ github.ref }}
+  # 固定分组：两次手动触发不会并发跑，后一次排队等前一次结束。
+  group: release
   cancel-in-progress: false
 
 permissions:
@@ -40,15 +43,12 @@ jobs:
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
 
-      - name: 校验 tag 与包版本一致
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: 打印待发布版本
         run: |
-          TAG="${GITHUB_REF#refs/tags/v}"
           VERSION=$(node -p "require('./packages/ng-components/package.json').version")
-          echo "tag=$TAG version=$VERSION"
-          if [ "$TAG" != "$VERSION" ]; then
-            echo "::error::tag v$TAG 与 package.json 的 $VERSION 不一致"
-            exit 1
+          echo "待发布版本：$VERSION"
+          if [ -n "$(git ls-remote --tags origin "refs/tags/v$VERSION")" ]; then
+            echo "::warning::tag v$VERSION 已存在——该版本应该已经发过，脚本会自动跳过已存在的版本"
           fi
 
       - name: 构建并校验产物

@@ -56,19 +56,24 @@ npm error 403 - Two-factor authentication or granular access token with bypass 2
 
 ## 版本与 tag
 
-三个包版本必须完全一致；`CHANGELOG.md` 里补一节，再改三个 `package.json` 的 `version`，然后：
+三个包版本必须完全一致；`CHANGELOG.md` 里补一节，再改三个 `package.json` 的 `version`。
 
-```bash
-git tag v0.1.0 && git push origin v0.1.0
-```
+**发布动作和打 tag 是两件独立的事**，顺序是「先发 npm，再打 tag」：
 
-**git tag 只用于发布**：tag 名必须是 `v<version>`，且该 version 必须等于 `packages/ng-components/package.json` 的 `version`。`release.yml` 会校验，不一致直接中止——避免出现「tag 说 0.4.0、npm 上却是 0.1.0」这种对不上的情况。
+1. 发 npm：本地 `pnpm run release -- --otp=123456`，或在 Actions 页面手动触发 `Release`（`workflow_dispatch`，`dry_run` 默认 `true`，要真发布得取消勾选，且仓库里得配好 `NPM_TOKEN`）。
+2. 打 tag：发布成功后
+   ```bash
+   git tag v0.1.1 && git push origin v0.1.1
+   ```
+   tag 只做版本标记，**推 tag 不会触发发布**——发布只从 Actions 页面手动点名，或本地命令，避免「推个 tag 顺手把包发了」。
+
+tag 名必须是 `v<version>`，且该 version 必须等于 `packages/ng-components/package.json` 的 `version`；否则历史记录里就会出现「tag 说 0.4.0、npm 上却是 0.1.0」这种对不上的情况。
 
 开发阶段的进度里程碑**不打 tag**，记在 [`docs/plans/milestones.md`](docs/plans/milestones.md)。历史上打过一个 `v0.4.0-alpha`（广度完成，2026-11-23），因为和 npm 版本号混用容易让人误以为 npm 上有 `0.4.0`，已在 0.1.0 首发准备时删除，内容保留在那里。
 
 **版本只能往上走**：npm 会记住已发布的最高版本，发出去的版本不能撤回也不能被更低的版本覆盖。首发取低值安全，取高值是单向门。
 
-推 tag 会触发 `.github/workflows/release.yml`：校验 tag 与 `packages/ng-components/package.json` 的版本一致，然后 `pnpm run release` 真发布，并带 npm provenance。也可以在 Actions 页面手动 `workflow_dispatch`（`dry_run` 默认 `true`）。
+`.github/workflows/release.yml` 只在 `workflow_dispatch` 时运行：装依赖 → 打印待发布版本（若该版本的 tag 已存在会给出 warning）→ 按 `dry_run` 跑 `release:check` 或 `release`，真发布带 npm provenance。
 
 ## CI 发布需要的东西
 
