@@ -171,7 +171,18 @@ function packDryRun(pkg) {
   console.log(`  期望文件齐全，含 README.md 与 LICENSE`);
 }
 
+/** 已发布的版本跳过，避免「styles 发完了、icons 因 OTP 过期失败」之后重跑时卡在第一个包上。 */
+function alreadyPublished(pkg) {
+  const { version } = readJson(path.join(repoRoot, pkg.dir, 'package.json'));
+  const result = run('npm', ['view', `${pkg.name}@${version}`, 'version'], { capture: true });
+  return result.status === 0 && (result.stdout || '').includes(version);
+}
+
 function publish(pkg) {
+  if (!dryRun && alreadyPublished(pkg)) {
+    console.log(`  ↷ ${pkg.name} 该版本已存在，跳过`);
+    return;
+  }
   // 同 pack：用 cwd 定位包，避免 npm 把路径参数当成 GitHub 简写或 tarball 名。
   const args = ['publish', '--access', 'public'];
   if (dryRun) args.push('--dry-run');
@@ -183,7 +194,7 @@ function publish(pkg) {
         [
           '',
           '提示：若上方报 403「Two-factor authentication ... required to publish」，说明账号的 2FA 要求写入时带验证码。两条路：',
-          '  1) 带上一次性密码重跑：pnpm run release -- --otp=123456',
+          '  1) 带上一次性密码重跑：pnpm run release -- --otp=123456（已发成功的包会自动跳过）',
           '  2) 改用 Automation token（或在 npmjs 创建 Granular token 时勾选 "bypass 2FA"），写进 ~/.npmrc 的 //registry.npmjs.org/:_authToken',
           '',
         ].join('\n'),

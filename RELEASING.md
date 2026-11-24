@@ -52,6 +52,8 @@ npm error 403 - Two-factor authentication or granular access token with bypass 2
 
 失败发生在第一个包（styles）的 PUT，所以**什么都没发出去**，版本号仍然可用；修好后从头重跑即可。
 
+脚本会先用 `npm view <name>@<version>` 探测，**已存在的版本自动跳过**——所以三个包发到一半 OTP 过期时，直接带新验证码重跑就行，不会卡在已发布的包上。
+
 ## 版本与 tag
 
 三个包版本必须完全一致；`CHANGELOG.md` 里补一节，再改三个 `package.json` 的 `version`，然后：
