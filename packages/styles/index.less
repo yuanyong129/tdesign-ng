@@ -1,10 +1,13 @@
-// 推荐的应用级入口：设计令牌 + 全局工具类 + 归一化。
+// 推荐的应用级入口：设计令牌 + 全局工具类 + 归一化 + 全部组件样式。
 //
 //   // styles.less
 //   @import '@tdesign-ng/styles/index.less';
 //
-// 只想要令牌、不想被 reset 影响时，改用 './theme.less'。
+// 只想要令牌、不想被 reset 影响时，改用 './theme.less'；
+// 只要组件样式（自己引令牌与 reset）时，改用 './components/index.less'；
+// 按需引入时，用 './components/<name>.less'。
 
 @import './theme.less';
 @import './vendor/tdesign-common/style/web/_global.less';
 @import './vendor/tdesign-common/style/web/_reset.less';
+@import './components/index.less';

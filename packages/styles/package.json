@@ -1,6 +1,6 @@
 {
   "name": "@tdesign-ng/styles",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TDesign styles for Angular, a thin assembly layer on top of the upstream tdesign-common less sources",
   "keywords": [
     "angular",

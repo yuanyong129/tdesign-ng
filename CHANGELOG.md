@@ -5,7 +5,14 @@
 
 `0.x` 阶段按 `0.<minor>.<patch>` 发布：`minor` 可能带破坏性变更，`patch` 只修 bug。
 
-## [0.1.0] - 未发布（首个公开预发布版本）
+## [0.1.1] - 未发布
+
+### Fixed
+
+- `@tdesign-ng/styles` 的 `index.less` / `dist/index.css` 现在真的包含全部组件样式。0.1.0 里它只带设计令牌、全局工具类和 reset，按 README 一行引入后组件渲染出来是无样式的裸标签（消费端 `ng build` 实测复现）。选 `theme.less`（只要令牌）或 `components/index.less`（只要组件样式）的用法不变。
+- `scripts/build-styles.mjs` 增加 `index` 入口的断言（必须含 `.t-button--variant-`），避免同类漏引再发生。
+
+## [0.1.0] - 2026-11-24（首个公开预发布版本）
 
 三个包同版本号一起发布：`@tdesign-ng/components`、`@tdesign-ng/styles`、`@tdesign-ng/icons`。
 
@@ -33,4 +40,5 @@
 - 尚未提供聚合 NgModule（`TDesignModule` 之类），需要逐组件引入。
 - 尚未提供单元测试与 e2e 测试。
 
+[0.1.1]: https://github.com/yuanyong129/tdesign-ng/releases/tag/v0.1.1
 [0.1.0]: https://github.com/yuanyong129/tdesign-ng/releases/tag/v0.1.0

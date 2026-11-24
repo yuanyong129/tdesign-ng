@@ -3,7 +3,7 @@
  * 把 packages/styles 的 less 入口编译成 CSS，输出到 packages/styles/dist。
  *
  * 产物：
- *   dist/index.css          推荐入口（令牌 + 全局 + reset）
+ *   dist/index.css          推荐入口（令牌 + 全局 + reset + 全部组件样式）
  *   dist/theme.css          只有设计令牌
  *   dist/reset.css          只有统一化样式
  *   dist/global.css         令牌 + 全局工具类
@@ -39,6 +39,11 @@ const ENTRIES = [
  */
 const ASSERTIONS = {
   theme: [/--td-brand-color:\s*var\(--td-brand-color-\d+\)/i, /\[theme-mode=['"]?dark/i],
+  /**
+   * index.less 是"一行引入即全部生效"的入口，必须真的带上组件样式。
+   * 0.1.0 漏了这一行，消费端只拿到令牌，按钮全是无样式裸标签。
+   */
+  index: [/\.t-button--variant-/, /\.t-divider--horizontal/],
   components: [/\.t-button--variant-/, /\.t-divider--horizontal/],
 };
 

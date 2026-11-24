@@ -2,7 +2,7 @@
 
 [TDesign](https://tdesign.tencent.com/) 的 Angular 组件库。
 
-> **状态：`0.1.0` 是首个公开预发布版本（pre-release）。** API 仍可能在小版本内调整，生产使用请锁版本。
+> **状态：`0.1.x` 是首个公开预发布版本（pre-release）。** API 仍可能在小版本内调整，生产使用请锁版本。
 > 属性命名与取值对齐 [tdesign-vue-next](https://github.com/Tencent/tdesign-vue-next)，视觉直接消费 [tdesign-common](https://github.com/Tencent/tdesign-common) 的上游 less 源码，所以长得和 TDesign 官网一致。
 
 - 要求 Angular >= 19（standalone / signal 输入）
@@ -53,7 +53,7 @@ export class AppModule {}
 
 ```less
 // styles.less
-@import '@tdesign-ng/styles/index.less';   // 设计令牌 + 全局 + reset
+@import '@tdesign-ng/styles/index.less';   // 设计令牌 + 全局 + reset + 全部组件样式
 @import '@tdesign-ng/components/bridge.less';  // 把 <t-button> 这类宿主元素桥接到上游 .t-button
 ```
 
