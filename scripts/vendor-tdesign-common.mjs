@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 /**
- * 把上游 tdesign-common 的样式源码（style/web）同步到 vendor/tdesign-common。
+ * 把上游 tdesign-common 的样式源码（style/web）同步到 packages/styles/vendor/tdesign-common。
  *
  * 约定：
- * - vendor/ 下是上游源码的**逐字节快照**，不允许手改；改动只会被下一次同步覆盖。
+ * - packages/styles/vendor 下是上游源码的**逐字节快照**，不允许手改；改动只会被下一次同步覆盖。
+ * - 快照放在样式包**内部**（而不是仓库根目录），这样 @tdesign-ng/styles 打包发布后
+ *   less 入口的相对 import 依然有效，安装即可用，不需要用户另外提供 vendor 目录。
  * - 我们的样式包 packages/styles 只做"入口装配"（import 上游文件），不复制、不改写样式。
  * - 同步后自动重建 packages/styles/src 下的组件入口文件，新增/删除上游组件都能跟上。
  *
@@ -32,8 +34,8 @@ const STYLE_SUBDIR = path.join('style', 'web');
 const SKIP_COMPONENTS = new Set(['a-template']);
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const vendorDir = path.join(repoRoot, 'vendor', 'tdesign-common');
 const stylesPkgDir = path.join(repoRoot, 'packages', 'styles');
+const vendorDir = path.join(stylesPkgDir, 'vendor', 'tdesign-common');
 
 function parseArgs(argv) {
   const args = { ref: DEFAULT_REF, from: null };
@@ -77,10 +79,9 @@ async function copyDir(from, to) {
   await fs.cp(from, to, { recursive: true });
 }
 
-/** 生成 packages/styles/src 下的入口文件（纯装配，不含样式代码）。 */
+/** 生成 packages/styles 下的入口文件（纯装配，不含样式代码）。 */
 async function regenerateEntries(componentDirs) {
-  const srcDir = path.join(stylesPkgDir, 'src');
-  const compEntryDir = path.join(srcDir, 'components');
+  const compEntryDir = path.join(stylesPkgDir, 'components');
   await fs.mkdir(compEntryDir, { recursive: true });
 
   // 先清空旧的入口文件，避免上游删掉某个组件后本地残留孤儿文件。
@@ -93,7 +94,7 @@ async function regenerateEntries(componentDirs) {
 
   const written = [];
   for (const name of componentDirs) {
-    const rel = '../../../../vendor/tdesign-common/style/web/components/' + name + '/_index.less';
+    const rel = '../vendor/tdesign-common/style/web/components/' + name + '/_index.less';
     const file = path.join(compEntryDir, `${name}.less`);
     await fs.writeFile(file, `${banner(name)}@import '${rel}';\n`, 'utf8');
     written.push(`components/${name}.less`);

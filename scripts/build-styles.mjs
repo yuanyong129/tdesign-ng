@@ -21,21 +21,21 @@ import { fileURLToPath } from 'node:url';
 import less from 'less';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const srcDir = path.join(repoRoot, 'packages', 'styles', 'src');
-const outDir = path.join(repoRoot, 'packages', 'styles', 'dist');
+const pkgDir = path.join(repoRoot, 'packages', 'styles');
+const outDir = path.join(pkgDir, 'dist');
 
 const ENTRIES = [
-  { name: 'index', file: path.join(srcDir, 'index.less') },
-  { name: 'theme', file: path.join(srcDir, 'theme.less') },
-  { name: 'reset', file: path.join(srcDir, 'reset.less') },
-  { name: 'global', file: path.join(srcDir, 'global.less') },
-  { name: 'components', file: path.join(srcDir, 'components', 'index.less') },
+  { name: 'index', file: path.join(pkgDir, 'index.less') },
+  { name: 'theme', file: path.join(pkgDir, 'theme.less') },
+  { name: 'reset', file: path.join(pkgDir, 'reset.less') },
+  { name: 'global', file: path.join(pkgDir, 'global.less') },
+  { name: 'components', file: path.join(pkgDir, 'components', 'index.less') },
 ];
 
 /**
  * 编译产物必须满足的最小断言。
  * 这些是"样式管线接错了"的早期信号，比人肉点页面靠得住。
- * 取值随上游演进，改动时请对照 vendor/tdesign-common/style/web 实际内容。
+ * 取值随上游演进，改动时请对照 packages/styles/vendor/tdesign-common/style/web 实际内容。
  */
 const ASSERTIONS = {
   theme: [/--td-brand-color:\s*var\(--td-brand-color-\d+\)/i, /\[theme-mode=['"]?dark/i],

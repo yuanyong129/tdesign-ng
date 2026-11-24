@@ -1,12 +1,33 @@
 {
   "name": "@tdesign-ng/icons",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "TDesign icons for Angular",
+  "keywords": [
+    "angular",
+    "tdesign",
+    "icon",
+    "icons",
+    "svg"
+  ],
+  "license": "MIT",
+  "author": "tdesign-ng contributors",
+  "homepage": "https://yuanyong129.github.io/tdesign-ng/",
+  "bugs": {
+    "url": "https://github.com/yuanyong129/tdesign-ng/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuanyong129/tdesign-ng.git",
+    "directory": "packages/icons"
+  },
   "peerDependencies": {
     "@angular/core": ">=19.0.0 <24.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
 }

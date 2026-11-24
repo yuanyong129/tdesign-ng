@@ -2,7 +2,30 @@
 
 [TDesign](https://tdesign.tencent.com/) 的 Angular 实现。
 
-> **状态：早期开发中（pre-alpha）。** 组件数量与 API 仍在快速变动，尚未发布到 npm。
+> **状态：`0.1.0` 首个公开预发布版本，发布准备已就绪（见 [RELEASING.md](./RELEASING.md)）。** API 仍可能在小版本内调整，生产使用请锁版本。变更见 [CHANGELOG](./CHANGELOG.md)。
+
+## 安装
+
+```bash
+npm i @tdesign-ng/components @tdesign-ng/styles
+npm i @tdesign-ng/icons        # 需要图标时
+```
+
+```ts
+import { TButton } from '@tdesign-ng/components';
+```
+
+```less
+// styles.less —— 两行都要，缺一行就是裸 DOM
+@import '@tdesign-ng/styles/index.less';
+@import '@tdesign-ng/components/bridge.less'; // 纯 CSS 项目用 bridge.css
+```
+
+- [`@tdesign-ng/components`](./packages/ng-components)：73 个 Angular 组件（standalone + 逐组件 NgModule）
+- [`@tdesign-ng/styles`](./packages/styles)：TDesign 样式，less 按组件入口 + 预编译 CSS
+- [`@tdesign-ng/icons`](./packages/icons)：`TIcon` 与图标数据
+
+在线文档：https://yuanyong129.github.io/tdesign-ng/
 
 本项目的两条硬性原则：
 

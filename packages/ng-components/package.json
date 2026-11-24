@@ -1,28 +1,47 @@
 {
   "name": "@tdesign-ng/components",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "TDesign components for Angular",
+  "keywords": [
+    "angular",
+    "tdesign",
+    "component",
+    "components",
+    "ui",
+    "ui-kit"
+  ],
+  "license": "MIT",
+  "author": "tdesign-ng contributors",
+  "homepage": "https://yuanyong129.github.io/tdesign-ng/",
+  "bugs": {
+    "url": "https://github.com/yuanyong129/tdesign-ng/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuanyong129/tdesign-ng.git",
+    "directory": "packages/ng-components"
+  },
   "peerDependencies": {
-    "@angular/cdk": "19.2.0",
+    "@angular/cdk": ">=19.0.0 <24.0.0",
     "@angular/common": ">=19.0.0 <24.0.0",
     "@angular/core": ">=19.0.0 <24.0.0",
     "@angular/forms": ">=19.0.0 <24.0.0",
-    "qrcode": "^1.5.4"
+    "@tdesign-ng/styles": "^0.1.0"
   },
   "dependencies": {
+    "qrcode": "^1.5.4",
     "tslib": "^2.3.0"
   },
   "sideEffects": [
-    "**/*.less"
+    "**/*.less",
+    "**/*.css"
   ],
   "devDependencies": {
     "@angular/cdk": "19.2.0",
     "qrcode": "^1.5.4",
     "@types/qrcode": "^1.5.5"
   },
-  "peerDependenciesMeta": {
-    "qrcode": {
-      "optional": true
-    }
+  "publishConfig": {
+    "access": "public"
   }
 }

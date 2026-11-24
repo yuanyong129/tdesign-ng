@@ -1,0 +1,63 @@
+name: Release
+
+# 打 tag（v0.1.0）即发布三个 npm 包。也可以在 Actions 页面手动触发一次演练。
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '只演练（打包 + 校验，不 publish）'
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  # npm provenance 需要 OIDC token
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 版本由根 package.json 的 packageManager 字段决定，pnpm/action-setup 会读它。
+      # 必须在 setup-node 之前，否则 setup-node 的 cache: pnpm 找不到 pnpm 可执行文件。
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 校验 tag 与包版本一致
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          VERSION=$(node -p "require('./packages/ng-components/package.json').version")
+          echo "tag=$TAG version=$VERSION"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::tag v$TAG 与 package.json 的 $VERSION 不一致"
+            exit 1
+          fi
+
+      - name: 构建并校验产物
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            pnpm run release:check
+          else
+            pnpm run release
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: 'true'

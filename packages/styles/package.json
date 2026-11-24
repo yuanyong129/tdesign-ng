@@ -1,14 +1,32 @@
 {
   "name": "@tdesign-ng/styles",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "TDesign styles for Angular, a thin assembly layer on top of the upstream tdesign-common less sources",
+  "keywords": [
+    "angular",
+    "tdesign",
+    "styles",
+    "less",
+    "css",
+    "theme"
+  ],
   "license": "MIT",
+  "author": "tdesign-ng contributors",
+  "homepage": "https://yuanyong129.github.io/tdesign-ng/",
+  "bugs": {
+    "url": "https://github.com/yuanyong129/tdesign-ng/issues"
+  },
   "sideEffects": [
     "**/*.less",
     "**/*.css"
   ],
   "files": [
-    "src",
+    "index.less",
+    "theme.less",
+    "reset.less",
+    "global.less",
+    "components",
+    "vendor",
     "dist"
   ],
   "publishConfig": {
