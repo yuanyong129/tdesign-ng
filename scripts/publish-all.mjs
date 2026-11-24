@@ -39,7 +39,7 @@ const PACKAGES = [
 /** 受限沙箱里 spawnSync 用 pipe 抓输出会 EPERM，改用临时文件接 fd，两条路都能跑。 */
 const captureDir = path.join(repoRoot, '.npm-cache');
 
-function runCapture(command, args) {
+function runCapture(command, args, cwd = repoRoot) {
   fs.mkdirSync(captureDir, { recursive: true });
   const stamp = `${process.pid}-${Date.now()}`;
   const outFile = path.join(captureDir, `stdout-${stamp}.log`);
@@ -49,7 +49,7 @@ function runCapture(command, args) {
   let result;
   try {
     result = spawnSync(command, args, {
-      cwd: repoRoot,
+      cwd,
       stdio: ['ignore', outFd, errFd],
       shell: process.platform === 'win32',
     });
@@ -66,9 +66,10 @@ function runCapture(command, args) {
 }
 
 function run(command, args, options = {}) {
-  if (options.capture) return runCapture(command, args);
+  const cwd = options.cwd ? path.resolve(repoRoot, options.cwd) : repoRoot;
+  if (options.capture) return runCapture(command, args, cwd);
   const result = spawnSync(command, args, {
-    cwd: repoRoot,
+    cwd,
     stdio: 'inherit',
     encoding: 'utf8',
     shell: process.platform === 'win32',
@@ -127,8 +128,9 @@ function checkAuth() {
 }
 
 function packDryRun(pkg) {
-  // 必须指定包目录：在仓库根执行 npm pack 打的是根 package.json。
-  const result = run('npm', ['pack', pkg.dir, '--dry-run', '--json'], { capture: true });
+  // 以包目录为 cwd 运行 npm，不传路径参数：npm 会把 `packages/styles` 这种
+  // 带一个斜杠的相对路径当成 GitHub 简写（github:packages/styles），转而去 git clone。
+  const result = run('npm', ['pack', '--dry-run', '--json'], { capture: true, cwd: pkg.dir });
   const combined = `${result.stdout || ''}\n${result.stderr || ''}`;
   if (result.status !== 0) {
     // 受限沙箱会拒绝 npm 内部为 `git ls-files` 建管道（EPERM），这不是产物问题。
@@ -161,9 +163,10 @@ function packDryRun(pkg) {
 }
 
 function publish(pkg) {
-  const args = ['publish', pkg.dir, '--access', 'public'];
+  // 同 pack：用 cwd 定位包，避免 npm 把路径参数当成 GitHub 简写或 tarball 名。
+  const args = ['publish', '--access', 'public'];
   if (dryRun) args.push('--dry-run');
-  const result = run('npm', args);
+  const result = run('npm', args, { cwd: pkg.dir });
   if (result.status !== 0) fail(`${pkg.name} 发布失败（见上方 npm 输出）`);
   console.log(`  ✓ ${pkg.name}${dryRun ? '（演练，未真正发布）' : ' 已发布'}`);
 }

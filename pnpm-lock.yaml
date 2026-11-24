@@ -278,6 +278,9 @@ importers:
       '@angular/forms':
         specifier: '>=19.0.0 <24.0.0'
         version: 19.2.19(@angular/common@19.2.19(@angular/core@19.2.19(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.19(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@19.2.19(@angular/common@19.2.19(@angular/core@19.2.19(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.19(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
+      qrcode:
+        specifier: ^1.5.4
+        version: 1.5.4
       tslib:
         specifier: ^2.3.0
         version: 2.8.1
@@ -285,12 +288,12 @@ importers:
       '@angular/cdk':
         specifier: 19.2.0
         version: 19.2.0(@angular/common@19.2.19(@angular/core@19.2.19(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.19(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
+      '@tdesign-ng/styles':
+        specifier: workspace:*
+        version: link:../styles
       '@types/qrcode':
         specifier: ^1.5.5
         version: 1.5.6
-      qrcode:
-        specifier: ^1.5.4
-        version: 1.5.4
 
   packages/styles: {}
 
