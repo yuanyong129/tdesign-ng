@@ -10,7 +10,7 @@
 - **API 唯一真源**：`tdesign-vue-next@1.20.11`（`https://unpkg.com/tdesign-vue-next@1.20.11/es/<component>/type.d.ts`）。
 - **视觉唯一真源**：仓库内 `vendor/tdesign-common/style/web`（上游 less 快照，`pnpm vendor:styles` 更新）。
 - 不兼容原 Arco 的任何属性，不做兼容层；TDesign 没有的组件（ButtonGroup / Scrollbar）已删除。
-- 用户已经明确：**文档站先不精修，优先组件开发**；**提交不需要问，直接 commit**。
+- 用户已经明确：**组件功能/API/演示文档优先**（文档站的样式与布局已按官网对齐，见 §8）；**提交不需要问，直接 commit**。
 
 ## 2. 当前进度
 
@@ -126,7 +126,9 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 - **没有单测**：组件全靠 CDP 行为验证 + `align-check` 契约验证；Vitest 迁移仍未开始。
 - **Icon SSR**：`TIcon` 用 `DOMParser`，未做 `isPlatformBrowser` 分支。
 - **未实现的上游能力**（均已在 `align-check` 写明原因）：Dialog 的 `draggable`/`confirmOnEnter`/`beforeOpen`/`beforeClose`；Loading 的 `indicator`/`attach`；Avatar 的 `imageProps`；AvatarGroup 折叠头像的弹层列表；CheckTag / CheckTagGroup；Pagination 的 `simple` 形态只有「当前页/总页数」；Tabs 的 `action`（自定义操作区）与 `list`（数据驱动面板）未实现；Collapse 的 `expandIcon` 只接受 `boolean | TemplateRef`，不接受上游的渲染函数；Empty 的 `image` 只接受 URL 字符串（不支持 ImageProps），`title` / `description` 为字符串（不支持 TNode）；Progress 的 `label` 只接受 `string | boolean`（不支持 TNode），`plump` 的 over/under 用 `percentage >= 10` 近似（未做逐像素测量），circle 状态图标沿用填充图标（上游是细线图标）；List 的 `scroll`（虚拟滚动）未实现，`asyncLoading` 不支持模板，`(scrollChange)` 原样透出没有节流。；Slider 的 `inputNumberProps`（两侧数字输入框）与 `tooltipProps` 透传未实现，键盘只支持方向键 / Home / End；Rate 的自定义 `icon` 未实现（固定内置星形），`showText` 不提供每颗星的悬浮 tooltip。Cascader 的 `valueType`、`minCollapsedNum` / `collapsedItems`（多选折叠）、`columnHeader` / `columnFooter`、`option`（自定义选项渲染）、`checkProps` 与各类 `*Props` 透传、`trigger="hover"`、受控 `popupVisible`、`readonly` / `borderless` / `status` / `tips` / 前后缀图标均未实现；`filter` 只能是同步函数（上游允许 Promise）。TreeSelect 的 `collapsedItems`（折叠标签的自定义内容，目前用内置 +N）、`valueDisplay`、`inputProps` / `selectInputProps` / `popupProps` 透传、受控 `popupVisible`、`autoWidth` / `borderless` / `readonly`、`suffix` / `suffixIcon` 与失焦/聚焦事件未实现；`treeProps` 目前只支持 `checkStrictly` / `valueMode` / `expandAll`，其余 Tree 能力（拖拽、虚拟滚动、懒加载、自定义图标/标签、`checkProps`）未透传。DatePicker 的 `mode` 已支持 date / week / month / quarter / year，但 week 的值格式用 `YYYY-[W]WW`（上游 dayjs 为 `gggg-wo`，依赖 weekOfYear 插件与本地化），`multiple` 已支持但与 `enableTimePicker` 互斥、在 week / quarter 模式下仍按整周/整季提交；未实现 `disableTime` / `timePickerProps` 与各类 `*Props` 透传；`cell` / `valueDisplay` 已支持但只接受返回字符串的回调（上游支持 `TNode`）、`borderless` / `readonly` / `status` / `tips` / `label`。DateRangePicker 未实现 `disableTime` / `timePickerProps`、`mode`、`panelActiveDate`、`panelPreselection` / `cancelRangeSelectLimit`、`cell` / `valueDisplay`、`prefixIcon` / `suffixIcon` 与 `inputProps` / `rangeInputProps` / `selectInputProps` / `popupProps` 透传、打开/关闭/失焦/聚焦事件。TimePicker 未实现 `t-time-range-picker`（区间）、`borderless` / `readonly` / `status` / `tips` / `label`、`suffixIcon` 替换与 `inputProps` / `selectInputProps` / `popupProps` 透传、打开 / 关闭 / 失焦 / 聚焦事件。
-- **文档站**：无搜索、无中英切换、无右侧锚点导航；示例卡片视觉可再贴近官网。
+- **文档站外壳已对齐官网（2026-11）**：`packages/docs/src/app/app.component.ts` 是整站外壳（64px 顶栏 + 搜索触发器 + 明暗主题 + 260px 侧栏 + 780px 正文 + 右侧 TOC + 页脚）；`docs/docs-toc.ts` 从 `.demo` / `.docs-section__title` 自动生成锚点；`docs/docs-search.ts` 是基于 `DOCS_NAV` 的客户端搜索（⌘/Ctrl+K）；`docs/docs.less` 统一页面与示例卡片样式；`demo-block.ts` 的示例卡片改为「标题/说明在卡片外 + 40px 舞台 + 48px 图标操作栏」。主题存 `localStorage['tdesign-docs-theme']`，`index.html` 有首屏内联脚本防闪烁。
+- **文档站仍未做**：示例 / API / 指南 分段 tab（页面是单页滚动，加 tab 需要改 73 个页面，属页面 owner 范围，目前靠右侧 TOC 导航）；中英切换；示例右上角的「配置」面板。
+- **文档站初始包 790 kB** 超过 `packages/docs/angular.json` 的 500 kB 警告线（主要是 `qrcode` 与全量 vendor 样式），只是警告、不阻塞构建。
 
 ## 9. 怎么验证一个改动
 
@@ -134,8 +136,9 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 2. `node scripts/align-check.mjs` 必须 `missing 0 / extra 0`。
 3. `pnpm build:lib` 全绿（`gen:api` / `gen:demos` 的 check 已包含在内）。
 4. **本地预览（首选）**：`pnpm start --port 4200 --host 127.0.0.1` 起 dev server（后台任务），再用 `node .local-cache/cdp-page.mjs /card /alert` 探针检查标题 / demo / api 表 / console 报错 / 4xx 资源；`PAGE_BASE` 可改地址，`PAGE_PROBES=".t-card,.t-alert"` 可统计选择器命中数。dev server 的 `prestart` 会自动跑 `gen-api-docs` + `gen-demo-sources`。
-5. 线上验证：`PAGE_BASE=https://yuanyong129.github.io/tdesign-ng node .local-cache/cdp-page.mjs /card`。推送到 main 后 GitHub Pages 约 1~2 分钟生效。
-6. 环境说明（2026-11-23 起）：DSH 会话已切到 `danger-full-access`，`pnpm build`/`ng serve`/管道子进程/`git push`/headless Edge 均可直接运行，不再需要绕 EPERM。
+5. **文档站全路由巡检**：`node scripts/qa-routes.mjs`（全部路由 @1400），`--width=390` 查移动端，`--routes=/button,/table` 只跑指定路由；判据是标题存在、无横向滚动、有示例就有 TOC、无 console 异常。`PAGE_BASE` / `CDP_ENDPOINT` 可覆盖默认的 `http://localhost:4280` / `http://127.0.0.1:9341`。
+6. 线上验证：`PAGE_BASE=https://yuanyong129.github.io/tdesign-ng node .local-cache/cdp-page.mjs /card`。推送到 main 后 GitHub Pages 约 1~2 分钟生效。
+7. 环境说明（2026-11-23 起）：DSH 会话已切到 `danger-full-access`，`pnpm build`/`ng serve`/管道子进程/`git push`/headless Edge 均可直接运行，不再需要绕 EPERM。
 
 
 

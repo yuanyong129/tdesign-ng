@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import demoSources from './demo-sources.generated.json';
 
 /**
@@ -38,7 +46,8 @@ function escapeHtml(code: string): string {
 }
 
 /**
- * 文档示例容器：演示区 + 「查看代码」+ 代码高亮 + 复制。
+ * 文档示例容器。布局对齐 TDesign 官网：标题与说明在卡片外，
+ * 卡片内是演示区 + 右下角「复制 / 查看代码」图标按钮 + 可展开的源码。
  *
  * 用法：
  *   <docs-demo id="button-theme" title="按钮主题" description="…">
@@ -54,30 +63,107 @@ function escapeHtml(code: string): string {
     <section class="demo" [attr.id]="id()">
       @if (title()) {
         <h3 class="demo__title">
-          <a class="demo__anchor" [attr.href]="'#' + id()" [attr.aria-label]="'链接到「' + title() + '」'">#</a>
-          {{ title() }}
+          <a
+            class="demo__anchor"
+            [attr.href]="'#' + id()"
+            tabindex="-1"
+            aria-hidden="true"
+          >#</a><span>{{ title() }}</span>
         </h3>
       }
       @if (description()) {
         <p class="demo__desc">{{ description() }}</p>
       }
 
-      <div class="demo__stage" [class.demo__stage--dark]="dark()">
-        <ng-content />
-      </div>
+      <div class="demo__card">
+        <div class="demo__stage" [class.demo__stage--dark]="dark()">
+          <ng-content />
+        </div>
 
-      <div class="demo__toolbar">
-        <button type="button" class="demo__action" (click)="toggleCode()">
-          {{ showCode() ? '收起代码' : '查看代码' }}
-        </button>
+        @if (hasSource()) {
+          <div class="demo__footer">
+            <button
+              type="button"
+              class="demo__icon-btn"
+              [class.demo__icon-btn--on]="copied()"
+              [attr.aria-label]="copied() ? '已复制' : '复制代码'"
+              [attr.title]="copied() ? '已复制' : '复制代码'"
+              (click)="copy()"
+            >
+              @if (copied()) {
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    d="m3.5 8.5 3 3 6-6.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              } @else {
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <rect
+                    x="5.5"
+                    y="5.5"
+                    width="8"
+                    height="8"
+                    rx="1.2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                  />
+                  <path
+                    d="M10.5 3.5v-.3A1.2 1.2 0 0 0 9.3 2H3.7a1.2 1.2 0 0 0-1.2 1.2v5.6a1.2 1.2 0 0 0 1.2 1.2h.3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              }
+            </button>
+
+            <button
+              type="button"
+              class="demo__icon-btn"
+              [class.demo__icon-btn--on]="showCode()"
+              [attr.aria-label]="showCode() ? '收起代码' : '查看代码'"
+              [attr.aria-expanded]="showCode()"
+              [attr.title]="showCode() ? '收起代码' : '查看代码'"
+              (click)="toggleCode()"
+            >
+              @if (showCode()) {
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    d="m6 4-4 4 4 4M10 4l4 4-4 4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              } @else {
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    d="m5.5 4.5-4 3.5 4 3.5M10.5 4.5l4 3.5-4 3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              }
+            </button>
+          </div>
+        }
+
         @if (showCode()) {
-          <button type="button" class="demo__action" (click)="copy()">{{ copied() ? '已复制' : '复制代码' }}</button>
+          <pre class="demo__code"><code class="hljs" [innerHTML]="highlighted()"></code></pre>
         }
       </div>
-
-      @if (showCode()) {
-        <pre class="demo__code"><code class="hljs" [innerHTML]="highlighted()"></code></pre>
-      }
     </section>
   `,
 })
@@ -90,19 +176,23 @@ export class DemoBlock {
 
   protected readonly showCode = signal(false);
   protected readonly copied = signal(false);
+  protected readonly hasSource = computed(() => Boolean(DEMO_SOURCES[this.id()]));
 
   /** 未高亮的纯文本（转义后），高亮加载完成前先显示它。 */
   private readonly plain = computed(() => escapeHtml(DEMO_SOURCES[this.id()] ?? ''));
   private readonly highlightedCode = signal<string | null>(null);
   protected readonly highlighted = computed(() => this.highlightedCode() ?? this.plain());
 
+  private copyTimer = 0;
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.copyTimer));
+  }
+
   protected async toggleCode(): Promise<void> {
     const next = !this.showCode();
     this.showCode.set(next);
-    if (!next) {
-      this.copied.set(false);
-      return;
-    }
+    if (!next) return;
 
     const source = DEMO_SOURCES[this.id()];
     if (!source || this.highlightedCode()) return;
@@ -121,6 +211,8 @@ export class DemoBlock {
     try {
       await navigator.clipboard.writeText(source);
       this.copied.set(true);
+      clearTimeout(this.copyTimer);
+      this.copyTimer = window.setTimeout(() => this.copied.set(false), 1600);
     } catch {
       // 剪贴板不可用（非 https 或未授权）时静默失败
     }

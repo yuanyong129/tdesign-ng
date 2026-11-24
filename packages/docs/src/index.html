@@ -8,6 +8,22 @@
   <meta name="description" content="TDesign Angular：按 TDesign 设计规范实现的 Angular 组件库，API 以 tdesign-vue-next 为唯一真源，样式来自 tdesign-common。">
   <meta name="theme-color" content="#0052d9">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script>
+    // 在首屏渲染前套用主题，避免深色模式下闪白
+    (function () {
+      try {
+        var stored = localStorage.getItem('tdesign-docs-theme');
+        var dark = stored
+          ? stored === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var root = document.documentElement;
+        root.setAttribute('theme-mode', dark ? 'dark' : 'light');
+        if (dark) root.classList.add('dark');
+      } catch (error) {
+        // localStorage 不可用时按浅色渲染
+      }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

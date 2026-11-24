@@ -1,56 +1,97 @@
-﻿/* 文档站自己的排版样式（全局，因为代码高亮的 span 由 innerHTML 注入，
+/* 文档站自己的排版样式（全局，因为代码高亮的 span 由 innerHTML 注入，
    组件级样式的属性选择器作用不到它们）。 */
 
 // ---------------------------------------------------------------------------
-// 页面骨架
+// 全局
+// ---------------------------------------------------------------------------
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+:root[theme-mode='dark'] {
+  color-scheme: dark;
+}
+
+// 弹层打开时锁住页面滚动
+:root.docs-modal-open,
+body.docs-nav-open {
+  overflow: hidden;
+}
+
+body {
+  background: var(--td-bg-color-container);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--td-brand-color);
+  outline-offset: 2px;
+}
+
+// ---------------------------------------------------------------------------
+// 页面骨架：与官网一致，正文 780px，右侧目录 240px
 // ---------------------------------------------------------------------------
 .docs-page {
-  max-width: 900px;
+  padding: 72px 0 0;
+  min-width: 0;
+  /* 个别示例的浮层提示宽度会超出正文，避免整页出现横向滚动条 */
+  overflow-x: clip;
 }
 
 .docs-page__title {
-  margin: 0 0 8px;
-  font: var(--td-font-headline-medium);
+  margin: 0;
+  font-size: 40px;
+  line-height: 52px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
   color: var(--td-text-color-primary);
 }
 
 .docs-page__lead {
-  margin: 0 0 32px;
-  font: var(--td-font-body-medium);
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 22px;
   color: var(--td-text-color-secondary);
 }
 
 .docs-section__title {
-  margin: 40px 0 8px;
-  font: var(--td-font-title-large);
+  margin: 64px 0 16px;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
   color: var(--td-text-color-primary);
+  scroll-margin-top: 88px;
 }
 
 // ---------------------------------------------------------------------------
-// 示例容器
+// 示例容器：标题/说明在卡片外，卡片里只有演示区 + 图标操作栏
 // ---------------------------------------------------------------------------
+docs-demo {
+  display: block;
+}
+
 .demo {
-  margin-bottom: 24px;
-  border: 1px solid var(--td-component-border);
-  border-radius: var(--td-radius-default);
-  background: var(--td-bg-color-container);
-  overflow: hidden;
+  scroll-margin-top: 88px;
 }
 
 .demo__title {
-  margin: 0;
-  padding: 0 24px;
-  font: var(--td-font-title-small);
+  margin: 48px 0 8px;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
   color: var(--td-text-color-primary);
-  scroll-margin-top: 80px;
-}
-
-.demo__title:first-child {
-  padding-top: 20px;
+  scroll-margin-top: 88px;
 }
 
 .demo__anchor {
-  margin-right: 8px;
+  margin-right: 2px;
+  font-weight: 400;
   color: var(--td-text-color-placeholder);
   text-decoration: none;
   opacity: 0;
@@ -66,14 +107,27 @@
 }
 
 .demo__desc {
-  margin: 4px 0 0;
-  padding: 0 24px;
-  font: var(--td-font-body-small);
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
   color: var(--td-text-color-secondary);
 }
 
+.demo__card {
+  margin: 16px 0 24px;
+  border: 1px solid var(--td-component-border);
+  border-radius: 6px;
+  background: var(--td-bg-color-container);
+  overflow: hidden;
+}
+
 .demo__stage {
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 120px;
+  padding: 40px;
+  box-sizing: border-box;
   color: var(--td-text-color-primary);
 }
 
@@ -106,26 +160,42 @@
   }
 }
 
-.demo__toolbar {
+.demo__footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  gap: 4px;
-  padding: 4px 16px;
-  border-top: 1px dashed var(--td-component-stroke);
+  gap: 2px;
+  height: 48px;
+  padding: 0 8px;
+  box-sizing: border-box;
 }
 
-.demo__action {
-  padding: 4px 8px;
+.demo__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border: 0;
-  border-radius: var(--td-radius-small);
+  border-radius: 3px;
   background: transparent;
-  font: var(--td-font-body-small);
   color: var(--td-text-color-secondary);
   cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
 }
 
-.demo__action:hover {
+.demo__icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.demo__icon-btn:hover {
   background: var(--td-bg-color-container-hover);
+  color: var(--td-text-color-primary);
+}
+
+.demo__icon-btn--on {
   color: var(--td-brand-color);
 }
 
@@ -135,6 +205,7 @@
   border-top: 1px solid var(--td-component-stroke);
   background: var(--td-bg-color-secondarycontainer);
   overflow: auto;
+  max-height: 480px;
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, monospace;
   font-size: 12.5px;
   line-height: 1.7;
@@ -202,7 +273,7 @@
 .page-nav {
   display: flex;
   gap: 16px;
-  margin-top: 40px;
+  margin-top: 64px;
   padding-top: 24px;
   border-top: 1px solid var(--td-component-border);
 }
@@ -215,7 +286,7 @@
   min-width: 0;
   padding: 12px 16px;
   border: 1px solid var(--td-component-border);
-  border-radius: var(--td-radius-default);
+  border-radius: 6px;
   background: var(--td-bg-color-container);
   text-decoration: none;
   color: var(--td-text-color-primary);
@@ -248,6 +319,11 @@
 @media (max-width: 960px) {
   .page-nav {
     flex-direction: column;
+  }
+
+  /* 固定表格布局会在窄屏把单元格压成竖排文字，改为横向滚动 */
+  .api-table__scroll .api-table {
+    min-width: 680px;
   }
 }
 
@@ -350,4 +426,39 @@
 
 .demo-cascader-row {
   max-width: 360px;
+}
+
+// ---------------------------------------------------------------------------
+// 窄屏
+// ---------------------------------------------------------------------------
+@media (max-width: 960px) {
+  .docs-page {
+    padding-top: 40px;
+  }
+
+  .docs-page__title {
+    font-size: 32px;
+    line-height: 42px;
+  }
+
+  .docs-section__title {
+    margin-top: 48px;
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .demo__title {
+    margin-top: 40px;
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  .demo__stage {
+    min-height: 96px;
+    padding: 24px;
+  }
+
+  .demo__code {
+    padding: 12px 16px;
+  }
 }
