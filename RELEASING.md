@@ -29,6 +29,29 @@ pnpm run release         # = node scripts/publish-all.mjs
 
 > 注意：脚本把 `npm_config_cache` 指向仓库内 `.npm-cache/`。某些受限环境（沙箱）无法写用户目录缓存，这个重定向是必须的。
 
+### 遇到 403（2FA）
+
+```
+npm error code E403
+npm error 403 403 Forbidden - PUT https://registry.npmjs.org/@tdesign-ng%2fstyles
+npm error 403 - Two-factor authentication or granular access token with bypass 2fa enabled is required to publish packages.
+```
+
+账号开了「写入需要 2FA」，但这次调用没带上验证码。两条路：
+
+1. **带 OTP 重跑**（验证码 30 秒有效，三个包连发可能要用第二个码）：
+   ```bash
+   pnpm run release -- --otp=123456
+   ```
+2. **用 bypass 2FA 的 token**（CI 必须这样）：npmjs → Access Tokens → Generate New Token → 选 *Automation* 或 *Granular* 并勾选 `bypass 2FA`，写进 `~/.npmrc`：
+   ```
+   //registry.npmjs.org/:_authToken=npm_xxx
+   ```
+
+排查当前用的是哪种认证：`npm config get //registry.npmjs.org/:_authToken`（有输出 = token 认证，不会弹 OTP）、`npm profile get two-factor-auth`。
+
+失败发生在第一个包（styles）的 PUT，所以**什么都没发出去**，版本号仍然可用；修好后从头重跑即可。
+
 ## 版本与 tag
 
 三个包版本必须完全一致；`CHANGELOG.md` 里补一节，再改三个 `package.json` 的 `version`，然后：

@@ -29,6 +29,15 @@ const skipBuild = argv.includes('--skip-build');
 /** npm 缓存默认落在用户目录，某些受限环境写不进去，统一指到仓库内。 */
 process.env.npm_config_cache = process.env.npm_config_cache || path.join(repoRoot, '.npm-cache');
 
+/** 账号开了 2FA 时，可以把一次性密码透传给 npm（`--otp 123456` 或 `--otp=123456`）。 */
+const otpArgIndex = argv.findIndex((arg) => arg === '--otp' || arg.startsWith('--otp='));
+const otp =
+  otpArgIndex < 0
+    ? null
+    : argv[otpArgIndex].includes('=')
+      ? argv[otpArgIndex].split('=')[1]
+      : argv[otpArgIndex + 1];
+
 /** 发布顺序 = 依赖顺序。 */
 const PACKAGES = [
   { name: '@tdesign-ng/styles', dir: 'packages/styles', required: ['package.json', 'index.less', 'components/button.less', 'vendor/tdesign-common/style/web/_reset.less', 'dist/index.css'] },
@@ -166,8 +175,22 @@ function publish(pkg) {
   // 同 pack：用 cwd 定位包，避免 npm 把路径参数当成 GitHub 简写或 tarball 名。
   const args = ['publish', '--access', 'public'];
   if (dryRun) args.push('--dry-run');
+  if (otp) args.push('--otp', otp);
   const result = run('npm', args, { cwd: pkg.dir });
-  if (result.status !== 0) fail(`${pkg.name} 发布失败（见上方 npm 输出）`);
+  if (result.status !== 0) {
+    if (!otp && !dryRun) {
+      console.error(
+        [
+          '',
+          '提示：若上方报 403「Two-factor authentication ... required to publish」，说明账号的 2FA 要求写入时带验证码。两条路：',
+          '  1) 带上一次性密码重跑：pnpm run release -- --otp=123456',
+          '  2) 改用 Automation token（或在 npmjs 创建 Granular token 时勾选 "bypass 2FA"），写进 ~/.npmrc 的 //registry.npmjs.org/:_authToken',
+          '',
+        ].join('\n'),
+      );
+    }
+    fail(`${pkg.name} 发布失败（见上方 npm 输出）`);
+  }
   console.log(`  ✓ ${pkg.name}${dryRun ? '（演练，未真正发布）' : ' 已发布'}`);
 }
 
