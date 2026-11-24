@@ -29,7 +29,11 @@ import ts from 'typescript';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const SRC_DIR = path.join(ROOT, 'packages/ng-components/src/components');
-const OUT_FILE = path.join(ROOT, 'packages/docs/src/app/api/api.generated.json');
+// API_OUT 允许把产物写到别的路径：并行开发时各会话写自己的 .local-cache/api.session.json，
+// 不污染入库的 api.generated.json（否则每个分支都会改同一个生成物，合并必冲突）。
+const OUT_FILE = process.env.API_OUT
+  ? path.resolve(ROOT, process.env.API_OUT)
+  : path.join(ROOT, 'packages/docs/src/app/api/api.generated.json');
 
 const argv = process.argv.slice(2);
 const CHECK_ONLY = argv.includes('--check');

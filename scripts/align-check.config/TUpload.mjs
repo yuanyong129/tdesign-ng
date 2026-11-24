@@ -1,0 +1,38 @@
+
+
+export default {
+    upstream: 'upload',
+    upstreamInterface: 'TdUploadProps',
+    // 上游的四个受控/非受控别名在 Angular 侧合并为一个 files model（[(files)]）
+    renames: { value: 'files', modelValue: 'files', defaultValue: 'files', defaultFiles: 'files' },
+    angularOnly: [],
+    ignoreUpstream: {
+      default: 'Angular 用 <ng-content> 投影自定义内容，仅在 theme=custom 时生效',
+      abridgeName: '[D2] 文件名省略规则，围绕 image 主题的缩略图链路，随 image 形态一起做',
+      showThumbnail: '[D2] 缩略图依赖 image 主题与 t-image',
+      showImageFileName: '[D2] 图片名显示属于 image 主题',
+      imageViewerProps: '[D2] 预览需接 image-viewer，随 image 主题一起做',
+      uploadButton: '[D2] 批量上传按钮需要 ButtonProps 类型与按钮插槽',
+      cancelUploadButton: '[D2] 取消上传按钮同上',
+      isBatchUpload: '[D2] 批量上传语义（继续选择/重新选择）后置',
+      triggerButtonProps: '[D3] 触发器按钮 props，需要 ButtonProps 白名单透传',
+      inputAttributes: '[D3] 原生 input 属性透传，需要 attr 白名单避免任意注入',
+      dragContent: '[D2] 拖拽区内容模板，当前拖拽区文案固定',
+      locale: '[D3] 文案按 zh-CN 写死（与上游默认值逐字一致），i18n 统一期再抽',
+      onCancelUpload: 'Angular 用 (cancelUpload) 输出',
+      onChange: 'Angular 用 (change) 输出，参数含 trigger/value/file/files/index/e',
+      onDragenter: 'Angular 用 (dragenter) 输出，参数 { e }',
+      onDragleave: 'Angular 用 (dragleave) 输出，参数 { e }',
+      onDrop: 'Angular 用 (drop) 输出，参数 { e }',
+      onFail: 'Angular 用 (fail) 输出，参数 { e, failedFiles, currentFiles, file, response }',
+      onOneFileFail: 'Angular 用 (oneFileFail) 输出（逐文件失败）',
+      onOneFileSuccess: 'Angular 用 (oneFileSuccess) 输出（逐文件成功）',
+      onPreview: 'Angular 用 (preview) 输出，参数 { file, index, e }',
+      onProgress: 'Angular 用 (progress) 输出，参数 { file, percent, type, XMLHttpRequest }',
+      onRemove: 'Angular 用 (remove) 输出，参数 { e, index, file }',
+      onSelectChange: 'Angular 用 (selectChange) 输出，参数 { files, currentSelectedFiles }',
+      onSuccess: 'Angular 用 (success) 输出，参数 { file, files, response }',
+      onValidate: 'Angular 用 (validate) 输出，参数 { type, files }',
+      onWaitingUploadFilesChange: 'Angular 用 (waitingUploadFilesChange) 输出',
+    },
+  };

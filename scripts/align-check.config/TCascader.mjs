@@ -1,0 +1,46 @@
+import { ANGULAR_EVENT_IGNORES } from './shared.mjs';
+
+
+export default {
+    upstream: 'cascader',
+    upstreamInterface: 'TdCascaderProps',
+    renames: {},
+    angularOnly: [],
+    ignoreUpstream: {
+      ...ANGULAR_EVENT_IGNORES,
+      // 第二层已补齐：multiple / checkStrictly / valueMode / max / filterable / filter /
+      // reserveKeyword / lazy / load / loading / loadingText
+      'checkProps': '多选复选框配置属于透传，Angular 侧不暴露',
+      'valueType': 'valueType 在后续版本实现',
+      'minCollapsedNum': '多选折叠在后续版本实现',
+      'collapsedItems': '多选折叠在后续版本实现',
+      'panelTopContent': 'Angular 用 <ng-template tCascaderPanelTop> 投影',
+      'panelBottomContent': 'Angular 用 <ng-template tCascaderPanelBottom> 投影',
+      'valueDisplay': 'Angular 用 <ng-template tCascaderValueDisplay> 投影',
+      'columnHeader': '自定义列头在后续版本实现',
+      'columnFooter': '自定义列尾在后续版本实现',
+      'option': '自定义选项渲染在后续版本实现',
+      'selectInputProps': '透传 SelectInputProps 在后续版本实现',
+      'tagInputProps': '多选标签配置在后续版本实现',
+      'tagProps': '多选标签配置在后续版本实现',
+      'inputProps': '透传 InputProps 在后续版本实现',
+      'popupProps': '透传 PopupProps 在后续版本实现',
+      'popupVisible': '受控弹层显隐在后续版本实现',
+      'trigger': '只支持 click 触发',
+      'prefixIcon': '前缀图标在后续版本实现',
+      'suffix': '后缀内容在后续版本实现',
+      'suffixIcon': '后缀图标在后续版本实现',
+      'label': '标签文案在后续版本实现',
+      'tips': '提示文案在后续版本实现',
+      'status': '校验状态在后续版本实现',
+      'borderless': '无边框模式在后续版本实现',
+      'autofocus': '自动聚焦在后续版本实现',
+      'readonly': '只读模式在后续版本实现',
+      'onChange': 'Angular 用 (change) 输出',
+      'onRemove': '多选删除在后续版本实现',
+      'onBlur': '失焦事件在后续版本实现',
+      'onFocus': '聚焦事件在后续版本实现',
+      'onPopupVisibleChange': 'Angular 用 (visibleChange) 输出',
+      'modelValue': 'Angular 用 value 双向绑定',
+    },
+  };

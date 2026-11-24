@@ -53,13 +53,21 @@ docs/plans/tdesign-angular-plan.md   # 历史分期与实现记录（§14~§22�
 ```bash
 pnpm build            # icons → components → docs（改完必跑）
 pnpm build:lib        # 只构建组件库（含 ng-packagr 严格检查）
-pnpm start            # 文档站 dev server :4280
+pnpm start            # 文档站 dev server :4280（`pnpm start --port 4301` 可换端口）
 pnpm gen:api          # 由 TSDoc 生成 packages/docs/.../api.generated.json
 pnpm gen:demos        # 由 demo 源码生成 demo-sources.generated.json
 node scripts/align-check.mjs            # 全部组件对齐检查
 node scripts/align-check.mjs --component TTable
 node scripts/align-check.mjs --json     # 结构化报告（depth-report 的数据源）
 node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统计债务）
+
+# 并行开发（多会话）专用
+pnpm verify:session                     # gen → .local-cache/api.session.json + tsc + ngc + align-check
+pnpm verify:session -- TTable           # 只校验一个组件
+pnpm verify                             # integrator 专用：重新 gen 入库生成物 + demos + align + build:lib
+node scripts/headless-edge.mjs start    # 起专用 headless Edge（CDP_PORT=9411 换端口）
+node scripts/cdp-page.mjs /table        # 页面探针（PORT / CDP_PORT / PROBES / SHOT 环境变量）
+node scripts/wire-component.mjs <dir> <ClassStem> "<label>" <group> <afterPath>
 ```
 
 ## 5. 必须遵守的约定
@@ -69,7 +77,7 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 3. **样式 100% 来自 `vendor/tdesign-common`**，`packages/ng-components/src/bridge.less` 只放两类东西：宿主元素桥接（如 `t-button { display: contents; }`、`t-table { display: block; }`）和上游选择器在 Angular 下失效时的等价规则（每条都要写清原因）。
 4. **`align-check` 的哲学**：上游每个未实现的属性都必须在 `ignoreUpstream` 里写一句原因；总量必须保持 `missing 0 / extra 0`。上游没有、我们新增的属性放进 `angularOnly` 并注明理由。
 5. **demo 约定**：`packages/docs/src/app/docs/<name>/demos/<name>-xxx.ts`，selector 为 `demo-<name>-<id>`，每个 demo 包在 `<docs-demo id="..." title description>` 里；页面末尾是 `<api-table component="TXxx" />` + `<docs-page-nav current="/xxx" />`。
-6. **新增组件要同步**：`index.ts` 导出、`nav.ts` 导航、`app.routes.ts` 懒加载路由、`packages/docs/src/styles.less` 引入组件 less、`scripts/align-check.mjs` 配置、README 组件表。
+6. **新增组件要同步**：`index.ts` 导出、`nav.ts` 导航、`app.routes.ts` 懒加载路由、`packages/docs/src/styles.less` 引入组件 less、`scripts/align-check.config/<TXxx>.mjs` 配置、README 组件表（新增组件用 `node scripts/wire-component.mjs` 一次接好前四项）。
 7. **未实现的上游属性必须标深度债**：`ignoreUpstream` 的 reason 以 `[D1]`（表格与选择线）/ `[D2]`（录入与反馈线）/ `[D3]`（其余）开头，后接一句"缺什么、为什么"。这既是文档，也是 `scripts/depth-report.mjs` 的输入。
 8. **广度期每个组件按 L1 六条交付**（roadmap §2.1）：主干可交互、通用维度齐全、契约完整、文档闭环、`build:lib` + CDP 通过、明确写清允许的欠账。不要用"先占位、以后再补"跳过 demo 与 align-check。
 
@@ -92,7 +100,7 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 
 **广度完成（100%）**：
 
-- **B0 基建**：`align-check --json`（`ignored[]` 带 `inUpstream`）、`scripts/depth-report.mjs`（`pnpm depth:report`）按 `[D1]/[D2]/[D3]` 聚合债务、`wire-component.cjs` 一键接线。
+- **B0 基建**：`align-check --json`（`ignored[]` 带 `inUpstream`）、`scripts/depth-report.mjs`（`pnpm depth:report`）按 `[D1]/[D2]/[D3]` 聚合债务、`scripts/wire-component.mjs` 一键接线。
 - **B1 布局与静态展示 15/15**：Layout/Header/Aside/Content/Footer、Row/Col、Card、Alert、Skeleton、Typography（Text/Title/Paragraph）、Breadcrumb(+Item)、Steps(+Item)、Descriptions(+Item)、Comment、Timeline(+Item)、Statistic、StickyTool、Affix、BackTop。
 - **B2 弹层与媒体 8/8**：Popconfirm、Dropdown(+Item)、Guide、Image、ImageViewer、Anchor(+Item)、QRCode（可选 peer 依赖 `qrcode`）、Watermark；新增横切组件 **ConfigProvider**（`TConfigService` 暴露 `config` signal，二维码文案已接入）。
 - **B3 录入补全 12/12**：InputAdornment、SelectInput、TagInput、RangeInput、InputNumber、AutoComplete、Calendar、ColorPicker、Swiper、CheckTag(+Group)、ConfigProvider。
@@ -120,6 +128,16 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 - Upload 自定义请求是否需要 `HttpClient`（当前 XHR，零依赖）；
 - `@angular/router` 是否作为 peer 依赖（Menu/Tree 的 `to`/`routerLink` 需要它）。
 
+**并行开发（2026-11-24 起）**：深度阶段按组件分给多个会话并行做。开工前读 [`docs/plans/depth-parallel-plan.md`](./docs/plans/depth-parallel-plan.md)：§2 冲突面与 owner、§3 D0-lite 状态（配置拆分 / 工具入库 / 生成物隔离已完成；`Content` 与 `popupProps` 契约仍待 L7 落地）、§4 七条线、§5 可直接粘给新会话的 brief、§6 单组件验收清单、§7 integrator 固定动作。
+
+三条硬阻塞已解决，会话之间不会互相踩：
+
+1. **`align-check` 配置单文件冲突** → 已拆成 `scripts/align-check.config/<Component>.mjs`，每个会话只改自己那 1~2 个文件。
+2. **生成物冲突** → `gen-api-docs.mjs` 支持 `API_OUT`、`align-check.mjs` 支持 `API_FILE`；会话用 `pnpm verify:session` 写 `.local-cache/api.session.json`，不入库文件保持不变，由 integrator 跑 `pnpm verify` 统一覆盖。
+3. **探针脚本只在 `.local-cache`（gitignore）** → `scripts/cdp-page.mjs`、`scripts/wire-component.mjs`、`scripts/headless-edge.mjs` 已入库；每个会话用独立 `PORT=43xx` / `CDP_PORT=94xx` 并存。
+
+仍需 integrator 独占的文件：`packages/ng-components/src/index.ts`、`bridge.less`、`nav.ts`、`app.routes.ts`、`packages/docs/src/styles.less`、`*.generated.json`、`README.md`、`HANDOFF.md`、`docs/plans/**`、根 `package.json`。
+
 ## 8. 已知缺口与技术债
 
 - **完整缺口清单与深度分批见 `docs/plans/breadth-first-roadmap.md` §1.3 / §4.2**；本节只记跨组件的共性问题。新登记的未实现属性请按 §5 第 7 条补 `[D1]/[D2]/[D3]` 前缀。
@@ -133,13 +151,18 @@ node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统�
 
 ## 9. 怎么验证一个改动
 
-1. `node scripts/gen-api-docs.mjs && node scripts/gen-demo-sources.mjs`（有新增输入/示例时）。
-2. `node scripts/align-check.mjs` 必须 `missing 0 / extra 0`。
-3. `pnpm build:lib` 全绿（`gen:api` / `gen:demos` 的 check 已包含在内）。
-4. **本地预览（首选）**：`pnpm start --port 4200 --host 127.0.0.1` 起 dev server（后台任务），再用 `node .local-cache/cdp-page.mjs /card /alert` 探针检查标题 / demo / api 表 / console 报错 / 4xx 资源；`PAGE_BASE` 可改地址，`PAGE_PROBES=".t-card,.t-alert"` 可统计选择器命中数。dev server 的 `prestart` 会自动跑 `gen-api-docs` + `gen-demo-sources`。
-5. **文档站全路由巡检**：`node scripts/qa-routes.mjs`（全部路由 @1400），`--width=390` 查移动端，`--routes=/button,/table` 只跑指定路由；判据是标题存在、无横向滚动、有示例就有 TOC、无 console 异常。`PAGE_BASE` / `CDP_ENDPOINT` 可覆盖默认的 `http://localhost:4280` / `http://127.0.0.1:9341`。
-6. 线上验证：`PAGE_BASE=https://yuanyong129.github.io/tdesign-ng node .local-cache/cdp-page.mjs /card`。推送到 main 后 GitHub Pages 约 1~2 分钟生效。
-7. 环境说明（2026-11-23 起）：DSH 会话已切到 `danger-full-access`，`pnpm build`/`ng serve`/管道子进程/`git push`/headless Edge 均可直接运行，不再需要绕 EPERM。
+**单个会话（并行开发）**：一条命令搞定，不污染入库生成物。
+
+1. `pnpm verify:session -- TTable`：内部依次 gen 到 `.local-cache/api.session.json`、`tsc`（库源码）、`ngc`（文档站 strictTemplates）、`align-check`（读会话生成物）。必须全绿，`missing 0 / extra 0`。
+2. 本地实拍（另开终端）：`PORT=4301 pnpm start` → `CDP_PORT=9411 node scripts/headless-edge.mjs start` → `PORT=4301 CDP_PORT=9411 SHOT=1 node scripts/cdp-page.mjs /table`。检查 title / demos / apiRows / `issues: []` / `badResources: []`；`PROBES=".t-table,.t-table__body"` 可统计选择器命中数，截图落在 `.local-cache/page-*.png`。
+3. 结束前 `CDP_PORT=9411 node scripts/headless-edge.mjs kill`（只杀自己 profile 的实例）。
+
+**integrator（合并会话后）**：
+
+1. `pnpm verify`：`gen:api`（覆盖入库的 `api.generated.json`）+ `check:demos` + `check:align` + `build:lib`。
+2. 文档站全路由巡检：`node scripts/qa-routes.mjs`（默认 `http://localhost:4280` + CDP 9341），`--width=390` 查移动端，`--routes=/button,/table` 只跑指定路由；判据是标题存在、无横向滚动、有示例就有 TOC、无 console 异常。
+3. 线上验证：`PAGE_BASE=https://yuanyong129.github.io/tdesign-ng node scripts/cdp-page.mjs /card`。推送到 main 后 GitHub Pages 约 1~2 分钟生效。
+4. 环境说明（2026-11-23 起）：DSH 会话为 `danger-full-access`，`pnpm build`/`ng serve`/管道子进程/`git push`/headless Edge 均可直接运行，不再需要绕 EPERM。
 
 
 

@@ -29,6 +29,11 @@
     "check:align": "node scripts/align-check.mjs",
     "check:align:json": "node scripts/align-check.mjs --json",
     "depth:report": "node scripts/depth-report.mjs",
+    "verify": "pnpm run gen:api && pnpm run check:demos && pnpm run check:align && pnpm run build:lib",
+    "verify:session": "node scripts/verify-session.mjs",
+    "probe:page": "node scripts/cdp-page.mjs",
+    "edge": "node scripts/headless-edge.mjs",
+    "wire": "node scripts/wire-component.mjs",
     "vendor:styles": "node scripts/vendor-tdesign-common.mjs",
     "preview:pages": "node scripts/preview-pages.mjs"
   },
