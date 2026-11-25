@@ -293,10 +293,12 @@
 
 ### 4.1 D0 横切工程（1~2 周，先做）
 
+> 进度（2026-11-25）：`Content` 契约与 `popupProps` 契约已完成（见 HANDOFF §5 第 9/10 条、`docs/plans/depth-parallel-plan.md` §3），剩下的模板渲染指令、受控统一、SSR、a11y、测试、i18n 仍在深度阶段推进。
+
 | 项 | 内容 | 影响 |
 | --- | --- | --- |
-| 模板化（TNode 映射） | `cell` / `label` / `content` / `title` 统一 `TemplateRef` 或 `string`；作用域参数用 `ngTemplateOutlet` context | 解除 Table、Cascader、TreeSelect、Upload、Descriptions 的富内容限制 |
-| `*Props` 透传 | `inputProps` / `popupProps` / `tagProps` / `treeProps` 等按上游语义透传 | 让高级用法不必等新 API |
+| 模板化（TNode 映射） | `cell` / `label` / `content` / `title` 统一 `TemplateRef` 或 `string`；作用域参数用 `ngTemplateOutlet` context | ✅ `Content` 类型 + `isTemplateContent()`/`isContentEmpty()` 已落地，23 个组件别名已统一；渲染指令（`tContent`）待抽 |
+| `*Props` 透传 | `inputProps` / `popupProps` / `tagProps` / `treeProps` 等按上游语义透传 | ✅ `PopupOptions` + `mergePopupOptions()`/`mergePopupClassNames()` 已落地，Popconfirm/Dropdown/Cascader 已接入；其余透传待做 |
 | 受控/非受控统一 | `value` + `defaultValue` + `(change)`，内部 `innerValue` 单一来源 | 修掉各组件各写一套的隐患 |
 | SSR | `TIcon` 的 `isPlatformBrowser` 分支；弹层 portal / document 访问审计 | 支持 Angular Universal / 预渲染 |
 | a11y | 键盘（roving focus）、aria 属性、focus trap 复用 | 弹层/表单类达到可用标准 |

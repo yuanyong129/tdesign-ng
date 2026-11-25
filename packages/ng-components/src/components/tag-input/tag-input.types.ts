@@ -1,4 +1,5 @@
 import type { TemplateRef } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 标签输入框尺寸。 */
 export const TAG_INPUT_SIZES = ['small', 'medium', 'large'] as const;
@@ -16,7 +17,7 @@ export type TagInputExcessTagsDisplayType = (typeof TAG_INPUT_EXCESS_TAGS_DISPLA
 export type TagInputValue = Array<string | number>;
 
 /** 富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type TagInputRichText = string | TemplateRef<unknown> | undefined;
+export type TagInputRichText = Content;
 
 /** 值变化来源。 */
 export type TagInputChangeTrigger = 'enter' | 'tag-remove' | 'backspace' | 'clear';

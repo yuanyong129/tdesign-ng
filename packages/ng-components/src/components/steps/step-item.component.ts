@@ -11,6 +11,7 @@ import {
   signal,
   type Signal,
 } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 步骤条节点的状态，与上游 `status` 的可选值一致。 */
 export const STEP_STATUSES = ['default', 'process', 'finish', 'error'] as const;
@@ -21,7 +22,7 @@ export const STEP_THEMES = ['default', 'dot'] as const;
 export type StepTheme = (typeof STEP_THEMES)[number];
 
 /** 步骤条里的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type StepContent = string | TemplateRef<unknown> | undefined;
+export type StepContent = Content;
 
 /** 步骤项的取值，可以是字符串或数字；与父容器的 `current` 按全等比较。 */
 export type StepValue = string | number;

@@ -18,6 +18,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TSpace } from '../space/space.component';
+import type { Content } from '../../_utils/content';
 
 /** 图片填充容器的方式。 */
 export const IMAGE_FITS = ['contain', 'cover', 'fill', 'none', 'scale-down'] as const;
@@ -51,7 +52,7 @@ export interface ImageSrcset {
 }
 
 /** 图片里的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type ImageContent = string | TemplateRef<unknown> | undefined;
+export type ImageContent = Content;
 
 /** 图片加载状态回调的参数，与上游 `onLoad` / `onError` 的 `{ e }` 对齐。 */
 export interface ImageEvent {

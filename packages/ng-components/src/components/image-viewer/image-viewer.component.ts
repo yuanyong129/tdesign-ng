@@ -21,6 +21,7 @@ import { TDialog, TDialogFooterSlot } from '../dialog/dialog.component';
 import { DialogCloseEvent, DialogCloseTrigger } from '../dialog/dialog.types';
 import { TImage } from '../image/image.component';
 import { TTooltip } from '../tooltip/tooltip.component';
+import type { Content } from '../../_utils/content';
 
 /** 预览器的展示形态。 */
 export const IMAGE_VIEWER_MODES = ['modal', 'modeless'] as const;
@@ -59,7 +60,7 @@ export interface ImageInfo {
 export type ImageViewerImage = string | File | ImageInfo;
 
 /** 预览器里的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type ImageViewerContent = string | TemplateRef<unknown> | undefined;
+export type ImageViewerContent = Content;
 
 /** 关闭来源。 */
 export type ImageViewerCloseTrigger = 'close-btn' | 'overlay' | 'esc';

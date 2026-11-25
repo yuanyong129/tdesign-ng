@@ -1,11 +1,12 @@
 import { InjectionToken, TemplateRef } from '@angular/core';
 import type { Signal } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 菜单项 / 子菜单的取值。 @zh 菜单取值 @en Menu value */
 export type MenuValue = string | number;
 
 /** 菜单节点的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet`。 @zh 菜单内容 @en Menu content */
-export type MenuContent = string | TemplateRef<unknown> | undefined;
+export type MenuContent = Content;
 
 /** 菜单主题取值。 @zh 菜单主题 @en Menu theme @values light,dark */
 export const MENU_THEMES = ['light', 'dark'] as const;

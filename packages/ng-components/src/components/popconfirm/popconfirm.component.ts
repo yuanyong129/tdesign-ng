@@ -16,7 +16,8 @@ import {
 import { TButton } from '../button/button.component';
 import type { ButtonSize, ButtonTheme, ButtonVariant } from '../button/button.types';
 import { TPopup } from '../popup/popup.component';
-import { POPUP_PLACEMENTS, type PopupPlacement } from '../popup/popup.types';
+import { POPUP_PLACEMENTS, mergePopupClassNames, type PopupOptions, type PopupPlacement } from '../popup/popup.types';
+import type { Content } from '../../_utils/content';
 
 /** 气泡确认框的主题，决定图标与确认按钮的主题色。 */
 export const POPCONFIRM_THEMES = ['default', 'warning', 'danger'] as const;
@@ -34,7 +35,7 @@ export const POPCONFIRM_TRIGGER_SOURCES = ['cancel', 'confirm', 'document', 'tri
 export type PopconfirmTriggerSource = (typeof POPCONFIRM_TRIGGER_SOURCES)[number];
 
 /** 气泡确认框的富文本内容：字符串按文本渲染，`TemplateRef` 交给 `ngTemplateOutlet` 渲染。 */
-export type PopconfirmContent = string | TemplateRef<unknown> | undefined;
+export type PopconfirmContent = Content;
 
 /** 按钮配置，与上游 `ButtonProps` 里本组件会用到的字段对齐。 */
 export interface PopconfirmButtonProps {
@@ -137,6 +138,9 @@ export class TPopconfirm {
   /** 弹层位置。 @zh 弹层位置 @en popup placement @defaultValue 'top' @values top,left,right,bottom,top-left,top-right,bottom-left,bottom-right,left-top,left-bottom,right-top,right-bottom */
   readonly placement = input<PopconfirmPlacement>('top');
 
+  /** 透传给弹层的选项（`delay` / `zIndex` / `overlayClassName` 等）；`placement` / `showArrow` / `destroyOnClose` 以本组件显式属性为准。 @zh 弹层透传选项 @en popup options @defaultValue undefined */
+  readonly popupProps = input<PopupOptions | undefined>(undefined);
+
   /** 是否显示弹层箭头。 @zh 是否显示箭头 @en show arrow @defaultValue true */
   readonly showArrow = input(true, { transform: booleanAttribute });
 
@@ -162,6 +166,21 @@ export class TPopconfirm {
   readonly visibleChange = output<PopconfirmVisibleChangeEvent>();
 
   protected readonly innerVisible = signal(false);
+
+  /**
+   * 弹层选项：`popupProps` 打底，本组件的显式属性覆盖同名键。
+   * `overlayClassName` 保留组件自身的 `t-popconfirm` 语义类，再叠加用户传入的类名。
+   */
+  protected readonly popupOptions = computed<PopupOptions>(() => {
+    const passthrough = this.popupProps() ?? {};
+    return {
+      ...passthrough,
+      placement: this.placement(),
+      showArrow: this.showArrow(),
+      destroyOnClose: this.destroyOnClose(),
+      overlayClassName: mergePopupClassNames('t-popconfirm', passthrough.overlayClassName),
+    };
+  });
 
   protected readonly showCancel = computed(() => this.cancelBtn() !== null);
 

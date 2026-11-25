@@ -8,9 +8,10 @@ import {
   input,
 } from '@angular/core';
 import { TButton } from '../button/button.component';
+import type { Content } from '../../_utils/content';
 
 /** 评论的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type CommentContent = string | TemplateRef<unknown> | undefined;
+export type CommentContent = Content;
 
 /** 单个操作项：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
 export type CommentAction = string | TemplateRef<unknown>;

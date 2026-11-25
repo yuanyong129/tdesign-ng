@@ -14,6 +14,7 @@ import {
   numberAttribute,
   signal,
 } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 回到顶部的形状。 */
 export const BACK_TOP_SHAPES = ['circle', 'square'] as const;
@@ -28,7 +29,7 @@ export const BACK_TOP_THEMES = ['light', 'primary', 'dark'] as const;
 export type BackTopTheme = (typeof BACK_TOP_THEMES)[number];
 
 /** 回到顶部的内容：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type BackTopContent = string | TemplateRef<unknown> | undefined;
+export type BackTopContent = Content;
 
 /**
  * 挂载节点，与上游 `AttachNode` 对齐：CSS 选择器、DOM 元素，或返回它们的函数。

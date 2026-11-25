@@ -80,6 +80,8 @@ node scripts/wire-component.mjs <dir> <ClassStem> "<label>" <group> <afterPath>
 6. **新增组件要同步**：`index.ts` 导出、`nav.ts` 导航、`app.routes.ts` 懒加载路由、`packages/docs/src/styles.less` 引入组件 less、`scripts/align-check.config/<TXxx>.mjs` 配置、README 组件表（新增组件用 `node scripts/wire-component.mjs` 一次接好前四项）。
 7. **未实现的上游属性必须标深度债**：`ignoreUpstream` 的 reason 以 `[D1]`（表格与选择线）/ `[D2]`（录入与反馈线）/ `[D3]`（其余）开头，后接一句"缺什么、为什么"。这既是文档，也是 `scripts/depth-report.mjs` 的输入。
 8. **广度期每个组件按 L1 六条交付**（roadmap §2.1）：主干可交互、通用维度齐全、契约完整、文档闭环、`build:lib` + CDP 通过、明确写清允许的欠账。不要用"先占位、以后再补"跳过 demo 与 align-check。
+9. **内容入参统一用 `Content`**（`packages/ng-components/src/_utils/content.ts`）：`export type Content = string | TemplateRef<unknown> | undefined;`。组件可以保留自己的别名（`export type CardContent = Content;`）以便 API 文档显示专有名，但**不要**再各写一份 `string | TemplateRef<unknown> | undefined`。判空用 `isContentEmpty()`，判模板用 `isTemplateContent()`（鸭子类型，避免多份 Angular 运行时 `instanceof` 误判），降级文案用 `contentText()`。
+10. **弹层组件的 `popupProps` 统一走 `PopupOptions`**（`packages/ng-components/src/components/popup/popup.types.ts`）：组件内用 `mergePopupOptions(passthrough)` 展开，**自己暴露的显式属性（`placement`/`showArrow`/`destroyOnClose` 等）优先级最高**，其次才是 `popupProps` 里的同名键；合并类名用 `mergePopupClassNames('t-xxx', passthrough.overlayClassName)`，绑定到 `TPopup` 时记得 `?? null`（`overlayClassName` 的输入类型不含 `undefined`，strictTemplates 会报 TS2322）。`PopupOptions` 刻意不含 `attach`/`overlayStyle`/`popperOptions`/`triggerElement`，不要偷偷收下无法生效的键。
 
 ## 6. 环境坑（都踩过）
 
@@ -114,8 +116,8 @@ node scripts/wire-component.mjs <dir> <ClassStem> "<label>" <group> <afterPath>
 
 | 主题 | 目标 | 落点 |
 | --- | --- | --- |
-| TNode 模板化 | `content`/`title`/`label` 等从「字符串或 TemplateRef」收口到统一的 `Content` 类型 + 渲染指令 | `_utils/content` 新工具 + 分批替换组件模板 |
-| `*Props` 透传 | `popupProps`/`inputProps`/`treeProps` 等上游透传对象 | 先做 `TPopup` 的 `popupProps`，再由 Select/DatePicker/Cascader 复用 |
+| TNode 模板化 | `content`/`title`/`label` 等从「字符串或 TemplateRef」收口到统一的 `Content` 类型 + 渲染指令 | ✅ `_utils/content` 已落地，23 个组件别名已统一；渲染指令（`tContent`）尚未抽出 |
+| `*Props` 透传 | `popupProps`/`inputProps`/`treeProps` 等上游透传对象 | `PopupOptions` + `mergePopupOptions` 已落地，Popconfirm / Dropdown / Cascader 已接入（其他弹层组件按同一模式补）；`inputProps` 等其余透传未做 |
 | 受控/非受控统一 | `[(value)]`、`model()` 与 `value`/`defaultValue` 三件套行为一致 | 逐个组件核对 + 回归探针 |
 | SSR 与 a11y | `isPlatformBrowser` 守卫、`aria-*` 补齐 | `TIcon` 的 `DOMParser` 首修 |
 | 单测 | 引入 Vitest，先覆盖 `_utils` 与 5 个纯逻辑组件 | `pnpm test` + CI |
@@ -128,7 +130,7 @@ node scripts/wire-component.mjs <dir> <ClassStem> "<label>" <group> <afterPath>
 - Upload 自定义请求是否需要 `HttpClient`（当前 XHR，零依赖）；
 - `@angular/router` 是否作为 peer 依赖（Menu/Tree 的 `to`/`routerLink` 需要它）。
 
-**并行开发（2026-11-24 起）**：深度阶段按组件分给多个会话并行做。开工前读 [`docs/plans/depth-parallel-plan.md`](./docs/plans/depth-parallel-plan.md)：§2 冲突面与 owner、§3 D0-lite 状态（配置拆分 / 工具入库 / 生成物隔离已完成；`Content` 与 `popupProps` 契约仍待 L7 落地）、§4 七条线、§5 可直接粘给新会话的 brief、§6 单组件验收清单、§7 integrator 固定动作。
+**并行开发（2026-11-24 起）**：深度阶段按组件分给多个会话并行做。开工前读 [`docs/plans/depth-parallel-plan.md`](./docs/plans/depth-parallel-plan.md)：§2 冲突面与 owner、§3 D0-lite 状态（配置拆分 / 工具入库 / 生成物隔离 / `Content` 与 `popupProps` 契约均已完成）、§4 七条线、§5 可直接粘给新会话的 brief、§6 单组件验收清单、§7 integrator 固定动作。
 
 三条硬阻塞已解决，会话之间不会互相踩：
 

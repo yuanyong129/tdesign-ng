@@ -16,9 +16,10 @@ import {
   output,
   signal,
 } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 固钉内容：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type AffixContent = string | TemplateRef<unknown> | undefined;
+export type AffixContent = Content;
 
 /**
  * 滚动容器，与上游 `ScrollContainer` 对齐：

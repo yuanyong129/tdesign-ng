@@ -10,6 +10,7 @@ import {
   numberAttribute,
 } from '@angular/core';
 import { TSkeleton } from '../skeleton/skeleton.component';
+import type { Content } from '../../_utils/content';
 
 /** 统计数值的趋势。 */
 export const STATISTIC_TRENDS = ['increase', 'decrease'] as const;
@@ -20,7 +21,7 @@ export const STATISTIC_TREND_PLACEMENTS = ['left', 'right'] as const;
 export type StatisticTrendPlacement = (typeof STATISTIC_TREND_PLACEMENTS)[number];
 
 /** 统计数值的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type StatisticContent = string | TemplateRef<unknown> | undefined;
+export type StatisticContent = Content;
 
 /**
  * 可缺省的数字输入转换：空值保持 `undefined`，其余交给 Angular 的 `numberAttribute`。

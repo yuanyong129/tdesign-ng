@@ -12,13 +12,14 @@ import {
   input,
   type Signal,
 } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 锚点链接的跳转方式，与上游 `target` 的可选值一致。 */
 export const ANCHOR_TARGETS = ['_self', '_blank', '_parent', '_top'] as const;
 export type AnchorTarget = (typeof ANCHOR_TARGETS)[number];
 
 /** 锚点里的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type AnchorContent = string | TemplateRef<unknown> | undefined;
+export type AnchorContent = Content;
 
 /** 锚点点击事件的参数，对应上游 `onClick({ href, title, e })`。 */
 export interface AnchorClickEvent {

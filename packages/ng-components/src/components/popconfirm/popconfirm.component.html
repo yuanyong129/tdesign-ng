@@ -1,11 +1,16 @@
 <t-popup
-  [placement]="placement()"
+  [placement]="popupOptions().placement ?? 'top'"
   trigger="click"
-  [showArrow]="showArrow()"
-  [destroyOnClose]="destroyOnClose()"
+  [delay]="popupOptions().delay ?? 0"
+  [disabled]="popupOptions().disabled ?? false"
+  [showArrow]="popupOptions().showArrow ?? true"
+  [destroyOnClose]="popupOptions().destroyOnClose ?? true"
+  [hideEmptyPopup]="popupOptions().hideEmptyPopup ?? false"
+  [zIndex]="popupOptions().zIndex"
+  [overlayClassName]="popupOptions().overlayClassName ?? null"
+  [overlayInnerClassName]="popupOptions().overlayInnerClassName ?? null"
   [visible]="innerVisible()"
   (visibleChange)="handlePopupVisibleChange($event)"
-  overlayClassName="t-popconfirm"
 >
   <!-- 触发器：投影内容优先，其次是 triggerElement；它必须是 t-popup 的第一个元素子节点（t-popup 用 firstElementChild 当锚点）。 -->
   @if (triggerTemplate(); as triggerTpl) {

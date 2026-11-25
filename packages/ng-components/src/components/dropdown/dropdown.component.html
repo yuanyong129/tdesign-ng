@@ -79,15 +79,18 @@
 </ng-template>
 
 <t-popup
-  [placement]="placement()"
-  [trigger]="trigger()"
-  [disabled]="disabled()"
-  [delay]="popupDelay"
+  [placement]="popupOptions().placement ?? 'bottom-left'"
+  [trigger]="popupOptions().trigger ?? 'hover'"
+  [disabled]="popupOptions().disabled ?? false"
+  [delay]="popupOptions().delay ?? popupDelay"
   [showArrow]="false"
-  [destroyOnClose]="true"
+  [destroyOnClose]="popupOptions().destroyOnClose ?? true"
+  [hideEmptyPopup]="popupOptions().hideEmptyPopup ?? false"
+  [zIndex]="popupOptions().zIndex"
+  [overlayClassName]="popupOptions().overlayClassName ?? null"
+  [overlayInnerClassName]="overlayInnerClasses()"
   [visible]="popupVisible()"
   (visibleChange)="handlePopupVisibleChange($event)"
-  overlayInnerClassName="t-dropdown"
 >
   <!-- 触发器：必须是 t-popup 的第一个元素子节点（t-popup 用 firstElementChild 当定位锚点）。 -->
   <ng-content />

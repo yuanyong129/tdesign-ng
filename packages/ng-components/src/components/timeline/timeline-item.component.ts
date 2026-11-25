@@ -16,13 +16,14 @@ import { TLoading } from '../loading/loading.component';
 // 只引用类型：父组件在运行时要拿到本组件的类去做 contentChildren 收集，
 // 反向只借用它的类型（`import type` 会被完全擦除），因此不会形成运行时循环依赖。
 import type { TimelineLabelAlign, TimelineLayout, TimelineMode, TimelineTheme } from './timeline.component';
+import type { Content } from '../../_utils/content';
 
 /** 时间轴子项的标签位置，比父组件的 `labelAlign` 少了 `alternate`。 */
 export const TIMELINE_ITEM_LABEL_ALIGNS = ['left', 'right', 'top', 'bottom'] as const;
 export type TimelineItemLabelAlign = (typeof TIMELINE_ITEM_LABEL_ALIGNS)[number];
 
 /** 时间轴子项的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type TimelineItemContent = string | TemplateRef<unknown> | undefined;
+export type TimelineItemContent = Content;
 
 /** 圆点颜色的主题取值，命中时用 `t-timeline-item__dot--{color}` 类，其余颜色走内联 border-color。 */
 const DOT_THEMES: readonly string[] = ['default', 'primary', 'success', 'warning', 'error'];

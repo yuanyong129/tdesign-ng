@@ -12,6 +12,7 @@ import {
   signal,
 } from '@angular/core';
 import { TPopup } from '../popup';
+import { mergePopupClassNames, type PopupOptions } from '../popup';
 import { TTag } from '../tag/tag.component';
 import {
   TCascaderPanelBottom,
@@ -100,6 +101,13 @@ export class TCascader {
    * @defaultValue false
    */
   readonly disabled = input(false, { transform: booleanAttribute });
+
+  /**
+   * @zh 透传给弹层的选项（`delay` / `zIndex` / `overlayClassName` 等）；`placement` / `trigger` 由组件内部约定。
+   * @en Options passed through to the popup layer.
+   * @defaultValue undefined
+   */
+  readonly popupProps = input<PopupOptions | undefined>(undefined);
 
   /**
    * @zh 输入框尺寸。
@@ -207,6 +215,21 @@ export class TCascader {
   readonly change = output<CascaderChangeEvent>();
 
   protected readonly open = signal(false);
+
+  /**
+   * 弹层选项：`popupProps` 打底，组件自己的 `placement` / `trigger` / `disabled` 覆盖同名键。
+   * `overlayClassName` 保留 `t-cascader__popup` 语义类，再叠加用户传入的类名。
+   */
+  protected readonly popupOptions = computed<PopupOptions>(() => {
+    const passthrough = this.popupProps() ?? {};
+    return {
+      ...passthrough,
+      placement: 'bottom-left',
+      trigger: 'click',
+      disabled: this.disabled(),
+      overlayClassName: mergePopupClassNames('t-cascader__popup', passthrough.overlayClassName),
+    };
+  });
   private readonly innerValue = signal<CascaderValue | undefined>(undefined);
   private readonly expandedValues = signal<CascaderItemValue[]>([]);
   private readonly keyword = signal('');

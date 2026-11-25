@@ -1,7 +1,8 @@
 import { TemplateRef } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 描述列表的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type DescriptionsContent = string | TemplateRef<unknown> | undefined;
+export type DescriptionsContent = Content;
 
 /** 描述列表标签、内容单元格的内联样式，与上游 `Styles` 对齐，支持字符串或样式对象。 */
 export type DescriptionsStyles = Record<string, string | number> | string | undefined;

@@ -4,11 +4,20 @@ import { DemoBlock } from '../demo-block';
 import { PageNav } from '../page-nav';
 import { DemoPopconfirmAsync } from './demos/popconfirm-async';
 import { DemoPopconfirmBase } from './demos/popconfirm-base';
+import { DemoPopconfirmPopupProps } from './demos/popconfirm-popup-props';
 import { DemoPopconfirmTheme } from './demos/popconfirm-theme';
 
 @Component({
   selector: 'popconfirm-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoPopconfirmBase, DemoPopconfirmTheme, DemoPopconfirmAsync],
+  imports: [
+    ApiTable,
+    DemoBlock,
+    PageNav,
+    DemoPopconfirmBase,
+    DemoPopconfirmTheme,
+    DemoPopconfirmAsync,
+    DemoPopconfirmPopupProps,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="docs-page">
@@ -41,6 +50,14 @@ import { DemoPopconfirmTheme } from './demos/popconfirm-theme';
         description="配合 visible 与 visibleChange 受控使用：确认按钮进入 loading 状态，异步操作完成后再主动关闭浮层。"
       >
         <demo-popconfirm-async />
+      </docs-demo>
+
+      <docs-demo
+        id="popconfirm-popup-props"
+        title="弹层透传"
+        description="popupProps 把 zIndex、delay、overlayClassName 等弹层选项整体透传给 Popup；组件自己暴露的 placement、showArrow、destroyOnClose 优先于 popupProps 中的同名键。"
+      >
+        <demo-popconfirm-popup-props />
       </docs-demo>
 
       <h2 class="docs-section__title" id="popconfirm-api">API</h2>

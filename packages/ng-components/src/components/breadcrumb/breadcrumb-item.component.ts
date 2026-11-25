@@ -11,13 +11,14 @@ import {
   input,
   type Signal,
 } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 面包屑节点的跳转目标，与上游 `target` 的可选值一致。 */
 export const BREADCRUMB_TARGETS = ['_blank', '_self', '_parent', '_top'] as const;
 export type BreadcrumbTarget = (typeof BREADCRUMB_TARGETS)[number];
 
 /** 面包屑里的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type BreadcrumbContent = string | TemplateRef<unknown> | undefined;
+export type BreadcrumbContent = Content;
 
 /** 面包屑父容器通过 DI 下发给子项的量，对应上游 `provide('tBreadcrumb', …)`。 */
 export interface BreadcrumbHost {

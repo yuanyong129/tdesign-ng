@@ -14,6 +14,7 @@ import {
   input,
   numberAttribute,
 } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 水印的排布方式，`rectangular` 平铺、`hexagonal` 交错。 */
 export const WATERMARK_LAYOUTS = ['rectangular', 'hexagonal'] as const;
@@ -50,7 +51,7 @@ export type WatermarkItem = WatermarkText | WatermarkImage;
 export type WatermarkContent = WatermarkItem | WatermarkItem[];
 
 /** 水印内容的富文本形式：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type WatermarkNode = string | TemplateRef<unknown> | undefined;
+export type WatermarkNode = Content;
 
 /** 画布绘制需要的全部参数，等价于上游 `bgImageOptions` 加上叠加层自己的几项。 */
 interface WatermarkOptions {

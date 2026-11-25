@@ -7,9 +7,10 @@ import {
   input,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import type { Content } from '../../_utils/content';
 
 /** 输入框前后缀内容，支持纯文本与模板。 */
-export type InputAdornmentContent = string | TemplateRef<unknown> | undefined;
+export type InputAdornmentContent = Content;
 
 /**
  * 输入框前后缀。

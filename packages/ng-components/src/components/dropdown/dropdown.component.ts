@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { TDivider } from '../divider/divider.component';
 import { TPopup } from '../popup/popup.component';
+import { mergePopupClassNames, type PopupOptions } from '../popup/popup.types';
 import { TDropdownItem } from './dropdown-item.component';
 import {
   type DropdownClickEvent,
@@ -89,6 +90,9 @@ export class TDropdown {
   /** 弹层位置。 @zh 弹层位置 @en popup placement @defaultValue 'bottom-left' @values top,left,right,bottom,top-left,top-right,bottom-left,bottom-right,left-top,left-bottom,right-top,right-bottom */
   readonly placement = input<DropdownPlacement>('bottom-left');
 
+  /** 透传给弹层的选项（`delay` / `zIndex` / `overlayClassName` 等）；`placement` / `trigger` / `disabled` 以本组件显式属性为准。 @zh 弹层透传选项 @en popup options @defaultValue undefined */
+  readonly popupProps = input<PopupOptions | undefined>(undefined);
+
   /** 触发方式。 @zh 触发方式 @en trigger @defaultValue 'hover' @values hover,click,focus,context-menu */
   readonly trigger = input<DropdownTrigger>('hover');
 
@@ -97,6 +101,27 @@ export class TDropdown {
 
   /** 面板展开状态受 `t-popup` 控制，这里保存它回传的状态。 */
   protected readonly popupVisible = signal(false);
+
+  /**
+   * 弹层选项：`popupProps` 打底，显式属性覆盖同名键。
+   * `delay` 不传时用组件自己的 `[0, 150]`（保证鼠标移向面板的瞬间不会关闭）。
+   */
+  protected readonly popupOptions = computed<PopupOptions>(() => {
+    const passthrough = this.popupProps() ?? {};
+    return {
+      ...passthrough,
+      placement: this.placement(),
+      trigger: this.trigger(),
+      disabled: this.disabled(),
+      showArrow: false,
+      destroyOnClose: passthrough.destroyOnClose ?? true,
+    };
+  });
+
+  /** 弹层内层类名：保留 `t-dropdown` 语义类，再叠加 `popupProps.overlayInnerClassName`。 */
+  protected readonly overlayInnerClasses = computed(() =>
+    mergePopupClassNames('t-dropdown', this.popupProps()?.overlayInnerClassName),
+  );
 
   /** 非子菜单的 hover 关闭延迟需要大于 0，否则鼠标移向面板的瞬间面板就被隐藏了。 */
   protected readonly popupDelay: [number, number] = [0, POPUP_CLOSE_DELAY];

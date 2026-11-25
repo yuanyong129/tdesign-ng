@@ -24,7 +24,6 @@ export default {
       'tagInputProps': '多选标签配置在后续版本实现',
       'tagProps': '多选标签配置在后续版本实现',
       'inputProps': '透传 InputProps 在后续版本实现',
-      'popupProps': '透传 PopupProps 在后续版本实现',
       'popupVisible': '受控弹层显隐在后续版本实现',
       'trigger': '只支持 click 触发',
       'prefixIcon': '前缀图标在后续版本实现',

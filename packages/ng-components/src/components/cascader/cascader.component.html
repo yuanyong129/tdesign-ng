@@ -93,12 +93,17 @@
 
 <t-popup
   class="t-cascader__trigger"
-  placement="bottom-left"
-  trigger="click"
-  [disabled]="disabled()"
+  [placement]="popupOptions().placement ?? 'bottom-left'"
+  [trigger]="popupOptions().trigger ?? 'click'"
+  [disabled]="popupOptions().disabled ?? false"
+  [delay]="popupOptions().delay ?? 0"
+  [destroyOnClose]="popupOptions().destroyOnClose ?? false"
+  [hideEmptyPopup]="popupOptions().hideEmptyPopup ?? false"
+  [zIndex]="popupOptions().zIndex"
+  [overlayClassName]="popupOptions().overlayClassName ?? null"
+  [overlayInnerClassName]="popupOptions().overlayInnerClassName ?? null"
   [visible]="open()"
   (visibleChange)="handleVisibleChange($event)"
-  overlayClassName="t-cascader__popup"
 >
   <div [class]="wrapperClasses()">
     @if (multiple()) {

@@ -9,6 +9,7 @@ import {
   output,
 } from '@angular/core';
 import { TPopup } from '../popup';
+import type { Content } from '../../_utils/content';
 
 /** 侧边悬浮的停靠位置。 */
 export const STICKY_TOOL_PLACEMENTS = [
@@ -34,7 +35,7 @@ export const STICKY_TOOL_ITEM_TRIGGERS = ['hover', 'click'] as const;
 export type StickyToolItemTrigger = (typeof STICKY_TOOL_ITEM_TRIGGERS)[number];
 
 /** 子项里的富文本取值：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type StickyToolNode = string | TemplateRef<unknown> | undefined;
+export type StickyToolNode = Content;
 
 /**
  * 侧边悬浮的子项。

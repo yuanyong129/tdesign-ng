@@ -1,4 +1,5 @@
 import { TemplateRef } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /**
  * 排版富文本内容：字符串按纯文本渲染，TemplateRef 交给 *ngTemplateOutlet 渲染。
@@ -6,7 +7,7 @@ import { TemplateRef } from '@angular/core';
  * 对应上游的 `string | TNode`（TNode 在 Vue 里是字符串或渲染函数），
  * Angular 侧没有渲染函数，统一用模板引用表达。
  */
-export type TypographyContent = string | TemplateRef<unknown> | undefined;
+export type TypographyContent = Content;
 
 /** 文本主题，取自上游 text 的 theme 可选值。 */
 export const TYPOGRAPHY_THEMES = ['primary', 'secondary', 'success', 'warning', 'error'] as const;

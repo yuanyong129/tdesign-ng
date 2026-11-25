@@ -1,4 +1,5 @@
 import type { TemplateRef } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 可选标签尺寸。 */
 export const CHECK_TAG_SIZES = ['small', 'medium', 'large'] as const;
@@ -11,7 +12,7 @@ export type CheckTagValue = string | number;
 export type CheckTagGroupValue = Array<string | number>;
 
 /** 富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type CheckTagContent = string | TemplateRef<unknown> | undefined;
+export type CheckTagContent = Content;
 
 /** 选中状态变化来源。 */
 export type CheckTagGroupChangeType = 'check' | 'uncheck';

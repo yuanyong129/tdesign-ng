@@ -13,13 +13,14 @@ import {
   output,
   signal,
 } from '@angular/core';
+import type { Content } from '../../_utils/content';
 
 /** 警告提示主题。 */
 export const ALERT_THEMES = ['success', 'info', 'warning', 'error'] as const;
 export type AlertTheme = (typeof ALERT_THEMES)[number];
 
 /** 警告提示里的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type AlertContent = string | TemplateRef<unknown> | undefined;
+export type AlertContent = Content;
 
 /** 点击关闭按钮时的事件参数，与上游 `onClose` 的 `{ e }` 对齐。 */
 export interface AlertCloseEvent {

@@ -1,5 +1,6 @@
 import type { TemplateRef } from '@angular/core';
 import type { PopupPlacement } from '../popup/popup.types';
+import type { Content } from '../../_utils/content';
 
 /** 弹层位置，直接复用 Popup 的 12 个方向。 */
 export type DropdownPlacement = PopupPlacement;
@@ -23,7 +24,7 @@ export type DropdownItemTheme = (typeof DROPDOWN_ITEM_THEMES)[number];
 export type DropdownValue = string | number | Record<string, unknown> | undefined;
 
 /** 可渲染内容：字符串按文本渲染，`TemplateRef` 交给 `ngTemplateOutlet` 渲染。 */
-export type DropdownContent = string | TemplateRef<unknown> | undefined;
+export type DropdownContent = Content;
 
 /** 点击选项时的上下文，与上游 `{ e }` 对齐。 */
 export interface DropdownItemClickContext {

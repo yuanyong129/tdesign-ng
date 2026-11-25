@@ -14,6 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TLoading } from '../loading/loading.component';
+import type { Content } from '../../_utils/content';
 
 /** 卡片尺寸。 */
 export const CARD_SIZES = ['medium', 'small'] as const;
@@ -24,7 +25,7 @@ export const CARD_THEMES = ['normal', 'poster1', 'poster2'] as const;
 export type CardTheme = (typeof CARD_THEMES)[number];
 
 /** 卡片富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
-export type CardContent = string | TemplateRef<unknown> | undefined;
+export type CardContent = Content;
 
 /** 卡片区块的内联样式，与上游 `Styles` 对齐，支持字符串或样式对象。 */
 export type CardStyles = Record<string, string | number> | string | undefined;

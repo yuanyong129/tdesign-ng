@@ -54,8 +54,8 @@
 | 1 | align-check 配置拆分 | `scripts/align-check.config/*.mjs`（97 个组件各一个文件 + `shared.mjs` + `index.mjs` loader） | ✅ 已完成，拆分前后 97 条逐组件签名 **0 差异**，totals 仍是 94 / 1576 / 1001 / 0 / 0 |
 | 2 | 工具入库 | `scripts/wire-component.mjs`、`scripts/cdp-page.mjs`（`PORT`/`CDP_PORT`/`PROBES`/`SHOT`/`SHOT_DIR`）、`scripts/headless-edge.mjs`（`start`/`kill`，自带独立 profile 与端口） | ✅ 已完成，`node scripts/cdp-page.mjs /button` 可跑 |
 | 3 | 生成物隔离 + `pnpm verify` | `gen-api-docs.mjs` 支持 `API_OUT`、`align-check.mjs` 支持 `API_FILE`、`scripts/verify-session.mjs` + `pnpm verify:session` / `pnpm verify` | ✅ 已完成，`API_OUT=.local-cache/api.session.json` 生成、`API_FILE=… align-check` 读取、入库 `api.generated.json` 不变 |
-| 4 | `Content` 契约 | `_utils/content.ts`：`Content = string \| TemplateRef<unknown>` + `isTemplateContent()` + 文档化的渲染约定 | ⏳ 待做（L7 工程线首个任务；不影响并行，各组件继续用本地 alias type） |
-| 5 | `popupProps` 契约 | `popup/popup.types.ts` 导出 `PopupOptions`；`TPopup` 支持 `popupProps` 入口；写清"显式 input 优先于 popupProps" | ⏳ 待做（L7 先做，之后 L2/L4 才能消费；未落地前 7 个组件的 `popupProps` 继续挂 `[D2]`） |
+| 4 | `Content` 契约 | `_utils/content.ts`：`Content = string \| TemplateRef<unknown> \| undefined` + `isTemplateContent()` / `isContentEmpty()` / `contentText()`；23 个组件的 `XxxContent` 别名统一指向 `Content` | ✅ 已完成（L7 第一项），TSDoc 与约定写进 HANDOFF §5 第 9 条 |
+| 5 | `popupProps` 契约 | `popup/popup.types.ts` 导出 `PopupOptions` / `PopupClassNames` / `mergePopupOptions()` / `mergePopupClassNames()`；Popconfirm / Dropdown / Cascader 已接入，显式 input 优先 | ✅ 已完成（L7 第二项），HANDOFF §5 第 10 条写清优先级；其余弹层组件（DatePicker / DateRangePicker / TimePicker / TreeSelect）按同一模式补 |
 
 > 受控值约定不单独改代码，写进 §5 的 brief 模板与 §6 检查清单即可（`model<T>()` + `defaultX` + `(xChange)`，`Change` 输出带 `{ value, source? }`）。
 
@@ -83,7 +83,7 @@ CDP_PORT=9411 node scripts/headless-edge.mjs kill
 | **L6 树与重型线** | `TTree`(50/19) `TMenu`(45/?) `TUpload`(63/10) `TTransfer`(26/10) | tree core | 若 L2 已占 tree core，本线先做 Menu/Upload/Transfer |
 | **L7 工程线**（建议你自己或固定一个会话） | i18n/ConfigProvider、a11y、单测（Vitest）、`Content`/`popupProps` 收敛、虚拟滚动工具 | `_utils/*`、`popup/*` | 只做横切，不改业务组件逻辑 |
 
-**依赖顺序**：L7 的 `popupProps`/`Content` 先于 L2/L4；tree core 先于 L2 的 Cascader/TreeSelect；`date-picker-utils` 归 L3 独占。
+**依赖顺序**：L7 的 `popupProps`/`Content` 已落地（见 §3 第 4/5 项），L2/L4 可直接消费；tree core 先于 L2 的 Cascader/TreeSelect；`date-picker-utils` 归 L3 独占。
 
 ## 5. 单个会话的 brief 模板（可直接粘给新会话）
 
@@ -108,8 +108,8 @@ CDP_PORT=9411 node scripts/headless-edge.mjs kill
 
 契约（必须遵守，见 docs/plans/depth-parallel-plan.md §6）
 - 受控：`value = model<T>()`（或 `value` + `defaultValue` + `(valueChange)`），Change 输出 `{ value, source? }`
-- 内容：`string | TemplateRef<unknown>` 一律用 `Content` 类型，不要自己再写 union
-- 弹层：`popupProps?: PopupOptions`，显式 input 优先于 popupProps
+- 内容：一律 `import type { Content } from '../../_utils/content'`；需要专有名就 `export type XxxContent = Content;`，不要再写 `string | TemplateRef<unknown> | undefined`
+- 弹层：`popupProps?: PopupOptions`（`components/popup/popup.types`），用 `mergePopupOptions()` 合并、`mergePopupClassNames()` 叠类名，显式 input 优先于 popupProps，绑到 `TPopup` 时 `?? null`
 - 未实现的上游属性：写进 `align-check.config` 的 ignoreUpstream，理由必须以 `[D1]/[D2]/[D3]` 开头
 
 验证（必须全绿再交）

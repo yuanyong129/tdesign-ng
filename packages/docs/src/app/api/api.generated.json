@@ -1589,6 +1589,15 @@
           "values": []
         },
         {
+          "name": "popupProps",
+          "type": "PopupOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "透传给弹层的选项（`delay` / `zIndex` / `overlayClassName` 等）；`placement` / `trigger` 由组件内部约定。",
+          "en": "Options passed through to the popup layer.",
+          "values": []
+        },
+        {
           "name": "size",
           "type": "'small' | 'medium' | 'large'",
           "default": "'medium'",
@@ -3891,6 +3900,15 @@
             "right-top",
             "right-bottom"
           ]
+        },
+        {
+          "name": "popupProps",
+          "type": "PopupOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层透传选项",
+          "en": "popup options",
+          "values": []
         },
         {
           "name": "trigger",
@@ -6653,6 +6671,15 @@
             "right-top",
             "right-bottom"
           ]
+        },
+        {
+          "name": "popupProps",
+          "type": "PopupOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层透传选项",
+          "en": "popup options",
+          "values": []
         },
         {
           "name": "showArrow",

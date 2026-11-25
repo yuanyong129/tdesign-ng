@@ -43,6 +43,7 @@ import {
   SelectInputValueChangeContext,
   SelectInputValueDisplayContext,
 } from './select-input.types';
+import type { Content } from '../../_utils/content';
 
 const PREFIX_CLS = 't-input';
 
@@ -50,7 +51,7 @@ const PREFIX_CLS = 't-input';
 const DEFAULT_KEYS: Required<SelectInputKeys> = { label: 'label', value: 'value', children: 'children' };
 
 /** 富文本属性：字符串按文本渲染，`TemplateRef` 交给 `ngTemplateOutlet` 渲染。 */
-export type SelectInputContent = string | TemplateRef<unknown> | undefined;
+export type SelectInputContent = Content;
 
 /** 值是否为「对象形态」（用于按 `keys.label` 取值）。 */
 function isObjectLike(value: unknown): value is Record<string, unknown> {
