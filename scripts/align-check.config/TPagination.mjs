@@ -1,17 +1,13 @@
-
-
 export default {
-    upstream: 'pagination',
-    upstreamInterface: 'TdPaginationProps',
-    renames: {},
-    angularOnly: [],
-    ignoreUpstream: {
-      'modelValue': 'Angular 用 [(current)] 双向绑定',
-      'defaultCurrent': 'Angular 用 [current] 作为受控初始值',
-      'defaultPageSize': 'Angular 用 [pageSize] 作为受控初始值',
-      'selectProps': '每页条数选择器用内置 t-select，暂不透传属性',
-      'onChange': 'Angular 用 (change) 输出，携带 PageInfo',
-      'onCurrentChange': 'Angular 用 (currentChange) 输出',
-      'onPageSizeChange': 'Angular 用 (pageSizeChange) 输出',
-    },
-  };
+  upstream: 'pagination',
+  upstreamInterface: 'TdPaginationProps',
+  renames: {},
+  angularOnly: [],
+  ignoreUpstream: {
+    // Vue 的 v-model 在 Angular 用「值输入 + 变化输出」表达，不是功能缺口
+    modelValue: 'Angular 用 [current]/[(current)] 与 (currentChange) 表达 v-model 语义',
+    onChange: 'Angular 用 (change) 输出，携带 PageInfo',
+    onCurrentChange: 'Angular 用 (currentChange) 输出',
+    onPageSizeChange: 'Angular 用 (pageSizeChange) 输出',
+  },
+};

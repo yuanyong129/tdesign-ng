@@ -1,6 +1,10 @@
-<div [class]="classes()">
-  @if (totalText(); as totalTextValue) {
-    <div class="t-pagination__total">{{ totalTextValue }}</div>
+<div [class]="classes()" role="navigation" aria-label="分页" [attr.aria-disabled]="disabled() ? 'true' : null">
+  @if (totalTemplate(); as totalTpl) {
+    <div class="t-pagination__total"><ng-container [ngTemplateOutlet]="totalTpl" /></div>
+  } @else {
+    @if (totalText(); as totalTextValue) {
+      <div class="t-pagination__total">{{ totalTextValue }}</div>
+    }
   }
 
   @if (showPageSize() && selectOptions().length > 0) {
@@ -9,7 +13,9 @@
         [options]="selectOptions()"
         [value]="selectValue()"
         [disabled]="disabled()"
-        [size]="size() === 'small' ? 'small' : 'medium'"
+        [size]="selectSize()"
+        [clearable]="selectClearable()"
+        [placeholder]="selectPlaceholder()"
         [borderless]="false"
         (valueChange)="handlePageSizeChange($event)"
       />
@@ -17,7 +23,15 @@
   }
 
   @if (showFirstAndLastPageBtn()) {
-    <div [class]="firstBtnClasses()" (click)="goFirst()">
+    <div
+      [class]="firstBtnClasses()"
+      role="button"
+      tabindex="0"
+      aria-label="首页"
+      [attr.aria-disabled]="prevDisabled() ? 'true' : null"
+      (click)="goFirst()"
+      (keydown)="handleKeyAction($event, 'first')"
+    >
       <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
         <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M7 5L7 19M17 5L10 12L17 19" />
       </svg>
@@ -25,7 +39,16 @@
   }
 
   @if (showPreviousAndNextBtn()) {
-    <div class="t-pagination__btn t-pagination__btn-prev" [class.t-is-disabled]="prevDisabled()" (click)="goPrev()">
+    <div
+      class="t-pagination__btn t-pagination__btn-prev"
+      [class.t-is-disabled]="prevDisabled()"
+      role="button"
+      tabindex="0"
+      aria-label="上一页"
+      [attr.aria-disabled]="prevDisabled() ? 'true' : null"
+      (click)="goPrev()"
+      (keydown)="handleKeyAction($event, 'prev')"
+    >
       <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
         <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M15 5L8 12L15 19" />
       </svg>
@@ -38,22 +61,31 @@
 
   @if (showPageNumber() && theme() === 'default') {
     <ul class="t-pagination__pager">
-      @if (folded()) {
+      @if (folded() && isMidEllipsis()) {
         <li
           class="t-pagination__number"
           [class.t-is-current]="innerCurrent() === 1"
           [class.t-is-disabled]="disabled()"
+          role="button"
+          tabindex="0"
+          aria-label="第 1 页"
+          [attr.aria-current]="innerCurrent() === 1 ? 'page' : null"
           (click)="goFirst()"
+          (keydown)="handleKeyAction($event, 'first')"
         >
           1
         </li>
       }
 
-      @if (folded() && showPrevMore()) {
+      @if (folded() && isMidEllipsis() && showPrevMore()) {
         <li
           class="t-pagination__number t-pagination__number--more"
           [class.t-is-disabled]="disabled()"
+          role="button"
+          tabindex="0"
+          aria-label="向前 5 页"
           (click)="goPrevMore()"
+          (keydown)="handleKeyAction($event, 'prev-more')"
         >
           <svg class="t-icon t-icon-more" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
             <path fill="currentColor" d="M6 10.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
@@ -66,17 +98,26 @@
           class="t-pagination__number"
           [class.t-is-current]="page === innerCurrent()"
           [class.t-is-disabled]="disabled()"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="'第 ' + page + ' 页'"
+          [attr.aria-current]="page === innerCurrent() ? 'page' : null"
           (click)="goTo(page)"
+          (keydown)="handleKeyAction($event, 'page', page)"
         >
           {{ page }}
         </li>
       }
 
-      @if (folded() && showNextMore()) {
+      @if (folded() && isMidEllipsis() && showNextMore()) {
         <li
           class="t-pagination__number t-pagination__number--more"
           [class.t-is-disabled]="disabled()"
+          role="button"
+          tabindex="0"
+          aria-label="向后 5 页"
           (click)="goNextMore()"
+          (keydown)="handleKeyAction($event, 'next-more')"
         >
           <svg class="t-icon t-icon-more" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
             <path fill="currentColor" d="M6 10.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
@@ -84,12 +125,17 @@
         </li>
       }
 
-      @if (folded()) {
+      @if (folded() && isMidEllipsis()) {
         <li
           class="t-pagination__number"
           [class.t-is-current]="innerCurrent() === pageCount()"
           [class.t-is-disabled]="disabled()"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="'第 ' + pageCount() + ' 页'"
+          [attr.aria-current]="innerCurrent() === pageCount() ? 'page' : null"
           (click)="goLast()"
+          (keydown)="handleKeyAction($event, 'last')"
         >
           {{ pageCount() }}
         </li>
@@ -98,7 +144,16 @@
   }
 
   @if (showPreviousAndNextBtn()) {
-    <div class="t-pagination__btn t-pagination__btn-next" [class.t-is-disabled]="nextDisabled()" (click)="goNext()">
+    <div
+      class="t-pagination__btn t-pagination__btn-next"
+      [class.t-is-disabled]="nextDisabled()"
+      role="button"
+      tabindex="0"
+      aria-label="下一页"
+      [attr.aria-disabled]="nextDisabled() ? 'true' : null"
+      (click)="goNext()"
+      (keydown)="handleKeyAction($event, 'next')"
+    >
       <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
         <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M9 5L16 12L9 19" />
       </svg>
@@ -106,7 +161,15 @@
   }
 
   @if (showFirstAndLastPageBtn()) {
-    <div [class]="lastBtnClasses()" (click)="goLast()">
+    <div
+      [class]="lastBtnClasses()"
+      role="button"
+      tabindex="0"
+      aria-label="末页"
+      [attr.aria-disabled]="nextDisabled() ? 'true' : null"
+      (click)="goLast()"
+      (keydown)="handleKeyAction($event, 'last')"
+    >
       <svg class="t-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
         <path fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M7 5L14 12L7 19M17 5L17 19" />
       </svg>
@@ -119,6 +182,7 @@
       <input
         class="t-pagination__input"
         type="number"
+        aria-label="跳转页码"
         [value]="jumpValue()"
         [disabled]="disabled()"
         (keydown.enter)="handleJump($event)"

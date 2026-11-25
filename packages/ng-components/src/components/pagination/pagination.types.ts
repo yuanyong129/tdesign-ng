@@ -30,3 +30,13 @@ export interface PageSizeOption {
 }
 
 export type PaginationPageSizeOptions = Array<number | PageSizeOption>;
+
+/** 每页条数选择器的透传配置，取 TDesign `SelectProps` 里分页用得到的部分。 */
+export interface PaginationSelectProps {
+  /** 选择器占位文案 */
+  placeholder?: string;
+  /** 选择器尺寸 */
+  size?: 'small' | 'medium' | 'large';
+  /** 是否可清空 */
+  clearable?: boolean;
+}

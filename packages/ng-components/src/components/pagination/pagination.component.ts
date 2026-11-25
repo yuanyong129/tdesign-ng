@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  TemplateRef,
   ViewEncapsulation,
   booleanAttribute,
   computed,
@@ -10,7 +11,10 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { TSelect } from '../select/select.component';
+import type { Content } from '../../_utils/content';
+import { contentText, isTemplateContent } from '../../_utils/content';
 import {
   PAGINATION_ELLIPSIS_MODES,
   PAGINATION_SIZES,
@@ -19,6 +23,7 @@ import {
   PageSizeOption,
   PaginationEllipsisMode,
   PaginationPageSizeOptions,
+  PaginationSelectProps,
   PaginationSize,
   PaginationTheme,
 } from './pagination.types';
@@ -38,20 +43,26 @@ const SIZE_CLASS: Record<PaginationSize, string> = {
 @Component({
   selector: 't-pagination',
   standalone: true,
-  imports: [TSelect],
+  imports: [NgTemplateOutlet, TSelect],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './pagination.component.html',
 })
 export class TPagination {
-  /** @zh 当前页，用于双向绑定 @en Current page, used for two-way binding @defaultValue 1 */
-  readonly current = input(1);
+  /** @zh 当前页，受控用法传入（配合 (currentChange) 双向绑定） @en Current page, pass it for controlled usage @defaultValue undefined */
+  readonly current = input<number | undefined>(undefined);
+
+  /** @zh 默认当前页，非受控用法 @en Default current page, used when uncontrolled @defaultValue 1 */
+  readonly defaultCurrent = input(1);
 
   /** @zh 数据总条数 @en Total number of items @defaultValue 0 */
   readonly total = input(0);
 
-  /** @zh 每页条数，用于双向绑定 @en Page size, used for two-way binding @defaultValue 10 */
-  readonly pageSize = input(10);
+  /** @zh 每页条数，受控用法传入（配合 (pageSizeChange) 双向绑定） @en Page size, pass it for controlled usage @defaultValue undefined */
+  readonly pageSize = input<number | undefined>(undefined);
+
+  /** @zh 默认每页条数，非受控用法 @en Default page size, used when uncontrolled @defaultValue 10 */
+  readonly defaultPageSize = input(10);
 
   /** @zh 每页条数选项 @en Page size options @defaultValue [10, 20, 50] */
   readonly pageSizeOptions = input<PaginationPageSizeOptions>([10, 20, 50]);
@@ -62,8 +73,11 @@ export class TPagination {
   /** @zh 是否显示跳转输入框 @en Whether to show the jumper @defaultValue false */
   readonly showJumper = input(false, { transform: booleanAttribute });
 
-  /** @zh 自定义数据统计内容，false 隐藏 @en Custom total content, false hides it @defaultValue true */
-  readonly totalContent = input<string | boolean>(true);
+  /** @zh 自定义数据统计内容，支持字符串与模板，false 隐藏 @en Custom total content, string or template, false hides it @defaultValue true */
+  readonly totalContent = input<Content | boolean>(true);
+
+  /** @zh 每页条数选择器的透传配置 @en Props passed to the page size selector @defaultValue undefined */
+  readonly selectProps = input<PaginationSelectProps | undefined>(undefined);
 
   /** @zh 是否显示首页/末页按钮 @en Whether to show the first/last page buttons @defaultValue true */
   readonly showFirstAndLastPageBtn = input(true, { transform: booleanAttribute });
@@ -119,36 +133,48 @@ export class TPagination {
   /** 是否需要折叠页码。 */
   protected readonly folded = computed(() => this.pageCount() > this.maxPageBtn());
 
-  /** 中间省略号左侧是否显示「更多」。 */
-  protected readonly showPrevMore = computed(() => {
-    if (!this.folded()) return false;
-    return this.innerCurrent() > this.foldedMaxPageBtn() - 1;
-  });
+  /** 是否按「中间省略」模式展现省略号。 */
+  protected readonly isMidEllipsis = computed(() => this.pageEllipsisMode() === 'mid');
 
-  /** 中间省略号右侧是否显示「更多」。 */
-  protected readonly showNextMore = computed(() => {
-    if (!this.folded()) return false;
-    return this.innerCurrent() < this.pageCount() - this.foldedMaxPageBtn() + 2;
-  });
+  private readonly curPageLeftCount = computed(() => Math.ceil((this.foldedMaxPageBtn() - 1) / 2));
+
+  private readonly curPageRightCount = computed(() => Math.floor((this.foldedMaxPageBtn() - 1) / 2));
+
+  /** 左侧是否显示「更多」，与上游 useMoreAction 保持一致。 */
+  protected readonly showPrevMore = computed(() => 2 + this.curPageLeftCount() < this.innerCurrent());
+
+  /** 右侧是否显示「更多」，与上游 useMoreAction 保持一致。 */
+  protected readonly showNextMore = computed(
+    () => this.pageCount() - 1 - this.curPageRightCount() > this.innerCurrent(),
+  );
 
   /**
-   * 折叠时显示的页码（不含首尾两页）。
-   * TDesign 把首页与末页单独渲染在省略号两侧，这里保持一致，避免重复。
+   * 折叠时显示的页码。
+   * 与上游一致：mid 模式首尾页单独渲染在省略号外侧；both-ends 模式只渲染中间窗口。
    */
   protected readonly pages = computed<number[]>(() => {
     const pageCount = this.pageCount();
     if (!this.folded()) return Array.from({ length: pageCount }, (_, index) => index + 1);
 
     const current = this.innerCurrent();
-    const foldedMax = Math.max(this.foldedMaxPageBtn(), 2);
+    let start: number;
+    let end: number;
 
-    if (!this.showPrevMore()) {
-      return Array.from({ length: Math.max(foldedMax - 1, 1) }, (_, index) => index + 2);
+    if (this.showPrevMore() && this.showNextMore()) {
+      start = current - this.curPageLeftCount();
+      end = current + this.curPageRightCount();
+    } else {
+      const foldedStart = this.isMidEllipsis() ? 2 : 1;
+      const foldedEnd = this.isMidEllipsis() ? pageCount - 1 : pageCount;
+      start = this.showPrevMore()
+        ? Math.min(current - 1, pageCount - this.foldedMaxPageBtn() + 1)
+        : foldedStart;
+      end = this.showNextMore() ? Math.max(current + 1, this.foldedMaxPageBtn()) : foldedEnd;
     }
-    if (!this.showNextMore()) {
-      return Array.from({ length: Math.max(foldedMax - 1, 1) }, (_, index) => pageCount - foldedMax + 1 + index);
-    }
-    return [current - 1, current, current + 1];
+
+    const pages: number[] = [];
+    for (let page = start; page <= end; page += 1) pages.push(page);
+    return pages;
   });
 
   protected readonly classes = computed(() =>
@@ -166,12 +192,27 @@ export class TPagination {
 
   protected readonly nextDisabled = computed(() => this.disabled() || this.innerCurrent() >= this.pageCount());
 
-  protected readonly totalText = computed(() => {
+  protected readonly totalTemplate = computed<TemplateRef<unknown> | null>(() => {
+    const content = this.totalContent();
+    if (content === false || content === true || content === undefined) return null;
+    return isTemplateContent(content) ? (content as TemplateRef<unknown>) : null;
+  });
+
+  protected readonly totalText = computed<string | null>(() => {
     const content = this.totalContent();
     if (content === false) return null;
-    if (typeof content === 'string') return content;
-    return `共 ${Number(this.total()) || 0} 条`;
+    if (content === true || content === undefined) return `共 ${Number(this.total()) || 0} 条`;
+    if (isTemplateContent(content)) return null;
+    const text = contentText(content);
+    return text || `共 ${Number(this.total()) || 0} 条`;
   });
+
+  /** 页数选择器的尺寸，selectProps.size 优先。 */
+  protected readonly selectSize = computed(() => this.selectProps()?.size ?? (this.size() === 'small' ? 'small' : 'medium'));
+
+  protected readonly selectPlaceholder = computed(() => this.selectProps()?.placeholder);
+
+  protected readonly selectClearable = computed(() => this.selectProps()?.clearable ?? false);
 
   protected readonly selectOptions = computed<PageSizeOption[]>(() =>
     this.pageSizeOptions().map((option) => {
@@ -192,25 +233,45 @@ export class TPagination {
   );
 
   constructor() {
+    // 受控：外部传入 current / pageSize 时以外部为准
     effect(() => {
       const current = this.current();
-      untracked(() => {
-        const next = this.clamp(current);
-        if (next !== this.innerCurrent()) this.innerCurrent.set(next);
-      });
+      if (current === undefined) return;
+      untracked(() => this.syncCurrent(current));
     });
 
     effect(() => {
       const pageSize = this.pageSize();
-      untracked(() => {
-        const next = Math.max(Number(pageSize) || 1, 1);
-        if (next === this.innerPageSize()) return;
-        this.innerPageSize.set(next);
-        // 每页条数变化后当前页可能越界，收敛到最后一页
-        const clamped = Math.min(this.innerCurrent(), this.pageCount());
-        if (clamped !== this.innerCurrent()) this.innerCurrent.set(clamped);
-      });
+      if (pageSize === undefined) return;
+      untracked(() => this.syncPageSize(pageSize));
     });
+
+    // 非受控：跟随 defaultCurrent / defaultPageSize
+    effect(() => {
+      const current = this.defaultCurrent();
+      if (this.current() !== undefined) return;
+      untracked(() => this.syncCurrent(current));
+    });
+
+    effect(() => {
+      const pageSize = this.defaultPageSize();
+      if (this.pageSize() !== undefined) return;
+      untracked(() => this.syncPageSize(pageSize));
+    });
+  }
+
+  private syncCurrent(current: number | undefined): void {
+    const next = this.clamp(current ?? 1);
+    if (next !== this.innerCurrent()) this.innerCurrent.set(next);
+  }
+
+  private syncPageSize(pageSize: number | undefined): void {
+    const next = Math.max(Number(pageSize) || 1, 1);
+    if (next === this.innerPageSize()) return;
+    this.innerPageSize.set(next);
+    // 每页条数变化后当前页可能越界，收敛到最后一页
+    const clamped = Math.min(this.innerCurrent(), this.pageCount());
+    if (clamped !== this.innerCurrent()) this.innerCurrent.set(clamped);
   }
 
   protected goTo(page: number): void {
@@ -271,6 +332,34 @@ export class TPagination {
     }
     this.goTo(value);
     input.value = String(this.innerCurrent());
+  }
+
+  /** 键盘激活：Enter / Space 与点击行为一致。 */
+  protected handleKeyAction(event: KeyboardEvent, action: string, page?: number): void {
+    if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'Spacebar') return;
+    event.preventDefault();
+    switch (action) {
+      case 'first':
+        this.goFirst();
+        break;
+      case 'last':
+        this.goLast();
+        break;
+      case 'prev':
+        this.goPrev();
+        break;
+      case 'next':
+        this.goNext();
+        break;
+      case 'prev-more':
+        this.goPrevMore();
+        break;
+      case 'next-more':
+        this.goNextMore();
+        break;
+      default:
+        if (typeof page === 'number') this.goTo(page);
+    }
   }
 
   private clamp(page: number): number {

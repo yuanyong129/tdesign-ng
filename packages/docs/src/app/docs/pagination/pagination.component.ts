@@ -7,6 +7,7 @@ import { DemoPaginationFolded } from './demos/pagination-folded';
 import { DemoPaginationJumper } from './demos/pagination-jumper';
 import { DemoPaginationSimple } from './demos/pagination-simple';
 import { DemoPaginationSize } from './demos/pagination-size';
+import { DemoPaginationUncontrolled } from './demos/pagination-uncontrolled';
 
 @Component({
   selector: 'pagination-docs',
@@ -19,6 +20,7 @@ import { DemoPaginationSize } from './demos/pagination-size';
     DemoPaginationJumper,
     DemoPaginationFolded,
     DemoPaginationSimple,
+    DemoPaginationUncontrolled,
   ],
   template: `
     <div class="docs-page">
@@ -45,6 +47,14 @@ import { DemoPaginationSize } from './demos/pagination-size';
 
       <docs-demo id="pagination-simple" title="简洁模式" description="theme=&quot;simple&quot; 只显示当前页/总页数。">
         <demo-pagination-simple />
+      </docs-demo>
+
+      <docs-demo
+        id="pagination-uncontrolled"
+        title="非受控与统计模板"
+        description="defaultCurrent / defaultPageSize 用于非受控场景，totalContent 支持模板，selectProps 透传给每页条数选择器。"
+      >
+        <demo-pagination-uncontrolled />
       </docs-demo>
 
       <h2 class="docs-section__title" id="pagination-api">API</h2>
