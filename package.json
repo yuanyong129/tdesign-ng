@@ -35,7 +35,8 @@
     "edge": "node scripts/headless-edge.mjs",
     "wire": "node scripts/wire-component.mjs",
     "vendor:styles": "node scripts/vendor-tdesign-common.mjs",
-    "preview:pages": "node scripts/preview-pages.mjs"
+    "preview:pages": "node scripts/preview-pages.mjs",
+    "clean:cache": "node scripts/clean-cache.mjs"
   },
   "devDependencies": {
     "@angular/compiler-cli": "^19.2.0",

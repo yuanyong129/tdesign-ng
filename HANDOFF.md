@@ -68,6 +68,8 @@ pnpm verify                             # integrator 专用：重新 gen 入库�
 node scripts/headless-edge.mjs start    # 起专用 headless Edge（CDP_PORT=9411 换端口）
 node scripts/cdp-page.mjs /table        # 页面探针（PORT / CDP_PORT / PROBES / SHOT 环境变量）
 node scripts/wire-component.mjs <dir> <ClassStem> "<label>" <group> <afterPath>
+pnpm clean:cache                        # 收工清理：陈旧 Edge profile + 一次性测试工程 + 构建缓存
+node scripts/clean-cache.mjs --dry-run  # 先看会删什么（--hours / --all / --logs 调阈值）
 ```
 
 ## 5. 必须遵守的约定
@@ -158,6 +160,7 @@ node scripts/wire-component.mjs <dir> <ClassStem> "<label>" <group> <afterPath>
 1. `pnpm verify:session -- TTable`：内部依次 gen 到 `.local-cache/api.session.json`、`tsc`（库源码）、`ngc`（文档站 strictTemplates）、`align-check`（读会话生成物）。必须全绿，`missing 0 / extra 0`。
 2. 本地实拍（另开终端）：`PORT=4301 pnpm start` → `CDP_PORT=9411 node scripts/headless-edge.mjs start` → `PORT=4301 CDP_PORT=9411 SHOT=1 node scripts/cdp-page.mjs /table`。检查 title / demos / apiRows / `issues: []` / `badResources: []`；`PROBES=".t-table,.t-table__body"` 可统计选择器命中数，截图落在 `.local-cache/page-*.png`。
 3. 结束前 `CDP_PORT=9411 node scripts/headless-edge.mjs kill`（只杀自己 profile 的实例）。
+4. **收工清理**：`pnpm clean:cache`（等价 `node scripts/clean-cache.mjs`）。一次 CDP 实拍会新建一个 Edge profile，单个 80–570 MB；不清理时 `.local-cache` 一周能涨到 4~5 GB（历史上发生过：34 个 profile = 4.39 GB）。这条命令会删 24 小时前的 `edge-*`（跳过正在被浏览器占用的，所以并行会话安全）、`packages/dist/.consumer-smoke`、`node_modules/.cache/ng-packagr`，以及 7 天前的日志/截图。`--dry-run` 先看清单，`--hours 6` / `--all` / `--logs 0` 调阈值。`headless-edge start` 本身也会顺手剪掉 12 小时前的 profile（`PRUNE_HOURS=0` 可关闭）。
 
 **integrator（合并会话后）**：
 

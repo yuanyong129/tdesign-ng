@@ -144,3 +144,4 @@ CDP_PORT=9411 node scripts/headless-edge.mjs kill
 3. 需要时补 `bridge.less` 宿主规则（唯一 owner）
 4. 更新 `README.md` 组件表与 `HANDOFF.md` / 本文件的进度
 5. 统一 commit + push（commit message 用 `feat(<dir>): ...` / `fix(<dir>): ...`）
+6. `pnpm clean:cache`：会话们各自起的 headless Edge profile、`packages/dist` 一次性测试工程都要清掉。单个 profile 80–570 MB，不清理时 `.local-cache` 一周能到 4~5 GB（2026-11-25 实测 34 个 profile = 4.39 GB，清理后工作区从 5.2 GB 回到 620 MB）。命令默认跳过正在被浏览器占用的 profile，并行会话不会被打断；`--dry-run` 可先看清单。
