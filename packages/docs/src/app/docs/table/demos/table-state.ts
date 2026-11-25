@@ -11,7 +11,15 @@ import { TSpaceModule, TSwitchModule, TTableModule, type TableColumn, type Table
         <t-switch [(value)]="loading" />
       </p>
       <t-table [data]="data" [columns]="columns" rowKey="id" [loading]="loading" />
+      <t-table
+        [data]="data"
+        [columns]="columns"
+        rowKey="id"
+        [loading]="loading"
+        [loadingProps]="{ text: '正在拉取数据…', size: 'large' }"
+      />
       <t-table [data]="[]" [columns]="columns" rowKey="id" empty="没有匹配的数据" />
+      <t-table [data]="[]" [columns]="columns" rowKey="id" [locale]="{ empty: 'locale 覆盖后的空态文案' }" />
     </t-space>
   `,
 })

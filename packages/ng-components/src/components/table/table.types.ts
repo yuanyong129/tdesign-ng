@@ -1,3 +1,4 @@
+import type { Content } from '../../_utils/content';
 import type {
   PageInfo,
   PaginationEllipsisMode,
@@ -259,6 +260,8 @@ export interface TableColumn<T extends TableRow = TableRow> {
   type?: TableRowSelectionType;
   /** 自定义单元格文本 */
   cell?: (context: TableCellContext<T>) => string;
+  /** 表尾单元格内容，`footData` 的行按列取它，未声明时取行数据同名字段 */
+  foot?: TableFootCellContent<T>;
   /** 列附加类名 */
   className?: string;
   /** 是否可排序，函数形式为自定义比较器 */
@@ -298,3 +301,171 @@ export interface TableHeaderCell<T extends TableRow = TableRow> {
   /** 纵向合并的表头行数 */
   rowspan: number;
 }
+
+/** 键盘操作下行高亮的模式，与 TDesign 的 `activeRowType` 一致。 */
+export const TABLE_ACTIVE_ROW_TYPES = ['single', 'multiple'] as const;
+
+export type TableActiveRowType = (typeof TABLE_ACTIVE_ROW_TYPES)[number];
+
+/** 高亮行列表里的一项。 */
+export interface TableActiveRowItem<T extends TableRow = TableRow> {
+  /** 行数据 */
+  row: T;
+  /** 行下标 */
+  rowIndex: number;
+}
+
+/** 高亮行变化事件，字段与 TDesign 的 `onActiveChange` 对齐。 */
+export interface TableActiveChangeEvent<T extends TableRow = TableRow> {
+  /** 高亮行的 key 列表 */
+  activeRowKeys: Array<string | number>;
+  /** 高亮行的数据 */
+  activeRowList: Array<TableActiveRowItem<T>>;
+  /** 本次操作的行数据 */
+  currentRowData?: T;
+  /** 本次是高亮还是取消高亮 */
+  type: 'active' | 'inactive';
+}
+
+/** 键盘操作高亮行时的动作，与 TDesign 的 `ActiveRowAction` 一致。 */
+export const TABLE_ACTIVE_ROW_ACTIONS = [
+  'shift-area-selection',
+  'space-one-selection',
+  'clear',
+  'select-all',
+] as const;
+
+export type TableActiveRowAction = (typeof TABLE_ACTIVE_ROW_ACTIONS)[number];
+
+/** 键盘操作高亮行事件。 */
+export interface TableActiveRowActionEvent<T extends TableRow = TableRow> {
+  /** 本次动作 */
+  action: TableActiveRowAction;
+  /** 当前高亮行列表 */
+  activeRowList: Array<TableActiveRowItem<T>>;
+}
+
+/** 行事件上下文，字段与 TDesign 的 `onRowClick` 等对齐。 */
+export interface TableRowEventContext<T extends TableRow = TableRow> {
+  /** 行数据 */
+  row: T;
+  /** 行下标 */
+  index: number;
+  /** 原生事件 */
+  e: Event;
+}
+
+/** 单元格点击事件上下文，字段与 TDesign 的 `onCellClick` 对齐。 */
+export interface TableCellClickEvent<T extends TableRow = TableRow> {
+  /** 行数据 */
+  row: T;
+  /** 列配置 */
+  col: TableColumn<T>;
+  /** 行下标 */
+  rowIndex: number;
+  /** 列下标 */
+  colIndex: number;
+  /** 原生事件 */
+  e: Event;
+}
+
+/** 滚动事件上下文，字段与 TDesign 的 `onScroll` 等对齐。 */
+export interface TableScrollEvent {
+  /** 原生事件 */
+  e: Event;
+}
+
+/** 行类名参数，字段与 TDesign 的 `RowClassNameParams` 对齐。 */
+export interface TableRowClassNameParams<T extends TableRow = TableRow> {
+  /** 行数据 */
+  row: T;
+  /** 行下标 */
+  rowIndex: number;
+  /** 行 key */
+  rowKey: string | number;
+  /** 行类型，表尾行为 `foot` */
+  type?: 'body' | 'foot';
+}
+
+/**
+ * 行类名。
+ *
+ * 支持字符串、回调、按「行下标 / 行 key」取值的映射，或它们的数组；
+ * 数组内各项依次拼接，与 TDesign 的 `rowClassName` 行为一致。
+ */
+export type TableRowClassName<T extends TableRow = TableRow> =
+  | string
+  | ((params: TableRowClassNameParams<T>) => string | undefined)
+  | Record<string | number, string | undefined>
+  | Array<
+      | string
+      | ((params: TableRowClassNameParams<T>) => string | undefined)
+      | Record<string | number, string | undefined>
+    >;
+
+/** 行属性参数，字段与 TDesign 的 `RowAttributesParams` 对齐。 */
+export interface TableRowAttributesParams<T extends TableRow = TableRow> {
+  /** 行数据 */
+  row: T;
+  /** 行下标 */
+  rowIndex: number;
+  /** 行类型，表尾行为 `foot` */
+  type: 'body' | 'foot';
+}
+
+/** 单个行属性的取值。 */
+export type TableRowAttributeValue = string | number | boolean | null | undefined;
+
+/**
+ * 一组行属性：属性名 → 取值，`class` / `style` 同样走这里。
+ *
+ * 取值不做类型限制：Angular 端统一走 `setAttribute` / `classList` / `style`，
+ * 数字与布尔会按字符串处理，`undefined` / `null` / `false` 表示移除该属性。
+ */
+export type TableRowAttributesValue = Record<string, unknown>;
+
+/**
+ * 行属性。
+ *
+ * 支持对象、回调、或它们的数组；数组内各项按顺序合并，与 TDesign 的
+ * `formatRowAttributes` 行为一致。
+ */
+export type TableRowAttributes<T extends TableRow = TableRow> =
+  | TableRowAttributesValue
+  | ((params: TableRowAttributesParams<T>) => TableRowAttributesValue | undefined)
+  | Array<TableRowAttributesValue | ((params: TableRowAttributesParams<T>) => TableRowAttributesValue | undefined)>;
+
+/** 加载状态配置，取 TDesign `LoadingProps` 里表格用得到的那部分。 */
+export interface TableLoadingProps {
+  /** 加载文案，优先于 `loadingText` / `locale.loadingText` */
+  text?: Content;
+  /** 加载图标，传 `false` 时不显示图标 */
+  indicator?: Content | boolean;
+  /** 加载图标尺寸 */
+  size?: string;
+  /** 是否显示遮罩 */
+  showOverlay?: boolean;
+}
+
+/**
+ * 语言配置，取 TDesign `TableConfig` 里表格用得到的那部分。
+ *
+ * 传入的字段优先于同名属性，例如 `locale.empty` 覆盖 `empty`。
+ */
+export interface TableLocale {
+  /** 空数据文案 */
+  empty?: Content;
+  /** 加载中文案 */
+  loadingText?: Content;
+  /** 筛选面板「确定」文案 */
+  confirmText?: string;
+  /** 筛选面板「重置」文案 */
+  resetText?: string;
+  /** 表格尺寸 */
+  size?: TableSize;
+}
+
+/** 表尾单元格内容。 */
+export type TableFootCellContent<T extends TableRow = TableRow> =
+  | Content
+  | ((context: TableCellContext<T>) => Content);

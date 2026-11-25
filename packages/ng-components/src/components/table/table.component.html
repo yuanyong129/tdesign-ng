@@ -1,5 +1,21 @@
-<div [class]="classes()">
-  <div #content class="t-table__content" [style]="contentStyle()" (scroll)="handleScroll($event)">
+<div
+  #root
+  [class]="classes()"
+  [attr.tabindex]="activeRowType() ? -1 : null"
+  (keydown)="handleTableKeydown($event)"
+  (keyup)="handleTableKeyup($event)"
+>
+  @if (topContent(); as top) {
+    <div class="t-table__top-content">
+      @if (templateOf(top); as tpl) {
+        <ng-container [ngTemplateOutlet]="tpl" />
+      } @else {
+        {{ textOf(top) }}
+      }
+    </div>
+  }
+
+  <div #content [class]="contentClasses()" [style]="contentStyle()" (scroll)="handleScroll($event)">
     @if (isVirtualScroll()) {
       <div
         class="t-table__virtual-scroll-cursor"
@@ -144,8 +160,12 @@
                                 </div>
                                 @if (col.filter?.showConfirmAndReset) {
                                   <div class="t-table__filter--bottom-buttons">
-                                    <t-button theme="default" size="small" (click)="handleFilterReset(col)">重置</t-button>
-                                    <t-button theme="primary" size="small" (click)="handleFilterConfirm(col)">确定</t-button>
+                                    <t-button theme="default" size="small" (click)="handleFilterReset(col)">{{
+                                      locale()?.resetText ?? '重置'
+                                    }}</t-button>
+                                    <t-button theme="primary" size="small" (click)="handleFilterConfirm(col)">{{
+                                      locale()?.confirmText ?? '确定'
+                                    }}</t-button>
                                   </div>
                                 }
                               </div>
@@ -165,10 +185,37 @@
       }
 
       <tbody class="t-table__body" [style.transform]="tbodyTransform()">
+        @if (firstFullRow(); as full) {
+          <tr class="t-table__row--full t-table__first-full-row">
+            <td [attr.colspan]="displayColumns().length">
+              <div class="t-table__row-full-inner">
+                <div class="t-table__row-full-element">
+                  @if (templateOf(full); as tpl) {
+                    <ng-container [ngTemplateOutlet]="tpl" />
+                  } @else {
+                    {{ textOf(full) }}
+                  }
+                </div>
+              </div>
+            </td>
+          </tr>
+        }
+
         @for (entry of tableRows(); track trackRow(entry.rowIndex, entry.row)) {
           @let row = entry.row;
           @let rowIndex = entry.rowIndex;
-          <tr [class]="rowClasses(row)" (click)="handleRowClick(row)">
+          <tr
+            [class]="rowClasses(row, rowIndex)"
+            [style]="rowStyle(rowIndex)"
+            [tTableRowAttributes]="rowAttributesOf(row, rowIndex, 'body')"
+            (click)="handleRowClick($event, row, rowIndex)"
+            (dblclick)="handleRowEvent('rowDblclick', $event, row, rowIndex)"
+            (mousedown)="handleRowEvent('rowMousedown', $event, row, rowIndex)"
+            (mouseup)="handleRowEvent('rowMouseup', $event, row, rowIndex)"
+            (mouseenter)="handleRowEvent('rowMouseenter', $event, row, rowIndex)"
+            (mouseleave)="handleRowEvent('rowMouseleave', $event, row, rowIndex)"
+            (mouseover)="handleRowEvent('rowMouseover', $event, row, rowIndex)"
+          >
             @for (col of displayColumns(); track col.colKey; let colIndex = $index) {
               @let span = cellSpanOf(row, col, rowIndex, colIndex);
               @if (!span.skipped) {
@@ -179,6 +226,7 @@
                 [style]="columnStyle(col)"
                 [attr.rowspan]="span.rowspan && span.rowspan > 1 ? span.rowspan : null"
                 [attr.colspan]="span.colspan && span.colspan > 1 ? span.colspan : null"
+                (click)="handleCellClick($event, row, col, rowIndex, colIndex)"
               >
                 @if (col.colKey === expandColumnKey) {
                   <div
@@ -223,6 +271,15 @@
                       [ngTemplateOutlet]="tpl"
                       [ngTemplateOutletContext]="cellContext(row, col, rowIndex, colIndex)"
                     />
+                  } @else if (isCellEmpty(row, col, rowIndex, colIndex) && cellEmptyContent()) {
+                    @if (templateOf(cellEmptyOf(row, col, rowIndex, colIndex)); as emptyTpl) {
+                      <ng-container
+                        [ngTemplateOutlet]="emptyTpl"
+                        [ngTemplateOutletContext]="cellContext(row, col, rowIndex, colIndex)"
+                      />
+                    } @else {
+                      {{ textOf(cellEmptyOf(row, col, rowIndex, colIndex)) }}
+                    }
                   } @else if (col.ellipsis) {
                     <div class="t-table__ellipsis" [attr.title]="cellText(row, col, rowIndex, colIndex)">
                       {{ cellText(row, col, rowIndex, colIndex) }}
@@ -251,16 +308,92 @@
           }
         }
 
-        @if (!rows().length) {
+        @if (lastFullRow(); as full) {
+          <tr class="t-table__row--full t-table__last-full-row">
+            <td [attr.colspan]="displayColumns().length">
+              <div class="t-table__row-full-inner">
+                <div class="t-table__row-full-element">
+                  @if (templateOf(full); as tpl) {
+                    <ng-container [ngTemplateOutlet]="tpl" />
+                  } @else {
+                    {{ textOf(full) }}
+                  }
+                </div>
+              </div>
+            </td>
+          </tr>
+        }
+
+        @if (isEmpty()) {
           <tr class="t-table__row--full">
             <td [attr.colspan]="displayColumns().length">
-              <div class="t-table__empty">{{ empty() }}</div>
+              <div class="t-table__row-full-element">
+                <div class="t-table__empty">
+                  @if (emptyTemplate(); as tpl) {
+                    <ng-container [ngTemplateOutlet]="tpl" />
+                  } @else {
+                    {{ emptyText() }}
+                  }
+                </div>
+              </div>
             </td>
           </tr>
         }
       </tbody>
+
+      @if (hasFooter()) {
+        <tfoot class="t-table__footer" [class.t-table__footer--fixed]="isFixedHeader()">
+          @if (footerSummary(); as summary) {
+            <tr class="t-table__row--full">
+              <td [attr.colspan]="displayColumns().length">
+                <div class="t-table__row-full-element">
+                  @if (templateOf(summary); as tpl) {
+                    <ng-container [ngTemplateOutlet]="tpl" />
+                  } @else {
+                    {{ textOf(summary) }}
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+          @for (row of footData(); track $index; let rowIndex = $index) {
+            <tr
+              [class]="footerRowClasses(row, rowIndex)"
+              [tTableRowAttributes]="rowAttributesOf(row, rowIndex, 'foot')"
+            >
+              @for (col of displayColumns(); track col.colKey; let colIndex = $index) {
+                @let span = footerSpanOf(row, col, rowIndex, colIndex);
+                @if (!span.skipped) {
+                  <td
+                    [class]="cellClasses(col)"
+                    [style]="columnStyle(col)"
+                    [attr.rowspan]="span.rowspan && span.rowspan > 1 ? span.rowspan : null"
+                    [attr.colspan]="span.colspan && span.colspan > 1 ? span.colspan : null"
+                  >
+                    @if (templateOf(footerCell(row, col, rowIndex, colIndex)); as tpl) {
+                      <ng-container [ngTemplateOutlet]="tpl" />
+                    } @else {
+                      {{ textOf(footerCell(row, col, rowIndex, colIndex)) }}
+                    }
+                  </td>
+                }
+              }
+            </tr>
+          }
+        </tfoot>
+      }
     </table>
   </div>
+
+  @if (bottomContent(); as bottom) {
+    <div class="t-table__bottom-content">
+      @if (templateOf(bottom); as tpl) {
+        <ng-container [ngTemplateOutlet]="tpl" />
+      } @else {
+        {{ textOf(bottom) }}
+      }
+    </div>
+  }
 
   @if (pagination(); as config) {
     <div class="t-table__pagination">
@@ -287,22 +420,35 @@
   }
 
   @if (loading()) {
-    <div class="t-loading t-loading--center t-loading--full t-loading__overlay">
-      <div class="t-loading--center t-size-s">
-        <svg
-          class="t-loading__gradient t-icon-loading"
-          viewBox="0 0 12 12"
-          width="1em"
-          height="1em"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <foreignObject x="0" y="0" width="12" height="12">
-            <div class="t-loading__gradient-conic"></div>
-          </foreignObject>
-        </svg>
-        @if (loadingText()) {
-          <div class="t-loading__text">{{ loadingText() }}</div>
+    <div
+      class="t-loading t-loading--center t-loading--full t-loading__overlay"
+      [class.t-loading__parent]="!loadingOverlay()"
+    >
+      <div [class]="'t-loading--center ' + loadingSizeClass()">
+        @if (loadingShowIcon()) {
+          @if (loadingIndicator(); as indicator) {
+            <ng-container [ngTemplateOutlet]="indicator" />
+          } @else {
+            <svg
+              class="t-loading__gradient t-icon-loading"
+              viewBox="0 0 12 12"
+              width="1em"
+              height="1em"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <foreignObject x="0" y="0" width="12" height="12">
+                <div class="t-loading__gradient-conic"></div>
+              </foreignObject>
+            </svg>
+          }
+        }
+        @if (loadingTemplate(); as tpl) {
+          <div class="t-loading__text">
+            <ng-container [ngTemplateOutlet]="tpl" />
+          </div>
+        } @else if (loadingTextContent()) {
+          <div class="t-loading__text">{{ loadingTextContent() }}</div>
         }
       </div>
     </div>

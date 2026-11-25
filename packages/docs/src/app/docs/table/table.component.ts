@@ -2,11 +2,15 @@ import { Component } from '@angular/core';
 import { ApiTable } from '../../api/api-table.component';
 import { DemoBlock } from '../demo-block';
 import { PageNav } from '../page-nav';
+import { DemoTableActiveRow } from './demos/table-active-row';
 import { DemoTableBasic } from './demos/table-basic';
 import { DemoTableCell } from './demos/table-cell';
 import { DemoTableExpand } from './demos/table-expand';
 import { DemoTableExpandClick } from './demos/table-expand-click';
+import { DemoTableCustomRow } from './demos/table-custom-row';
 import { DemoTableFilter } from './demos/table-filter';
+import { DemoTableFooter } from './demos/table-footer';
+import { DemoTableFullRow } from './demos/table-full-row';
 import { DemoTableFixed } from './demos/table-fixed';
 import { DemoTableGroupHeader } from './demos/table-group-header';
 import { DemoTableMerge } from './demos/table-merge';
@@ -43,6 +47,10 @@ import { DemoTableStyle } from './demos/table-style';
     DemoTableMerge,
     DemoTableVirtual,
     DemoTableResizable,
+    DemoTableActiveRow,
+    DemoTableCustomRow,
+    DemoTableFooter,
+    DemoTableFullRow,
   ],
   template: `
     <div class="docs-page">
@@ -162,6 +170,38 @@ import { DemoTableStyle } from './demos/table-style';
         description="表格上声明 resizable 后，拖动表头右边缘即可调整列宽；列上可用 resizable 关闭、用 resize 限定最小/最大宽度。"
       >
         <demo-table-resizable />
+      </docs-demo>
+
+      <docs-demo
+        id="table-active-row"
+        title="高亮行"
+        description="activeRowType 打开行高亮（single / multiple），activeRowKeys 受控高亮行；聚焦表格后支持上下键移动、空格切换、Shift + 空格连选、Esc 清空、Ctrl + A 全选。"
+      >
+        <demo-table-active-row />
+      </docs-demo>
+
+      <docs-demo
+        id="table-footer"
+        title="表尾"
+        description="列的 foot 声明表尾单元格，footData 提供表尾行；footerSummary 渲染整行汇总，表格定高时表尾吸底。"
+      >
+        <demo-table-footer />
+      </docs-demo>
+
+      <docs-demo
+        id="table-full-row"
+        title="首尾整行与空单元格"
+        description="firstFullRow / lastFullRow 在表体首尾插入通栏内容，cellEmptyContent 给空单元格补占位。"
+      >
+        <demo-table-full-row />
+      </docs-demo>
+
+      <docs-demo
+        id="table-custom-row"
+        title="自定义行样式"
+        description="rowClassName 追加行类名，rowAttributes 注入属性与内联样式，都支持回调；topContent / bottomContent 在表格上下加说明。"
+      >
+        <demo-table-custom-row />
       </docs-demo>
 
       <h2 class="docs-section__title" id="table-api">API</h2>

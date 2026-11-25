@@ -1,5 +1,6 @@
-﻿import { NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import {
+  AfterViewChecked,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -26,29 +27,49 @@ import { TInput } from '../input';
 import { TPagination, type PageInfo } from '../pagination';
 import { TPopup } from '../popup';
 import { TRadio, TRadioGroup } from '../radio';
+import type { Content } from '../../_utils/content';
+import { contentText, isContentEmpty, isTemplateContent } from '../../_utils/content';
 import { TTableCell } from './table-cell.directive';
 import { TTableExpandedRow } from './table-expanded-row.directive';
+import { TTableRowAttributes } from './table-row-attributes.directive';
 import {
   TABLE_ALIGNS,
   TABLE_LAYOUTS,
   TABLE_SIZES,
   TABLE_SORT_TYPES,
   TABLE_VERTICAL_ALIGNS,
+  TableActiveChangeEvent,
+  TableActiveRowAction,
+  TableActiveRowActionEvent,
+  TableActiveRowItem,
+  TableActiveRowType,
+  TableCellClickEvent,
+  TableCellContext,
   TableColumn,
   TableExpandChangeEvent,
   TableFilterChangeEvent,
   TableFilterChangeContext,
   TableFilterType,
   TableFilterValue,
+  TableFootCellContent,
   TableHeaderCell,
   TableLayout,
+  TableLoadingProps,
+  TableLocale,
   TablePageChangeEvent,
   TablePagination,
   TableRow,
+  TableRowAttributes,
+  TableRowAttributesParams,
+  TableRowAttributesValue,
+  TableRowClassName,
+  TableRowClassNameParams,
+  TableRowEventContext,
   TableRowSelectionType,
   TableRowspan,
   TableRowspanParams,
   TableScroll,
+  TableScrollEvent,
   TableColumnResizeEvent,
   TableSelectChangeEvent,
   TableSize,
@@ -57,6 +78,9 @@ import {
   TableSortType,
   TableVerticalAlign,
 } from './table.types';
+
+/** 单元格为空时的占位内容。 */
+type TableCellEmptyContent = Content | ((context: TableCellContext) => Content);
 
 const SIZE_CLASS: Record<TableSize, string> = {
   small: 't-size-s',
@@ -125,6 +149,57 @@ interface TableCellSpan {
 
 const EMPTY_CELL_SPAN: TableCellSpan = {};
 
+/** 内容里的模板部分，纯文本内容返回 `null`。 */
+function asTemplate(value: Content | null | undefined): TemplateRef<unknown> | null {
+  return isTemplateContent(value) ? value : null;
+}
+
+/** 把类名取值拆成 token 列表。 */
+function splitClasses(value: string | undefined): string[] {
+  return value ? value.split(/\s+/).filter(Boolean) : [];
+}
+
+/**
+ * 计算合并单元格：返回 cellKey → span 的映射。
+ *
+ * 先算出锚点单元格的 span，再把它覆盖到的其余单元格标记为 skipped，
+ * 表体与表尾共用同一套规则（对应上游 `rowspanAndColspanInFooter`）。
+ */
+function buildCellSpans(
+  rows: TableRow[],
+  columns: TableColumn[],
+  rowKey: string,
+  handler: (params: TableRowspanParams) => TableRowspan | undefined,
+): Map<string, TableCellSpan> {
+  const map = new Map<string, TableCellSpan>();
+
+  rows.forEach((row, rowIndex) => {
+    columns.forEach((col, colIndex) => {
+      const key = cellKeyOf(row, col, rowIndex, colIndex, rowKey);
+      const state = map.get(key) ?? {};
+      const result = handler({ row, col, rowIndex, colIndex });
+      if (result?.rowspan) state.rowspan = result.rowspan;
+      if (result?.colspan) state.colspan = result.colspan;
+      if (state.rowspan || state.colspan) map.set(key, state);
+
+      const maxRowIndex = rowIndex + (state.rowspan ?? 1);
+      const maxColIndex = colIndex + (state.colspan ?? 1);
+      for (let i = rowIndex; i < maxRowIndex; i += 1) {
+        for (let j = colIndex; j < maxColIndex; j += 1) {
+          if (i === rowIndex && j === colIndex) continue;
+          if (!rows[i] || !columns[j]) return;
+          const coveredKey = cellKeyOf(rows[i], columns[j], i, j, rowKey);
+          const covered = map.get(coveredKey) ?? {};
+          covered.skipped = true;
+          map.set(coveredKey, covered);
+        }
+      }
+    });
+  });
+
+  return map;
+}
+
 /** 单元格唯一键：行 key + 列 key，行 key 缺失时退化为行下标。 */
 function cellKeyOf(
   row: TableRow,
@@ -152,12 +227,23 @@ function cellKeyOf(
 @Component({
   selector: 't-table',
   standalone: true,
-  imports: [NgTemplateOutlet, TButton, TCheckbox, TCheckboxGroup, TInput, TPagination, TPopup, TRadio, TRadioGroup],
+  imports: [
+    NgTemplateOutlet,
+    TButton,
+    TCheckbox,
+    TCheckboxGroup,
+    TInput,
+    TPagination,
+    TPopup,
+    TRadio,
+    TRadioGroup,
+    TTableRowAttributes,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './table.component.html',
 })
-export class TTable implements OnDestroy {
+export class TTable implements AfterViewChecked, OnDestroy {
   /** @zh 表格数据 @en Table data @defaultValue [] */
   readonly data = input<TableRow[]>([]);
 
@@ -315,6 +401,160 @@ export class TTable implements OnDestroy {
   /** @zh 列宽拖拽结束，携带拖拽后的列宽 @en Emitted after a column resize drag ends */
   readonly columnResizeChange = output<TableColumnResizeEvent>();
 
+  /**
+   * @zh 受控的高亮行 key，传入后表格不再自己记录高亮行
+   * @en Controlled active row keys, the table stops keeping highlight state once provided
+   * @defaultValue undefined
+   */
+  readonly activeRowKeys = input<Array<string | number> | undefined>(undefined);
+
+  /** @zh 默认高亮行 key，仅初始生效 @en Default active row keys, applied initially @defaultValue undefined */
+  readonly defaultActiveRowKeys = input<Array<string | number> | undefined>(undefined);
+
+  /**
+   * @zh 键盘操作的高亮模式，`single` 单行、`multiple` 多行
+   * @en Highlight mode used by keyboard operations, `single` or `multiple`
+   * @defaultValue undefined @values single, multiple
+   */
+  readonly activeRowType = input<TableActiveRowType | undefined>(undefined);
+
+  /**
+   * @zh 空格键是否禁用取消高亮行 @en Whether pressing space can deactivate the active row
+   * @defaultValue false
+   */
+  readonly disableSpaceInactiveRow = input(false, { transform: booleanAttribute });
+
+  /** @zh 键盘移动时是否显示行悬停高亮 @en Whether keyboard navigation highlights the row @defaultValue false */
+  readonly keyboardRowHover = input(false, { transform: booleanAttribute });
+
+  /** @zh 高亮行变化 @en Emitted when the active rows change */
+  readonly activeChange = output<TableActiveChangeEvent>();
+
+  /** @zh 键盘操作高亮行时的动作 @en Emitted with the keyboard action applied to active rows */
+  readonly activeRowAction = output<TableActiveRowActionEvent>();
+
+  /** @zh 点击行 @en Emitted when a row is clicked */
+  readonly rowClick = output<TableRowEventContext>();
+
+  /** @zh 双击行 @en Emitted when a row is double clicked */
+  readonly rowDblclick = output<TableRowEventContext>();
+
+  /** @zh 行内按下鼠标 @en Emitted when the mouse button is pressed on a row */
+  readonly rowMousedown = output<TableRowEventContext>();
+
+  /** @zh 行内松开鼠标 @en Emitted when the mouse button is released on a row */
+  readonly rowMouseup = output<TableRowEventContext>();
+
+  /** @zh 鼠标进入行 @en Emitted when the pointer enters a row */
+  readonly rowMouseenter = output<TableRowEventContext>();
+
+  /** @zh 鼠标离开行 @en Emitted when the pointer leaves a row */
+  readonly rowMouseleave = output<TableRowEventContext>();
+
+  /** @zh 鼠标在行内移动 @en Emitted when the pointer moves inside a row */
+  readonly rowMouseover = output<TableRowEventContext>();
+
+  /** @zh 点击单元格 @en Emitted when a cell is clicked */
+  readonly cellClick = output<TableCellClickEvent>();
+
+  /** @zh 表格滚动 @en Emitted when the table scrolls, horizontally or vertically */
+  readonly scrollChange = output<TableScrollEvent>();
+
+  /** @zh 表格横向滚动 @en Emitted when the table scrolls horizontally */
+  readonly scrollXChange = output<TableScrollEvent>();
+
+  /** @zh 表格纵向滚动 @en Emitted when the table scrolls vertically */
+  readonly scrollYChange = output<TableScrollEvent>();
+
+  /**
+   * @zh 表格顶部内容，渲染在表格内容之上 @en Content rendered above the table content
+   * @defaultValue undefined
+   */
+  readonly topContent = input<Content>(undefined);
+
+  /**
+   * @zh 表格底部内容，渲染在分页之上 @en Content rendered below the table content, above the pager
+   * @defaultValue undefined
+   */
+  readonly bottomContent = input<Content>(undefined);
+
+  /**
+   * @zh 表头下方的整行内容 @en Full-width content rendered as the first body row
+   * @defaultValue undefined
+   */
+  readonly firstFullRow = input<Content>(undefined);
+
+  /**
+   * @zh 表尾上方的整行内容 @en Full-width content rendered as the last body row
+   * @defaultValue undefined
+   */
+  readonly lastFullRow = input<Content>(undefined);
+
+  /**
+   * @zh 单元格内容为空时的占位，支持回调按单元格取值
+   * @en Placeholder rendered when a cell is empty, a callback can return per-cell content
+   * @defaultValue undefined
+   */
+  readonly cellEmptyContent = input<TableCellEmptyContent>(undefined);
+
+  /** @zh 表尾数据，渲染在 `tfoot` 里 @en Footer data rendered in `tfoot` @defaultValue [] */
+  readonly footData = input<TableRow[]>([]);
+
+  /**
+   * @zh 表尾整行总结内容，与 `footData` 二选一 @en Full-width footer summary, alternative to `footData`
+   * @defaultValue undefined
+   */
+  readonly footerSummary = input<Content>(undefined);
+
+  /**
+   * @zh 表尾单元格合并回调 @en Merge footer cells by returning `{ rowspan, colspan }`
+   * @defaultValue undefined
+   */
+  readonly rowspanAndColspanInFooter = input<
+    ((params: TableRowspanParams) => TableRowspan | undefined) | undefined
+  >(undefined);
+
+  /**
+   * @zh 固定行数，`[顶部固定行数, 底部固定行数]`，固定行不随内容滚动
+   * @en Fixed row counts as `[top, bottom]`, fixed rows stay in place while the content scrolls
+   * @defaultValue []
+   */
+  readonly fixedRows = input<number[]>([]);
+
+  /**
+   * @zh 行属性，支持对象、回调或它们的数组，`class` / `style` 会被合并
+   * @en Row attributes: an object, a callback, or an array of both
+   * @defaultValue undefined
+   */
+  readonly rowAttributes = input<TableRowAttributes | undefined>(undefined);
+
+  /**
+   * @zh 行类名，支持字符串、回调、按行下标或行 key 取值的映射、以及它们的数组
+   * @en Row class names: a string, a callback, a map keyed by row index or row key, or an array of them
+   * @defaultValue undefined
+   */
+  readonly rowClassName = input<TableRowClassName | undefined>(undefined);
+
+  /**
+   * @zh 表格内容宽度，超过容器宽度时出现横向滚动条
+   * @en Width of the table content, a horizontal scrollbar shows up when it exceeds the container
+   * @defaultValue undefined
+   */
+  readonly tableContentWidth = input<string | number | undefined>(undefined);
+
+  /**
+   * @zh 加载状态配置，可覆盖文案、图标与遮罩 @en Loading config overriding the text, indicator and overlay
+   * @defaultValue undefined
+   */
+  readonly loadingProps = input<TableLoadingProps | undefined>(undefined);
+
+  /**
+   * @zh 语言配置，传入的字段优先于同名属性（如 `empty`、`loadingText`、`size`）
+   * @en Locale config, its fields take precedence over the same-named props
+   * @defaultValue undefined
+   */
+  readonly locale = input<TableLocale | undefined>(undefined);
+
   protected readonly sizes = TABLE_SIZES;
   protected readonly aligns = TABLE_ALIGNS;
   protected readonly layouts = TABLE_LAYOUTS;
@@ -338,6 +578,9 @@ export class TTable implements OnDestroy {
 
   /** 内部展开行 key，受控时忽略。 */
   private readonly innerExpandedRowKeys = signal<Array<string | number>>([]);
+
+  /** 内部高亮行 key，受控时忽略。 */
+  private readonly innerActiveRowKeys = signal<Array<string | number>>([]);
 
   /** 非受控分页时内部记录的页码 / 每页条数。 */
   private readonly innerPagination = signal<{ current: number; pageSize: number } | null>(null);
@@ -408,6 +651,74 @@ export class TTable implements OnDestroy {
 
   private readonly expandedKeySet = computed(() => new Set(this.expandedKeys()));
 
+  /** 当前高亮行 key。 */
+  protected readonly activeKeys = computed(() => this.activeRowKeys() ?? this.innerActiveRowKeys());
+
+  private readonly activeKeySet = computed(() => new Set(this.activeKeys()));
+
+  /** 键盘操作的当前行下标，-1 表示还没进入表格。 */
+  private readonly currentOperationRowIndex = signal(-1);
+
+  /** 键盘移动时高亮的行 key，仅在 `keyboardRowHover` 打开时使用。 */
+  private readonly hoveredRowKey = signal<string | number | null>(null);
+
+  /** 是否按下了 Shift（区域选择）。 */
+  private isShiftPressed = false;
+
+  /** Shift 区域选择的起点行下标。 */
+  private areaSelectionStartIndex = -1;
+
+  /** 固定行的上下偏移（px），按实际行高测量得到。 */
+  private readonly fixedRowOffsets = signal<{ top: number[]; bottom: number[] }>({ top: [], bottom: [] });
+
+  /** 上一次测量固定行时的表格形态，变了才重新测量。 */
+  private fixedRowSignature = '';
+
+  /** 生效的表格尺寸：`locale.size` 优先。 */
+  protected readonly effectiveSize = computed<TableSize>(() => this.locale()?.size ?? this.size());
+
+  /** 生效的空数据内容：`locale.empty` 优先。 */
+  protected readonly emptyContent = computed<Content>(() => this.locale()?.empty ?? this.empty());
+
+  /** 空数据模板，模板内容优先于文本。 */
+  protected readonly emptyTemplate = computed(() => asTemplate(this.emptyContent()));
+
+  /** 空数据文本。 */
+  protected readonly emptyText = computed(() => contentText(this.emptyContent()));
+
+  /** 生效的加载文案：`loadingProps.text` → `locale.loadingText` → `loadingText`。 */
+  protected readonly loadingContent = computed<Content>(
+    () => this.loadingProps()?.text ?? this.locale()?.loadingText ?? this.loadingText(),
+  );
+
+  /** 加载模板。 */
+  protected readonly loadingTemplate = computed(() => asTemplate(this.loadingContent()));
+
+  /** 加载文本。 */
+  protected readonly loadingTextContent = computed(() => contentText(this.loadingContent()));
+
+  /** 自定义加载图标，`loadingProps.indicator === false` 时回落成默认图标。 */
+  protected readonly loadingIndicator = computed(() => {
+    const indicator = this.loadingProps()?.indicator;
+    return typeof indicator === 'boolean' ? null : asTemplate(indicator ?? null);
+  });
+
+  /** 是否显示加载图标，`loadingProps.indicator === false` 时隐藏。 */
+  protected readonly loadingShowIcon = computed(() => this.loadingProps()?.indicator !== false);
+
+  /** 加载图标的尺寸类名，上游 loading 用 `t-size-s` / `m` / `l`。 */
+  protected readonly loadingSizeClass = computed(() => {
+    const size = this.loadingProps()?.size;
+    const token = size === 'medium' ? 'm' : size === 'large' ? 'l' : 's';
+    return `t-size-${token}`;
+  });
+
+  /** 是否显示加载遮罩。 */
+  protected readonly loadingOverlay = computed(() => this.loadingProps()?.showOverlay ?? true);
+
+  /** 表头 / 表尾是否吸顶吸底：传了高度时表头贴住顶部、表尾贴住底部。 */
+  protected readonly isFixedHeader = computed(() => this.height() !== undefined || this.maxHeight() !== undefined);
+
   /** 分页状态：当前页 / 每页条数 / 总条数，非受控时用内部值兜底。 */
   protected readonly paginationState = computed(() => {
     const config = this.pagination();
@@ -450,11 +761,17 @@ export class TTable implements OnDestroy {
 
   private readonly contentRef = viewChild<ElementRef<HTMLElement>>('content');
 
+  /** 表格根元素，键盘操作时用来聚焦。 */
+  private readonly rootRef = viewChild<ElementRef<HTMLElement>>('root');
+
   /** 实测列宽（colKey → px）。固定列偏移优先用它，取不到时回退到列配置的数字宽度。 */
   private readonly colWidths = signal<Record<string, number>>({});
 
   /** 横向滚动状态，用于决定固定列两侧的阴影分界线是否显示。 */
   private readonly scrollState = signal({ scrollLeft: 0, contentWidth: 0, viewportWidth: 0 });
+
+  /** 上一次滚动位置，用来判断横向 / 纵向滚动是否真的变了。 */
+  private readonly lastScrollPosition = { left: 0, top: 0 };
 
   private resizeObserver?: ResizeObserver;
 
@@ -516,6 +833,23 @@ export class TTable implements OnDestroy {
     return scroll.scrollLeft + scroll.viewportWidth < scroll.contentWidth - 1;
   });
 
+  /** 内容是否横向溢出容器，用于 `t-table--width-overflow`。 */
+  protected readonly hasHorizontalOverflow = computed(() => {
+    const scroll = this.scrollState();
+    return scroll.contentWidth > scroll.viewportWidth + 1;
+  });
+
+  /** 滚动容器的类名：分界线阴影挂在 `.t-table__content` 上，与样式文件一致。 */
+  protected readonly contentClasses = computed(() =>
+    [
+      't-table__content',
+      this.showLeftShadow() ? 't-table__content--scrollable-to-left' : '',
+      this.showRightShadow() ? 't-table__content--scrollable-to-right' : '',
+    ]
+      .filter(Boolean)
+      .join(' '),
+  );
+
   private readonly cellDirectives = contentChildren(TTableCell);
 
   /** colKey → 单元格模板。 */
@@ -533,39 +867,16 @@ export class TTable implements OnDestroy {
    * 再把它覆盖到的其余单元格标记为 skipped（渲染时直接跳过）。
    */
   private readonly cellSpans = computed<Map<string, TableCellSpan>>(() => {
-    const map = new Map<string, TableCellSpan>();
     const handler = this.rowspanAndColspan();
-    if (!handler) return map;
+    if (!handler) return new Map<string, TableCellSpan>();
+    return buildCellSpans(this.rows(), this.displayColumns(), this.rowKey(), handler);
+  });
 
-    const rows = this.rows();
-    const columns = this.displayColumns();
-    const rowKey = this.rowKey();
-
-    rows.forEach((row, rowIndex) => {
-      columns.forEach((col, colIndex) => {
-        const key = cellKeyOf(row, col, rowIndex, colIndex, rowKey);
-        const state = map.get(key) ?? {};
-        const result = handler({ row, col, rowIndex, colIndex });
-        if (result?.rowspan) state.rowspan = result.rowspan;
-        if (result?.colspan) state.colspan = result.colspan;
-        if (state.rowspan || state.colspan) map.set(key, state);
-
-        const maxRowIndex = rowIndex + (state.rowspan ?? 1);
-        const maxColIndex = colIndex + (state.colspan ?? 1);
-        for (let i = rowIndex; i < maxRowIndex; i += 1) {
-          for (let j = colIndex; j < maxColIndex; j += 1) {
-            if (i === rowIndex && j === colIndex) continue;
-            if (!rows[i] || !columns[j]) return;
-            const coveredKey = cellKeyOf(rows[i], columns[j], i, j, rowKey);
-            const covered = map.get(coveredKey) ?? {};
-            covered.skipped = true;
-            map.set(coveredKey, covered);
-          }
-        }
-      });
-    });
-
-    return map;
+  /** 表尾的单元格合并状态，规则与表体一致。 */
+  private readonly footerSpans = computed<Map<string, TableCellSpan>>(() => {
+    const handler = this.rowspanAndColspanInFooter();
+    if (!handler) return new Map<string, TableCellSpan>();
+    return buildCellSpans(this.footData(), this.displayColumns(), this.rowKey(), handler);
   });
 
   protected readonly classes = computed(() =>
@@ -575,16 +886,17 @@ export class TTable implements OnDestroy {
       this.stripe() ? 't-table--striped' : '',
       this.hover() ? 't-table--hoverable' : '',
       `t-table--align-${this.verticalAlign()}`,
-      SIZE_CLASS[this.size()],
+      SIZE_CLASS[this.effectiveSize()],
       this.loading() ? 't-table--loading' : '',
       this.selectColumn() ? 't-table--row-select' : '',
       this.showExpandColumn() ? 't-table--row-expandable' : '',
       this.hasMultiHeader() ? 't-table--multiple-header' : '',
-      this.rowspanAndColspan() ? 't-table--rowspan-colspan' : '',
+      this.rowspanAndColspan() || this.rowspanAndColspanInFooter() ? 't-table--rowspan-colspan' : '',
       this.hasFixedColumn() ? 't-table--column-fixed' : '',
       this.resizable() ? 't-table--column-resizable' : '',
-      this.showLeftShadow() ? 't-table__content--scrollable-to-left' : '',
-      this.showRightShadow() ? 't-table__content--scrollable-to-right' : '',
+      this.isFixedHeader() ? 't-table--header-fixed' : '',
+      this.activeRowType() ? `t-table__row--active-${this.activeRowType()}` : '',
+      this.hasHorizontalOverflow() ? 't-table--width-overflow' : '',
     ]
       .filter(Boolean)
       .join(' '),
@@ -614,6 +926,10 @@ export class TTable implements OnDestroy {
    * 否则交回 100%，让浏览器按剩余空间分配（与上游一致）。
    */
   protected readonly tableWidth = computed(() => {
+    // 显式传了表宽就以它为准
+    const contentWidth = this.tableContentWidth();
+    if (contentWidth !== undefined) return this.toLength(contentWidth);
+
     const columns = this.displayColumns();
     if (!columns.length) return null;
 
@@ -745,6 +1061,13 @@ export class TTable implements OnDestroy {
       });
     });
 
+    effect(() => {
+      const defaultActive = this.defaultActiveRowKeys();
+      untracked(() => {
+        if (defaultActive !== undefined) this.innerActiveRowKeys.set([...defaultActive]);
+      });
+    });
+
     // 固定列需要实测宽度：首屏渲染后量一次，列 / 数据变化后再量
     afterNextRender(() => this.setupFixedColumns());
 
@@ -759,6 +1082,71 @@ export class TTable implements OnDestroy {
     this.resizeObserver?.disconnect();
     document.removeEventListener('mousemove', this.handleResizeMove);
     document.removeEventListener('mouseup', this.handleResizeEnd);
+  }
+
+  /** 渲染后测量固定行高度，算出吸顶 / 吸底偏移。 */
+  ngAfterViewChecked(): void {
+    this.measureFixedRows();
+  }
+
+  /**
+   * 测量固定行。
+   *
+   * `fixedRows` 只给出「顶部 / 底部固定几行」，每行的 `top` / `bottom` 需要按真实
+   * 行高累加，否则多行同时固定会叠在一起；行高只能渲染后读，因此放在视图检查里，
+   * 并用签名挡住没有变化的重测。
+   */
+  private measureFixedRows(): void {
+    const [topCount = 0, bottomCount = 0] = this.fixedRows();
+    const rows = this.rows();
+
+    if ((!topCount && !bottomCount) || !rows.length) {
+      if (this.fixedRowSignature) {
+        this.fixedRowSignature = '';
+        this.fixedRowOffsets.set({ top: [], bottom: [] });
+      }
+      return;
+    }
+
+    const widthSignature = [...this.columnWidths().values()].join(',');
+    const signature = [
+      topCount,
+      bottomCount,
+      rows.length,
+      this.keyOf(rows[0]),
+      this.keyOf(rows[rows.length - 1]),
+      widthSignature,
+    ].join(':');
+    if (signature === this.fixedRowSignature) return;
+
+    const body = this.contentRef()?.nativeElement.querySelector('tbody');
+    if (!body) return;
+
+    const elements = Array.from(body.children).filter(
+      (element): element is HTMLTableRowElement =>
+        element instanceof HTMLTableRowElement &&
+        !element.classList.contains('t-table__row--full') &&
+        !element.classList.contains('t-table__expanded-row'),
+    );
+    const fallbackHeight = this.scroll()?.rowHeight ?? 47;
+    const heightOf = (index: number): number => elements[index]?.offsetHeight || fallbackHeight;
+
+    const top: number[] = [];
+    let offset = this.isFixedHeader() ? this.headerHeight() : 0;
+    for (let index = 0; index < topCount && index < rows.length; index += 1) {
+      top[index] = Math.round(offset);
+      offset += heightOf(index);
+    }
+
+    const bottom: number[] = [];
+    let bottomOffset = 0;
+    for (let index = rows.length - 1; index >= 0 && index >= rows.length - bottomCount; index -= 1) {
+      bottom[index] = Math.round(bottomOffset);
+      bottomOffset += heightOf(index);
+    }
+
+    this.fixedRowSignature = signature;
+    this.fixedRowOffsets.set({ top, bottom });
   }
 
   /** 拖拽中的临时状态。 */
@@ -904,11 +1292,23 @@ export class TTable implements OnDestroy {
       this.scrollTop.set(element.scrollTop);
       this.viewportHeight.set(element.clientHeight);
     }
+
+    // 滚动事件只在与上一次不同的时候抛，避免高频重复
+    const position = { left: element.scrollLeft, top: element.scrollTop };
+    if (position.left !== this.lastScrollPosition.left) {
+      this.lastScrollPosition.left = position.left;
+      this.scrollXChange.emit({ e: event as unknown as WheelEvent });
+    }
+    if (position.top !== this.lastScrollPosition.top) {
+      this.lastScrollPosition.top = position.top;
+      this.scrollYChange.emit({ e: event as unknown as WheelEvent });
+    }
+    this.scrollChange.emit({ e: event as unknown as WheelEvent });
   }
 
   /** 表格分页器的尺寸：large 没有对应分页尺寸，回落到 medium。 */
   protected readonly paginationSize = computed<'small' | 'medium'>(() =>
-    this.size() === 'small' ? 'small' : 'medium',
+    this.effectiveSize() === 'small' ? 'small' : 'medium',
   );
 
   /** 翻页：非受控时记下页码，随后把滚动位置复位并抛出事件。 */
@@ -982,19 +1382,237 @@ export class TTable implements OnDestroy {
     this.toggleExpand(row);
   }
 
-  /** 点击行：按需展开 / 选中。 */
-  protected handleRowClick(row: TableRow): void {
+  /** 点击行：抛出事件，并按需高亮 / 展开 / 选中。 */
+  protected handleRowClick(event: Event, row: TableRow, rowIndex: number): void {
+    if (this.activeRowType()) {
+      this.activateRow(rowIndex);
+      // 键盘操作要能接着用，点击后把焦点移到表格上
+      this.rootRef()?.nativeElement.focus({ preventScroll: true });
+    }
+    this.rowClick.emit({ row, index: rowIndex, e: event });
     if (this.expandOnRowClick() && this.showExpandColumn()) this.toggleExpand(row);
     if (this.selectOnRowClick() && this.selectColumn()) this.handleSelectRow(row, !this.isRowSelected(row));
   }
 
-  protected rowClasses(row: TableRow): string {
-    return [
-      this.isRowSelected(row) ? 't-table__row--selected' : '',
-      this.showExpandColumn() ? (this.isRowExpanded(row) ? 't-table__row--expanded' : 't-table__row--folded') : '',
-    ]
-      .filter(Boolean)
-      .join(' ');
+  /** 其余行事件：双击 / 按下 / 松开 / 进入 / 离开 / 移动。 */
+  protected handleRowEvent(
+    type: 'rowDblclick' | 'rowMousedown' | 'rowMouseup' | 'rowMouseenter' | 'rowMouseleave' | 'rowMouseover',
+    event: Event,
+    row: TableRow,
+    rowIndex: number,
+  ): void {
+    this[type].emit({ row, index: rowIndex, e: event });
+  }
+
+  /** 点击单元格。 */
+  protected handleCellClick(event: Event, row: TableRow, col: TableColumn, rowIndex: number, colIndex: number): void {
+    this.cellClick.emit({ row, col, rowIndex, colIndex, e: event });
+  }
+
+  /** 行类名：固定行 → 自定义类名 → 高亮 / 键盘悬停。 */
+  protected rowClasses(row: TableRow, rowIndex: number): string {
+    const key = this.keyOf(row);
+    const classes = [...this.fixedRowClasses(rowIndex), ...this.customRowClasses(row, rowIndex, 'body')];
+    if (this.activeKeySet().has(key)) classes.push('t-table__row--active');
+    if (this.hoveredRowKey() === key) classes.push('t-table__row--hover');
+    return classes.filter(Boolean).join(' ');
+  }
+
+  /** 行内联样式：固定行要把 `top` / `bottom` 偏移写到行上。 */
+  protected rowStyle(rowIndex: number): Record<string, string> | null {
+    const offsets = this.fixedRowOffsets();
+    const style: Record<string, string> = {};
+    const top = offsets.top[rowIndex];
+    const bottom = offsets.bottom[rowIndex];
+    if (top !== undefined) style['top'] = `${top}px`;
+    if (bottom !== undefined) style['bottom'] = `${bottom}px`;
+    return Object.keys(style).length ? style : null;
+  }
+
+  /** 行属性：多个来源按顺序合并，`class` 拼接、`style` 逐项合并。 */
+  protected rowAttributesOf(row: TableRow, rowIndex: number, type: 'body' | 'foot'): TableRowAttributesValue | null {
+    const source = this.rowAttributes();
+    if (!source) return null;
+
+    const params: TableRowAttributesParams = { row, rowIndex, type };
+    const items = Array.isArray(source) ? source : [source];
+    const attributes: TableRowAttributesValue = {};
+    const classNames: unknown[] = [];
+    const styles: Record<string, unknown> = {};
+
+    for (const item of items) {
+      const value = typeof item === 'function' ? item(params) : item;
+      if (!value) continue;
+      for (const [name, entry] of Object.entries(value)) {
+        if (name === 'class') classNames.push(entry);
+        else if (name === 'style') Object.assign(styles, entry as Record<string, unknown>);
+        else attributes[name] = entry;
+      }
+    }
+
+    if (classNames.length) attributes['class'] = classNames;
+    if (Object.keys(styles).length) attributes['style'] = styles;
+    return Object.keys(attributes).length ? attributes : null;
+  }
+
+  /** 自定义行类名，支持字符串 / 回调 / 映射 / 数组。 */
+  private customRowClasses(row: TableRow, rowIndex: number, type: 'body' | 'foot'): string[] {
+    const source = this.rowClassName();
+    if (!source) return [];
+
+    const params: TableRowClassNameParams = { row, rowIndex, rowKey: this.keyOf(row), type };
+    const items = Array.isArray(source) ? source : [source];
+    return items.flatMap((item) => {
+      if (typeof item === 'function') return splitClasses(item(params));
+      if (typeof item === 'string') return splitClasses(item);
+      // 对象形式先用行下标、再用行 key 取值，与上游一致
+      return splitClasses(item[rowIndex] ?? item[params.rowKey]);
+    });
+  }
+
+  /** 固定行的类名：顶部固定、底部固定、底部第一行、以及它上面那行的去边框。 */
+  private fixedRowClasses(rowIndex: number): string[] {
+    const [topCount = 0, bottomCount = 0] = this.fixedRows();
+    if (!topCount && !bottomCount) return [];
+
+    const classes: string[] = [];
+    if (topCount && rowIndex < topCount) classes.push('t-table__row--fixed-top');
+
+    const firstFixedBottomRow = this.rows().length - bottomCount;
+    if (bottomCount && rowIndex >= firstFixedBottomRow) {
+      classes.push('t-table__row--fixed-bottom');
+      if (rowIndex === firstFixedBottomRow) classes.push('t-table__row--fixed-bottom-first');
+      if (rowIndex === firstFixedBottomRow - 1) classes.push('t-table__row--without-border-bottom');
+    }
+    return classes;
+  }
+
+  /** 高亮行：单选取代、多选累加，再次操作取消。 */
+  private activateRow(rowIndex: number, source: 'mouse' | 'keyboard' = 'mouse'): void {
+    const rows = this.rows();
+    const row = rows[rowIndex];
+    if (!row) return;
+
+    const key = this.keyOf(row);
+    const keys = this.activeKeys();
+    const isActive = keys.includes(key);
+
+    if (isActive && source === 'keyboard' && this.disableSpaceInactiveRow()) {
+      this.activeRowAction.emit({ action: 'space-one-selection', activeRowList: this.activeRowList(keys) });
+      return;
+    }
+
+    const next =
+      this.activeRowType() === 'single'
+        ? isActive
+          ? []
+          : [key]
+        : isActive
+          ? keys.filter((item) => item !== key)
+          : [...keys, key];
+
+    this.commitActiveRows(next, isActive ? 'inactive' : 'active', row);
+  }
+
+  /** Shift 区域选择：把起止行之间的行全部高亮。 */
+  private activateRange(fromIndex: number, toIndex: number): void {
+    const rows = this.rows();
+    const start = Math.max(0, Math.min(fromIndex, toIndex));
+    const end = Math.min(rows.length - 1, Math.max(fromIndex, toIndex));
+    if (end < start) return;
+
+    const keys = rows.slice(start, end + 1).map((row) => this.keyOf(row));
+    const next = this.activeRowType() === 'single' ? keys.slice(0, 1) : keys;
+    this.activeRowAction.emit({ action: 'shift-area-selection', activeRowList: this.activeRowList(next) });
+    this.commitActiveRows(next, 'active', rows[end]);
+  }
+
+  private commitActiveRows(
+    keys: Array<string | number>,
+    type: 'active' | 'inactive',
+    currentRowData?: TableRow,
+  ): void {
+    if (this.activeRowKeys() === undefined) this.innerActiveRowKeys.set([...keys]);
+    this.activeChange.emit({
+      activeRowKeys: [...keys],
+      activeRowList: this.activeRowList(keys),
+      currentRowData,
+      type,
+    });
+  }
+
+  private activeRowList(keys: Array<string | number>): Array<TableActiveRowItem> {
+    const set = new Set(keys);
+    const list: Array<TableActiveRowItem> = [];
+    this.rows().forEach((row, rowIndex) => {
+      if (set.has(this.keyOf(row))) list.push({ row, rowIndex });
+    });
+    return list;
+  }
+
+  private clearActiveRows(): void {
+    this.activeRowAction.emit({ action: 'clear', activeRowList: [] });
+    this.commitActiveRows([], 'inactive');
+  }
+
+  /**
+   * 表格键盘操作，语义照抄上游 `useRowHighlight`：
+   * 上下键移动当前行（单选时直接高亮）、空格切换、Shift + 空格区域选择、
+   * Esc / `c` 清空、`Ctrl + A` / `a` 在多选下全选。
+   */
+  protected handleTableKeydown(event: KeyboardEvent): void {
+    if (!this.activeRowType()) return;
+
+    const rows = this.rows();
+    if (!rows.length) return;
+
+    const current = this.currentOperationRowIndex();
+    const key = event.key;
+
+    if (key === 'Shift') {
+      this.isShiftPressed = true;
+      this.areaSelectionStartIndex = current;
+      return;
+    }
+
+    if (key === 'ArrowDown' || key === 'ArrowUp') {
+      event.preventDefault();
+      const step = key === 'ArrowDown' ? 1 : -1;
+      const next = Math.min(Math.max(current + step, 0), rows.length - 1);
+      this.currentOperationRowIndex.set(next);
+      this.hoveredRowKey.set(this.keyboardRowHover() ? this.keyOf(rows[next]) : null);
+      if (this.activeRowType() === 'single') this.activateRow(next, 'keyboard');
+      return;
+    }
+
+    if (key === ' ') {
+      event.preventDefault();
+      if (current < 0) return;
+      if (this.isShiftPressed && this.areaSelectionStartIndex >= 0) {
+        this.activateRange(this.areaSelectionStartIndex, current);
+        return;
+      }
+      this.activateRow(current, 'keyboard');
+      return;
+    }
+
+    if (key === 'Escape' || key === 'c' || key === 'C') {
+      this.clearActiveRows();
+      return;
+    }
+
+    if ((key === 'a' || key === 'A') && (event.ctrlKey || event.metaKey) && this.activeRowType() === 'multiple') {
+      event.preventDefault();
+      const keys = rows.map((row) => this.keyOf(row));
+      this.activeRowAction.emit({ action: 'select-all', activeRowList: this.activeRowList(keys) });
+      this.commitActiveRows(keys, 'active');
+    }
+  }
+
+  protected handleTableKeyup(event: KeyboardEvent): void {
+    if (event.key !== 'Shift') return;
+    this.isShiftPressed = false;
+    this.areaSelectionStartIndex = -1;
   }
 
   private toggleExpand(row: TableRow): void {
@@ -1148,7 +1766,12 @@ export class TTable implements OnDestroy {
     return { $implicit: row, row, rowIndex };
   }
 
-  protected cellContext(row: TableRow, col: TableColumn, rowIndex: number, colIndex: number): Record<string, unknown> {
+  protected cellContext(
+    row: TableRow,
+    col: TableColumn,
+    rowIndex: number,
+    colIndex: number,
+  ): TableCellContext & { $implicit: TableRow } {
     const value = row?.[col.colKey];
     // $implicit 与上游 slot 参数保持一致（整行），单元格值用 value 单独暴露
     return { $implicit: row, row, value, rowIndex, col, colIndex };
@@ -1167,6 +1790,58 @@ export class TTable implements OnDestroy {
     }
     return value === undefined || value === null ? '' : String(value);
   }
+
+  /** 单元格是否为空：既没有单元格模板也没有文本。 */
+  protected isCellEmpty(row: TableRow, col: TableColumn, rowIndex: number, colIndex: number): boolean {
+    if (this.cellTemplate(col)) return false;
+    return !this.cellText(row, col, rowIndex, colIndex);
+  }
+
+  /** 空单元格占位内容。 */
+  protected cellEmptyOf(row: TableRow, col: TableColumn, rowIndex: number, colIndex: number): Content {
+    const source = this.cellEmptyContent();
+    if (source === undefined) return '';
+    if (typeof source === 'function') return source(this.cellContext(row, col, rowIndex, colIndex)) ?? '';
+    return source;
+  }
+
+  /** 是否有表尾：有汇总内容或有表尾数据。 */
+  protected readonly hasFooter = computed(
+    () => !isContentEmpty(this.footerSummary()) || this.footData().length > 0,
+  );
+
+  /** 表尾单元格内容：优先 `col.foot`，否则取同名字段。 */
+  protected footerCell(row: TableRow, col: TableColumn, rowIndex: number, colIndex: number): Content {
+    const foot = col.foot;
+    if (typeof foot === 'function') return foot(this.cellContext(row, col, rowIndex, colIndex)) ?? '';
+    if (foot !== undefined) return foot;
+    const value = row?.[col.colKey];
+    return value === undefined || value === null ? '' : String(value);
+  }
+
+  /** 表尾的单元格合并状态。 */
+  protected footerSpanOf(row: TableRow, col: TableColumn, rowIndex: number, colIndex: number): TableCellSpan {
+    return this.footerSpans().get(cellKeyOf(row, col, rowIndex, colIndex, this.rowKey())) ?? EMPTY_CELL_SPAN;
+  }
+
+  /** 表尾行的自定义类名，`rowClassName` 的 `type` 为 `foot`。 */
+  protected footerRowClasses(row: TableRow, rowIndex: number): string {
+    return this.customRowClasses(row, rowIndex, 'foot').join(' ');
+  }
+
+  /** 内容入参统一转成模板 / 文本，模板里直接调用。 */
+  protected templateOf(value: Content | null | undefined): TemplateRef<unknown> | null {
+    return asTemplate(value);
+  }
+
+  protected textOf(value: Content | null | undefined): string {
+    return contentText(value);
+  }
+
+  /** 没有任何数据、也没有整行内容时才显示空态。 */
+  protected readonly isEmpty = computed(
+    () => !this.rows().length && !this.loading() && !this.firstFullRow() && !this.lastFullRow(),
+  );
 
   protected cellClasses(col: TableColumn): string {
     const fixed = col.fixed;
