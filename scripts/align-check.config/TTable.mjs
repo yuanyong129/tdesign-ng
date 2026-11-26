@@ -23,16 +23,16 @@ export default {
     'defaultExpandedRowKeys',
     'expandOnRowClick',
     'expandIcon',
+    // 下面这些同样来自上游 TdPrimaryTableProps，本配置对比的是 TdBaseTableProps，故记为 Angular 侧属性
+    'displayColumns',
+    'defaultDisplayColumns',
+    'rowSelectionType',
+    'reserveSelectedRowOnPaginate',
+    'expandedRow',
   ],
   ignoreUpstream: {
-    // 吸顶吸底一族：需要先接 TAffix 并测量固定区域高度，当前版本未实现
-    'attach': '[D1] 吸顶表头 / 吸底表尾 / 加载遮罩的挂载点，等 TAffix 接入后再透传',
-    'headerAffixedTop': '[D1] 表头吸顶未实现，需要 TAffix + 表头高度测量',
-    'headerAffixProps': '[D1] 表头吸顶未实现，AffixProps 待吸顶落地后透传',
-    'footerAffixedBottom': '[D1] 表尾吸底未实现，需要 TAffix + 表尾高度测量',
-    'footerAffixProps': '[D1] 表尾吸底未实现，AffixProps 待吸底落地后透传',
-    'paginationAffixedBottom': '[D1] 分页吸底未实现，等 TAffix 接入后再做',
-    'horizontalScrollAffixedBottom': '[D1] 横向滚动条吸底未实现，需要自绘滚动条容器',
+    // 吸顶表头 / 吸底表尾 / 吸底分页 / 吸底横向滚动条均已接 TAffix 实现
+    'attach': '[D2] 挂载点需要 TPopup / TLoading 支持 attach 才能透传，当前两者都没有该能力',
     'lazyLoad': '[D1] 虚拟滚动已按可视区渲染，懒加载需要行高观测与占位占高，暂未实现',
     // 事件：Angular 侧一律用 outputs 表达，不用 Vue 的 onXxx 输入
     'onActiveChange': 'Angular 用 (activeChange) 输出',

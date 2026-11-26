@@ -3,11 +3,13 @@ import { ApiTable } from '../../api/api-table.component';
 import { DemoBlock } from '../demo-block';
 import { PageNav } from '../page-nav';
 import { DemoTableActiveRow } from './demos/table-active-row';
+import { DemoTableAffix } from './demos/table-affix';
 import { DemoTableBasic } from './demos/table-basic';
 import { DemoTableCell } from './demos/table-cell';
 import { DemoTableExpand } from './demos/table-expand';
 import { DemoTableExpandClick } from './demos/table-expand-click';
 import { DemoTableCustomRow } from './demos/table-custom-row';
+import { DemoTableDisplayColumns } from './demos/table-display-columns';
 import { DemoTableFilter } from './demos/table-filter';
 import { DemoTableFooter } from './demos/table-footer';
 import { DemoTableFullRow } from './demos/table-full-row';
@@ -48,9 +50,11 @@ import { DemoTableStyle } from './demos/table-style';
     DemoTableVirtual,
     DemoTableResizable,
     DemoTableActiveRow,
+    DemoTableAffix,
     DemoTableCustomRow,
     DemoTableFooter,
     DemoTableFullRow,
+    DemoTableDisplayColumns,
   ],
   template: `
     <div class="docs-page">
@@ -202,6 +206,22 @@ import { DemoTableStyle } from './demos/table-style';
         description="rowClassName 追加行类名，rowAttributes 注入属性与内联样式，都支持回调；topContent / bottomContent 在表格上下加说明。"
       >
         <demo-table-custom-row />
+      </docs-demo>
+
+      <docs-demo
+        id="table-affix"
+        title="吸顶表头与吸底表尾"
+        description="headerAffixedTop / footerAffixedBottom / paginationAffixedBottom / horizontalScrollAffixedBottom 借 TAffix 把表头、表尾、分页器与横向滚动条吸附到视口边缘，都支持传入 AffixProps 对象。"
+      >
+        <demo-table-affix />
+      </docs-demo>
+
+      <docs-demo
+        id="table-display-columns"
+        title="显示列与展开内容"
+        description="displayColumns 受控决定渲染哪些列，expandedRow 直接给出展开内容，reserveSelectedRowOnPaginate 控制翻页后是否保留其他页的选中项。"
+      >
+        <demo-table-display-columns />
       </docs-demo>
 
       <h2 class="docs-section__title" id="table-api">API</h2>

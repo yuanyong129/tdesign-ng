@@ -21,6 +21,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import { TAffix, type AffixScrollContainer } from '../affix';
 import { TButton } from '../button';
 import { TCheckbox, TCheckboxGroup } from '../checkbox';
 import { TInput } from '../input';
@@ -43,10 +44,12 @@ import {
   TableActiveRowActionEvent,
   TableActiveRowItem,
   TableActiveRowType,
+  TableAffixProps,
   TableCellClickEvent,
   TableCellContext,
   TableColumn,
   TableExpandChangeEvent,
+  TableExpandedRowContent,
   TableFilterChangeEvent,
   TableFilterChangeContext,
   TableFilterType,
@@ -100,7 +103,7 @@ function columnDepth(columns: TableColumn[], depth = 1): number {
   return max;
 }
 
-/** 列包含的叶子列数，分组列即为其 colspan。 */
+/** 列包含的叶子列数，分组列即为子列 colspan 之和。 */
 function leafCount(col: TableColumn): number {
   if (!col.children?.length) return 1;
   return col.children.reduce((sum, child) => sum + leafCount(child), 0);
@@ -117,10 +120,37 @@ function flattenColumns(columns: TableColumn[]): TableColumn[] {
 }
 
 /**
- * 按层级生成表头矩阵，第 0 行为最上层。
- * 与 TDesign 的 useMultiHeader 一致：分组列 rowspan 1、colspan 为叶子数；
- * 叶子列 rowspan 为剩余行数、colspan 1。
+ * 按显示列过滤列树，并按 displayColumns 里的顺序重排。
+ * 分组列保留可见子列，全部子列被隐藏时整组一起隐藏。
  */
+function filterColumnsByKeys(columns: TableColumn[], keys: string[] | undefined): TableColumn[] {
+  if (!keys) return columns;
+
+  const order = new Map(keys.map((key, index) => [key, index]));
+  const rankOf = (column: TableColumn): number => {
+    const own = order.get(column.colKey);
+    if (own !== undefined) return own;
+    const children = column.children ?? [];
+    return children.reduce((rank, child) => Math.min(rank, rankOf(child)), Number.POSITIVE_INFINITY);
+  };
+
+  const filtered: TableColumn[] = [];
+  for (const column of columns) {
+    if (column.children?.length) {
+      const children = filterColumnsByKeys(column.children, keys);
+      if (children.length) filtered.push({ ...column, children });
+      continue;
+    }
+    if (order.has(column.colKey)) filtered.push(column);
+  }
+
+  return filtered.sort((a, b) => rankOf(a) - rankOf(b));
+}
+
+/**
+ * 按层级生成表头矩阵，第 0 行为最上层。
+  * 与 TDesign 的 useMultiHeader 一致：分组列 rowspan 1、colspan 为叶子数。
+   * 叶子列 rowspan 为剩余行数、colspan 1。 */
 function buildHeaderRows(columns: TableColumn[]): TableHeaderCell[][] {
   const maxDepth = columnDepth(columns);
   const rows: TableHeaderCell[][] = [];
@@ -149,6 +179,36 @@ interface TableCellSpan {
 
 const EMPTY_CELL_SPAN: TableCellSpan = {};
 
+/** 归一化后的吸顶 / 吸底配置，直接摊给 `t-affix`。 */
+interface ResolvedAffix {
+  enabled: boolean;
+  container: AffixScrollContainer;
+  offsetTop: number | null;
+  offsetBottom: number | null;
+  zIndex: number | undefined;
+}
+
+/**
+ * 归一化吸顶 / 吸底配置。
+  *
+ * 开关属性既可以是 `boolean` 也可以是配置对象（与上游 `boolean | Partial<AffixProps>` 一致）。
+  * 单独的 `xxxAffixProps` 只做覆盖、不负责开启。
+ */
+function resolveAffix(
+  value: boolean | TableAffixProps | undefined,
+  override: TableAffixProps | undefined,
+): ResolvedAffix {
+  const base = typeof value === 'object' && value !== null ? value : {};
+  const merged = { ...base, ...(override ?? {}) };
+  return {
+    enabled: !!value,
+    container: merged.container ?? null,
+    offsetTop: merged.offsetTop ?? 0,
+    offsetBottom: merged.offsetBottom ?? 0,
+    zIndex: merged.zIndex,
+  };
+}
+
 /** 内容里的模板部分，纯文本内容返回 `null`。 */
 function asTemplate(value: Content | null | undefined): TemplateRef<unknown> | null {
   return isTemplateContent(value) ? value : null;
@@ -161,7 +221,7 @@ function splitClasses(value: string | undefined): string[] {
 
 /**
  * 计算合并单元格：返回 cellKey → span 的映射。
- *
+  *
  * 先算出锚点单元格的 span，再把它覆盖到的其余单元格标记为 skipped，
  * 表体与表尾共用同一套规则（对应上游 `rowspanAndColspanInFooter`）。
  */
@@ -215,7 +275,7 @@ function cellKeyOf(
 
 /**
  * 表格。
- *
+  *
  * ```html
  * <t-table [data]="data" [columns]="columns" rowKey="id">
  *   <ng-template tTableCell="status" let-value>
@@ -229,6 +289,7 @@ function cellKeyOf(
   standalone: true,
   imports: [
     NgTemplateOutlet,
+    TAffix,
     TButton,
     TCheckbox,
     TCheckboxGroup,
@@ -250,7 +311,21 @@ export class TTable implements AfterViewChecked, OnDestroy {
   /** @zh 列配置 @en Column configuration @defaultValue [] */
   readonly columns = input<TableColumn[]>([]);
 
-  /** @zh 行唯一标识字段名 @en Field name of the row key @defaultValue 'id' */
+  /**
+   * @zh 实际显示的列，按 colKey 的顺序渲染；传入后表格只渲染这些列
+   * @en Columns to display, rendered in the order of the colKeys
+   * @defaultValue undefined
+   */
+  readonly displayColumns = input<string[] | undefined>(undefined);
+
+  /**
+   * @zh 实际显示的列默认值，非受控场景生效
+   * @en Default columns to display, used when uncontrolled
+   * @defaultValue undefined
+   */
+  readonly defaultDisplayColumns = input<string[] | undefined>(undefined);
+
+  /** @zh 行唯一标识字段 @en Field name of the row key @defaultValue 'id' */
   readonly rowKey = input('id');
 
   /** @zh 是否显示边框 @en Whether to show borders @defaultValue false */
@@ -274,13 +349,13 @@ export class TTable implements AfterViewChecked, OnDestroy {
   /** @zh 是否显示表头 @en Whether to show the header @defaultValue true */
   readonly showHeader = input(true, { transform: booleanAttribute });
 
-  /** @zh 是否显示加载中 @en Whether the table is loading @defaultValue false */
+  /** @zh 是否显示加载态 @en Whether the table is loading @defaultValue false */
   readonly loading = input(false, { transform: booleanAttribute });
 
-  /** @zh 加载提示文字 @en Loading text @defaultValue '加载中' */
+  /** @zh 加载提示文字 @en Loading text @defaultValue '加载。 */
   readonly loadingText = input('加载中');
 
-  /** @zh 空数据提示文字 @en Empty content @defaultValue '暂无数据' */
+  /** @zh 空数据提示文案 @en Empty content @defaultValue '暂无数据' */
   readonly empty = input<string>('暂无数据');
 
   /** @zh 表格高度，超出后内部滚动 @en Table height, scrolls inside when exceeded @defaultValue undefined */
@@ -334,6 +409,15 @@ export class TTable implements AfterViewChecked, OnDestroy {
    */
   readonly rowSelectionAllowUncheck = input(false, { transform: booleanAttribute });
 
+  /**
+   * @zh 行选择器类型，覆盖列上 type 的渲染
+   * @en Row selector type, overrides the type declared on the column
+   * @values single, multiple
+   * @defaultValue undefined
+   */
+  readonly rowSelectionType = input<TableRowSelectionType | undefined>(undefined);
+
+
   /** @zh 点击行时选中该行 @en Whether clicking a row selects it @defaultValue false */
   readonly selectOnRowClick = input(false, { transform: booleanAttribute });
 
@@ -355,19 +439,33 @@ export class TTable implements AfterViewChecked, OnDestroy {
   /** @zh 是否显示展开图标列 @en Whether to show the expand icon column @defaultValue true */
   readonly expandIcon = input(true, { transform: booleanAttribute });
 
+  /**
+   * @zh 展开行内容，支持字符串与模板；传函数时按行返回内容
+   * @en Expanded row content, accepts a string or a template; a function receives the row
+   * @defaultValue undefined
+   */
+  readonly expandedRow = input<TableExpandedRowContent | undefined>(undefined);
+
   /** @zh 展开行变化 @en Emitted when the expanded rows change */
   readonly expandChange = output<TableExpandChangeEvent>();
 
   /**
-   * @zh 分页配置，传入后表格底部显示分页；数据超过一页且未开启 disableDataPage 时自动本地分页
-   * @en Pagination config; the table renders a pager and paginates locally unless disableDataPage is on
+   * @zh 分页配置，传入后表格底部显示分页；数据超过一页且未开启 disableDataPage 时自动本地分页。
+    * @en Pagination config; the table renders a pager and paginates locally unless disableDataPage is on
    * @defaultValue undefined
    */
   readonly pagination = input<TablePagination | undefined>(undefined);
 
   /**
-   * @zh 关闭本地分页，只显示分页器并把翻页事件交给使用方（服务端分页）
-   * @en Disable local pagination, only render the pager and emit page changes (server-side paging)
+   * @zh 翻页时是否保留已选中的行
+   * @en Whether selected rows are kept when changing page
+   * @defaultValue true
+   */
+  readonly reserveSelectedRowOnPaginate = input(true, { transform: booleanAttribute });
+
+  /**
+   * @zh 关闭本地分页，只显示分页器并把翻页事件交给使用方（服务端分页。
+    * @en Disable local pagination, only render the pager and emit page changes (server-side paging)
    * @defaultValue false
    */
   readonly disableDataPage = input(false, { transform: booleanAttribute });
@@ -555,6 +653,48 @@ export class TTable implements AfterViewChecked, OnDestroy {
    */
   readonly locale = input<TableLocale | undefined>(undefined);
 
+  /**
+   * @zh 表头吸顶，表格滚出可视区后表头固定在容器顶部；传对象可配置 `offsetTop` / `zIndex` / `container`
+   * @en Affix the header to the top of the container once it scrolls out of view; pass an object to configure it
+   * @defaultValue false
+   */
+  readonly headerAffixedTop = input<boolean | TableAffixProps>(false);
+
+  /**
+   * @zh 表头吸顶的附加配置，优先于 `headerAffixedTop` 里的对象
+   * @en Extra affix config for the header, wins over the object passed to `headerAffixedTop`
+   * @defaultValue undefined
+   */
+  readonly headerAffixProps = input<TableAffixProps | undefined>(undefined);
+
+  /**
+   * @zh 表尾吸底，表格滚出可视区后表尾固定在容器底部
+   * @en Affix the footer to the bottom of the container once it scrolls out of view
+   * @defaultValue false
+   */
+  readonly footerAffixedBottom = input<boolean | TableAffixProps>(false);
+
+  /**
+   * @zh 表尾吸底的附加配置，优先于 `footerAffixedBottom` 里的对象
+   * @en Extra affix config for the footer, wins over the object passed to `footerAffixedBottom`
+   * @defaultValue undefined
+   */
+  readonly footerAffixProps = input<TableAffixProps | undefined>(undefined);
+
+  /**
+   * @zh 分页吸底，分页器滚出可视区后固定在容器底部
+   * @en Affix the pager to the bottom of the container once it scrolls out of view
+   * @defaultValue undefined
+   */
+  readonly paginationAffixedBottom = input<boolean | TableAffixProps | undefined>(undefined);
+
+  /**
+   * @zh 横向滚动条吸底，表格较宽时在容器底部固定一条横向滚动条
+   * @en Affix a horizontal scrollbar to the bottom of the container when the table is wider than it
+   * @defaultValue undefined
+   */
+  readonly horizontalScrollAffixedBottom = input<boolean | TableAffixProps | undefined>(undefined);
+
   protected readonly sizes = TABLE_SIZES;
   protected readonly aligns = TABLE_ALIGNS;
   protected readonly layouts = TABLE_LAYOUTS;
@@ -592,24 +732,36 @@ export class TTable implements AfterViewChecked, OnDestroy {
 
   /** 行选择列：`type` 为 single / multiple 的列。 */
   protected readonly selectColumn = computed(
-    () => this.columns().find((col) => col.type === 'single' || col.type === 'multiple') ?? null,
+    () => this.rootColumns().find((col) => col.type === 'single' || col.type === 'multiple') ?? null,
   );
 
-  /** 行选择类型。 */
-  protected readonly selectionType = computed<TableRowSelectionType | null>(() => this.selectColumn()?.type ?? null);
+  /** 行选择类型：rowSelectionType 优先，其次看列上声明的 type。 */
+  protected readonly selectionType = computed<TableRowSelectionType | null>(
+    () => this.rowSelectionType() ?? this.selectColumn()?.type ?? null,
+  );
 
   /** 是否渲染展开图标列。 */
-  protected readonly showExpandColumn = computed(() => this.expandIcon() && !!this.expandedRowTemplate());
+  protected readonly showExpandColumn = computed(
+    () => this.expandIcon() && (!!this.expandedRowTemplate() || this.expandedRow() !== undefined),
+  );
 
-  /** 根列：展开图标列固定在首列。 */
+  /** 非受控时的显示列。 */
+  private readonly innerDisplayColumns = signal<string[] | undefined>(undefined);
+
+  /** 生效的显示列：受控优先，其次非受控默认值；undefined 表示全部显示。 */
+  protected readonly visibleColumnKeys = computed(
+    () => this.displayColumns() ?? this.innerDisplayColumns(),
+  );
+
+  /** 根列：按显示列过滤，展开图标列固定在首列。 */
   protected readonly rootColumns = computed<TableColumn[]>(() => {
-    const columns = this.columns();
+    const columns = filterColumnsByKeys(this.columns(), this.visibleColumnKeys());
     if (!this.showExpandColumn()) return columns;
     return [{ colKey: EXPAND_COLUMN_KEY, width: 46, className: 't-table__expandable-icon-cell' }, ...columns];
   });
 
   /** 实际渲染的列：多级表头只渲染叶子列。 */
-  protected readonly displayColumns = computed<TableColumn[]>(() => flattenColumns(this.rootColumns()));
+  protected readonly renderColumns = computed<TableColumn[]>(() => flattenColumns(this.rootColumns()));
 
   /** 表头矩阵，第 0 行为最上层，每格带 rowspan / colspan。 */
   protected readonly headerRows = computed<TableHeaderCell[][]>(() => buildHeaderRows(this.rootColumns()));
@@ -625,13 +777,12 @@ export class TTable implements AfterViewChecked, OnDestroy {
 
   /**
    * 生效的列宽：拖拽结果 → 列配置的数字宽度 → 实测宽度（仅开启 resizable 时）。
-   * 开启拖拽后总宽按实测宽度固定，否则表格是 100% 宽、拖动没有意义。
-   */
+    * 开启拖拽后总宽按实测宽度固定，否则表格按 100% 宽、拖动没有意义。 */
   protected readonly columnWidths = computed<Map<string, number>>(() => {
     const overrides = this.columnWidthOverrides();
     const measured = this.colWidths();
     const map = new Map<string, number>();
-    for (const col of this.displayColumns()) {
+    for (const col of this.renderColumns()) {
       const width =
         overrides[col.colKey] ??
         this.numericWidth(col.width) ??
@@ -651,7 +802,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
 
   private readonly expandedKeySet = computed(() => new Set(this.expandedKeys()));
 
-  /** 当前高亮行 key。 */
+  /** 当前高亮的行 key。 */
   protected readonly activeKeys = computed(() => this.activeRowKeys() ?? this.innerActiveRowKeys());
 
   private readonly activeKeySet = computed(() => new Set(this.activeKeys()));
@@ -659,7 +810,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
   /** 键盘操作的当前行下标，-1 表示还没进入表格。 */
   private readonly currentOperationRowIndex = signal(-1);
 
-  /** 键盘移动时高亮的行 key，仅在 `keyboardRowHover` 打开时使用。 */
+  /** 键盘移动时高亮的行 key，仅 `keyboardRowHover` 打开时使用。 */
   private readonly hoveredRowKey = signal<string | number | null>(null);
 
   /** 是否按下了 Shift（区域选择）。 */
@@ -719,6 +870,54 @@ export class TTable implements AfterViewChecked, OnDestroy {
   /** 表头 / 表尾是否吸顶吸底：传了高度时表头贴住顶部、表尾贴住底部。 */
   protected readonly isFixedHeader = computed(() => this.height() !== undefined || this.maxHeight() !== undefined);
 
+  /** 表头吸顶配置。 */
+  protected readonly headerAffix = computed(() => resolveAffix(this.headerAffixedTop(), this.headerAffixProps()));
+
+  /** 表尾吸底配置。 */
+  protected readonly footerAffix = computed(() => resolveAffix(this.footerAffixedBottom(), this.footerAffixProps()));
+
+  /** 分页吸底配置。 */
+  protected readonly paginationAffix = computed(() =>
+    resolveAffix(this.paginationAffixedBottom(), undefined),
+  );
+
+  /** 横向滚动条吸底配置。 */
+  protected readonly horizontalScrollAffix = computed(() =>
+    resolveAffix(this.horizontalScrollAffixedBottom(), undefined),
+  );
+
+  /** 是否存在任意吸顶 / 吸底元素，用来决定要不要挂滚动监听与横向同步。 */
+  protected readonly isAffixed = computed(
+    () =>
+      this.headerAffix().enabled ||
+      this.footerAffix().enabled ||
+      this.paginationAffix().enabled ||
+      this.horizontalScrollAffix().enabled,
+  );
+
+  /** 吸顶 / 吸底元素的有效显隐：贴近表格边缘时让位给原位元素。 */
+  protected readonly showAffixHeader = signal(true);
+  protected readonly showAffixFooter = signal(true);
+  protected readonly showAffixPagination = signal(true);
+
+  /**
+   * 吸底开关在首帧之后才生效：TAffix 在 ngOnInit 里就测一次高度，
+   * 那时投影内容还没进 DOM，测到 0 就会按 0 高度固定下来再也回不去。
+    * 先传 null 让首次测量不吸附，等首屏渲染完再传真实值触发重新测量。
+   */
+  protected readonly affixReady = signal(false);
+
+  /** 吸顶表头高度，由原位表头测量得到，用来占位避免内容跳动。 */
+  protected readonly affixedHeaderHeight = computed(() =>
+    this.headerAffix().enabled ? this.headerHeight() : 0,
+  );
+
+  /** 吸顶 / 吸底表格的宽度：按内容实际宽度，表格比容器宽时也要对齐。 */
+  protected readonly affixedTableWidth = computed(() => {
+    const state = this.scrollState();
+    return state.contentWidth || state.viewportWidth;
+  });
+
   /** 分页状态：当前页 / 每页条数 / 总条数，非受控时用内部值兜底。 */
   protected readonly paginationState = computed(() => {
     const config = this.pagination();
@@ -764,16 +963,37 @@ export class TTable implements AfterViewChecked, OnDestroy {
   /** 表格根元素，键盘操作时用来聚焦。 */
   private readonly rootRef = viewChild<ElementRef<HTMLElement>>('root');
 
+  /** 吸顶表头的横向滚动容器，滚动位置跟着内容容器走。 */
+  private readonly affixedHeaderElm = viewChild<ElementRef<HTMLElement>>('affixedHeaderElm');
+
+  /** 吸底表尾的横向滚动容器。 */
+  private readonly affixedFooterElm = viewChild<ElementRef<HTMLElement>>('affixedFooterElm');
+
+  /** 吸底横向滚动条。 */
+  private readonly affixedScrollbarElm = viewChild<ElementRef<HTMLElement>>('affixedScrollbarElm');
+
+  /** 分页器容器，用来判断要不要显示吸底分页。 */
+  private readonly paginationElm = viewChild<ElementRef<HTMLElement>>('paginationElm');
+
   /** 实测列宽（colKey → px）。固定列偏移优先用它，取不到时回退到列配置的数字宽度。 */
   private readonly colWidths = signal<Record<string, number>>({});
 
   /** 横向滚动状态，用于决定固定列两侧的阴影分界线是否显示。 */
-  private readonly scrollState = signal({ scrollLeft: 0, contentWidth: 0, viewportWidth: 0 });
+  protected readonly scrollState = signal({ scrollLeft: 0, contentWidth: 0, viewportWidth: 0 });
 
   /** 上一次滚动位置，用来判断横向 / 纵向滚动是否真的变了。 */
   private readonly lastScrollPosition = { left: 0, top: 0 };
 
   private resizeObserver?: ResizeObserver;
+
+  /** 页面滚动监听是否已挂上。 */
+  private affixWatching = false;
+
+  /** 合并页面滚动回调用的帧号。 */
+  private affixFrame = 0;
+
+  /** 解绑页面滚动监听。 */
+  private detachAffixWatchers?: () => void;
 
   /** 是否存在固定列。 */
   protected readonly hasFixedColumn = computed(() => this.columns().some((col) => !!col.fixed));
@@ -806,7 +1026,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
 
   /** 左侧最后一个固定列，用来挂滚动分界线。 */
   protected readonly lastLeftKey = computed(() => {
-    const columns = this.displayColumns();
+    const columns = this.renderColumns();
     let key: string | null = null;
     columns.forEach((col, index) => {
       if (col.fixed === 'left' && columns[index + 1]?.fixed !== 'left') key = col.colKey;
@@ -816,20 +1036,20 @@ export class TTable implements AfterViewChecked, OnDestroy {
 
   /** 右侧第一个固定列，用来挂滚动分界线。 */
   protected readonly firstRightKey = computed(() => {
-    const columns = this.displayColumns();
+    const columns = this.renderColumns();
     const index = columns.findIndex((col) => col.fixed === 'right');
     return index < 0 ? null : columns[index].colKey;
   });
 
   /** 已向右滚动且存在左侧固定列时显示左阴影。 */
   protected readonly showLeftShadow = computed(
-    () => this.scrollState().scrollLeft > 0 && this.displayColumns().some((col) => col.fixed === 'left'),
+    () => this.scrollState().scrollLeft > 0 && this.renderColumns().some((col) => col.fixed === 'left'),
   );
 
   /** 右侧还有未滚动到的内容且存在右侧固定列时显示右阴影。 */
   protected readonly showRightShadow = computed(() => {
     const scroll = this.scrollState();
-    if (!this.displayColumns().some((col) => col.fixed === 'right')) return false;
+    if (!this.renderColumns().some((col) => col.fixed === 'right')) return false;
     return scroll.scrollLeft + scroll.viewportWidth < scroll.contentWidth - 1;
   });
 
@@ -863,20 +1083,20 @@ export class TTable implements AfterViewChecked, OnDestroy {
 
   /**
    * 单元格合并状态：cellKey → `{ rowspan, colspan, skipped }`。
-   * 与上游 `useRowspanAndColspan` 一致：先算出锚点单元格的 span，
-   * 再把它覆盖到的其余单元格标记为 skipped（渲染时直接跳过）。
+    * 与上游 `useRowspanAndColspan` 一致：先算出锚点单元格的 span。
+     * 再把它覆盖到的其余单元格标记为 skipped（渲染时直接跳过）。
    */
   private readonly cellSpans = computed<Map<string, TableCellSpan>>(() => {
     const handler = this.rowspanAndColspan();
     if (!handler) return new Map<string, TableCellSpan>();
-    return buildCellSpans(this.rows(), this.displayColumns(), this.rowKey(), handler);
+    return buildCellSpans(this.rows(), this.renderColumns(), this.rowKey(), handler);
   });
 
   /** 表尾的单元格合并状态，规则与表体一致。 */
   private readonly footerSpans = computed<Map<string, TableCellSpan>>(() => {
     const handler = this.rowspanAndColspanInFooter();
     if (!handler) return new Map<string, TableCellSpan>();
-    return buildCellSpans(this.footData(), this.displayColumns(), this.rowKey(), handler);
+    return buildCellSpans(this.footData(), this.renderColumns(), this.rowKey(), handler);
   });
 
   protected readonly classes = computed(() =>
@@ -896,7 +1116,10 @@ export class TTable implements AfterViewChecked, OnDestroy {
       this.resizable() ? 't-table--column-resizable' : '',
       this.isFixedHeader() ? 't-table--header-fixed' : '',
       this.activeRowType() ? `t-table__row--active-${this.activeRowType()}` : '',
-      this.hasHorizontalOverflow() ? 't-table--width-overflow' : '',
+      this.headerAffix().enabled ? 't-table--affixed-header' : '',
+    this.footerAffix().enabled ? 't-table--footer-affixed' : '',
+    this.horizontalScrollAffix().enabled ? 't-table--horizontal-bar-affixed' : '',
+    this.hasHorizontalOverflow() ? 't-table--width-overflow' : '',
     ]
       .filter(Boolean)
       .join(' '),
@@ -922,15 +1145,14 @@ export class TTable implements AfterViewChecked, OnDestroy {
   });
 
   /**
-   * 只有「所有列都写了固定宽度」时才给表格设总宽，
-   * 否则交回 100%，让浏览器按剩余空间分配（与上游一致）。
-   */
+   * 只有「所有列都写了固定宽度」时才给表格设总宽。
+    * 否则交回 100%，让浏览器按剩余空间分配（与上游一致）。 */
   protected readonly tableWidth = computed(() => {
     // 显式传了表宽就以它为准
     const contentWidth = this.tableContentWidth();
     if (contentWidth !== undefined) return this.toLength(contentWidth);
 
-    const columns = this.displayColumns();
+    const columns = this.renderColumns();
     if (!columns.length) return null;
 
     const widths = this.columnWidths();
@@ -1025,6 +1247,12 @@ export class TTable implements AfterViewChecked, OnDestroy {
   /** 表头高度，虚拟滚动时用来对齐占位高度与行位置。 */
   private readonly headerHeight = signal(0);
 
+  /** 表尾高度，吸底表尾要用它把克隆表叠回原位。 */
+  protected readonly footerHeight = signal(0);
+
+  /** 内容区原生横向滚动条占位高度。 */
+  protected readonly scrollbarHeight = signal(0);
+
   /** 虚拟滚动占位元素的高度：行总高加上表头，保证最后一行能滚到视口底部。 */
   protected readonly virtualCursorHeight = computed(
     () =>
@@ -1068,8 +1296,20 @@ export class TTable implements AfterViewChecked, OnDestroy {
       });
     });
 
-    // 固定列需要实测宽度：首屏渲染后量一次，列 / 数据变化后再量
-    afterNextRender(() => this.setupFixedColumns());
+    effect(() => {
+      const defaultDisplayColumns = this.defaultDisplayColumns();
+      untracked(() => {
+        if (defaultDisplayColumns !== undefined) this.innerDisplayColumns.set([...defaultDisplayColumns]);
+      });
+    });
+
+    // 固定列需要实测宽度：首屏渲染后量一次，列宽 / 数据变化后再量。
+    afterNextRender(() => {
+      this.setupFixedColumns();
+      this.setupAffixWatchers();
+      // 首屏布局完成后才把吸底开关交给 TAffix，避免它按 0 高度测量吸附
+      requestAnimationFrame(() => this.affixReady.set(true));
+    });
 
     effect(() => {
       this.columns();
@@ -1080,6 +1320,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
 
   ngOnDestroy(): void {
     this.resizeObserver?.disconnect();
+    this.detachAffixWatchers?.();
     document.removeEventListener('mousemove', this.handleResizeMove);
     document.removeEventListener('mouseup', this.handleResizeEnd);
   }
@@ -1164,7 +1405,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
   /** 鼠标当前停在哪一列的右边缘。 */
   private resizeHoverKey: string | null = null;
 
-  /** 表头鼠标移动：靠近列右边缘 8px 内显示 col-resize，并把该列记为拖拽目标。 */
+  /** 表头鼠标移动：靠近列右边界 8px 内显示 col-resize，并把该列记为拖拽目标。 */
   protected handleHeaderMouseMove(event: MouseEvent, col: TableColumn): void {
     if (!this.isColumnResizable(col)) return;
 
@@ -1196,7 +1437,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
     const key = this.resizeHoverKey;
     if (!key || !this.resizable()) return;
 
-    const target = this.displayColumns().find((item) => item.colKey === key);
+    const target = this.renderColumns().find((item) => item.colKey === key);
     const element = this.contentRef()?.nativeElement;
     if (!target || !element) return;
 
@@ -1263,7 +1504,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
     next[drag.colKey] = width;
 
     if (drag.nextKey && drag.nextWidth > 0) {
-      const nextCol = this.displayColumns().find((item) => item.colKey === drag.nextKey);
+      const nextCol = this.renderColumns().find((item) => item.colKey === drag.nextKey);
       const nextMin = Math.max(nextCol?.resize?.minWidth ?? 80, this.numericWidth(nextCol?.minWidth) ?? 0);
       next[drag.nextKey] = Math.max(nextMin, Math.round(drag.nextWidth - consumed));
     }
@@ -1274,7 +1515,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
 
   /** 同一层级相邻的可拖拽列（跳过显式关闭拖拽的列）。 */
   private siblingColumn(col: TableColumn, step: 1 | -1): TableColumn | null {
-    const columns = this.displayColumns();
+    const columns = this.renderColumns();
     let index = columns.findIndex((item) => item.colKey === col.colKey);
     while (index >= 0) {
       index += step;
@@ -1292,6 +1533,8 @@ export class TTable implements AfterViewChecked, OnDestroy {
       this.scrollTop.set(element.scrollTop);
       this.viewportHeight.set(element.clientHeight);
     }
+    // 吸顶表头 / 吸底表尾 / 吸底滚动条共用同一条横向滚动位置
+    this.syncAffixedScroll(element);
 
     // 滚动事件只在与上一次不同的时候抛，避免高频重复
     const position = { left: element.scrollLeft, top: element.scrollTop };
@@ -1318,6 +1561,16 @@ export class TTable implements AfterViewChecked, OnDestroy {
 
     if (config.current === undefined) {
       this.innerPagination.set({ current: pageInfo.current, pageSize: pageInfo.pageSize });
+    }
+
+    // 未开启 reserveSelectedRowOnPaginate 时，翻页后丢弃不在当前页的选中项
+    if (!this.reserveSelectedRowOnPaginate()) {
+      const start = (pageInfo.current - 1) * pageInfo.pageSize;
+      const pageRows = this.disableDataPage() ? this.data() : this.data().slice(start, start + pageInfo.pageSize);
+      const pageKeys = new Set(pageRows.map((row) => this.keyOf(row)));
+      const currentKeys = this.selectedKeys();
+      const next = currentKeys.filter((key) => pageKeys.has(key));
+      if (next.length !== currentKeys.length) this.commitSelection(next, 'uncheck');
     }
 
     const data = this.data();
@@ -1669,7 +1922,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
               : null;
 
     const controlled = this.sort();
-    // 单列排序时点新列会替换掉原来的排序，多列排序才追加
+    // 单列排序时点新列会替换掉原来的排序，多列排序才追加。
     const base = this.multipleSort()
       ? this.normalizeSort(controlled === undefined ? this.innerSort() : controlled).filter(
           (info) => info.sortBy !== col.colKey,
@@ -1688,7 +1941,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
     return !!filter && Object.keys(filter).length > 0;
   }
 
-  /** 筛选控件类型，缺省为多选（与 TDesign 文档示例一致）。 */
+  /** 筛选控件类型，缺省为多选（与 TDesign 文档示例一致） */
   protected filterTypeOf(col: TableColumn): TableFilterType {
     return col.filter?.type ?? 'multiple';
   }
@@ -1712,7 +1965,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
   protected handleFilterVisibleChange(col: TableColumn, visible: boolean): void {
     if (visible) {
       this.openedFilterKey.set(col.colKey);
-      // 打开面板时同步一次草稿，保证面板展示的是当前生效值
+      // 打开面板时同步一次草稿，保证面板展示的是当前生效的值。
       this.draftFilterValue.set({ ...this.filterState() });
       return;
     }
@@ -1764,6 +2017,12 @@ export class TTable implements AfterViewChecked, OnDestroy {
   /** 展开行模板上下文。 */
   protected expandedRowContext(row: TableRow, rowIndex: number): Record<string, unknown> {
     return { $implicit: row, row, rowIndex };
+  }
+
+  /** 展开行内容：函数按行求值，其余交给模板 / 文本分支渲染。 */
+  protected expandedRowOf(row: TableRow, rowIndex: number): Content {
+    const value = this.expandedRow();
+    return typeof value === 'function' ? value({ row, rowIndex }) : value;
   }
 
   protected cellContext(
@@ -1824,7 +2083,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
     return this.footerSpans().get(cellKeyOf(row, col, rowIndex, colIndex, this.rowKey())) ?? EMPTY_CELL_SPAN;
   }
 
-  /** 表尾行的自定义类名，`rowClassName` 的 `type` 为 `foot`。 */
+  /** 表尾行的自定义类名，`rowClassName` 带 `type` 为 `foot`。 */
   protected footerRowClasses(row: TableRow, rowIndex: number): string {
     return this.customRowClasses(row, rowIndex, 'foot').join(' ');
   }
@@ -1899,6 +2158,17 @@ export class TTable implements AfterViewChecked, OnDestroy {
     return Object.keys(style).length ? style : null;
   }
 
+  /** 吸顶 / 吸底克隆表只关心列宽，sticky 偏移交给单元格。 */
+  protected colWidthStyle(col: TableColumn): Record<string, string> | null {
+    const style: Record<string, string> = {};
+    const width = this.columnWidths().get(col.colKey);
+    if (width !== undefined) style['width'] = `${width}px`;
+    else if (col.width !== undefined) style['width'] = this.toLength(col.width);
+    else if (col.type) style['width'] = '64px';
+    if (col.minWidth !== undefined) style['min-width'] = this.toLength(col.minWidth);
+    return Object.keys(style).length ? style : null;
+  }
+
   protected trackRow = (_index: number, row: TableRow): unknown => row?.[this.rowKey()] ?? _index;
 
   private scheduleColumnMeasure(): void {
@@ -1906,6 +2176,7 @@ export class TTable implements AfterViewChecked, OnDestroy {
       () => {
         this.refreshColumnMetrics();
         this.refreshVirtualViewport();
+        this.updateAffixVisibility();
       },
       { injector: this.injector },
     );
@@ -1937,6 +2208,13 @@ export class TTable implements AfterViewChecked, OnDestroy {
     const header = element.querySelector<HTMLElement>('thead');
     const headerHeight = header ? header.getBoundingClientRect().height : 0;
     if (this.headerHeight() !== headerHeight) this.headerHeight.set(headerHeight);
+
+    const foot = element.querySelector<HTMLElement>('tfoot');
+    const footerHeight = foot ? foot.getBoundingClientRect().height : 0;
+    if (this.footerHeight() !== footerHeight) this.footerHeight.set(footerHeight);
+
+    const scrollbarHeight = Math.max(0, element.offsetHeight - element.clientHeight);
+    if (this.scrollbarHeight() !== scrollbarHeight) this.scrollbarHeight.set(scrollbarHeight);
 
     this.viewportHeight.set(element.clientHeight);
     const maxScrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
@@ -1980,6 +2258,88 @@ export class TTable implements AfterViewChecked, OnDestroy {
       previous.viewportWidth !== next.viewportWidth
     ) {
       this.scrollState.set(next);
+    }
+  }
+
+  /** 吸顶 / 吸底需要的页面滚动监听，只挂一次。 */
+  private setupAffixWatchers(): void {
+    if (this.affixWatching || typeof window === 'undefined') return;
+    this.affixWatching = true;
+
+    const schedule = (): void => {
+      if (this.affixFrame) return;
+      this.affixFrame = window.requestAnimationFrame(() => {
+        this.affixFrame = 0;
+        this.updateAffixVisibility();
+      });
+    };
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    this.detachAffixWatchers = () => {
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      if (this.affixFrame) window.cancelAnimationFrame(this.affixFrame);
+      this.affixWatching = false;
+    };
+  }
+
+  /**
+   * 判断吸顶 / 吸底元素此刻该不该显示。
+    *
+   * 与上游 `useAffix` 一致：表格顶部快要滚出可视区时显示吸顶表头；
+   * 吸底元素只在原位元素还没进入可视区时显示，避免和原位内容重复。
+   */
+  private updateAffixVisibility(): void {
+    if (!this.isAffixed()) return;
+
+    const rect = this.contentRef()?.nativeElement.getBoundingClientRect();
+    if (!rect) return;
+
+    const headerHeight = this.headerHeight();
+    if (this.headerAffix().enabled) {
+      const footerHeight = this.affixedFooterElm()?.nativeElement.getBoundingClientRect().height ?? 0;
+      const offsetTop = this.headerAffix().offsetTop ?? 0;
+      const next = Math.abs(rect.top) < rect.height - headerHeight - offsetTop - footerHeight;
+      if (this.showAffixHeader() !== next) this.showAffixHeader.set(next);
+    }
+
+    const belowViewport = (element: HTMLElement | null): boolean => {
+      if (!element) return false;
+      const target = element.getBoundingClientRect();
+      return rect.top + headerHeight < target.top && target.top > target.height;
+    };
+
+    if (this.footerAffix().enabled || this.horizontalScrollAffix().enabled) {
+      const anchor = this.footerAffix().enabled
+        ? this.affixedFooterElm()?.nativeElement
+        : this.affixedScrollbarElm()?.nativeElement;
+      const next = belowViewport(anchor ?? null);
+      if (this.showAffixFooter() !== next) this.showAffixFooter.set(next);
+    }
+
+    if (this.paginationAffix().enabled) {
+      const next = belowViewport(this.paginationElm()?.nativeElement ?? null);
+      if (this.showAffixPagination() !== next) this.showAffixPagination.set(next);
+    }
+  }
+
+  /** 把横向滚动位置同步到吸顶表头 / 吸底表尾 / 吸底滚动条，避免和表体错位。 */
+  protected syncAffixedScroll(source: EventTarget | null): void {
+    if (!this.isAffixed()) return;
+
+    const origin = source instanceof HTMLElement ? source : this.contentRef()?.nativeElement;
+    if (!origin) return;
+
+    const left = origin.scrollLeft;
+    const targets = [
+      this.contentRef()?.nativeElement,
+      this.affixedHeaderElm()?.nativeElement,
+      this.affixedFooterElm()?.nativeElement,
+      this.affixedScrollbarElm()?.nativeElement,
+    ];
+    for (const target of targets) {
+      if (target && target !== origin && target.scrollLeft !== left) target.scrollLeft = left;
     }
   }
 

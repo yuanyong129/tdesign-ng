@@ -15,6 +15,30 @@
     </div>
   }
 
+  @if (headerAffix().enabled) {
+    <t-affix
+      [container]="headerAffix().container"
+      [offsetTop]="headerAffix().offsetTop"
+      [offsetBottom]="null"
+      [zIndex]="headerAffix().zIndex"
+    >
+      <div class="t-table__affixed-header-elm-wrap" [style.height.px]="affixedHeaderHeight()">
+        <div
+          #affixedHeaderElm
+          class="scrollbar t-table__affixed-header-elm"
+          [style.width.px]="affixedTableWidth()"
+          [style.opacity]="showAffixHeader() ? 1 : 0"
+          (scroll)="syncAffixedScroll($event.target)"
+        >
+          <table [class]="tableLayoutClass()" [style.width.px]="affixedTableWidth()">
+            <ng-container [ngTemplateOutlet]="tableColGroup" />
+            <ng-container [ngTemplateOutlet]="tableHead" />
+          </table>
+        </div>
+      </div>
+    </t-affix>
+  }
+
   <div #content [class]="contentClasses()" [style]="contentStyle()" (scroll)="handleScroll($event)">
     @if (isVirtualScroll()) {
       <div
@@ -23,6 +47,8 @@
       ></div>
     }
     <table [class]="tableLayoutClass()" [style.width]="tableWidth()">
+      <!-- 表头抽成模板：吸顶表头要复用同一份结构 -->
+      <ng-template #tableHead>
       @if (showHeader()) {
         <thead class="t-table__header" [class.t-table__header--multiple]="hasMultiHeader()">
           @for (headerRow of headerRows(); track $index) {
@@ -183,11 +209,22 @@
           }
         </thead>
       }
+      </ng-template>
+
+      <!-- 吸顶 / 吸底克隆表用的列宽定义，主表列宽已经写在 th / td 上 -->
+      <ng-template #tableColGroup>
+        <colgroup>
+          @for (col of renderColumns(); track col.colKey) {
+            <col [style]="colWidthStyle(col)" />
+          }
+        </colgroup>
+      </ng-template>
+      <ng-container [ngTemplateOutlet]="tableHead" />
 
       <tbody class="t-table__body" [style.transform]="tbodyTransform()">
         @if (firstFullRow(); as full) {
           <tr class="t-table__row--full t-table__first-full-row">
-            <td [attr.colspan]="displayColumns().length">
+            <td [attr.colspan]="renderColumns().length">
               <div class="t-table__row-full-inner">
                 <div class="t-table__row-full-element">
                   @if (templateOf(full); as tpl) {
@@ -216,7 +253,7 @@
             (mouseleave)="handleRowEvent('rowMouseleave', $event, row, rowIndex)"
             (mouseover)="handleRowEvent('rowMouseover', $event, row, rowIndex)"
           >
-            @for (col of displayColumns(); track col.colKey; let colIndex = $index) {
+            @for (col of renderColumns(); track col.colKey; let colIndex = $index) {
               @let span = cellSpanOf(row, col, rowIndex, colIndex);
               @if (!span.skipped) {
               <td
@@ -292,15 +329,26 @@
               }
             }
           </tr>
-          @if (expandedRowTemplate(); as expanded) {
+          @if (expandedRowTemplate() || expandedRow() !== undefined) {
             @if (isRowExpanded(row)) {
               <tr class="t-table__expanded-row">
-                <td [attr.colspan]="displayColumns().length">
+                <td [attr.colspan]="renderColumns().length">
                   <div class="t-table__expanded-row-inner">
-                    <ng-container
-                      [ngTemplateOutlet]="expanded.template"
-                      [ngTemplateOutletContext]="expandedRowContext(row, rowIndex)"
-                    />
+                    @if (expandedRowTemplate(); as expanded) {
+                      <ng-container
+                        [ngTemplateOutlet]="expanded.template"
+                        [ngTemplateOutletContext]="expandedRowContext(row, rowIndex)"
+                      />
+                    } @else {
+                      @if (templateOf(expandedRowOf(row, rowIndex)); as expandedTpl) {
+                        <ng-container
+                          [ngTemplateOutlet]="expandedTpl"
+                          [ngTemplateOutletContext]="expandedRowContext(row, rowIndex)"
+                        />
+                      } @else {
+                        {{ textOf(expandedRowOf(row, rowIndex)) }}
+                      }
+                    }
                   </div>
                 </td>
               </tr>
@@ -310,7 +358,7 @@
 
         @if (lastFullRow(); as full) {
           <tr class="t-table__row--full t-table__last-full-row">
-            <td [attr.colspan]="displayColumns().length">
+            <td [attr.colspan]="renderColumns().length">
               <div class="t-table__row-full-inner">
                 <div class="t-table__row-full-element">
                   @if (templateOf(full); as tpl) {
@@ -326,7 +374,7 @@
 
         @if (isEmpty()) {
           <tr class="t-table__row--full">
-            <td [attr.colspan]="displayColumns().length">
+            <td [attr.colspan]="renderColumns().length">
               <div class="t-table__row-full-element">
                 <div class="t-table__empty">
                   @if (emptyTemplate(); as tpl) {
@@ -341,11 +389,12 @@
         }
       </tbody>
 
+      <ng-template #tableFoot>
       @if (hasFooter()) {
         <tfoot class="t-table__footer" [class.t-table__footer--fixed]="isFixedHeader()">
           @if (footerSummary(); as summary) {
             <tr class="t-table__row--full">
-              <td [attr.colspan]="displayColumns().length">
+              <td [attr.colspan]="renderColumns().length">
                 <div class="t-table__row-full-element">
                   @if (templateOf(summary); as tpl) {
                     <ng-container [ngTemplateOutlet]="tpl" />
@@ -361,7 +410,7 @@
               [class]="footerRowClasses(row, rowIndex)"
               [tTableRowAttributes]="rowAttributesOf(row, rowIndex, 'foot')"
             >
-              @for (col of displayColumns(); track col.colKey; let colIndex = $index) {
+              @for (col of renderColumns(); track col.colKey; let colIndex = $index) {
                 @let span = footerSpanOf(row, col, rowIndex, colIndex);
                 @if (!span.skipped) {
                   <td
@@ -382,8 +431,36 @@
           }
         </tfoot>
       }
+      </ng-template>
+      <ng-container [ngTemplateOutlet]="tableFoot" />
     </table>
   </div>
+
+  @if (footerAffix().enabled && hasFooter()) {
+    <t-affix
+      [container]="footerAffix().container"
+      [offsetTop]="null"
+      [offsetBottom]="affixReady() ? footerAffix().offsetBottom : null"
+      [zIndex]="footerAffix().zIndex"
+      [style.marginTop.px]="-(footerHeight() + (hasHorizontalOverflow() ? scrollbarHeight() : 0))"
+    >
+      <div class="t-table__affixed-footer-wrap">
+        <div
+          #affixedFooterElm
+          class="scrollbar t-table__affixed-footer-elm"
+          [style.width.px]="affixedTableWidth()"
+          [style.opacity]="showAffixFooter() ? 1 : 0"
+          [style.pointer-events]="showAffixFooter() ? null : 'none'"
+          (scroll)="syncAffixedScroll($event.target)"
+        >
+          <table [class]="tableLayoutClass()" [style.width.px]="affixedTableWidth()">
+            <ng-container [ngTemplateOutlet]="tableColGroup" />
+            <ng-container [ngTemplateOutlet]="tableFoot" />
+          </table>
+        </div>
+      </div>
+    </t-affix>
+  }
 
   @if (bottomContent(); as bottom) {
     <div class="t-table__bottom-content">
@@ -395,8 +472,8 @@
     </div>
   }
 
-  @if (pagination(); as config) {
-    <div class="t-table__pagination">
+  <ng-template #tablePagination>
+    @if (pagination(); as config) {
       <t-pagination
         [current]="paginationState().current"
         [pageSize]="paginationState().pageSize"
@@ -416,7 +493,50 @@
         [disabled]="config.disabled ?? false"
         (change)="handlePageChange($event)"
       />
+    }
+  </ng-template>
+
+  @if (paginationAffix().enabled) {
+    <t-affix
+      [container]="paginationAffix().container"
+      [offsetTop]="null"
+      [offsetBottom]="affixReady() ? paginationAffix().offsetBottom : null"
+      [zIndex]="paginationAffix().zIndex"
+    >
+      <div
+        #paginationElm
+        class="t-table__pagination"
+        [style.opacity]="showAffixPagination() ? 1 : 0"
+        [style.pointer-events]="showAffixPagination() ? null : 'none'"
+      >
+        <ng-container [ngTemplateOutlet]="tablePagination" />
+      </div>
+    </t-affix>
+  } @else {
+    <div class="t-table__pagination">
+      <ng-container [ngTemplateOutlet]="tablePagination" />
     </div>
+  }
+
+  @if (horizontalScrollAffix().enabled && hasHorizontalOverflow()) {
+    <t-affix
+      [container]="horizontalScrollAffix().container"
+      [offsetTop]="null"
+      [offsetBottom]="affixReady() ? horizontalScrollAffix().offsetBottom : null"
+      [zIndex]="horizontalScrollAffix().zIndex"
+      [style.marginTop.px]="-scrollbarHeight()"
+    >
+      <div
+        #affixedScrollbarElm
+        class="scrollbar t-table__scrollbar--obvious"
+        [style.width.px]="scrollState().viewportWidth"
+        [style.overflow]="'auto'"
+        [style.opacity]="showAffixFooter() ? 1 : 0"
+        (scroll)="syncAffixedScroll($event.target)"
+      >
+        <div [style.width.px]="affixedTableWidth()" [style.height.px]="5"></div>
+      </div>
+    </t-affix>
   }
 
   @if (loading()) {

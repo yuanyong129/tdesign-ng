@@ -465,7 +465,35 @@ export interface TableLocale {
   size?: TableSize;
 }
 
+/**
+ * 吸顶 / 吸底配置，字段与 `TAffix` 对齐。
+ *
+ * `headerAffixedTop` 之类的开关属性传 `true` 时用默认值，传对象时按这里的字段覆盖。
+ */
+export interface TableAffixProps {
+  /** 滚动容器，与 `TAffix` 的 `container` 一致；留空视作窗口 */
+  container?: string | HTMLElement | null;
+  /** 距离容器顶部的偏移（px） */
+  offsetTop?: number | null;
+  /** 距离容器底部的偏移（px） */
+  offsetBottom?: number | null;
+  /** 吸顶 / 吸底时的层级 */
+  zIndex?: number;
+}
+
 /** 表尾单元格内容。 */
 export type TableFootCellContent<T extends TableRow = TableRow> =
   | Content
   | ((context: TableCellContext<T>) => Content);
+
+/** 展开行内容的渲染上下文。 */
+export interface TableExpandedRowContext<T extends TableRow = TableRow> {
+  row: T;
+  rowIndex: number;
+}
+
+/** 展开行内容：字符串、模板，或按行返回内容的函数。 */
+export type TableExpandedRowContent<T extends TableRow = TableRow> =
+  | Content
+  | ((context: TableExpandedRowContext<T>) => Content);
+
