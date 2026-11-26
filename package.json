@@ -29,14 +29,16 @@
     "check:align": "node scripts/align-check.mjs",
     "check:align:json": "node scripts/align-check.mjs --json",
     "depth:report": "node scripts/depth-report.mjs",
-    "verify": "pnpm run gen:api && pnpm run check:demos && pnpm run check:align && pnpm run build:lib",
+    "verify": "pnpm run gen:api && pnpm run gen:progress && pnpm run check:demos && pnpm run check:align && pnpm run build:lib",
     "verify:session": "node scripts/verify-session.mjs",
     "probe:page": "node scripts/cdp-page.mjs",
     "edge": "node scripts/headless-edge.mjs",
     "wire": "node scripts/wire-component.mjs",
     "vendor:styles": "node scripts/vendor-tdesign-common.mjs",
     "preview:pages": "node scripts/preview-pages.mjs",
-    "clean:cache": "node scripts/clean-cache.mjs"
+    "clean:cache": "node scripts/clean-cache.mjs",
+    "gen:progress": "node scripts/gen-progress-docs.mjs",
+    "check:progress": "node scripts/gen-progress-docs.mjs --check"
   },
   "devDependencies": {
     "@angular/compiler-cli": "^19.2.0",

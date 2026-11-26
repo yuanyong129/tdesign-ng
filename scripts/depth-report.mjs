@@ -18,67 +18,15 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+import { BUCKET_LABELS as LINE_TITLES, classifyDebt, isMapping } from './lib/debt.mjs';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const argv = process.argv.slice(2);
 const FROM = argv.includes('--from') ? argv[argv.indexOf('--from') + 1] : null;
 const OUT = argv.includes('--out') ? argv[argv.indexOf('--out') + 1] : null;
 
-/**
- * 组件默认归属的深度线（与 docs/plans/breadth-first-roadmap.md §4.2 一致）。
- * reason 里显式的 `[D#]` 前缀优先于这张表：某个组件的个别属性可以提前/延后到别的线。
- */
-const LINE_DEFAULTS = {
-  D1: [
-    'TTable',
-    'TSelect',
-    'TSelectInput',
-    'TCascader',
-    'TTree',
-    'TTreeSelect',
-    'TDatePicker',
-    'TDateRangePicker',
-    'TTimePicker',
-    'TInputNumber',
-    'TAutoComplete',
-  ],
-  D2: [
-    'TInput',
-    'TTextarea',
-    'TForm',
-    'TFormItem',
-    'TUpload',
-    'TTransfer',
-    'TDialog',
-    'TDrawer',
-    'TPopup',
-    'TMenu',
-    'TDropdown',
-    'TGuide',
-  ],
-};
-
 const BUCKETS = ['D1', 'D2', 'D3'];
-
-/**
- * 「不是欠账，只是换了说法」的 reason 特征。
- *
- * Angular 没有 Vue 的 props 式插槽/双向绑定，`modelValue`、`onChange`、`default`、`content`
- * 这类上游属性在本库是输出绑定、ng-content 或 (change) 事件，属于 API 形态差异而非未实现。
- * 这些条目照样要留在 ignoreUpstream（否则 missing 会误报），但不能算进深度债，
- * 否则 D 阶段的工作单会被大量零工作量条目稀释。
- */
-const MAPPING_PATTERNS = [/^Angular (用|直接)/, /双向绑定/, /ng-content/, /插槽/, /Vue 的默认插槽/];
-
-function isMapping(reason) {
-  return MAPPING_PATTERNS.some((p) => p.test(reason ?? ''));
-}
-
-const LINE_TITLES = {
-  D1: 'D1 表格与选择线',
-  D2: 'D2 录入与反馈线',
-  D3: 'D3 其余组件与边角能力',
-};
 
 function loadReport() {
   if (FROM) {
@@ -98,19 +46,6 @@ function loadReport() {
     fs.closeSync(fd);
   }
   return JSON.parse(fs.readFileSync(tmp, 'utf8'));
-}
-
-function resolveBucket(className, reason) {
-  const explicit = /^\s*\[(D[123])\]/i.exec(reason ?? '');
-  if (explicit) {
-    return { bucket: explicit[1].toUpperCase(), explicit: true };
-  }
-  for (const bucket of BUCKETS) {
-    if ((LINE_DEFAULTS[bucket] ?? []).includes(className)) {
-      return { bucket, explicit: false };
-    }
-  }
-  return { bucket: 'D3', explicit: false };
 }
 
 function pct(part, total) {
@@ -134,7 +69,7 @@ function buildMarkdown(report) {
       const mappings = upstreamIgnored.filter((i) => isMapping(i.reason));
       const debts = upstreamIgnored
         .filter((i) => !isMapping(i.reason))
-        .map((i) => ({ name: i.name, reason: i.reason, ...resolveBucket(c.className, i.reason) }));
+        .map((i) => ({ name: i.name, reason: i.reason, ...classifyDebt(c.className, i.reason) }));
       const counts = Object.fromEntries(BUCKETS.map((b) => [b, debts.filter((d) => d.bucket === b).length]));
       return {
         className: c.className,

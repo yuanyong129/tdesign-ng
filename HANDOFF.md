@@ -43,6 +43,8 @@ packages/styles/vendor/tdesign-common  # 上游样式快照（打进 styles 包�
 docs/plans/breadth-first-roadmap.md  # 当前执行计划：广度优先波次、L1/L2 定义  ← 先读这个
 docs/plans/milestones.md             # 里程碑记录（里程碑不打 tag，发布 tag 只对应 npm 版本）
 docs/plans/tdesign-angular-plan.md   # 历史分期与实现记录（§14~§22）
+docs/progress/README.md              # 组件进度总表（生成物，`pnpm gen:progress`）
+docs/progress/<dir>.md               # 每个组件的进度明细（已实现输入/事件、深度债、示例）
 ```
 
 - Node 22 / pnpm 12 / Angular 19.2 / ng-packagr 19.2，zone CD + `provideZoneChangeDetection({ eventCoalescing: true })`。
@@ -60,6 +62,8 @@ node scripts/align-check.mjs            # 全部组件对齐检查
 node scripts/align-check.mjs --component TTable
 node scripts/align-check.mjs --json     # 结构化报告（depth-report 的数据源）
 node scripts/depth-report.mjs           # D 阶段工作单（按 D1/D2/D3 统计债务）
+pnpm gen:progress                       # 生成 docs/progress/（总表 + 每组件进度文档）
+pnpm check:progress                     # 校验 docs/progress/ 是否最新（verify 会跑）
 
 # 并行开发（多会话）专用
 pnpm verify:session                     # gen → .local-cache/api.session.json + tsc + ngc + align-check
