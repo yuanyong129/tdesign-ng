@@ -126,6 +126,8 @@ P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / Tree
 
 广度阶段已完成（73 个组件目录、上游 71 个组件目录 100% 覆盖），当前进入深度阶段：D0 横切工程（TNode 模板化、`*Props` 透传、受控/非受控统一、SSR、a11y、单测、i18n）→ D1 表格与选择线 → D2 录入与反馈线 → D3 其余组件。深度债基线见 `pnpm depth:report`（298 项：D1 180 / D2 71 / D3 47）。
 
+**每个组件的进度明细见 [`docs/progress/`](./docs/progress/README.md)**：总表 + 每个组件一页（已实现输入/事件、逐条深度债与原因、示例清单）。数据由 `pnpm gen:progress` 从 `align-check` 生成，`pnpm check:progress` 可校验是否过期；汇总口径仍看 `pnpm depth:report`。
+
 接手开发请先读 [`HANDOFF.md`](./HANDOFF.md)。
 
 `ButtonGroup`、`Scrollbar` 在 TDesign 中没有对应组件，已从本仓库移除。
@@ -141,6 +143,7 @@ P0~P4 已全部落地；P5 复杂录入已完成 Slider / Rate / Cascader / Tree
 | `vendor/tdesign-common` | 上游样式源码快照，`VERSION.json` 记录同步版本 |
 | `scripts` | 代码生成与校验脚本（API 文档、图标、样式构建、上游对齐） |
 | `docs/plans` | 改造计划与技术决策记录 |
+| `docs/progress` | 组件进度文档（生成物，`pnpm gen:progress`） |
 
 ## 本地开发
 
