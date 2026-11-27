@@ -1,8 +1,10 @@
 <form
   [class]="formClasses()"
+  [attr.id]="id()"
   novalidate
   [attr.aria-busy]="isSubmitting()"
   (submit)="handleNativeSubmit($event)"
+  (reset)="handleNativeReset($event)"
 >
   <ng-content />
 </form>

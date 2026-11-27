@@ -2,10 +2,12 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
   contentChildren,
   effect,
   input,
+  inject,
   output,
   signal,
   untracked,
@@ -28,8 +30,11 @@ import type {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  host: { '[attr.id]': 'null' },
 })
 export class TForm {
+  /** @zh 实际原生 form 元素的 id @en ID of the native form element @defaultValue undefined */
+  readonly id = input<string | undefined>(undefined);
   /**
    * @zh 表单布局：纵向或行内
    * @en Form layout: vertical or inline
@@ -150,6 +155,8 @@ export class TForm {
 
   private readonly items = contentChildren(TFormItem, { descendants: true });
   private readonly submitting = signal(false);
+  private operationVersion = 0;
+  private destroyed = false;
 
   protected readonly effectiveLabelAlign = computed<FormLabelAlign>(
     () => this.labelAlign() ?? (this.layout() === 'vertical' ? 'top' : 'right'),
@@ -162,8 +169,9 @@ export class TForm {
   });
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => { this.destroyed = true; this.operationVersion++; });
     // 把表单级配置下发给每个表单项
-    effect(() => {
+    effect((cleanup) => {
       const context: FormItemContext = {
         layout: this.layout(),
         labelAlign: this.effectiveLabelAlign(),
@@ -174,41 +182,27 @@ export class TForm {
         disabled: this.disabled(),
         showErrorMessage: this.showErrorMessage(),
         statusIcon: this.statusIcon(),
+        errorMessage: this.errorMessage(),
         rules: this.rules() ?? {},
       };
       const items = this.items();
       untracked(() => {
         for (const item of items) {
           item.setFormContext(context);
-          item.captureInitialValue();
         }
       });
+      cleanup(() => untracked(() => items.filter((item) => !this.items().includes(item)).forEach((item) => item.clearFormContext())));
     });
   }
 
   /** 校验整表，返回每个字段的结果。 */
   async validateAll(): Promise<FormValidateMessage> {
-    const items = this.items().filter((item) => !!item.name());
-    const results = await Promise.all(items.map((item) => item.validate('submit')));
-
-    const message: FormValidateMessage = {};
-    items.forEach((item, index) => {
-      const name = item.name();
-      if (!name) return;
-      const result = results[index];
-      message[name] = result.result
-        ? { result: true }
-        : {
-            result: false,
-            message: this.errorMessage() ?? result.message,
-            type: result.type ?? 'error',
-          };
-    });
-
+    const message = await this.validateItems(this.items().filter((item) => !!item.name()));
+    if (this.destroyed || Object.values(message).some((result) => result.stale)) return message;
     this.validate.emit(message);
 
     if (this.scrollToFirstError()) {
-      const firstInvalid = items.find((item) => {
+      const firstInvalid = this.items().find((item) => {
         const name = item.name();
         return name ? message[name] && !message[name].result : false;
       });
@@ -222,19 +216,27 @@ export class TForm {
   async validateField(names: string | string[]): Promise<FormValidateMessage> {
     const list = Array.isArray(names) ? names : [names];
     const items = this.items().filter((item) => list.includes(item.name() ?? ''));
-    const results = await Promise.all(items.map((item) => item.validate('submit')));
+    return this.validateItems(items);
+  }
 
+  private async validateItems(items: readonly TFormItem[]): Promise<FormValidateMessage> {
+    const version = this.operationVersion;
+    const snapshots = items.map((item) => ({ item, name: item.name(), value: item.getValue() }));
+    const results = await Promise.all(items.map((item) => item.validate('submit')));
     const message: FormValidateMessage = {};
-    items.forEach((item, index) => {
-      const name = item.name();
+    snapshots.forEach(({ item, name, value }, index) => {
       if (!name) return;
-      message[name] = results[index];
+      const stale = this.destroyed || version !== this.operationVersion || !this.items().includes(item) || item.name() !== name || item.getValue() !== value;
+      const result = results[index];
+      message[name] = stale || result.stale ? { result: false, stale: true }
+        : result.result ? { result: true } : { ...result, message: this.errorMessage() ?? result.message };
     });
     return message;
   }
 
   /** 清空校验状态。 */
   clearValidate(names?: string | string[]): void {
+    this.operationVersion++;
     const list = names ? (Array.isArray(names) ? names : [names]) : null;
     for (const item of this.items()) {
       if (!list || list.includes(item.name() ?? '')) item.clearValidate();
@@ -253,16 +255,25 @@ export class TForm {
 
   /** 重置表单。 */
   resetForm(): void {
-    for (const item of this.items()) item.resetField();
+    this.operationVersion++;
+    for (const item of this.items()) item.resetField(this.resetType());
     this.clearValidate();
     this.reset.emit(this.getFieldsValue());
   }
 
   /** 提交表单：先校验，通过后抛出 submit 事件。 */
   async submitForm(): Promise<FormSubmitResult | null> {
+    if (this.submitting() || this.destroyed) return null;
+    const version = this.operationVersion;
+    const items = [...this.items()];
+    const snapshots = items.map((item) => ({ name: item.name(), value: item.getValue() }));
+    const rules = this.rules();
     this.submitting.set(true);
     try {
       const validateResult = await this.validateAll();
+      if (this.destroyed || version !== this.operationVersion || items.length !== this.items().length || items.some((item) => !this.items().includes(item))
+        || this.rules() !== rules || items.some((item, index) => item.name() !== snapshots[index].name || item.getValue() !== snapshots[index].value)
+        || Object.values(validateResult).some((result) => result.stale)) return null;
       const failed = Object.values(validateResult).filter((result) => !result.result);
       const hasError = failed.some((result) => result.type !== 'warning');
       const hasWarning = failed.length > 0;
@@ -283,6 +294,11 @@ export class TForm {
     event.stopPropagation();
     if (this.preventSubmitDefault()) event.preventDefault();
     void this.submitForm();
+  }
+
+  protected handleNativeReset(event: Event): void {
+    event.stopPropagation(); event.preventDefault();
+    this.resetForm();
   }
 
   protected isSubmitting(): boolean {

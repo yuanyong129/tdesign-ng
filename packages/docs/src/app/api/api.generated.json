@@ -4232,6 +4232,15 @@
       "file": "packages/ng-components/src/components/form/form.component.ts",
       "inputs": [
         {
+          "name": "id",
+          "type": "string | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "实际原生 form 元素的 id",
+          "en": "ID of the native form element",
+          "values": []
+        },
+        {
           "name": "layout",
           "type": "FormLayout",
           "default": "vertical",

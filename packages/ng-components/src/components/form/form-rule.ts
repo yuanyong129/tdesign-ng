@@ -71,12 +71,12 @@ export async function validateRules(
       return fail(rule.message ?? '必填项不能为空', 'error');
     }
 
-    // 非必填且值为空时，其余规则不再校验
-    if (isEmpty(value)) continue;
-
     if (typeof value === 'string' && rule.whitespace === false && value.trim() === '') {
       return fail(rule.message ?? '不能只包含空白字符');
     }
+
+    // 自定义规则必须能够检查空值；其它非必填规则跳过空值。
+    if (isEmpty(value) && !rule.validator) continue;
 
     if (rule.type && !typeMatches(value, rule.type)) {
       return fail(message);
@@ -99,14 +99,21 @@ export async function validateRules(
     }
 
     if (rule.pattern) {
-      const pattern = typeof rule.pattern === 'string' ? new RegExp(rule.pattern) : rule.pattern;
-      if (typeof value !== 'string' || !pattern.test(value)) {
+      let pattern: RegExp;
+      try { pattern = typeof rule.pattern === 'string' ? new RegExp(rule.pattern) : rule.pattern; }
+      catch { return fail(message); }
+      pattern.lastIndex = 0;
+      const matched = typeof value === 'string' && pattern.test(value);
+      pattern.lastIndex = 0;
+      if (!matched) {
         return fail(message);
       }
     }
 
     if (rule.validator) {
-      const output = await rule.validator(value, { ...context, value, rule });
+      let output: FormValidateResult | boolean;
+      try { output = await rule.validator(value, { ...context, value, rule }); }
+      catch { return fail(message); }
       if (typeof output === 'boolean') {
         if (!output) return fail(message);
       } else if (!output.result) {
@@ -128,5 +135,5 @@ export function toRuleArray(rules: FormRule | FormRule[] | undefined): FormRule[
 export function triggersAt(rule: FormRule, trigger: 'blur' | 'change' | 'submit'): boolean {
   const configured = rule.trigger ?? 'submit';
   const list = Array.isArray(configured) ? configured : [configured];
-  return list.includes(trigger);
+  return trigger === 'submit' || list.includes(trigger);
 }

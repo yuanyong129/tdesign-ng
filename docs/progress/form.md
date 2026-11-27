@@ -4,30 +4,31 @@
 
 - 目录：`packages/ng-components/src/components/form/`
 - 文档页：`/form`（`packages/docs/src/app/docs/form/form.component.ts`）
-- 状态：🚧 有深度债 2 项
+- 状态：🚧 有深度债 1 项
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 34 |
-| 已对齐 | 28 |
-| 覆盖率 | 82.4% |
-| 深度债 | 2（D1 0 / D2 2 / D3 0） |
+| 已对齐 | 29 |
+| 覆盖率 | 85.3% |
+| 深度债 | 1（D1 0 / D2 1 / D3 0） |
 | Angular 惯用映射 | 4（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 6 个 |
+| 文档示例 | 7 个 |
 
 ## 组件明细
 
 ### `TForm`（`<t-form>`）
 
-上游接口 `TdFormProps`；上游属性 21、已对齐 15（71.4%）；深度债 2 项；未登记缺失 0 项。
+上游接口 `TdFormProps`；上游属性 21、已对齐 16（76.2%）；深度债 1 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
+| `id` | string \| undefined | undefined | 实际原生 form 元素的 id |
 | `layout` | FormLayout | vertical | 表单布局：纵向或行内 |
 | `labelAlign` | FormLabelAlign \| undefined | undefined | 标签对齐方式，不设置时纵向布局为 top、行内布局为 right |
 | `labelWidth` | string \| number | 100px | 标签宽度 |
@@ -57,7 +58,6 @@
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
 | `data` | Angular 惯用映射 | Angular 用 ngModel/FormGroup 承载表单数据，不需要 data 输入 |
-| `id` | D2 录入与反馈线 | 宿主元素的 id 交给使用方设置，框架不覆盖 |
 | `onReset` | Angular 惯用映射 | Angular 用 (reset) 输出 |
 | `onSubmit` | Angular 惯用映射 | Angular 用 (submit) 输出 |
 | `onValidate` | Angular 惯用映射 | Angular 用 (validate) 输出 |
@@ -91,5 +91,6 @@
 - `packages/docs/src/app/docs/form/demos/form-disabled.ts`
 - `packages/docs/src/app/docs/form/demos/form-inline.ts`
 - `packages/docs/src/app/docs/form/demos/form-label.ts`
+- `packages/docs/src/app/docs/form/demos/form-lifecycle.ts`
 - `packages/docs/src/app/docs/form/demos/form-rules.ts`
 - `packages/docs/src/app/docs/form/demos/form-validator.ts`

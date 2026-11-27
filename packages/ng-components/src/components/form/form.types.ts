@@ -43,6 +43,8 @@ export interface FormValidateResult {
   result: boolean;
   message?: string;
   type?: FormMessageType;
+  /** 校验期间字段已变化、重置或移除，结果不可用于提交。 */
+  stale?: boolean;
 }
 
 /** 单条校验规则，字段语义与 TDesign 保持一致。 */
@@ -70,7 +72,7 @@ export interface FormRule {
     value: any,
     context: FormRuleContext,
   ) => FormValidateResult | boolean | Promise<FormValidateResult | boolean>;
-  /** 触发时机，默认 submit */
+  /** 交互校验时机，默认 submit；整表提交始终检查全部规则 */
   trigger?: FormRuleTrigger | FormRuleTrigger[];
 }
 

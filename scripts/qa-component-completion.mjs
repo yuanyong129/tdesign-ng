@@ -1076,6 +1076,126 @@ try {
   assert.deepEqual(switchState.formPending,{model:'off',checked:'true',touched:false}); assert.deepEqual(switchState.formBlurred,{model:'on',touched:true});
   assert.equal(switchState.formDisabled,true); assert.deepEqual(switchState.reset,{checked:'false',model:'off',touched:false});
   console.log('PASS Switch state: default/custom/CVA, sync and async guards, one pending request, rejection, stale result cancellation, destroy, keyboard');
+  await page('/form', 'demo-form-lifecycle .ngmodel-form input');
+  const formLifecycle = await evaluate(`(async () => {
+    const root=document.querySelector('demo-form-lifecycle'), demo=ng.getComponent(root);
+    let host=root.querySelector('t-form'), form=ng.getComponent(host), native=host.querySelector('form');
+    const item=ng.getComponent(host.querySelector('t-form-item'));
+    const id={native:native.id,host:host.id,count:document.querySelectorAll('#lifecycle-native-form').length};
+    demo.formId.set('changed-native-form'); ng.applyChanges(demo); ${settle}
+    const dynamicId=native.id;
+    const initialDisabled=demo.locked.disabled && !demo.name.disabled;
+    demo.disabled.set(true); ng.applyChanges(demo); ${settle}
+    const allDisabled=[demo.name,demo.count,demo.enabled,demo.locked,demo.tags].every(control=>control.disabled);
+    demo.disabled.set(false); ng.applyChanges(demo); ${settle}
+    const released={name:demo.name.disabled,locked:demo.locked.disabled};
+    demo.mirror.set(true); demo.disabled.set(true); demo.mirrorDisabled.set(true); ng.applyChanges(demo); ${settle}
+    demo.disabled.set(false); ng.applyChanges(demo); ${settle} const sharedLocked=demo.name.disabled;
+    demo.mirror.set(false); ng.applyChanges(demo); ${settle} const sharedReleased=demo.name.enabled;
+    demo.name.setValue(''); ${settle}
+    const required=await form.validateAll(); ${settle}
+    const errorShown=host.querySelector('t-form-item .t-input__extra')?.textContent.trim();
+    demo.errorMessage.set('统一错误'); ng.applyChanges(demo); ${settle}
+    const fieldResult=await form.validateField('name'); ${settle}
+    const unified={returned:fieldResult.name.message,shown:host.querySelector('t-form-item .t-input__extra')?.textContent.trim()};
+    demo.ownRules.set([]); ng.applyChanges(demo); ${settle}
+    const ownEmpty=await form.validateField('name');
+    demo.ownRules.set(undefined); demo.errorMessage.set(undefined); ng.applyChanges(demo); ${settle}
+    demo.rules.set({name:[{pattern:/^[a-z]+$/g,message:'仅限英文',trigger:'change'}]}); demo.name.setValue('alpha'); ng.applyChanges(demo); ${settle}
+    const regex1=await form.validateField('name'),regex2=await form.validateField('name');
+    demo.rules.set({name:[{whitespace:false,message:'不可全为空白'}]}); demo.name.setValue('   '); ng.applyChanges(demo); ${settle}
+    const whitespace=await form.validateField('name');
+    demo.rules.set({name:[{validator:value=>({result:value==='ok',message:'自定义空值校验'})}]}); demo.name.setValue(''); ng.applyChanges(demo); ${settle}
+    const customEmpty=await form.validateField('name');
+    demo.rules.set({name:[{pattern:'[',message:'正则配置错误'}]}); demo.name.setValue('test'); ng.applyChanges(demo); ${settle}
+    const invalidPattern=await form.validateField('name');
+    demo.rules.set({name:[{validator:()=>({result:false,message:'警告提示',type:'warning'})}]}); demo.name.setValue('warning'); ng.applyChanges(demo); ${settle}
+    const warningBlocked=await form.submitForm(); demo.allowWarnings.set(true); ng.applyChanges(demo); ${settle}
+    const warningAllowed=await form.submitForm();
+    demo.rules.set({}); demo.allowWarnings.set(false); ng.applyChanges(demo); ${settle}
+    demo.name.setValue('编辑名称'); demo.count.setValue(9); demo.enabled.setValue(false); demo.tags.setValue(['b','c']);
+    demo.name.markAsDirty(); demo.name.markAsTouched(); ${settle}
+    native.dispatchEvent(new Event('reset',{bubbles:true,cancelable:true})); ${settle}
+    const empty={fields:form.getFieldsValue(),resets:demo.resets(),pristine:demo.name.pristine,touched:demo.name.touched,locked:demo.locked.disabled};
+    demo.resetType.set('initial'); ng.applyChanges(demo); ${settle} form.resetForm(); ${settle}
+    const initial=JSON.parse(JSON.stringify(form.getFieldsValue()));
+    demo.tags.value.push('mutated'); form.resetForm(); ${settle} const cloned=[...demo.tags.value];
+    const modelHost=root.querySelector('.ngmodel-form'), modelForm=ng.getComponent(modelHost), modelInput=modelHost.querySelector('input');
+    const modelInitial=demo.model; modelInput.value='模板编辑'; modelInput.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    modelForm.resetForm(); ${settle} const modelReset={model:demo.model,text:modelInput.value};
+    demo.extra.set(true); ng.applyChanges(demo); ${settle}
+    demo.extraControl.setValue('改动态值'); ${settle} form.resetForm(); ${settle}
+    const dynamicReset=form.getFieldsValue().extra;
+    demo.extra.set(false); ng.applyChanges(demo); ${settle} const removed=!('extra' in form.getFieldsValue());
+    demo.rules.set({name:[{validator:()=>false,message:'离焦检查',trigger:'blur'}]}); ng.applyChanges(demo); ${settle}
+    const nameInput=host.querySelector('input'), helper=host.querySelector('t-form-item button');
+    nameInput.focus(); helper.focus(); ${settle} const internalFocusClean=!host.querySelector('t-form-item .t-input__extra');
+    helper.blur(); ${settle} const externalFocusError=host.querySelector('t-form-item .t-input__extra')?.textContent.trim();
+    demo.useAsyncRules(); ng.applyChanges(demo); ${settle}
+    const old=item.validate('submit'); demo.name.setValue('新值'); ${settle} const latest=item.validate('submit');
+    const first=demo.requests.shift(),second=demo.requests.shift(); second.resolve(true); await latest; ${settle}
+    first.resolve(false); const oldResult=await old; ${settle}
+    const staleHidden=!host.querySelector('t-form-item .t-input__extra');
+    const cleared=item.validate('submit'); const clearRequest=demo.requests.shift(); form.clearValidate(); clearRequest.resolve(false);
+    const clearResult=await cleared; ${settle} const clearHidden=!host.querySelector('t-form-item .t-input__extra');
+    const rejected=item.validate('submit'); demo.fail(); const rejectResult=await rejected; ${settle}
+    form.clearValidate(); ${settle}
+    const submission=form.submitForm(); ${settle} const requestsBefore=demo.requests.length;
+    const duplicate=await form.submitForm(); const duplicateSingle=demo.requests.length===requestsBefore;
+    demo.finish(true); const submitted=await submission; ${settle}
+    const beforeReset=demo.submits(); const resetPending=form.submitForm(); ${settle} form.resetForm(); demo.finish(true);
+    const resetCancelled=await resetPending; ${settle}
+    const beforeChange=demo.submits(); const changedPending=form.submitForm(); ${settle} demo.name.setValue('提交期间变化'); ${settle} demo.finish(true);
+    const changeCancelled=await changedPending; ${settle}
+    form.clearValidate();
+    const renamePending=form.submitForm(); ${settle} demo.fieldName.set('renamed'); ng.applyChanges(demo); ${settle} demo.finish(true);
+    const renameCancelled=await renamePending; ${settle}
+    demo.fieldName.set('name'); ng.applyChanges(demo); ${settle}
+    demo.rules.set({extra:[{validator:()=>new Promise((resolve,reject)=>demo.requests.push({resolve,reject})),message:'移除字段校验'}]});
+    demo.extra.set(true); ng.applyChanges(demo); ${settle}
+    const removedPending=form.submitForm(); ${settle} demo.extra.set(false); ng.applyChanges(demo); ${settle} demo.finish(true);
+    const removeCancelled=await removedPending; ${settle}
+    demo.useAsyncRules(); ng.applyChanges(demo); ${settle}
+    const latePending=form.submitForm(); ${settle} demo.extra.set(true); ng.applyChanges(demo); ${settle} demo.finish(true);
+    const additionCancelled=await latePending; ${settle} demo.extra.set(false); ng.applyChanges(demo); ${settle}
+    demo.rules.set({}); ng.applyChanges(demo); ${settle}
+    const callbackSub=form.validate.subscribe(()=>demo.name.setValue('校验回调改值'));
+    const callbackCancelled=(await form.submitForm())===null; callbackSub.unsubscribe(); ${settle}
+    const submitsBefore=demo.submits(); const nativeSubmit=new Event('submit',{bubbles:true,cancelable:true});
+    native.dispatchEvent(nativeSubmit); ${settle}
+    const nativeOnce=demo.submits()===submitsBefore+1 && nativeSubmit.defaultPrevented;
+    const external=document.createElement('button'); external.type='submit'; external.setAttribute('form',native.id); document.body.append(external);
+    const beforeExternal=demo.submits(); external.click(); ${settle} external.remove();
+    const externalSubmit=demo.submits()===beforeExternal+1;
+    demo.useAsyncRules(); ng.applyChanges(demo); ${settle}
+    const beforeDestroy=demo.submits(); const destroyedPending=form.submitForm(); ${settle}
+    demo.mounted.set(false); ng.applyChanges(demo); ${settle} demo.finish(true); const destroyCancelled=await destroyedPending; ${settle}
+    return {id,dynamicId,initialDisabled,allDisabled,released,sharedLocked,sharedReleased,required:required.name.result,errorShown,unified,ownEmpty:ownEmpty.name.result,
+      regex:[regex1.name.result,regex2.name.result],whitespace:whitespace.name.result,customEmpty:customEmpty.name.result,invalidPattern:invalidPattern.name.result,
+      warningBlocked:warningBlocked===null,warningAllowed:!!warningAllowed,empty,initial,cloned,modelInitial,modelReset,dynamicReset,removed,
+      internalFocusClean,externalFocusError,oldResult,staleHidden,clearResult,clearHidden,rejectResult,
+      duplicate:duplicate===null,duplicateSingle,submitted:!!submitted,resetCancelled:resetCancelled===null,
+      changeCancelled:changeCancelled===null,renameCancelled:renameCancelled===null,
+      removeCancelled:removeCancelled===null,additionCancelled:additionCancelled===null,callbackCancelled,nativeOnce,externalSubmit,
+      destroyCancelled:destroyCancelled===null,destroyStable:beforeDestroy===demo.submits()};
+  })()`);
+  assert.deepEqual(formLifecycle.id,{native:'lifecycle-native-form',host:'',count:1}); assert.equal(formLifecycle.dynamicId,'changed-native-form');
+  assert.equal(formLifecycle.initialDisabled,true); assert.equal(formLifecycle.allDisabled,true); assert.deepEqual(formLifecycle.released,{name:false,locked:true});
+  assert.equal(formLifecycle.sharedLocked,true); assert.equal(formLifecycle.sharedReleased,true);
+  assert.equal(formLifecycle.required,false); assert.equal(formLifecycle.errorShown,'名称必填'); assert.deepEqual(formLifecycle.unified,{returned:'统一错误',shown:'统一错误'});
+  assert.equal(formLifecycle.ownEmpty,true); assert.deepEqual(formLifecycle.regex,[true,true]); assert.equal(formLifecycle.whitespace,false); assert.equal(formLifecycle.customEmpty,false);
+  assert.equal(formLifecycle.invalidPattern,false);
+  assert.equal(formLifecycle.warningBlocked,true); assert.equal(formLifecycle.warningAllowed,true);
+  assert.deepEqual(formLifecycle.empty,{fields:{name:'',count:null,enabled:false,locked:'',tags:[]},resets:1,pristine:true,touched:false,locked:true});
+  assert.deepEqual(formLifecycle.initial,{name:'初始名称',count:3,enabled:true,locked:'保留禁用',tags:['a']}); assert.deepEqual(formLifecycle.cloned,['a']);
+  assert.equal(formLifecycle.modelInitial,'模板初始值'); assert.deepEqual(formLifecycle.modelReset,{model:'模板初始值',text:'模板初始值'});
+  assert.equal(formLifecycle.dynamicReset,'动态初始值'); assert.equal(formLifecycle.removed,true);
+  assert.equal(formLifecycle.internalFocusClean,true); assert.equal(formLifecycle.externalFocusError,'离焦检查');
+  assert.deepEqual(formLifecycle.oldResult,{result:false,stale:true}); assert.equal(formLifecycle.staleHidden,true);
+  assert.deepEqual(formLifecycle.clearResult,{result:false,stale:true}); assert.equal(formLifecycle.clearHidden,true);
+  assert.deepEqual(formLifecycle.rejectResult,{result:false,message:'异步校验失败',type:'error'});
+  for(const key of ['duplicate','duplicateSingle','submitted','resetCancelled','changeCancelled','renameCancelled','removeCancelled','additionCancelled','callbackCancelled','nativeOnce','externalSubmit','destroyCancelled','destroyStable']) assert.equal(formLifecycle[key],true,key);
+  console.log('PASS Form lifecycle: reset modes/native reset, disabled ownership, IDs, validation triggers/regex/empty/warnings, dynamic fields, stale async results and submission');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

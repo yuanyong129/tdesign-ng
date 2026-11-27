@@ -2,6 +2,7 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
   contentChild,
   effect,
@@ -12,9 +13,9 @@ import {
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
-import { NgControl } from '@angular/forms';
+import { NgControl, type AbstractControl } from '@angular/forms';
 import { toRuleArray, triggersAt, validateRules } from './form-rule';
-import type { FormLabelAlign, FormRule, FormValidateResult, FormValidateStatus } from './form.types';
+import type { FormLabelAlign, FormRule, FormValidateResult, FormValidateStatus, FormResetType } from './form.types';
 
 /** 由 t-form 下发的上下文。 */
 export interface FormItemContext {
@@ -27,6 +28,7 @@ export interface FormItemContext {
   disabled: boolean;
   showErrorMessage: boolean;
   statusIcon: boolean;
+  errorMessage?: string;
   rules: Record<string, FormRule | FormRule[]>;
 }
 
@@ -35,6 +37,9 @@ const STATUS_CLASS: Record<FormValidateStatus, string> = {
   warning: 't-is-warning',
   error: 't-is-error',
 };
+
+// 同一 Angular Control 可能出现在多个表单项中，每项仅释放自己持有的禁用锁。
+const DISABLED_LOCKS = new WeakMap<AbstractControl, { owners: number; originallyDisabled: boolean }>();
 
 /** 可选的布尔输入：不传时保持 undefined，以便回落到表单级配置。 */
 const optionalBoolean = (value: unknown): boolean | undefined =>
@@ -48,7 +53,7 @@ const optionalBoolean = (value: unknown): boolean | undefined =>
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'itemClasses()',
-    '(focusout)': 'handleFocusOut()',
+    '(focusout)': 'handleFocusOut($event)',
   },
 })
 export class TFormItem {
@@ -155,6 +160,10 @@ export class TFormItem {
   private readonly validated = signal<FormValidateStatus | null>(null);
   private initialValue: unknown = undefined;
   private initialValueCaptured = false;
+  private capturedControl: AbstractControl | null = null;
+  private disabledControl: AbstractControl | null = null;
+  private validationVersion = 0;
+  private destroyed = false;
 
   protected readonly effectiveLabelAlign = computed(
     () => this.labelAlign() ?? this.context()?.labelAlign ?? 'right',
@@ -165,8 +174,7 @@ export class TFormItem {
   );
 
   protected readonly rulesToUse = computed<FormRule[]>(() => {
-    const own = toRuleArray(this.rules());
-    if (own.length) return own;
+    if (this.rules() !== undefined) return toRuleArray(this.rules());
     const name = this.name();
     const formRules = this.context()?.rules;
     if (!name || !formRules) return [];
@@ -192,7 +200,7 @@ export class TFormItem {
     return show && !!this.message();
   });
 
-  protected readonly displayMessage = computed(() => (this.showMessage() ? this.message() : ''));
+  protected readonly displayMessage = computed(() => (this.showMessage() ? this.context()?.errorMessage ?? this.message() : ''));
 
   protected readonly itemClasses = computed(() => {
     const classes = ['t-form__item'];
@@ -229,17 +237,27 @@ export class TFormItem {
   });
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => {
+      this.destroyed = true; this.validationVersion++;
+      this.releaseDisabledControl();
+    });
     // 表单禁用时把控件一并禁用
     effect(() => {
       const disabled = this.context()?.disabled ?? false;
       const control = this.ngControl();
       untracked(() => {
-        if (!control?.control) return;
+        const target = control?.control;
+        if (this.disabledControl && this.disabledControl !== target) this.releaseDisabledControl();
+        if (!target) return;
         if (disabled) {
-          control.control.disable({ emitEvent: false });
-        } else if (control.control.disabled) {
-          control.control.enable({ emitEvent: false });
-        }
+          if (this.disabledControl !== target) {
+            const lock = DISABLED_LOCKS.get(target) ?? { owners: 0, originallyDisabled: target.disabled };
+            lock.owners++;
+            DISABLED_LOCKS.set(target, lock);
+            this.disabledControl = target;
+          }
+          if (target.enabled) target.disable({ emitEvent: false });
+        } else this.releaseDisabledControl();
       });
     });
 
@@ -247,12 +265,29 @@ export class TFormItem {
     effect((onCleanup) => {
       const control = this.ngControl()?.control;
       if (!control) return;
+      queueMicrotask(() => { if (!this.destroyed && this.ngControl()?.control === control) this.captureInitialValue(); });
       const subscription = control.valueChanges.subscribe(() => {
         void this.validate('change', !!this.validateStatus());
       });
       onCleanup(() => subscription.unsubscribe());
     });
+    effect(() => {
+      this.name(); this.rulesToUse();
+      untracked(() => this.clearValidate());
+    });
   }
+
+  private releaseDisabledControl(): void {
+    const control = this.disabledControl;
+    this.disabledControl = null;
+    if (!control) return;
+    const lock = DISABLED_LOCKS.get(control);
+    if (!lock || --lock.owners > 0) return;
+    DISABLED_LOCKS.delete(control);
+    if (!lock.originallyDisabled && control.disabled) control.enable({ emitEvent: false });
+  }
+
+  clearFormContext(): void { this.context.set(null); this.clearValidate(); }
 
   /** 由 t-form 调用，下发上下文。 */
   setFormContext(context: FormItemContext): void {
@@ -270,13 +305,17 @@ export class TFormItem {
     trigger: 'blur' | 'change' | 'submit' = 'submit',
     force = false,
   ): Promise<FormValidateResult> {
+    const version = ++this.validationVersion;
+    const name = this.name();
+    const value = this.getValue();
     const rules = this.rulesToUse().filter((rule) => force || triggersAt(rule, trigger));
     if (!rules.length) {
       if (trigger === 'submit') this.clearValidate();
       return { result: true };
     }
 
-    const result = await validateRules(this.getValue(), rules, { name: this.name() ?? '' });
+    const result = await validateRules(value, rules, { name: name ?? '' });
+    if (this.destroyed || version !== this.validationVersion || name !== this.name() || value !== this.getValue()) return { result: false, stale: true };
 
     if (result.result) {
       this.clearValidate();
@@ -290,23 +329,39 @@ export class TFormItem {
 
   /** 清空校验状态。 */
   clearValidate(): void {
+    this.validationVersion++;
     this.validated.set(null);
     this.message.set('');
   }
 
   /** 重置为初始值并清空校验状态。 */
-  resetField(): void {
+  resetField(type: FormResetType = 'initial'): void {
     const control = this.ngControl()?.control;
     if (!control) return;
-    control.reset(this.initialValueCaptured ? this.initialValue : control.value);
+    this.captureInitialValue();
+    const initial = this.cloneValue(this.initialValue);
+    const value = type === 'initial' ? initial : Array.isArray(initial) ? [] : typeof initial === 'boolean' ? false : typeof initial === 'string' ? '' : null;
+    control.reset(value, { emitEvent: false });
     this.clearValidate();
   }
 
   /** 记录初始值，供 reset() 回滚。 */
   captureInitialValue(): void {
-    if (this.initialValueCaptured) return;
-    this.initialValue = this.getValue();
+    const control = this.ngControl()?.control;
+    if (!control) return;
+    if (this.initialValueCaptured && this.capturedControl === control) return;
+    this.capturedControl = control;
+    this.initialValue = this.cloneValue(this.getValue());
     this.initialValueCaptured = true;
+  }
+
+  private cloneValue(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map((item) => this.cloneValue(item));
+    if (value instanceof Date) return new Date(value.getTime());
+    if (value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
+      return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, this.cloneValue(item)]));
+    }
+    return value;
   }
 
   /** 把该项滚动到可见区域，用于 scrollToFirstError。 */
@@ -314,7 +369,8 @@ export class TFormItem {
     this.host.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  protected handleFocusOut(): void {
+  protected handleFocusOut(event: FocusEvent): void {
+    if (event.relatedTarget && this.host.nativeElement.contains(event.relatedTarget as Node)) return;
     void this.validate('blur');
   }
 }

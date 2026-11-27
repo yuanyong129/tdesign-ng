@@ -188,3 +188,16 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、交互回归、`pnpm check:progress` 和 `git diff --check` 通过，missing 0 / extra 0。保留既有 footer slot、Browserslist、qrcode CommonJS 和首包预算告警（约 799.66 kB）。
 
 **接续任务**：第 3 轮 Form → SelectInput → AutoComplete → Tabs.list → Breadcrumb / Steps / Statistic，继续核实已有实现。第 3 轮整体与 M2 尚未完成。
+
+### 2026-11-27：第 3 轮 Form 重置与校验生命周期
+
+- **原生 form id**：id 输入指向实际原生 form，宿主不保留同名 id，动态修改生效；外部 button 的 form 属性可以引用并提交。原生 submit / reset 在内部拦截冒泡，避免同名输出重复通知；reset 阻止浏览器再执行一次默认重置。
+- **重置语义**：此前 resetType 虽已登记但始终恢复初值，现接入 empty / initial。empty 将字符串、布尔、数组分别置为 ''、false、[]，数字及对象置为 null；initial 恢复控件首次就绪时的值。初始值在控件就绪微任务捕获，覆盖 ngModel 延迟初始化与动态字段；数组、普通对象和 Date 保存/恢复副本，避免编辑污染初值。重置清除 touched / dirty 和提示，保持禁用状态，输出重置后的字段值；不额外触发 valueChanges 自动校验。
+- **禁用所有权**：表单只释放自己持有的禁用锁，预先禁用的控件不会被顺带启用。相同 Angular Control 被多个表单项引用时按 WeakMap 计数，最后一个锁释放后才恢复；成员移除/销毁释放自己的锁。外部 FormGroup.disable/enable 与 t-form.disabled 同时管理同一周期的优先级仍有限制，文档明确建议采用单一来源。
+- **规则与提示**：提交检查全部规则，包括配置 blur / change 的规则；交互时仍按 trigger 过滤。显式空 rules 数组可覆盖表单规则。全局正则每次校验重置 lastIndex，非法正则按失败结果返回；whitespace=false 不再被空值短路，自定义 validator 可以检查空值。同步抛错和 Promise 拒绝返回规则失败文案，不产生未处理异常。errorMessage 同时作用于界面和 validateAll / validateField 返回结果。
+- **异步失效**：每个 FormItem 的校验有版本控制，后发校验、字段改值/改名、规则变化、clearValidate、重置或销毁使旧结果失效，不覆盖当前界面。过期结果返回 { result: false, stale: true }，明确不能用于提交。重复 submitForm 在等待期间返回 null；字段值、规则、成员或操作版本改变时取消本次提交。validate 回调同步修改字段也不会提交未经校验的新值。失效只忽略返回结果，不主动中止用户自定义请求。
+- **动态字段与焦点**：移除成员不再参与取值/校验，新增成员不会随旧提交一并放行；初始重置值按新控件捕获。FormItem 内部输入框到辅助按钮的焦点切换不触发 blur 校验，焦点离开整项才触发。
+- **进度与限制**：新增 Form 生命周期 demo，示例 331 → 332；对齐 1062 → 1063（67.4%），真实债务 223 → 222，零债务目录仍为 42/73。id 债务实际实现，resetType 等属于已有登记行为修复。表单级 readonly 仍保留为 1 项真实债务，需要跨控件统一上下文，本批不将它改列映射。每项当前管理首个 Angular 表单控件；errorMessage 仍为统一字符串，scrollToFirstError 仍为布尔，statusIcon 与富内容等既有边界未在本批扩展，不宣称完整上游运行语义或 SSR/水合验收完成。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及本批交互回归、`pnpm check:progress` 和 `git diff --check` 通过，missing 0 / extra 0。交互覆盖两种 reset、原生 reset/submit 单次输出、外部按钮按 id 提交、ngModel 初值、数组副本、动态字段、禁用所有权及共享锁、trigger/空规则覆盖/全局及非法正则/空值/warning、统一提示、内部换焦点、异步结果乱序/拒绝/清除、重复提交及各类失效。Form 页面 issues / badResources 为空，截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 799.66 kB）。
+
+**接续任务**：Form.readonly 跨控件上下文 → SelectInput → AutoComplete → Tabs.list → Breadcrumb / Steps / Statistic。Form 整体、第 3 轮与 M2 尚未完成。

@@ -6,9 +6,9 @@
 | --- | --- |
 | 组件目录 | 73 |
 | 上游属性 | 1576 |
-| 已对齐 | 1062 |
+| 已对齐 | 1063 |
 | 覆盖率 | 67.4% |
-| 深度债 | 223 项 |
+| 深度债 | 222 项 |
 | 零债务组件 | 42 / 73 |
 
 状态图例：✅ 无债务；🚧 有深度债（D1 表格与选择线 / D2 录入与反馈 / D3 其余）；⚠️ 有未登记缺失。
@@ -67,10 +67,10 @@
 | [回到顶部 BackTop](back-top.md) | `back-top` | 11 | 9 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [折叠面板 Collapse](collapse.md) | `collapse` | 11 | 9 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [颜色选择器 ColorPicker](color-picker.md) | `color-picker` | 22 | 18 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [表单 Form](form.md) | `form` | 34 | 28 | 82.4% | 0 | 2 | 0 | 0 | 6 | 🚧 |
 | [分页 Pagination](pagination.md) | `pagination` | 23 | 19 | 82.6% | 0 | 0 | 0 | 0 | 6 | ✅ |
 | [锚点 Anchor](anchor.md) | `anchor` | 12 | 10 | 83.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [排版 Typography](typography.md) | `typography` | 20 | 17 | 85.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
+| [表单 Form](form.md) | `form` | 34 | 29 | 85.3% | 0 | 1 | 0 | 0 | 7 | 🚧 |
 | [空状态 Empty](empty.md) | `empty` | 7 | 6 | 85.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [评分 Rate](rate.md) | `rate` | 14 | 12 | 85.7% | 0 | 0 | 0 | 0 | 5 | ✅ |
 | [统计数值 Statistic](statistic.md) | `statistic` | 15 | 13 | 86.7% | 0 | 0 | 2 | 0 | 3 | 🚧 |
