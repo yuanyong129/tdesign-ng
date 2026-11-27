@@ -119,3 +119,18 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、`pnpm build`、交互回归及 `pnpm check:progress` 全部通过，missing 0 / extra 0。完整构建保留既有 footer slot、Browserslist、qrcode CommonJS 与首包预算告警（当前首包 791.20 kB），无构建错误。
 
 本批按用户要求验证后自动提交，并保持 progress 生成物同步。**接续任务**：第 2 轮 Avatar/AvatarGroup → InputNumber/RangeInput/TagInput → Slider；第 2 轮整体与 M1 尚未全部完成。
+
+### 2026-11-27：第 2 轮 Avatar / AvatarGroup
+
+- **Avatar.imageProps**：图片分支复用 TImage，提供 AvatarImageProps 类型，覆盖 fit、position、shape、referrerpolicy、gallery、lazy、srcset、加载/错误/占位/浮层内容、备用图片及 onLoad/onError。image/alt 由头像显式输入管理；内容与 collapseAvatar 统一支持 Content 模板。
+- **失败行为**：按锁定上游行为修正 hideOnLoadFailed：false 保留 Image 错误态，true 隐藏失败图片并显示内容；更换 image 重置失败状态。原有“总是回退内容”的说明已同步修正。
+- **AvatarGroup.popupProps**：复用 PopupOptions，提供折叠头像列表与可聚焦触发器，支持点击/悬浮、键盘、禁用、关闭销毁及类名等配置。锁定的上游 1.20.11 声明了此属性，但 group.mjs 未消费；本库按完善计划提供实际折叠弹层，不能称为对该版本运行行为的完全复刻。
+- **组件保留**：通过 CDK DomPortal 移动原头像宿主到弹层，关闭时恢复原位置；不复制头像，不丢失宿主 click、投影图标、内部按钮和原组件状态。动态删除头像时解绑 Portal 并清理节点，组内成员与 max/size 变化实时更新。max 未设置、0 或负数时全部展示。
+- **样式适配**：更新 bridge 中因头像宿主隔开的层叠规则，使用 vendor 的 -8px 对应尺寸变量和初始 z-index 50；折叠触发器补必要的宿主桥接。可见项与折叠列表中已验证无重复头像。
+- **关联 Image 修复**：空字符串 loading 明确表示不显示加载占位；缓存探测不再把解码失败误报为 load；同资源缓存探测/原生 load 去重，新 srcset 资源仍可通知；备用图片再次失败时进入错误态，不无限重试。
+- **交互回归**：通过 HTTP 200 的无效图片 fixture 验证真实解码失败、事件各一次、备用图片成功/失败、地址更新恢复；验证折叠模板、原宿主 click、投影按钮及图标、动态增删、反复开关、max/size、键盘、动态禁用关闭、aria-expanded 重置及组销毁清理。扩展脚本保留前两批所有回归。
+- **生成进度**：新增 2 个 demo，总计 321 个；`docs/progress/avatar.md` 与总表由脚本同步，Avatar 目录真实债务 2 → 0；全库已对齐 1044 → 1046（66.4%）、深度债 242 → 240、零债务目录 38 → 39。
+- **页面检查**：Avatar 页面无 console 异常或失败资源；Image 页面原有失败演示请求 `/not-exists.png` 返回 404，属于现有示例行为，未算成本批新增错误。系统剪贴板等其他既有回归仍使用隔离 fixture。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部组件交互回归及 `pnpm check:progress` 通过；missing 0 / extra 0。保留已有 footer slot、Browserslist、qrcode CommonJS 和首包预算告警，本批首包约 795.23 kB。浏览器验证已完成，完整 SSR/水合验证仍属后续质量任务。
+
+**接续任务**：第 2 轮 InputNumber / RangeInput / TagInput 的类型化属性透传 → Slider；第 2 轮与 M1 尚未全部完成。

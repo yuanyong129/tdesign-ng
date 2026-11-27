@@ -141,26 +141,40 @@ t-avatar.t-avatar--hidden {
   display: none;
 }
 
-// 头像组的层叠：上游用 `.t-avatar:not(:last-child)` / `:nth-child()` 计算负边距与层级，
-// 但宿主是 display: contents，真实头像都是各自宿主的「第一个/最后一个」子元素，
-// 这些选择器永远命中不到，所以把规则改写到宿主元素上。
+// 头像组的宿主隔开了上游 nth-child/负边距选择器，等价规则施加到真实头像根节点。
+// 数值与 vendor 的 @avatar-group-init-zIndex / @avatar-group-offset-* 一致。
 .avatar-group-z-index(@n, @i: 1) when (@i =< @n) {
-  > t-avatar:nth-child(@{i}) {
-    z-index: (20 - @i);
+  > t-avatar:nth-of-type(@{i}) > .t-avatar {
+    z-index: (50 - @i);
   }
   .avatar-group-z-index(@n, (@i + 1));
 }
 
-.t-avatar-group.t-avatar--offset-right > t-avatar:not(:last-of-type) {
-  margin-right: -4px;
+.t-avatar-group.t-avatar--offset-right > t-avatar:not(:last-of-type) > .t-avatar,
+.t-avatar-group.t-avatar--offset-right:has(> t-popup) > t-avatar > .t-avatar {
+  margin-right: calc(0px - var(--td-size-4));
 }
 
 .t-avatar-group.t-avatar--offset-left {
-  .avatar-group-z-index(10);
-
-  > t-avatar:not(:first-of-type) {
-    margin-left: -4px;
+  .avatar-group-z-index(50);
+  > t-avatar:not(:first-of-type) > .t-avatar {
+    margin-left: calc(0px - var(--td-size-4));
   }
+}
+
+// 隐藏项的原宿主移动到弹层后恢复显示；原列表中的隐藏标记继续生效。
+.t-avatar-group[data-t-avatar-overflow] > t-avatar.t-avatar--hidden {
+  display: contents;
+}
+
+// 折叠触发器多一层 Popup 宿主与可聚焦 span，补等价的左层叠偏移。
+.t-avatar-group > t-popup > .t-avatar__collapse {
+  position: relative;
+  display: inline-flex;
+}
+
+.t-avatar-group.t-avatar--offset-left > t-popup > .t-avatar__collapse {
+  margin-left: calc(0px - var(--td-size-4));
 }
 
 // 分页：上游的跳转框用 t-input-number 渲染，这里用原生 input 承载，

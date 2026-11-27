@@ -1,10 +1,22 @@
 <div [class]="classes()" [style]="customSize()">
   @if (showImage()) {
-    <img class="t-avatar__image" [src]="image()" [alt]="alt() ?? ''" (error)="handleImageError($event)" />
+    <t-image [src]="image()" [alt]="alt() ?? ''" [style.width]="'100%'" [style.height]="'100%'"
+      [fit]="imageProps()?.fit ?? 'fill'" [position]="imageProps()?.position ?? 'center'"
+      [shape]="imageProps()?.shape ?? 'square'" [referrerpolicy]="imageProps()?.referrerpolicy ?? 'strict-origin-when-cross-origin'"
+      [lazy]="imageProps()?.lazy ?? false" [gallery]="imageProps()?.gallery ?? false"
+      [fallback]="imageProps()?.fallback ?? ''" [srcset]="imageProps()?.srcset"
+      [error]="imageProps()?.error ?? ''" [loading]="imageProps()?.loading ?? ''"
+      [placeholder]="imageProps()?.placeholder" [overlayContent]="imageProps()?.overlayContent"
+      [overlayTrigger]="imageProps()?.overlayTrigger ?? 'always'"
+      (error)="handleImageError($event)" (load)="handleImageLoad($event)" />
   } @else {
     <ng-content select="[tAvatarIcon]" />
-    @if (content()) {
-      <span class="t-avatar__text">{{ content() }}</span>
+    @if (content(); as value) {
+      <span class="t-avatar__text">
+        @if (isTemplateContent(value)) {
+          <ng-container [ngTemplateOutlet]="value" />
+        } @else { {{ value }} }
+      </span>
     }
     <ng-content />
   }

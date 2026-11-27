@@ -561,6 +561,15 @@
           "values": []
         },
         {
+          "name": "imageProps",
+          "type": "AvatarImageProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "图片配置，支持当前 AvatarImageProps 中的 Image 属性及回调，图片地址与 alt 以显式输入为准",
+          "en": "Supported Image options and callbacks; image URL and alt are controlled by explicit avatar inputs",
+          "values": []
+        },
+        {
           "name": "alt",
           "type": "string | undefined",
           "default": "undefined",
@@ -596,17 +605,17 @@
           "type": "boolean",
           "default": "false",
           "required": false,
-          "zh": "图片加载失败时是否隐藏",
-          "en": "Whether to hide the avatar when the image fails to load",
+          "zh": "图片加载失败时是否隐藏图片并回退到头像内容",
+          "en": "Whether to hide the failed image and render avatar content instead",
           "values": []
         },
         {
           "name": "content",
-          "type": "string | undefined",
+          "type": "AvatarContent",
           "default": "undefined",
           "required": false,
-          "zh": "头像文字，图片不可用时作为降级内容",
-          "en": "Avatar text, used as fallback when the image is unavailable",
+          "zh": "头像内容，支持字符串或模板，无图片或隐藏失败图片时显示",
+          "en": "Avatar content as text or a template, shown without an image or when the failed image is hidden",
           "values": []
         }
       ],
@@ -629,8 +638,8 @@
           "type": "number | undefined",
           "default": "undefined",
           "required": false,
-          "zh": "最多显示的头像个数，超出显示 +N",
-          "en": "Max visible avatars, the rest collapse into +N",
+          "zh": "最多显示的头像个数，正数时超出显示 +N，未设置或非正数时全部显示",
+          "en": "Max visible avatars for positive values; unset or non-positive values show all avatars",
           "values": []
         },
         {
@@ -647,11 +656,20 @@
         },
         {
           "name": "collapseAvatar",
-          "type": "string | undefined",
+          "type": "AvatarContent",
           "default": "undefined",
           "required": false,
-          "zh": "折叠头像的文字，默认 +N",
-          "en": "Text of the collapse avatar, defaults to +N",
+          "zh": "折叠头像内容，支持字符串或模板，默认 +N",
+          "en": "Content of the collapse avatar as text or a template, defaults to +N",
+          "values": []
+        },
+        {
+          "name": "popupProps",
+          "type": "PopupOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "折叠头像列表的弹层配置，支持当前 PopupOptions",
+          "en": "Supported popup options for the collapsed avatar list",
           "values": []
         },
         {

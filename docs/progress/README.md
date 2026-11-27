@@ -6,10 +6,10 @@
 | --- | --- |
 | 组件目录 | 73 |
 | 上游属性 | 1576 |
-| 已对齐 | 1044 |
-| 覆盖率 | 66.2% |
-| 深度债 | 242 项 |
-| 零债务组件 | 38 / 73 |
+| 已对齐 | 1046 |
+| 覆盖率 | 66.4% |
+| 深度债 | 240 项 |
+| 零债务组件 | 39 / 73 |
 
 状态图例：✅ 无债务；🚧 有深度债（D1 表格与选择线 / D2 录入与反馈 / D3 其余）；⚠️ 有未登记缺失。
 
@@ -40,7 +40,6 @@
 | [选项卡 Tabs](tabs.md) | `tabs` | 16 | 10 | 62.5% | 0 | 0 | 1 | 0 | 7 | 🚧 |
 | [通知 Notification](notification.md) | `notification` | 11 | 7 | 63.6% | 0 | 0 | 1 | 0 | 3 | 🚧 |
 | [范围输入框 RangeInput](range-input.md) | `range-input` | 28 | 18 | 64.3% | 0 | 0 | 3 | 0 | 3 | 🚧 |
-| [头像 Avatar](avatar.md) | `avatar` | 15 | 10 | 66.7% | 0 | 0 | 2 | 0 | 3 | 🚧 |
 | [分割线 Divider](divider.md) | `divider` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [布局 Layout](layout.md) | `layout` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [选择器输入 SelectInput](select-input.md) | `select-input` | 43 | 29 | 67.4% | 0 | 2 | 2 | 0 | 3 | 🚧 |
@@ -64,6 +63,7 @@
 | [步骤条 Steps](steps.md) | `steps` | 17 | 13 | 76.5% | 0 | 0 | 1 | 0 | 3 | 🚧 |
 | [日历 Calendar](calendar.md) | `calendar` | 22 | 17 | 77.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [侧边悬浮 StickyTool](sticky-tool.md) | `sticky-tool` | 9 | 7 | 77.8% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [头像 Avatar](avatar.md) | `avatar` | 15 | 12 | 80.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
 | [回到顶部 BackTop](back-top.md) | `back-top` | 11 | 9 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [折叠面板 Collapse](collapse.md) | `collapse` | 11 | 9 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [颜色选择器 ColorPicker](color-picker.md) | `color-picker` | 22 | 18 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |

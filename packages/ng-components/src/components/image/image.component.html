@@ -50,7 +50,7 @@
 
 @if (showLoadingBox()) {
   <div class="t-image__loading">
-    @if (loading()) {
+    @if (loading() !== undefined && loading() !== null) {
       <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: loading() }" />
     } @else {
       <t-space direction="vertical" [size]="8" align="center">

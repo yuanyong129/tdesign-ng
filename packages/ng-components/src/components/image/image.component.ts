@@ -154,6 +154,7 @@ export class TImage {
   private readonly hovering = signal(false);
 
   private observer: IntersectionObserver | null = null;
+  private loadedSource: string | undefined;
 
   protected readonly classes = computed(() =>
     [
@@ -243,6 +244,11 @@ export class TImage {
   }
 
   protected handleLoad(event: Event): void {
+    const image = event.target as HTMLImageElement | null;
+    const source = image?.currentSrc || image?.src;
+    // 缓存探测与原生 load 可能命中同一资源；srcset 切换到新资源时仍正常通知。
+    if (this.isLoaded() && source === this.loadedSource) return;
+    this.loadedSource = source;
     this.isLoaded.set(true);
     this.load.emit({ e: event });
   }
@@ -253,9 +259,10 @@ export class TImage {
     this.error.emit({ e: event });
 
     const fallback = this.fallback();
-    if (fallback) {
+    if (fallback && this.fallbackSrc() !== fallback) {
       this.fallbackSrc.set(fallback);
       this.hasError.set(false);
+      this.isLoaded.set(false);
     }
   }
 
@@ -263,6 +270,7 @@ export class TImage {
   private applySrc(src: string | File | undefined): void {
     this.hasError.set(false);
     this.isLoaded.set(false);
+    this.loadedSource = undefined;
     this.fallbackSrc.set(null);
     this.releaseFileUrl();
 
@@ -314,7 +322,7 @@ export class TImage {
    */
   private syncInitialLoad(): void {
     const image = this.imgRef()?.nativeElement;
-    if (!image || this.lazy() || !image.complete) {
+    if (!image || this.lazy() || !image.complete || image.naturalWidth === 0) {
       return;
     }
     const event = new Event('load');

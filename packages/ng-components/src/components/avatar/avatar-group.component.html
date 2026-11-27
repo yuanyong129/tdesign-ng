@@ -1,6 +1,28 @@
 <div [class]="classes()">
   <ng-content />
   @if (collapsedCount() > 0) {
-    <t-avatar [content]="collapseText()" [size]="size() ?? 'medium'" />
+    <t-popup #popup [placement]="popupOptions().placement ?? 'top'" [trigger]="popupOptions().trigger ?? 'hover'"
+      [delay]="popupOptions().delay ?? [0, 100]" [disabled]="popupOptions().disabled ?? false"
+      [showArrow]="popupOptions().showArrow ?? true" [destroyOnClose]="popupOptions().destroyOnClose ?? false"
+      [hideEmptyPopup]="popupOptions().hideEmptyPopup ?? true" [zIndex]="popupOptions().zIndex"
+      [overlayClassName]="popupOptions().overlayClassName ?? null"
+      [overlayInnerClassName]="popupOptions().overlayInnerClassName ?? null"
+      (visibleChange)="popupVisible.set($event)">
+      <span class="t-avatar__collapse" role="button" [attr.tabindex]="popupOptions().disabled ? -1 : 0"
+        aria-haspopup="true" [attr.aria-expanded]="popupVisible()" [attr.aria-disabled]="popupOptions().disabled || null"
+        [attr.aria-label]="'查看其余 ' + collapsedCount() + ' 个头像'"
+        [style.z-index]="cascading() === 'left-up' ? 49 - visibleAvatars().length : null"
+        (keydown)="handleCollapseKeydown($event, popup)">
+        <t-avatar [content]="collapseText()" [size]="size() ?? 'medium'" />
+      </span>
+      <div tPopupContent>
+        <!-- CDK 移动原头像宿主；解绑时恢复原位置，不复制组件或丢失宿主事件。 -->
+        <div class="t-avatar-group" data-t-avatar-overflow>
+          @for (avatar of collapsedAvatars(); track avatar) {
+            <ng-container [cdkPortalOutlet]="avatar.groupPortal" />
+          }
+        </div>
+      </div>
+    </t-popup>
   }
 </div>

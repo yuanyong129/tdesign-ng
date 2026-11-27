@@ -1,14 +1,24 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  ElementRef,
   ViewEncapsulation,
   booleanAttribute,
   computed,
+  effect,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
-import { AVATAR_SIZES, AvatarShape, AvatarSize } from './avatar.types';
+import { NgTemplateOutlet } from '@angular/common';
+import { AvatarShape, AvatarSize } from './avatar.types';
+import { DomPortal } from '@angular/cdk/portal';
+import type { AvatarContent, AvatarImageProps } from './avatar.types';
+import { TImage } from '../image/image.component';
+import type { ImageEvent } from '../image/image.component';
+import { isTemplateContent } from '../../_utils/content';
 
 const SIZE_CLASS: Record<AvatarSize, string> = {
   small: 't-size-s',
@@ -30,6 +40,7 @@ const SIZE_CLASS: Record<AvatarSize, string> = {
 @Component({
   selector: 't-avatar',
   standalone: true,
+  imports: [NgTemplateOutlet, TImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './avatar.component.html',
@@ -41,6 +52,9 @@ export class TAvatar {
   /** @zh 图片地址 @en Image URL @defaultValue undefined */
   readonly image = input<string | undefined>();
 
+  /** @zh 图片配置，支持当前 AvatarImageProps 中的 Image 属性及回调，图片地址与 alt 以显式输入为准 @en Supported Image options and callbacks; image URL and alt are controlled by explicit avatar inputs @defaultValue undefined */
+  readonly imageProps = input<AvatarImageProps | undefined>(undefined);
+
   /** @zh 图片的 alt 文本 @en Alt text of the image @defaultValue undefined */
   readonly alt = input<string | undefined>();
 
@@ -50,16 +64,21 @@ export class TAvatar {
   /** @zh 头像尺寸，支持 small / medium / large 或具体数值 @en Avatar size, accepts small / medium / large or a concrete value @defaultValue 'medium' */
   readonly size = input<string>('medium');
 
-  /** @zh 图片加载失败时是否隐藏 @en Whether to hide the avatar when the image fails to load @defaultValue false */
+  /** @zh 图片加载失败时是否隐藏图片并回退到头像内容 @en Whether to hide the failed image and render avatar content instead @defaultValue false */
   readonly hideOnLoadFailed = input(false, { transform: booleanAttribute });
 
-  /** @zh 头像文字，图片不可用时作为降级内容 @en Avatar text, used as fallback when the image is unavailable @defaultValue undefined */
-  readonly content = input<string | undefined>();
+  /** @zh 头像内容，支持字符串或模板，无图片或隐藏失败图片时显示 @en Avatar content as text or a template, shown without an image or when the failed image is hidden @defaultValue undefined */
+  readonly content = input<AvatarContent>(undefined);
 
   /** @zh 图片加载失败 @en Emitted when the image fails to load */
   readonly error = output<Event>();
 
   private readonly imageFailed = signal(false);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  protected readonly isTemplateContent = isTemplateContent;
+
+  /** 头像组移动原宿主节点，保留原生宿主事件、投影和组件状态。 */
+  readonly groupPortal = new DomPortal(this.element);
 
   protected readonly groupHidden = signal(false);
 
@@ -85,11 +104,30 @@ export class TAvatar {
       .join(' '),
   );
 
-  protected readonly showImage = computed(() => !!this.image() && !this.imageFailed());
+  protected readonly showImage = computed(() => !!this.image() && !(this.imageFailed() && this.hideOnLoadFailed()));
 
-  protected handleImageError(event: Event): void {
+  constructor() {
+    effect(() => {
+      this.image();
+      this.imageFailed.set(false);
+    });
+    inject(DestroyRef).onDestroy(() => {
+      if (!this.groupPortal.isAttached) return;
+      // 动态删除头像时，先解绑 Portal 再移除恢复到原位置的宿主，避免留下已销毁节点。
+      this.groupPortal.detach();
+      const element = this.element.nativeElement;
+      element.parentNode?.removeChild(element);
+    });
+  }
+
+  protected handleImageError(context: ImageEvent): void {
     this.imageFailed.set(true);
-    this.error.emit(event);
+    this.error.emit(context.e);
+    this.imageProps()?.onError?.(context);
+  }
+
+  protected handleImageLoad(context: ImageEvent): void {
+    this.imageProps()?.onLoad?.(context);
   }
 
   /** 由头像组调用，控制超出 max 的项是否隐藏。 */

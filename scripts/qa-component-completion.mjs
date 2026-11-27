@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** 组件完善交互回归（第 1 轮及第 2 轮首批）。前置：开发文档站 + scripts/headless-edge.mjs。
+/** 组件完善交互回归。前置：开发文档站 + scripts/headless-edge.mjs。
  * PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs
  * 在独立 CDP 页面运行；剪贴板 mock 只影响此测试页面，不读写用户剪贴板。
  */
@@ -16,6 +16,7 @@ await new Promise((resolve, reject) => {
 let sequence = 0;
 const pending = new Map();
 const failures = [];
+let failAvatarFallback = false;
 socket.addEventListener('message', ({ data }) => {
   const message = JSON.parse(data);
   if (message.id) {
@@ -28,6 +29,16 @@ socket.addEventListener('message', ({ data }) => {
     failures.push(JSON.stringify(message.params.exceptionDetails));
   } else if (message.method === 'Network.responseReceived' && message.params.response.status >= 400) {
     failures.push(`${message.params.response.status} ${message.params.response.url}`);
+  } else if (message.method === 'Fetch.requestPaused') {
+    // 返回 HTTP 200 的无效图片，触发真实解码失败；不制造应用 404 或外部网络依赖。
+    const { requestId, request } = message.params;
+    const broken = request.url.includes('avatar-broken=') || failAvatarFallback;
+    const reply = broken
+      ? send('Fetch.fulfillRequest', { requestId, responseCode: 200,
+        responseHeaders: [{ name: 'Content-Type', value: 'image/svg+xml' }],
+        body: Buffer.from('invalid image fixture').toString('base64') })
+      : send('Fetch.continueRequest', { requestId });
+    reply.catch(error => failures.push(error.message));
   }
 });
 function send(method, params = {}) {
@@ -338,6 +349,152 @@ try {
   assert.equal(menuPopup.placement, 'bottom-left'); assert.equal(menuPopup.selected, 'first');
   assert.equal(menuPopup.destroyed, true); assert.equal(menuPopup.disabled, true); assert.equal(menuPopup.inline, true);
   console.log('PASS Submenu.popupProps: theme/class merging, menu placement, selection/close, explicit disabled, inline unaffected');
+
+  await send('Network.setCacheDisabled', { cacheDisabled: true });
+  await send('Fetch.enable', { patterns: [
+    { urlPattern: '*favicon.svg?avatar-broken=*' },
+    { urlPattern: '*favicon.svg?avatar-fallback*' },
+  ] });
+  await page('/avatar', 'demo-avatar-image-props t-avatar');
+  const avatarImage = await evaluate(`(async () => {
+    const root = document.querySelector('demo-avatar-image-props');
+    const demo = ng.getComponent(root);
+    const wait = async predicate => { for (let i=0;i<100;i++) {
+      if (predicate()) return; await new Promise(resolve=>setTimeout(resolve,50));
+    } throw new Error('Avatar image did not settle'); };
+    root.scrollIntoView(); ${settle}
+    const avatars = root.querySelectorAll('t-avatar');
+    await wait(() => demo.loads() === 1 && demo.fallbackLoads() === 1 && avatars[3].querySelector('img')?.naturalWidth > 0);
+    const image = avatars[0].querySelector('img');
+    const child = avatars[0].querySelector('t-image');
+    const initial = {fit:getComputedStyle(image).objectFit,
+      position:image.classList.contains('t-image--position-top'), alt:image.alt,
+      referrer:image.getAttribute('referrerpolicy'), width:Math.round(child.getBoundingClientRect().width),
+      lazy:ng.getComponent(avatars[3].querySelector('t-image')).lazy(), loads:demo.loads()};
+    child.dispatchEvent(new MouseEvent('mouseenter')); ${settle}
+    const overlay = !child.querySelector('.t-image__overlay-content').classList.contains('t-image__overlay-content--hidden');
+    demo.image.set('favicon.svg?avatar-broken=1'); ng.applyChanges(demo); ${settle}
+    await wait(() => demo.errors() === 1 && demo.hiddenErrors() === 1 && demo.fallbackLoads() === 2);
+    const failed = {imageError:!!avatars[0].querySelector('.t-image__error'),
+      customError:avatars[0].querySelector('.t-image__error')?.textContent.trim(),
+      hiddenImage:!avatars[1].querySelector('t-image'), fallback:avatars[1].querySelector('strong')?.textContent,
+      events:demo.errors(), callback:demo.imageErrors(), loads:demo.loads(),
+      backup:avatars[2].querySelector('img')?.getAttribute('src')};
+    demo.fallbackText.set('备2'); ng.applyChanges(demo); ${settle}
+    const dynamicFallback = avatars[1].querySelector('strong')?.textContent;
+    demo.retry(); ng.applyChanges(demo); ${settle}
+    await wait(() => demo.loads() === 2 && demo.fallbackLoads() === 3 && avatars[1].querySelector('img')?.naturalWidth > 0);
+    return {initial, overlay, failed, dynamicFallback,
+      recovered:!!avatars[0].querySelector('img') && !!avatars[1].querySelector('img'),
+      loads:demo.loads(), callback:demo.imageErrors()};
+  })()`);
+  assert.equal(avatarImage.initial.fit, 'contain'); assert.equal(avatarImage.initial.position, true);
+  assert.equal(avatarImage.initial.alt, '显式头像描述'); assert.equal(avatarImage.initial.referrer, 'no-referrer');
+  assert.equal(avatarImage.initial.width, 64); assert.equal(avatarImage.initial.lazy, true);
+  assert.equal(avatarImage.initial.loads, 1); assert.equal(avatarImage.overlay, true);
+  assert.equal(avatarImage.failed.imageError, true); assert.equal(avatarImage.failed.customError, '×');
+  assert.equal(avatarImage.failed.hiddenImage, true); assert.equal(avatarImage.failed.fallback, '备');
+  assert.equal(avatarImage.failed.events, 1); assert.equal(avatarImage.failed.callback, 1);
+  assert.equal(avatarImage.failed.loads, 1); assert.equal(avatarImage.failed.backup, 'favicon.svg?avatar-fallback=1');
+  assert.equal(avatarImage.dynamicFallback, '备2'); assert.equal(avatarImage.recovered, true);
+  assert.equal(avatarImage.loads, 2); assert.equal(avatarImage.callback, 1);
+  failAvatarFallback = true;
+  const avatarFallbackFailure = await evaluate(`(async () => {
+    const root = document.querySelector('demo-avatar-image-props');
+    const demo = ng.getComponent(root);
+    demo.fallbackImage.set('favicon.svg?avatar-fallback=2');
+    demo.image.set('favicon.svg?avatar-broken=2'); ng.applyChanges(demo); ${settle}
+    const avatar = root.querySelectorAll('t-avatar')[2];
+    for (let i=0;i<100;i++) {
+      if (avatar.querySelector('.t-image__error')) break;
+      await new Promise(resolve => setTimeout(resolve,50));
+    }
+    return {failed:!!avatar.querySelector('.t-image__error'), loading:!!avatar.querySelector('.t-image__loading'),
+      fallbackLoads:demo.fallbackLoads(), src:avatar.querySelector('img')?.getAttribute('src'),
+      state:ng.getComponent(avatar.querySelector('t-image')).hasError()};
+  })()`);
+  assert.equal(avatarFallbackFailure.failed, true, JSON.stringify(avatarFallbackFailure)); assert.equal(avatarFallbackFailure.loading, false);
+  assert.equal(avatarFallbackFailure.fallbackLoads, 3);
+  await send('Fetch.disable');
+  console.log('PASS Avatar.imageProps: real decode errors, fit/alt/size/lazy/overlay, callbacks once, fallback/retry, failed backup');
+
+  const avatarGroup = await evaluate(`(async () => {
+    const root = document.querySelector('demo-avatar-group-popup');
+    const demo = ng.getComponent(root);
+    root.scrollIntoView(); ${settle}
+    const group = () => root.querySelector('t-avatar-group > .t-avatar-group');
+    const trigger = () => group().querySelector('.t-avatar__collapse');
+    const direct = () => [...group().querySelectorAll(':scope > t-avatar:not(.t-avatar--hidden) > .t-avatar')];
+    const initial = {count:direct().length, text:trigger().textContent.trim(),
+      customCollapse:!!trigger().querySelector('strong'),
+      width:Math.round(direct()[0].getBoundingClientRect().width),
+      offset:parseFloat(getComputedStyle(direct()[1]).marginLeft),
+      index:parseInt(getComputedStyle(direct()[0]).zIndex), originals:ng.getComponent(root.querySelector('t-avatar-group')).avatars().length};
+    trigger().click(); ${settle}
+    const panel = () => document.querySelector('.avatar-custom-panel');
+    const popup = {count:panel()?.querySelectorAll('.t-avatar').length,
+      classes:!!panel()?.querySelector('.avatar-custom-inner'), zIndex:panel()?.style.zIndex};
+    panel().querySelector('button').click(); ${settle}
+    const firstClick = demo.clicks();
+    demo.suffix.set('!'); demo.add(); ng.applyChanges(demo); ${settle}
+    const dynamic = {count:panel().querySelectorAll('.t-avatar').length, text:panel().textContent,
+      collapse:trigger().textContent.trim()};
+    trigger().dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', bubbles:true})); ${settle}
+    const closed = !panel();
+    trigger().dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true})); ${settle}
+    panel().querySelector('button').click(); ${settle}
+    const repeatedClick = demo.clicks();
+    demo.max.set(20); ng.applyChanges(demo); ${settle}
+    const expanded = {count:direct().length, noPopup:!panel(), noTrigger:!trigger(), icons:group().querySelectorAll('[tAvatarIcon]').length};
+    group().querySelector('button').click(); ${settle}
+    const expandedClick = demo.clicks();
+    demo.size.set('small'); ng.applyChanges(demo); ${settle}
+    const small = direct().every(node=>node.classList.contains('t-size-s'));
+    demo.max.set(2); ng.applyChanges(demo); ${settle}
+    const restoredAria = trigger().getAttribute('aria-expanded');
+    trigger().dispatchEvent(new KeyboardEvent('keydown', {key:' ', bubbles:true})); ${settle}
+    const restoredCount = panel()?.querySelectorAll('.t-avatar').length;
+    const restoredText = panel()?.querySelector('button')?.textContent.trim();
+    demo.extras.set([]); ng.applyChanges(demo); ${settle}
+    const removed = panel()?.querySelectorAll('.t-avatar').length;
+    const noStaleHosts = direct().length === 2 && !group().textContent.includes('D!') && !group().textContent.includes('E!');
+    demo.disabled.set(true); ng.applyChanges(demo); ${settle}
+    const disabledWhileOpen = !panel() && trigger().getAttribute('aria-expanded') === 'false';
+    demo.disabled.set(false); ng.applyChanges(demo); ${settle}
+    demo.max.set(0); ng.applyChanges(demo); ${settle}
+    const zero = {count:direct().length, noPopup:!panel(), noTrigger:!trigger()};
+    demo.max.set(-1); ng.applyChanges(demo); ${settle}
+    const negative = direct().length;
+    demo.max.set(2); demo.disabled.set(true); ng.applyChanges(demo); ${settle}
+    trigger().click(); trigger().dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true})); ${settle}
+    const disabled = !panel();
+    demo.disabled.set(false); ng.applyChanges(demo); ${settle}
+    trigger().dispatchEvent(new KeyboardEvent('keydown', {key:'ArrowDown', bubbles:true})); ${settle}
+    const arrowOpened = !!panel();
+    demo.showGroup.set(false); ng.applyChanges(demo); ${settle}
+    const disposed = !panel();
+    return {initial,popup,firstClick,dynamic,closed,repeatedClick,expanded,expandedClick,small,
+      restoredCount,restoredText,restoredAria,removed,noStaleHosts,disabledWhileOpen,zero,negative,disabled,arrowOpened,disposed,
+      hostClicks:demo.hostClicks()};
+  })()`);
+  assert.equal(avatarGroup.initial.count, 2); assert.equal(avatarGroup.initial.text, '+3');
+  assert.equal(avatarGroup.initial.customCollapse, true);
+  // vendor large 为 40px，头像组再加两侧各 1px 边框。
+  assert.equal(avatarGroup.initial.width, 42); assert.equal(avatarGroup.initial.offset, -8);
+  assert.equal(avatarGroup.initial.index, 49); assert.equal(avatarGroup.initial.originals, 5);
+  assert.equal(avatarGroup.popup.count, 3); assert.equal(avatarGroup.popup.classes, true); assert.equal(avatarGroup.popup.zIndex, '2350');
+  assert.equal(avatarGroup.firstClick, 1); assert.equal(avatarGroup.dynamic.count, 4);
+  assert.ok(avatarGroup.dynamic.text.includes('F!')); assert.equal(avatarGroup.dynamic.collapse, '+4');
+  assert.equal(avatarGroup.closed, true); assert.equal(avatarGroup.repeatedClick, 2);
+  assert.deepEqual(avatarGroup.expanded, {count:6,noPopup:true,noTrigger:true,icons:1});
+  assert.equal(avatarGroup.expandedClick, 3); assert.equal(avatarGroup.small, true);
+  assert.equal(avatarGroup.restoredCount, 4); assert.equal(avatarGroup.restoredText, '3');
+  assert.equal(avatarGroup.restoredAria, 'false'); assert.equal(avatarGroup.disabledWhileOpen, true);
+  assert.equal(avatarGroup.removed, 1); assert.deepEqual(avatarGroup.zero, {count:3,noPopup:true,noTrigger:true});
+  assert.equal(avatarGroup.noStaleHosts, true); assert.equal(avatarGroup.hostClicks, 3);
+  assert.equal(avatarGroup.negative, 3); assert.equal(avatarGroup.disabled, true);
+  assert.equal(avatarGroup.arrowOpened, true); assert.equal(avatarGroup.disposed, true);
+  console.log('PASS AvatarGroup.popupProps: original hosts/projection/events, dynamic deletion, max/size, stacking, keyboard, disposal');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {
