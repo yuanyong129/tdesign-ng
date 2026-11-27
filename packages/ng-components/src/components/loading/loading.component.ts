@@ -2,7 +2,6 @@ import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   ViewEncapsulation,
   booleanAttribute,
   computed,
@@ -18,6 +17,9 @@ const SIZE_CLASS: Record<LoadingSize, string> = {
   medium: 't-size-m',
   large: 't-size-l',
 };
+
+/** 每个实例只释放自己的锁；行内 Loading 的销毁不应影响其他全屏加载。 */
+const scrollLocks = new WeakMap<Document, { count: number; originallyLocked: boolean }>();
 
 /**
  * 加载状态。
@@ -36,8 +38,6 @@ const SIZE_CLASS: Record<LoadingSize, string> = {
 })
 export class TLoading {
   private readonly document = inject(DOCUMENT);
-
-  private readonly destroyRef = inject(DestroyRef);
 
   /** @zh 是否处于加载状态 @en Whether it is loading @defaultValue true */
   readonly loading = input(true, { transform: booleanAttribute });
@@ -67,8 +67,6 @@ export class TLoading {
   readonly zIndex = input<number | undefined>();
 
   private readonly delayed = signal(false);
-
-  private lockTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly sizes = LOADING_SIZES;
 
@@ -101,6 +99,7 @@ export class TLoading {
         this.delayed.set(true);
         return;
       }
+      this.delayed.set(false);
       const timer = setTimeout(() => this.delayed.set(true), delay);
       onCleanup(() => clearTimeout(timer));
     });
@@ -109,13 +108,18 @@ export class TLoading {
     effect((onCleanup) => {
       const shouldLock = this.fullscreen() && this.preventScrollThrough() && this.visible();
       if (!shouldLock) return;
+      const lock = scrollLocks.get(this.document) ?? {
+        count: 0,
+        originallyLocked: this.document.body.classList.contains('t-loading--lock'),
+      };
+      lock.count++;
+      scrollLocks.set(this.document, lock);
       this.document.body.classList.add('t-loading--lock');
-      onCleanup(() => this.document.body.classList.remove('t-loading--lock'));
-    });
-
-    this.destroyRef.onDestroy(() => {
-      this.document.body.classList.remove('t-loading--lock');
-      if (this.lockTimer) clearTimeout(this.lockTimer);
+      onCleanup(() => {
+        if (--lock.count > 0) return;
+        if (!lock.originallyLocked) this.document.body.classList.remove('t-loading--lock');
+        scrollLocks.delete(this.document);
+      });
     });
   }
 }

@@ -18,6 +18,7 @@ import type {
   CheckTagGroupOption,
   CheckTagGroupValue,
   CheckTagSize,
+  CheckTagTagProps,
 } from './check-tag.types';
 
 /** 渲染一项标签所需的派生数据。 */
@@ -25,7 +26,7 @@ interface PreparedOption {
   option: CheckTagGroupOption;
   value: string | number;
   disabled: boolean;
-  size: CheckTagSize;
+  size: CheckTagSize | undefined;
   template: TemplateRef<unknown> | null;
   text: string;
 }
@@ -54,6 +55,8 @@ interface PreparedOption {
         [checked]="isChecked(entry.value)"
         [disabled]="entry.disabled"
         [size]="entry.size"
+        [checkedProps]="checkedProps()"
+        [uncheckedProps]="uncheckedProps()"
         (change)="handleChange($event, entry.option)"
       >
         @if (entry.template; as template) {
@@ -81,6 +84,12 @@ export class TCheckTagGroup {
   /** 是否允许多选。 @zh 是否多选 @en Whether multiple selection is allowed @defaultValue false */
   readonly multiple = input(false, { transform: booleanAttribute });
 
+  /** @zh 组内选中标签的 Tag 配置 @en Tag options for checked group items @defaultValue undefined */
+  readonly checkedProps = input<CheckTagTagProps | undefined>(undefined);
+
+  /** @zh 组内未选中标签的 Tag 配置 @en Tag options for unchecked group items @defaultValue undefined */
+  readonly uncheckedProps = input<CheckTagTagProps | undefined>(undefined);
+
   /** 值变化事件，用于双向绑定。 @zh 值变化 @en Value change event */
   readonly valueChange = output<CheckTagGroupValue>();
 
@@ -106,7 +115,7 @@ export class TCheckTagGroup {
         option,
         value: option.value,
         disabled: !!option.disabled,
-        size: option.size ?? 'medium',
+        size: option.size,
         template,
         text,
       };

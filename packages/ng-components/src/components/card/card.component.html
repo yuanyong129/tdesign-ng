@@ -60,18 +60,20 @@
   </div>
 }
 
-@if (loading() || hasContent()) {
-  <div [class]="bodyClasses()" [style]="bodyStyle()">
-    @if (loading()) {
-      <!-- 加载态交给 t-loading 渲染，卡片不自带任何加载视觉（上游同样用 Loading 组件包住主体）。 -->
-      <t-loading [loading]="true" />
-    }
-    <!-- 投影内容常驻在主体里，加载态只隐藏不改结构：<ng-content> 若被销毁，内容会落回宿主上直接显示。 -->
-    <div #bodyInner [style.display]="loading() ? 'none' : null">
-      <ng-content />
-    </div>
+<!-- 投影槽必须常驻：初始 loading=false 时也要先创建内容才能判断是否为空。 -->
+<div [class]="bodyClasses()" [style]="bodyStyle()" [style.display]="loading() || hasContent() ? null : 'none'">
+  @if (loading()) {
+    <!-- 加载态交给 t-loading 渲染，卡片不自带任何加载视觉（上游同样用 Loading 组件包住主体）。 -->
+    <t-loading [loading]="loading()" [text]="loadingProps()?.text" [size]="loadingProps()?.size ?? 'medium'"
+      [inheritColor]="loadingProps()?.inheritColor ?? false" [delay]="loadingProps()?.delay ?? 0"
+      [fullscreen]="loadingProps()?.fullscreen ?? false" [showOverlay]="loadingProps()?.showOverlay ?? true"
+      [preventScrollThrough]="loadingProps()?.preventScrollThrough ?? true" [zIndex]="loadingProps()?.zIndex" />
+  }
+  <!-- 投影内容常驻在主体里，加载态只隐藏不改结构，保留内容实例与状态。 -->
+  <div #bodyInner [style.display]="loading() ? 'none' : null">
+    <ng-content />
   </div>
-}
+</div>
 
 @if (hasFooter()) {
   <div [class]="footerClasses()" [style]="footerStyle()">

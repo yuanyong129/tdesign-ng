@@ -14,6 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TLoading } from '../loading/loading.component';
+import type { LoadingOptions } from '../loading/loading.types';
 import type { Content } from '../../_utils/content';
 
 /** 卡片尺寸。 */
@@ -100,6 +101,9 @@ export class TCard {
 
   /** 是否显示加载态，加载态下卡片主体显示 t-loading。 @zh 是否显示加载态 @en loading @defaultValue false */
   readonly loading = input(false, { transform: booleanAttribute });
+
+  /** @zh 加载组件配置，支持当前 LoadingOptions 中的属性，加载状态由 loading 决定 @en Loading options supported by TLoading; the loading input controls the state @defaultValue undefined */
+  readonly loadingProps = input<LoadingOptions | undefined>(undefined);
 
   /** 是否显示卡片阴影。 @zh 是否显示卡片阴影 @en shadow @defaultValue false */
   readonly shadow = input(false, { transform: booleanAttribute });

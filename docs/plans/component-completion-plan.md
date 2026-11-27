@@ -106,3 +106,16 @@ node scripts/qa-component-completion.mjs
 已知既有告警：Dialog/Drawer 未使用的 footer slot imports；Browserslist 数据过期；文档站首包超过 500 kB 告警线（当前 791.13 kB）；qrcode 的 CommonJS 依赖提示。Icon 源码已有 DOMParser/document 守卫，不重复补守卫；完整 SSR/水合验证仍待后续质量任务。
 
 **接续任务**：第 2 轮 CheckTag/CheckTagGroup 的 checkedProps/uncheckedProps → Button/Card 的 loadingProps → StickyTool/Submenu 的 popupProps。其余轮次尚未实施；不将首轮完成等同于全计划完成。
+
+### 2026-11-27：第 2 轮首批（6 个组件入口）
+
+- **CheckTag / CheckTagGroup**：新增 checkedProps / uncheckedProps，覆盖主题、变体、形状、尺寸、颜色、图标、文字宽度、title、禁用和关闭回调。声明 `CheckTagTagProps`，不接收会覆盖选择、内容及点击逻辑的任意 Tag 配置。显式 size 优先，显式禁用和表单禁用不能被状态配置解除。保留宿主结构，确保 vendor 的组内相邻间距规则继续生效；补齐 CVA 的 setDisabledState。
+- **Button / Card**：新增 loadingProps，复用现有 LoadingOptions，透传当前可实现的文字、尺寸、颜色继承、延迟、全屏、遮罩、滚动锁定及 zIndex；loading 状态由父组件输入控制，不接收未实现的 attach/indicator 等键。Button 默认继承颜色，延迟期间仍拦截提交。补一条 bridge 等价选择器，恢复 Loading 宿主打断的图标/文字间距，并验证延迟显示前没有空白间距。
+- **关联修复**：Card 的投影槽改为常驻，解决初始 loading=false 时主体无法被探测和显示的问题；加载切换保留子组件状态。Loading 延迟变化会重新等待；滚动锁按 Document 计数，每个实例只释放自己的锁，保留外部原有锁，销毁行内 Loading 不影响全屏实例。
+- **StickyTool**：整组与单项均支持 PopupOptions；默认值 → 整组配置 → 单项配置 → 单项显式 trigger，语义类与自定义类合并。
+- **Submenu**：浮层模式支持 PopupOptions，保留菜单自动定位、主题类和显式禁用；选中菜单项后关闭浮层，内联模式不使用弹层配置。
+- **进度同步**：API、demo-sources 与 `docs/progress/` 均由脚本更新。新增 5 个 demo，全部示例共 319 个；已对齐 1036 → 1044（66.2%），真实深度债 250 → 242，零债务目录 35 → 38。CheckTag 仍保留已有的原生 click 差异记录，不把整个目录宣称为全面完成。
+- **回归范围**：交互脚本继续覆盖首轮 5 个组件，并新增 CheckTag/Group 的单多选、键盘、关闭回调及表单禁用，Button/Card 的延迟与内容保留，Loading 的多个/外部滚动锁，StickyTool 的配置优先级，Submenu 的主题类、定位、选中关闭与内联模式。5 个本批文档页面均通过页面探针，无 console 异常与失败资源。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、`pnpm build`、交互回归及 `pnpm check:progress` 全部通过，missing 0 / extra 0。完整构建保留既有 footer slot、Browserslist、qrcode CommonJS 与首包预算告警（当前首包 791.20 kB），无构建错误。
+
+本批按用户要求验证后自动提交，并保持 progress 生成物同步。**接续任务**：第 2 轮 Avatar/AvatarGroup → InputNumber/RangeInput/TagInput → Slider；第 2 轮整体与 M1 尚未全部完成。

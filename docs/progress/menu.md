@@ -4,19 +4,19 @@
 
 - 目录：`packages/ng-components/src/components/menu/`
 - 文档页：`/menu`（`packages/docs/src/app/docs/menu/menu.component.ts`）
-- 状态：🚧 有深度债 5 项
+- 状态：🚧 有深度债 4 项
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 34 |
-| 已对齐 | 23 |
-| 覆盖率 | 67.6% |
-| 深度债 | 5（D1 0 / D2 4 / D3 1） |
+| 已对齐 | 24 |
+| 覆盖率 | 70.6% |
+| 深度债 | 4（D1 0 / D2 4 / D3 0） |
 | Angular 惯用映射 | 6（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 3 个 |
+| 文档示例 | 4 个 |
 
 ## 组件明细
 
@@ -105,7 +105,7 @@
 
 ### `TSubmenu`（`<t-submenu>`）
 
-上游接口 `TdSubmenuProps`；上游属性 7、已对齐 4（57.1%）；深度债 1 项；未登记缺失 0 项。
+上游接口 `TdSubmenuProps`；上游属性 7、已对齐 5（71.4%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -116,6 +116,7 @@
 | `icon` | MenuContent | undefined | 子菜单图标 |
 | `expandIcon` | MenuContent | undefined | 展开图标，不设置时用内置箭头 |
 | `disabled` | boolean | false | 是否禁用 |
+| `popupProps` | PopupOptions \| undefined | undefined | 浮层模式的弹层配置，菜单自动定位及显式禁用优先；内联模式不使用 |
 
 **未实现（深度债）**
 
@@ -123,10 +124,10 @@
 | --- | --- | --- |
 | `content` | Angular 惯用映射 | [D1] Angular 用 title 或 <ng-content> 投影标题，不再重复 content 入口 |
 | `default` | Angular 惯用映射 | [D1] Angular 用 <ng-content> 投影子菜单项 |
-| `popupProps` | D3 其余组件与边角能力 | [D3] t-popup 是离散 inputs 的 Angular 组件，无类型安全透传通道；菜单语境下 placement/delay/showArrow 已内置 |
 
 ## 文档示例
 
 - `packages/docs/src/app/docs/menu/demos/menu-base.ts`
 - `packages/docs/src/app/docs/menu/demos/menu-collapsed.ts`
 - `packages/docs/src/app/docs/menu/demos/menu-horizontal.ts`
+- `packages/docs/src/app/docs/menu/demos/menu-popup-props.ts`

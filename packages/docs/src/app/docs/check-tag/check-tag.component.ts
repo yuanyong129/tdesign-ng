@@ -5,10 +5,11 @@ import { PageNav } from '../page-nav';
 import { DemoCheckTagBasic } from './demos/check-tag-basic';
 import { DemoCheckTagDisabled } from './demos/check-tag-disabled';
 import { DemoCheckTagGroup } from './demos/check-tag-group';
+import { DemoCheckTagProps } from './demos/check-tag-props';
 
 @Component({
   selector: 'check-tag-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoCheckTagBasic, DemoCheckTagGroup, DemoCheckTagDisabled],
+  imports: [ApiTable, DemoBlock, PageNav, DemoCheckTagBasic, DemoCheckTagGroup, DemoCheckTagDisabled, DemoCheckTagProps],
   template: `
     <article class="docs-page">
       <h1 class="docs-page__title">可选标签 CheckTag</h1>
@@ -34,6 +35,10 @@ import { DemoCheckTagGroup } from './demos/check-tag-group';
 
       <docs-demo id="check-tag-disabled" title="禁用与尺寸" description="disabled 不可点击，size 支持 small / medium / large。">
         <demo-check-tag-disabled />
+      </docs-demo>
+
+      <docs-demo id="check-tag-props" title="选中与未选中配置" description="checkedProps / uncheckedProps 支持主题、变体、形状、尺寸、颜色、图标、宽度、提示、禁用及关闭回调。显式 size 和禁用优先；选择状态、内容与点击逻辑由 CheckTag 管理。">
+        <demo-check-tag-props />
       </docs-demo>
 
       <h2 class="docs-section__title" id="check-tag-api">API</h2>

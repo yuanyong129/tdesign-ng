@@ -1,6 +1,8 @@
 # 交接文档 · TDesign Angular
 
-> 2026-11-27 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，已完成基线核对及首轮 Textarea、Tabs.action、Rate.icon、Text.copyable、DescriptionItem 富内容。当前生成进度：已对齐 1036/1576，真实深度债 250；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续第 2 轮 CheckTag/Group 属性透传。首轮交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）。
+> 2026-11-27 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，首轮及第 2 轮首批已完成；本批包含 CheckTag/Group 状态配置、Button/Card.loadingProps、StickyTool/Submenu.popupProps。当前生成进度：已对齐 1044/1576，真实深度债 242；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续第 2 轮 Avatar/AvatarGroup。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）。
+>
+> 用户明确要求（2026-11-27）：后续每批验证完成后可自动 commit，不必询问；及时同步计划与交接文档，尤其 `docs/progress/`。progress 必须通过 `pnpm gen:progress` 生成，并用 `pnpm check:progress` 校验，不手改生成物。
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
 > 更新日期：2026-11-23，对应路线：**广度已完成（B0~B4 100%）→ 深度阶段 D0 横切工程**（见 §7）。

@@ -23,8 +23,10 @@ t-icon {
   line-height: 0;
 }
 
-// 输入框：图标作为投影内容进入前后缀时，上游依赖 svg + 相邻选择器补间距
-.t-button > t-icon + .t-button__text:not(:empty) {
+// 图标投影及 Loading 的 Angular 宿主隔开了上游 svg/.t-loading + 文本选择器。
+// Loading 延迟期间没有实际图标，不补间距；其余值等价于上游按钮图标间距。
+.t-button > t-icon + .t-button__text:not(:empty),
+.t-button > t-loading:has(.t-loading) + .t-button__text:not(:empty) {
   margin-left: 8px;
 }
 

@@ -8,6 +8,8 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import type { ButtonShape, ButtonSize, ButtonTheme, ButtonType, ButtonVariant } from './button.types';
+import { TLoading } from '../loading/loading.component';
+import type { LoadingOptions } from '../loading/loading.types';
 
 const PREFIX_CLS = 't-button';
 
@@ -60,7 +62,7 @@ function buildClasses(options: {
 @Component({
   selector: 't-button',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, TLoading],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './button.component.html',
@@ -89,6 +91,9 @@ export class TButton {
 
   /** @zh 是否处于加载状态 @en Whether the button is in loading state @defaultValue false */
   readonly loading = input(false, { transform: booleanAttribute });
+
+  /** @zh 加载组件配置，支持当前 LoadingOptions 中的属性，加载状态由 loading 决定 @en Loading options supported by TLoading; the loading input controls the state @defaultValue undefined */
+  readonly loadingProps = input<LoadingOptions | undefined>(undefined);
 
   /** @zh 渲染的标签，`a` 会渲染成链接 @en Tag to render, `a` renders a link @defaultValue 'button' @values button a div */
   readonly tag = input<'button' | 'a' | 'div'>('button');

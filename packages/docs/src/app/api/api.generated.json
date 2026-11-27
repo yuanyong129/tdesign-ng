@@ -1059,6 +1059,15 @@
           "values": []
         },
         {
+          "name": "loadingProps",
+          "type": "LoadingOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "加载组件配置，支持当前 LoadingOptions 中的属性，加载状态由 loading 决定",
+          "en": "Loading options supported by TLoading; the loading input controls the state",
+          "values": []
+        },
+        {
           "name": "tag",
           "type": "'button' | 'a' | 'div'",
           "default": "'button'",
@@ -1454,6 +1463,15 @@
           "required": false,
           "zh": "是否显示加载态",
           "en": "loading",
+          "values": []
+        },
+        {
+          "name": "loadingProps",
+          "type": "LoadingOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "加载组件配置，支持当前 LoadingOptions 中的属性，加载状态由 loading 决定",
+          "en": "Loading options supported by TLoading; the loading input controls the state",
           "values": []
         },
         {
@@ -1961,7 +1979,7 @@
         },
         {
           "name": "size",
-          "type": "CheckTagSize",
+          "type": "CheckTagSize | undefined",
           "default": "medium",
           "required": false,
           "zh": "尺寸",
@@ -1971,6 +1989,24 @@
             "medium",
             "large"
           ]
+        },
+        {
+          "name": "checkedProps",
+          "type": "CheckTagTagProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "选中状态的 Tag 配置，不覆盖显式 size 和 disabled",
+          "en": "Tag options for the checked state; explicit size and disabled take precedence",
+          "values": []
+        },
+        {
+          "name": "uncheckedProps",
+          "type": "CheckTagTagProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "未选中状态的 Tag 配置，不覆盖显式 size 和 disabled",
+          "en": "Tag options for the unchecked state; explicit size and disabled take precedence",
+          "values": []
         },
         {
           "name": "value",
@@ -2036,6 +2072,24 @@
           "required": false,
           "zh": "是否多选",
           "en": "Whether multiple selection is allowed",
+          "values": []
+        },
+        {
+          "name": "checkedProps",
+          "type": "CheckTagTagProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "组内选中标签的 Tag 配置",
+          "en": "Tag options for checked group items",
+          "values": []
+        },
+        {
+          "name": "uncheckedProps",
+          "type": "CheckTagTagProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "组内未选中标签的 Tag 配置",
+          "en": "Tag options for unchecked group items",
           "values": []
         }
       ],
@@ -8907,6 +8961,15 @@
           "values": []
         },
         {
+          "name": "popupProps",
+          "type": "PopupOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "所有子项共用的弹层配置，单项 popupProps 可覆盖，子项 trigger 优先",
+          "en": "Shared popup options; item popupProps override them, and explicit item trigger takes precedence",
+          "values": []
+        },
+        {
           "name": "offset",
           "type": "Array<string | number> | undefined",
           "default": "undefined",
@@ -9028,6 +9091,15 @@
           "required": false,
           "zh": "是否禁用",
           "en": "Whether the submenu is disabled",
+          "values": []
+        },
+        {
+          "name": "popupProps",
+          "type": "PopupOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "浮层模式的弹层配置，菜单自动定位及显式禁用优先；内联模式不使用",
+          "en": "Popup options in popup mode; menu placement and explicit disabling take precedence; ignored inline",
           "values": []
         }
       ],

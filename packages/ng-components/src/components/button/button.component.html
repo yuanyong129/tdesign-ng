@@ -26,20 +26,10 @@
 
 <ng-template #inner>
   @if (loading()) {
-    <span class="t-loading">
-      <svg
-        class="t-loading__gradient t-icon-loading"
-        viewBox="0 0 12 12"
-        version="1.1"
-        width="1em"
-        height="1em"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <foreignObject x="0" y="0" width="12" height="12">
-          <div class="t-loading__gradient-conic"></div>
-        </foreignObject>
-      </svg>
-    </span>
+    <t-loading [loading]="loading()" [text]="loadingProps()?.text" [size]="loadingProps()?.size ?? 'medium'"
+      [inheritColor]="loadingProps()?.inheritColor ?? true" [delay]="loadingProps()?.delay ?? 0"
+      [fullscreen]="loadingProps()?.fullscreen ?? false" [showOverlay]="loadingProps()?.showOverlay ?? true"
+      [preventScrollThrough]="loadingProps()?.preventScrollThrough ?? true" [zIndex]="loadingProps()?.zIndex" />
   } @else {
     <ng-content select="[tButtonIcon]" />
   }

@@ -1,5 +1,21 @@
 import type { TemplateRef } from '@angular/core';
 import type { Content } from '../../_utils/content';
+import type { TagShape, TagTheme, TagVariant } from '../tag/tag.types';
+
+/** 当前状态的 Tag 配置。选择值、内容和点击处理由 CheckTag 自身管理。 */
+export interface CheckTagTagProps {
+  theme?: TagTheme;
+  variant?: TagVariant;
+  shape?: TagShape;
+  size?: CheckTagSize;
+  color?: string;
+  maxWidth?: string | number;
+  title?: string | boolean;
+  disabled?: boolean;
+  icon?: Content;
+  closable?: boolean;
+  onClose?: (context: { e: MouseEvent }) => void;
+}
 
 /** 可选标签尺寸。 */
 export const CHECK_TAG_SIZES = ['small', 'medium', 'large'] as const;

@@ -12,6 +12,5 @@ export default {
       icon: 'Angular 用 <t-icon tButtonIcon> 投影，不是输入属性',
       suffix: 'Angular 用 <span tButtonSuffix> 投影，不是输入属性',
       onClick: 'Angular 直接监听原生 click（会冒泡到宿主），不再额外提供输出，避免一次点击触发两次',
-      'loadingProps': 'Angular 侧用 [loading] 搭配 t-loading 指令实现，P1 定',
     },
   };

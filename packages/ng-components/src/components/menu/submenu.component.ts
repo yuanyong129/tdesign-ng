@@ -13,6 +13,8 @@ import {
 } from '@angular/core';
 import { TPopup } from '../popup';
 import type { PopupPlacement } from '../popup';
+import { mergePopupClassNames, mergePopupOptions } from '../popup/popup.types';
+import type { PopupOptions } from '../popup/popup.types';
 import { T_MENU, T_MENU_NODE, T_SUBMENU, asTemplate } from './menu.types';
 import type { MenuContent, MenuHost, MenuNode, MenuValue, SubmenuHost } from './menu.types';
 
@@ -54,6 +56,15 @@ export class TSubmenu implements MenuNode, SubmenuHost {
   /** @zh 是否禁用 @en Whether the submenu is disabled @defaultValue false */
   readonly disabled = input(false, { transform: booleanAttribute });
 
+  /** @zh 浮层模式的弹层配置，菜单自动定位及显式禁用优先；内联模式不使用 @en Popup options in popup mode; menu placement and explicit disabling take precedence; ignored inline @defaultValue undefined */
+  readonly popupProps = input<PopupOptions | undefined>(undefined);
+
+  protected readonly mergedDisabled = computed(() => this.disabled() || (this.popupMode() && !!this.popupProps()?.disabled));
+  protected readonly popupOptions = computed(() => mergePopupOptions(
+    { trigger: 'hover', delay: [0, 100], showArrow: false }, this.popupProps(),
+    { placement: this.popupPlacement(), disabled: this.mergedDisabled() },
+  ));
+
   private readonly host = inject(T_MENU, { optional: true });
   private readonly parentSubmenu = inject(T_SUBMENU, { optional: true, skipSelf: true });
   private readonly childNodes = contentChildren(T_MENU_NODE);
@@ -71,7 +82,7 @@ export class TSubmenu implements MenuNode, SubmenuHost {
 
   /** 是否展开：浮层形态看浮层显隐，内联形态看菜单的展开取值。 */
   protected readonly opened = computed(() => {
-    if (this.popupMode()) return this.popupVisible();
+    if (this.popupMode()) return this.popupVisible() && !this.mergedDisabled();
     const value = this.value();
     return value !== undefined && (this.host?.expandedValues() ?? []).includes(value);
   });
@@ -87,14 +98,14 @@ export class TSubmenu implements MenuNode, SubmenuHost {
   protected readonly classes = computed(() => {
     const classes = ['t-submenu'];
     if (this.opened()) classes.push('t-is-opened');
-    if (this.disabled()) classes.push('t-is-disabled');
+    if (this.mergedDisabled()) classes.push('t-is-disabled');
     return classes.join(' ');
   });
 
   protected readonly headerClasses = computed(() => {
     const classes = ['t-menu__item'];
     if (this.opened()) classes.push('t-is-opened');
-    if (this.disabled()) classes.push('t-is-disabled');
+    if (this.mergedDisabled()) classes.push('t-is-disabled');
     if (this.isActive()) classes.push('t-is-active');
     return classes.join(' ');
   });
@@ -110,14 +121,14 @@ export class TSubmenu implements MenuNode, SubmenuHost {
     const classes = [`t-menu--${this.host?.theme() ?? 'light'}`];
     if (this.host?.isHead()) classes.push('t-is-head-menu');
     if (this.parentSubmenu) classes.push('t-menu-is-nested');
-    return classes.join(' ');
+    return mergePopupClassNames(classes.join(' '), this.popupProps()?.overlayClassName);
   });
 
   /** 浮层内容类名，对应上游 `overlayInnerClassName`。 */
   protected readonly overlayInnerClasses = computed(() => {
     const classes = ['t-menu__popup', this.host?.isHead() ? 't-is-horizontal' : 't-is-vertical'];
     if (this.opened()) classes.push('t-is-opened');
-    return classes.join(' ');
+    return mergePopupClassNames(classes.join(' '), this.popupProps()?.overlayInnerClassName);
   });
 
   protected readonly spacerClasses = computed(() => {
@@ -150,7 +161,7 @@ export class TSubmenu implements MenuNode, SubmenuHost {
 
   /** 点击标题：浮层形态切换浮层，内联形态切换菜单的展开取值。 */
   protected toggle(event: Event): void {
-    if (this.disabled()) return;
+    if (this.mergedDisabled()) return;
     event.stopPropagation();
     if (this.popupMode()) {
       this.popupVisible.update((visible) => !visible);
@@ -161,6 +172,7 @@ export class TSubmenu implements MenuNode, SubmenuHost {
 
   /** Enter / 空格 展开收起，方向键进入或退出浮层。 */
   protected handleKeydown(event: KeyboardEvent): void {
+    if (this.mergedDisabled()) return;
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.toggle(event);

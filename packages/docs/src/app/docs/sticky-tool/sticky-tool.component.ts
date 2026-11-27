@@ -5,6 +5,7 @@ import { PageNav } from '../page-nav';
 import { DemoStickyToolBase } from './demos/sticky-tool-base';
 import { DemoStickyToolPlacement } from './demos/sticky-tool-placement';
 import { DemoStickyToolShape } from './demos/sticky-tool-shape';
+import { DemoStickyToolPopupProps } from './demos/sticky-tool-popup-props';
 
 @Component({
   selector: 'sticky-tool-docs',
@@ -15,6 +16,7 @@ import { DemoStickyToolShape } from './demos/sticky-tool-shape';
     DemoStickyToolBase,
     DemoStickyToolPlacement,
     DemoStickyToolShape,
+    DemoStickyToolPopupProps,
   ],
   template: `
     <article class="docs-page">
@@ -43,6 +45,10 @@ import { DemoStickyToolShape } from './demos/sticky-tool-shape';
         description="placement 指定停靠方向，offset 在默认偏移之上做增量。"
       >
         <demo-sticky-tool-placement />
+      </docs-demo>
+
+      <docs-demo id="sticky-tool-popup-props" title="弹层配置" description="整组 popupProps 作为默认配置，单项 popupProps 覆盖同名值；子项显式 trigger 优先。自定义内层类名与组件语义类合并。">
+        <demo-sticky-tool-popup-props />
       </docs-demo>
 
       <h2 class="docs-section__title" id="sticky-tool-api">API</h2>

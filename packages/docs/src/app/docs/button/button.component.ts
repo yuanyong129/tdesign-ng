@@ -12,6 +12,7 @@ import { DemoButtonSize } from './demos/button-size';
 import { DemoButtonTheme } from './demos/button-theme';
 import { DemoButtonThemeVariant } from './demos/button-theme-variant';
 import { DemoButtonVariant } from './demos/button-variant';
+import { DemoButtonLoadingProps } from './demos/button-loading-props';
 
 @Component({
   selector: 'button-docs',
@@ -29,6 +30,7 @@ import { DemoButtonVariant } from './demos/button-variant';
     DemoButtonIcon,
     DemoButtonDisabled,
     DemoButtonLink,
+    DemoButtonLoadingProps,
   ],
   template: `
     <div class="docs-page">
@@ -75,6 +77,10 @@ import { DemoButtonVariant } from './demos/button-variant';
 
       <docs-demo id="button-link" title="链接按钮" description="设置 href 或 tag=&quot;a&quot; 后渲染为锚点元素。">
         <demo-button-link />
+      </docs-demo>
+
+      <docs-demo id="button-loading-props" title="加载配置" description="loadingProps 支持当前 LoadingOptions 的尺寸、文字、颜色继承、延迟和全屏配置。loading 决定状态，默认继承按钮文字颜色；延迟期间也会阻止点击。">
+        <demo-button-loading-props />
       </docs-demo>
 
       <h2 class="docs-section__title" id="button-api">API</h2>

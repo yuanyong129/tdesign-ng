@@ -5,10 +5,11 @@ import { PageNav } from '../page-nav';
 import { DemoCardBasic } from './demos/card-basic';
 import { DemoCardCover } from './demos/card-cover';
 import { DemoCardLoading } from './demos/card-loading';
+import { DemoCardLoadingProps } from './demos/card-loading-props';
 
 @Component({
   selector: 'card-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoCardBasic, DemoCardCover, DemoCardLoading],
+  imports: [ApiTable, DemoBlock, PageNav, DemoCardBasic, DemoCardCover, DemoCardLoading, DemoCardLoadingProps],
   template: `
     <article class="docs-page">
       <h1 class="docs-page__title">卡片 Card</h1>
@@ -38,6 +39,10 @@ import { DemoCardLoading } from './demos/card-loading';
         description="loading 为 true 时卡片主体显示加载中，头部与底部保持可见。"
       >
         <demo-card-loading />
+      </docs-demo>
+
+      <docs-demo id="card-loading-props" title="自定义加载配置" description="loadingProps 配置当前 LoadingOptions 支持的文字、尺寸、延迟和全屏等属性；加载时保留主体实例与状态。attach 和自定义 indicator 等能力暂不支持。">
+        <demo-card-loading-props />
       </docs-demo>
 
       <h2 class="docs-section__title" id="card-api">API</h2>

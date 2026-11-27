@@ -9,6 +9,8 @@ import {
   output,
 } from '@angular/core';
 import { TPopup } from '../popup';
+import { mergePopupClassNames, mergePopupOptions } from '../popup/popup.types';
+import type { PopupOptions } from '../popup/popup.types';
 import type { Content } from '../../_utils/content';
 
 /** 侧边悬浮的停靠位置。 */
@@ -40,7 +42,7 @@ export type StickyToolNode = Content;
 /**
  * 侧边悬浮的子项。
  *
- * 与上游 `TdStickyItemProps` 对齐，仅少一个 `popupProps`（见 `[D3]` 说明）。
+ * 弹层配置可继承整组 popupProps，并在单项上覆盖。
  */
 export interface StickyToolItem {
   /** 图标，字符串按文本渲染，推荐传模板（例如内含 `<t-icon />`）。 */
@@ -49,6 +51,8 @@ export interface StickyToolItem {
   label?: StickyToolNode;
   /** 悬浮/点击后展示的弹层内容。 */
   popup?: StickyToolNode;
+  /** 当前子项的弹层配置，覆盖工具栏的同名配置；trigger 仍以子项显式值为准。 */
+  popupProps?: PopupOptions;
   /** 弹层触发方式。 */
   trigger?: StickyToolItemTrigger;
 }
@@ -112,13 +116,20 @@ export interface StickyToolItemEvent {
     </ng-template>
 
     <div [class]="rootClasses()" [style]="rootStyle()">
-      @for (item of list(); track $index) {
+      @for (entry of preparedItems(); track $index) {
+        @let item = entry.item;
         @if (item.popup) {
           <t-popup
-            [trigger]="item.trigger ?? 'hover'"
-            [placement]="popupPlacement()"
-            [hideEmptyPopup]="true"
-            overlayInnerClassName="t-sticky-tool-popup-content"
+            [trigger]="entry.popup.trigger ?? 'hover'"
+            [placement]="entry.popup.placement ?? popupPlacement()"
+            [hideEmptyPopup]="entry.popup.hideEmptyPopup ?? true"
+            [delay]="entry.popup.delay ?? 0"
+            [disabled]="entry.popup.disabled ?? false"
+            [showArrow]="entry.popup.showArrow ?? true"
+            [destroyOnClose]="entry.popup.destroyOnClose ?? false"
+            [zIndex]="entry.popup.zIndex"
+            [overlayClassName]="entry.popup.overlayClassName ?? null"
+            [overlayInnerClassName]="entry.popup.overlayInnerClassName ?? null"
           >
             <ng-container *ngTemplateOutlet="stickyItem; context: { $implicit: item }" />
             <div tPopupContent>
@@ -144,6 +155,20 @@ export class TStickyTool {
    * @zh 悬浮项列表 @en list of sticky items @defaultValue []
    */
   readonly list = input<StickyToolItem[]>([]);
+
+  /** @zh 所有子项共用的弹层配置，单项 popupProps 可覆盖，子项 trigger 优先 @en Shared popup options; item popupProps override them, and explicit item trigger takes precedence @defaultValue undefined */
+  readonly popupProps = input<PopupOptions | undefined>(undefined);
+
+  protected readonly preparedItems = computed(() => this.list().map((item) => {
+    const popup = mergePopupOptions(
+      { hideEmptyPopup: true, placement: this.popupPlacement(), trigger: 'hover' },
+      this.popupProps(), item.popupProps, { trigger: item.trigger },
+    );
+    popup.overlayInnerClassName = mergePopupClassNames('t-sticky-tool-popup-content',
+      mergePopupClassNames(this.popupProps()?.overlayInnerClassName ?? null, item.popupProps?.overlayInnerClassName));
+    popup.overlayClassName = mergePopupClassNames(this.popupProps()?.overlayClassName ?? null, item.popupProps?.overlayClassName);
+    return { item, popup };
+  }));
 
   /**
    * 相对默认位置的偏移增量，依次为 `[水平, 垂直]`：数字与基础偏移（80 / 24）相加，字符串写进 `calc()`。

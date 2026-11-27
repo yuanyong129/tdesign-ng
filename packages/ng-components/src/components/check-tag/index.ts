@@ -10,5 +10,6 @@ export type {
   CheckTagGroupOption,
   CheckTagGroupValue,
   CheckTagSize,
+  CheckTagTagProps,
   CheckTagValue,
 } from './check-tag.types';

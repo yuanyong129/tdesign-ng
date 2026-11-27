@@ -5,10 +5,11 @@ import { PageNav } from '../page-nav';
 import { DemoMenuBase } from './demos/menu-base';
 import { DemoMenuCollapsed } from './demos/menu-collapsed';
 import { DemoMenuHorizontal } from './demos/menu-horizontal';
+import { DemoMenuPopupProps } from './demos/menu-popup-props';
 
 @Component({
   selector: 'menu-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoMenuBase, DemoMenuCollapsed, DemoMenuHorizontal],
+  imports: [ApiTable, DemoBlock, PageNav, DemoMenuBase, DemoMenuCollapsed, DemoMenuHorizontal, DemoMenuPopupProps],
   template: `
     <article class="docs-page">
       <h1 class="docs-page__title">导航菜单 Menu</h1>
@@ -38,6 +39,10 @@ import { DemoMenuHorizontal } from './demos/menu-horizontal';
         description="mode 为 horizontal 时横向排列，子菜单用浮层下拉；logo 与 operations 分别占据最左和最右的操作区。"
       >
         <demo-menu-horizontal />
+      </docs-demo>
+
+      <docs-demo id="menu-popup-props" title="子菜单弹层配置" description="子菜单在浮层模式下支持 PopupOptions 中的配置；菜单自动定位及显式禁用优先，自定义类名保留主题类，内联模式不使用弹层配置。">
+        <demo-menu-popup-props />
       </docs-demo>
 
       <h2 class="docs-section__title" id="menu-api">API</h2>
