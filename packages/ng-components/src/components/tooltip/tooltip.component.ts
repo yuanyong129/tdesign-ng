@@ -171,6 +171,7 @@ export class TTooltip {
   }
 
   protected handleEnter(event: MouseEvent): void {
+    if (this.visible() !== undefined) return;
     if (this.disabled()) return;
     this.clearHideTimer();
     const delay = this.delay();
@@ -184,11 +185,13 @@ export class TTooltip {
   }
 
   protected handleLeave(): void {
+    if (this.visible() !== undefined) return;
     if (this.pointerInPanel) return;
     this.scheduleHide();
   }
 
   protected handleFocus(active: boolean): void {
+    if (this.visible() !== undefined) return;
     if (this.disabled()) return;
     if (active) {
       this.open();
@@ -198,6 +201,7 @@ export class TTooltip {
   }
 
   private scheduleHide(): void {
+    if (this.visible() !== undefined) return;
     this.clearShowTimer();
     this.clearHideTimer();
     const delay = this.delay();

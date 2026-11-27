@@ -1,39 +1,41 @@
-﻿<div class="t-slider__container" [class.is-vertical]="vertical()">
+<div class="t-slider__container" [class.is-vertical]="vertical()">
   <div
     class="t-slider"
     [class.is-vertical]="vertical()"
     [class.t-slider--vertical]="vertical()"
     [class.t-is-disabled]="disabled()"
-    role="slider"
-    [attr.aria-valuemin]="min()"
-    [attr.aria-valuemax]="max()"
-    [attr.aria-valuenow]="rangeStart()"
-    [attr.aria-orientation]="layout()"
-    [attr.aria-disabled]="disabled()"
   >
     <div class="t-slider__rail" (click)="handleRailClick($event)">
       <div class="t-slider__track" [style]="trackStyle()"></div>
 
-      <div class="t-slider__button-wrapper" [style]="buttonStyle(rangeStart())" (mouseenter)="hovered.set(0)" (mouseleave)="hovered.set(-1)" tabindex="0" (mousedown)="handleButtonDown($event, 0)" (keydown)="handleButtonKeydown($event, 0)">
+      <div class="t-slider__button-wrapper" [style]="buttonStyle(rangeStart())" (mouseenter)="hovered.set(0)" (mouseleave)="hovered.set(-1)" [attr.tabindex]="disabled() ? -1 : 0" role="slider" [attr.aria-valuemin]="min()" [attr.aria-valuemax]="max()" [attr.aria-valuenow]="rangeStart()" [attr.aria-disabled]="disabled()" [attr.aria-orientation]="layout()" (focus)="focused.set(0)" (blur)="focused.set(-1)" (click)="$event.stopPropagation()" (mousedown)="handleButtonDown($event, 0)" (keydown)="handleButtonKeydown($event, 0)">
         <t-tooltip
           [content]="tooltipContent(rangeStart())"
           [disabled]="!tooltipContent(rangeStart())"
           [visible]="isTooltipVisible(0)"
-          [placement]="vertical() ? 'right' : 'top'"
-          [showArrow]="true"
+          [placement]="tooltipProps()?.placement ?? (vertical() ? 'right' : 'top')"
+          [showArrow]="tooltipProps()?.showArrow ?? true"
+          [theme]="tooltipProps()?.theme ?? 'default'"
+          [duration]="tooltipProps()?.duration ?? 0"
+          [destroyOnClose]="tooltipProps()?.destroyOnClose ?? false"
+          [zIndex]="tooltipProps()?.zIndex"
         >
           <div class="t-slider__button" [class.t-slider__button--dragging]="isButtonDragging(0)"></div>
         </t-tooltip>
       </div>
 
       @if (range()) {
-        <div class="t-slider__button-wrapper" [style]="buttonStyle(rangeEnd())" (mouseenter)="hovered.set(1)" (mouseleave)="hovered.set(-1)" tabindex="0" (mousedown)="handleButtonDown($event, 1)" (keydown)="handleButtonKeydown($event, 1)">
+        <div class="t-slider__button-wrapper" [style]="buttonStyle(rangeEnd())" (mouseenter)="hovered.set(1)" (mouseleave)="hovered.set(-1)" [attr.tabindex]="disabled() ? -1 : 0" role="slider" [attr.aria-valuemin]="min()" [attr.aria-valuemax]="max()" [attr.aria-valuenow]="rangeEnd()" [attr.aria-disabled]="disabled()" [attr.aria-orientation]="layout()" (focus)="focused.set(1)" (blur)="focused.set(-1)" (click)="$event.stopPropagation()" (mousedown)="handleButtonDown($event, 1)" (keydown)="handleButtonKeydown($event, 1)">
           <t-tooltip
             [content]="tooltipContent(rangeEnd())"
             [disabled]="!tooltipContent(rangeEnd())"
             [visible]="isTooltipVisible(1)"
-            [placement]="vertical() ? 'right' : 'top'"
-            [showArrow]="true"
+            [placement]="tooltipProps()?.placement ?? (vertical() ? 'right' : 'top')"
+            [showArrow]="tooltipProps()?.showArrow ?? true"
+          [theme]="tooltipProps()?.theme ?? 'default'"
+          [duration]="tooltipProps()?.duration ?? 0"
+          [destroyOnClose]="tooltipProps()?.destroyOnClose ?? false"
+          [zIndex]="tooltipProps()?.zIndex"
           >
             <div class="t-slider__button" [class.t-slider__button--dragging]="isButtonDragging(1)"></div>
           </t-tooltip>
@@ -62,5 +64,24 @@
       }
     </div>
   </div>
+  @if (inputNumberProps()) {
+    <div class="t-slider__input-container" [class.is-vertical]="vertical()">
+      @for (index of range() ? [0, 1] : [0]; track index) {
+        @if (index === 1) { <span class="t-slider__center-line"></span> }
+        <t-input-number class="t-slider__input"
+          [value]="index === 0 ? firstValue() : secondValue()"
+          [min]="min()" [max]="max()" [step]="step()" [allowInputOverLimit]="false"
+          [disabled]="numberDisabled()" [readonly]="numberOptions().readonly ?? false"
+          [align]="numberOptions().align" [autoWidth]="numberOptions().autoWidth ?? false"
+          [autofocus]="numberOptions().autofocus ?? false"
+          [decimalPlaces]="numberOptions().decimalPlaces ?? precision()"
+          [format]="numberOptions().format" [inputProps]="numberOptions().inputProps"
+          [label]="numberOptions().label" [suffix]="numberOptions().suffix" [tips]="numberOptions().tips"
+          [placeholder]="numberOptions().placeholder" [size]="numberOptions().size ?? 'medium'"
+          [status]="numberOptions().status ?? 'default'" [theme]="numberOptions().theme ?? 'column'"
+          (change)="handleNumberChange($event, index)" />
+      }
+    </div>
+  }
 </div>
 

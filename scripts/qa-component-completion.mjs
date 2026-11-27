@@ -653,6 +653,101 @@ try {
   assert.equal(tagOptions.explicitDisabled,true); assert.equal(tagOptions.formDisabled,true);
   assert.deepEqual(tagOptions.formValue,['表单禁用','new']); assert.deepEqual(tagOptions.reset,['表单禁用']);
   console.log('PASS TagInput input/tag props: attrs/style, IME, callbacks once, close/removal, readonly, dynamic appearance, CVA');
+  await page('/slider', 'demo-slider-options input');
+  const slider = await evaluate(`(async () => {
+    const root=document.querySelector('demo-slider-options'), demo=ng.getComponent(root);
+    const host=root.querySelector('.configured-single'), component=ng.getComponent(host);
+    const input=host.querySelector('input'), thumb=host.querySelector('.t-slider__button-wrapper');
+    const edit=async value=>{input.value=value; input.dispatchEvent(new Event('input',{bubbles:true})); ${settle}};
+    const key=async value=>{thumb.dispatchEvent(new KeyboardEvent('keydown',{key:value,bubbles:true})); ${settle}};
+    const rail=host.querySelector('.t-slider__rail');
+    const initial={name:input.name,value:input.value,small:!!host.querySelector('.t-size-s')};
+    await edit('9'); const edited={value:demo.value(),changes:demo.changes(),ends:demo.ends(),callbacks:demo.callbacks()};
+    await key('ArrowRight'); const keyboard={value:demo.value(),text:input.value,ends:demo.ends()};
+    const rect=rail.getBoundingClientRect();
+    rail.dispatchEvent(new MouseEvent('click',{clientX:rect.left+rect.width*0.3,bubbles:true})); ${settle}
+    const snapped=demo.value();
+    const beforeClick=demo.changes(); thumb.click(); ${settle}
+    const clickStable=demo.changes()===beforeClick;
+    await edit(''); const empty=demo.value(); await key('End');
+    const tooltip=ng.getComponent(host.querySelector('t-tooltip'));
+    thumb.dispatchEvent(new MouseEvent('mouseenter')); ${settle}
+    host.querySelector('t-tooltip').dispatchEvent(new MouseEvent('mouseenter')); ${settle}
+    const delayed=!tooltip.innerVisible();
+    await new Promise(r=>setTimeout(r,160)); ${settle}
+    const panel=document.querySelector('.t-tooltip--primary');
+    const popup={visible:tooltip.innerVisible(),text:panel?.textContent.trim(),arrow:!!panel?.querySelector('.t-popup__content--arrow'),
+      placement:tooltip.placement(),z:panel?.style.zIndex};
+    thumb.dispatchEvent(new MouseEvent('mouseleave')); thumb.dispatchEvent(new FocusEvent('focus')); ${settle}
+    await new Promise(r=>setTimeout(r,160)); ${settle}
+    const focusVisible=tooltip.innerVisible();
+    demo.label.set('数量 {value}/{value}'); ng.applyChanges(demo); ${settle}
+    const label=tooltip.content();
+    demo.label.set(false); ng.applyChanges(demo); ${settle}
+    const hiddenByLabel=!tooltip.innerVisible();
+    demo.label.set(undefined); demo.tooltipProps.set({...demo.tooltipProps(),delay:0,duration:60}); ng.applyChanges(demo); ${settle}
+    await new Promise(r=>setTimeout(r,100)); ${settle}
+    const durationHidden=!tooltip.innerVisible();
+    thumb.dispatchEvent(new MouseEvent('mouseleave')); thumb.dispatchEvent(new FocusEvent('blur')); ${settle}
+    demo.tooltipProps.set({...demo.tooltipProps(),delay:100,duration:0}); ng.applyChanges(demo); ${settle}
+    thumb.dispatchEvent(new MouseEvent('mouseenter')); ${settle}
+    demo.tooltipProps.set({...demo.tooltipProps(),disabled:true}); ng.applyChanges(demo); ${settle}
+    await new Promise(r=>setTimeout(r,140)); ${settle}
+    const cancelled=!tooltip.innerVisible();
+    demo.tooltipProps.set({...demo.tooltipProps(),disabled:false});
+    demo.label.set(undefined); demo.tooltipProps.set({...demo.tooltipProps(),delay:0}); ng.applyChanges(demo); ${settle}
+    demo.disabled.set(true); ng.applyChanges(demo); ${settle}
+    const disabled={input:input.disabled,tabindex:thumb.tabIndex,tooltip:tooltip.innerVisible()};
+    const beforeDisabled=demo.changes(); await edit('3'); await key('Home');
+    const disabledStable=beforeDisabled===demo.changes();
+    demo.disabled.set(false); demo.numberProps.set({inputProps:{readonly:true}}); ng.applyChanges(demo); ${settle}
+    const readonly=input.readOnly; const beforeReadonly=demo.changes(); await edit('3');
+    const readonlyStable=beforeReadonly===demo.changes(); await key('Home'); const railEditable=demo.value()===1;
+    thumb.dispatchEvent(new MouseEvent('mousedown',{bubbles:true})); ${settle}
+    document.dispatchEvent(new MouseEvent('mousemove',{clientX:rect.left+rect.width*.5})); ${settle}
+    const dragged=demo.value(); demo.disabled.set(true); ng.applyChanges(demo); ${settle}
+    const beforeStop={changes:demo.changes(),ends:demo.ends()};
+    document.dispatchEvent(new MouseEvent('mousemove',{clientX:rect.right})); document.dispatchEvent(new MouseEvent('mouseup')); ${settle}
+    const stopStable=beforeStop.changes===demo.changes() && beforeStop.ends===demo.ends();
+    const rangeHost=root.querySelector('.configured-range'), range=ng.getComponent(rangeHost);
+    const rangeInputs=rangeHost.querySelectorAll('input');
+    rangeInputs[1].value='1'; rangeInputs[1].dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const crossed=[...demo.rangeValue()];
+    rangeInputs[0].value='19'; rangeInputs[0].dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const crossedBack=[...demo.rangeValue()];
+    const rangeText=[...rangeInputs].map(input=>input.value);
+    const rangeRail=rangeHost.querySelector('.t-slider__rail'), rr=rangeRail.getBoundingClientRect();
+    rangeHost.querySelector('.t-slider__button-wrapper').dispatchEvent(new MouseEvent('mousedown',{bubbles:true})); ${settle}
+    document.dispatchEvent(new MouseEvent('mousemove',{clientX:rr.right})); ${settle}
+    document.dispatchEvent(new MouseEvent('mousemove',{clientX:rr.left+rr.width*.9})); ${settle}
+    const dragCross=[...demo.rangeValue()]; document.dispatchEvent(new MouseEvent('mouseup')); ${settle}
+    const vertical=root.querySelector('.configured-vertical'), vi=vertical.querySelector('input');
+    vi.value='0.7'; vi.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const verticalState={value:vi.value,bottom:vertical.querySelector('.t-slider__button-wrapper').style.bottom,
+      height:vertical.querySelector('.t-slider__rail').getBoundingClientRect().height};
+    demo.numberProps.set(false); ng.applyChanges(demo); ${settle}
+    const removed=!host.querySelector('input');
+    demo.numberProps.set(true); ng.applyChanges(demo); ${settle}
+    const restored=!!host.querySelector('input');
+    return {initial,edited,keyboard,snapped,clickStable,empty,delayed,popup,focusVisible,label,hiddenByLabel,durationHidden,cancelled,disabled,
+      disabledStable,readonly,readonlyStable,railEditable,dragged,stopStable,crossed,crossedBack,rangeText,dragCross,verticalState,removed,restored};
+  })()`);
+  assert.deepEqual(slider.initial,{name:'slider-quantity',value:'5',small:true});
+  assert.deepEqual(slider.edited,{value:9,changes:1,ends:0,callbacks:1});
+  assert.deepEqual(slider.keyboard,{value:11,text:'11',ends:1});
+  assert.equal(slider.snapped,7); assert.equal(slider.clickStable,true); assert.equal(slider.empty,7);
+  assert.equal(slider.delayed,true);
+  assert.deepEqual(slider.popup,{visible:true,text:'选择份数',arrow:false,placement:'bottom',z:'2200'});
+  assert.equal(slider.focusVisible,true); assert.equal(slider.label,'数量 21/21'); assert.equal(slider.hiddenByLabel,true);
+  assert.equal(slider.durationHidden,true); assert.equal(slider.cancelled,true);
+  assert.deepEqual(slider.disabled,{input:true,tabindex:-1,tooltip:false}); assert.equal(slider.disabledStable,true);
+  assert.equal(slider.readonly,true); assert.equal(slider.readonlyStable,true); assert.equal(slider.railEditable,true);
+  assert.equal(slider.dragged,11); assert.equal(slider.stopStable,true);
+  assert.deepEqual(slider.crossed,[1,3]); assert.deepEqual(slider.crossedBack,[3,19]); assert.deepEqual(slider.dragCross,[19,19]);
+  assert.deepEqual(slider.rangeText,['3','19']);
+  assert.equal(slider.verticalState.value,'0.7'); assert.equal(slider.verticalState.bottom,'70%'); assert.ok(slider.verticalState.height>100);
+  assert.equal(slider.removed,true); assert.equal(slider.restored,true);
+  console.log('PASS Slider options: numeric linkage, range crossing, min-relative steps, readonly/disabled, drag cancellation, tooltip delay/focus/priority, vertical');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

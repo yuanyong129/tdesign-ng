@@ -6,10 +6,11 @@ import { DemoSliderBasic } from './demos/slider-basic';
 import { DemoSliderMarks } from './demos/slider-marks';
 import { DemoSliderRange } from './demos/slider-range';
 import { DemoSliderVertical } from './demos/slider-vertical';
+import { DemoSliderOptions } from './demos/slider-options';
 
 @Component({
   selector: 'slider-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoSliderBasic, DemoSliderRange, DemoSliderMarks, DemoSliderVertical],
+  imports: [ApiTable, DemoBlock, PageNav, DemoSliderBasic, DemoSliderRange, DemoSliderMarks, DemoSliderVertical, DemoSliderOptions],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">滑块 Slider</h1>
@@ -32,6 +33,11 @@ import { DemoSliderVertical } from './demos/slider-vertical';
       <docs-demo id="slider-vertical" title="竖向布局" description="layout 为 vertical 时纵向渲染，需要给宿主元素设定高度。">
         <demo-slider-vertical />
       </docs-demo>
+
+      <docs-demo id="slider-options" title="数字输入框与提示配置" description="inputNumberProps 支持 true 或类型化配置；单值、区间、竖向均可联动。数字输入只触发 change，不触发 changeEnd。">
+        <demo-slider-options />
+      </docs-demo>
+      <p class="demo-hint">Slider 管理数字框的 value、min、max、step；支持的外观、只读、inputProps 和 onChange 见 SliderInputNumberProps。禁用取并集，数字框只读不影响轨道操作。tooltipProps 支持当前 Tooltip 的内容、位置、主题、箭头、延迟、时长、销毁及层级；显式 label 优先，false 隐藏提示，显示状态由滑块交互管理。暂不支持 Vue 渲染函数或完整 InputNumberProps / TooltipProps。</p>
 
       <h2 class="docs-section__title" id="slider-api">API</h2>
       <div class="api-table__scroll">

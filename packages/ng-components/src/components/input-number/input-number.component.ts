@@ -176,6 +176,7 @@ export class TInputNumber implements ControlValueAccessor {
   protected readonly focused = signal(false);
 
   private readonly innerValue = signal<InputNumberValue | null | undefined>(undefined);
+  private readonly editRevision = signal(0);
 
   private readonly disabledByForms = signal(false);
 
@@ -245,6 +246,7 @@ export class TInputNumber implements ControlValueAccessor {
 
   constructor() {
     effect(() => {
+      this.editRevision();
       const next = this.current();
       untracked(() => this.syncDisplay(next));
     });
@@ -395,6 +397,8 @@ export class TInputNumber implements ControlValueAccessor {
     this.onChange(value);
     this.valueChange.emit(value);
     this.change.emit({ value, type, e });
+    // 受控父级可能拒绝或归一化本次修改，即使 value 不变也须恢复展示值。
+    if (this.value() !== undefined) this.editRevision.update((revision) => revision + 1);
     this.validate.emit({ error: this.errorOf(value) });
   }
 

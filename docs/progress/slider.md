@@ -4,25 +4,25 @@
 
 - 目录：`packages/ng-components/src/components/slider/`
 - 文档页：`/slider`（`packages/docs/src/app/docs/slider/slider.component.ts`）
-- 状态：🚧 有深度债 2 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 16 |
-| 已对齐 | 11 |
-| 覆盖率 | 68.8% |
-| 深度债 | 2（D1 0 / D2 0 / D3 2） |
+| 已对齐 | 13 |
+| 覆盖率 | 81.3% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 3（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 4 个 |
+| 文档示例 | 5 个 |
 
 ## 组件明细
 
 ### `TSlider`（`<t-slider>`）
 
-上游接口 `TdSliderProps`；上游属性 16、已对齐 11（68.8%）；深度债 2 项；未登记缺失 0 项。
+上游接口 `TdSliderProps`；上游属性 16、已对齐 13（81.3%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -39,6 +39,8 @@
 | `label` | string \| boolean \| undefined | undefined | 滑块提示文案 |
 | `showStep` | boolean | false | 是否显示步长刻度点 |
 | `marks` | SliderMarks \| undefined | undefined | 刻度标记 |
+| `inputNumberProps` | boolean \| SliderInputNumberProps | false | 数字输入框配置，true 使用默认配置 |
+| `tooltipProps` | SliderTooltipProps \| undefined | undefined | 提示配置，显式 label 优先 |
 
 **已实现事件**
 
@@ -51,15 +53,14 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `inputNumberProps` | D3 其余组件与边角能力 | 滑块两侧的数字输入框在后续版本实现 |
 | `modelValue` | Angular 惯用映射 | Angular 用 value 双向绑定 |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出 |
 | `onChangeEnd` | Angular 惯用映射 | Angular 用 (changeEnd) 输出 |
-| `tooltipProps` | D3 其余组件与边角能力 | 滑块提示用内置 t-tooltip，未透传 TooltipProps |
 
 ## 文档示例
 
 - `packages/docs/src/app/docs/slider/demos/slider-basic.ts`
 - `packages/docs/src/app/docs/slider/demos/slider-marks.ts`
+- `packages/docs/src/app/docs/slider/demos/slider-options.ts`
 - `packages/docs/src/app/docs/slider/demos/slider-range.ts`
 - `packages/docs/src/app/docs/slider/demos/slider-vertical.ts`

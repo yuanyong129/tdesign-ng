@@ -147,3 +147,16 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、交互回归及 `pnpm check:progress` 通过；missing 0 / extra 0。构建保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 795.23 kB），无构建错误。
 
 **接续任务**：第 2 轮 Slider 的 inputNumberProps / tooltipProps；其他轮次仍按原顺序，M1 尚未全部完成。
+
+### 2026-11-27：第 2 轮 Slider，M1 验收
+
+- **数字输入联动**：inputNumberProps 支持 true / false / SliderInputNumberProps；单值、区间与竖向复用现有 InputNumber。Slider 管理 value、min、max、step；配置支持当前实际接入的尺寸、主题、对齐、宽度、格式、小数位、富内容、inputProps、只读、禁用及 onChange。禁用取并集；数字框只读不影响滑块轨道。数字输入触发 change 和配置回调，不触发 changeEnd；清空不写入非法 Slider 值。
+- **提示配置**：SliderTooltipProps 支持纯文本 content、placement、theme、showArrow、delay、duration、disabled、destroyOnClose、zIndex；显示状态由 hover / focus / drag 管理，显式 label 优先，false 强制隐藏。延迟任务在交互结束、禁用与销毁时取消，拖动即时显示。Tooltip 的受控模式不再被宿主 hover / focus 或面板离开事件擅自覆盖。
+- **关联修复**：区间任一端交叉均排序，拖动交叉后切换活动端，避免后续指针继续移动错误端；步长相对 min 对齐；点击滑块按钮不再冒泡成轨道点击。拖动中禁用会移除 document 监听且不继续发出 change / changeEnd；受控拖动结束携带最后提交值。每个滑块分别提供 role、当前值、方向、禁用状态与可聚焦性。
+- **InputNumber 受控展示**：父级拒绝或归一化编辑且绑定值不变时，也重新同步显示文本，修复区间输入交叉后两侧文本与实际区间不同步；保留合法输入中间态和已有 CVA 回归。
+- **范围说明**：上述对象是实际支持字段的白名单，不是完整 Vue Props；不支持 Vue 渲染函数、Tooltip.visible 或任意透传。label 的字符串 / boolean 边界保留，零债务目录不代表框架差异、SSR 或所有质量任务已经完成。本批没有增加样式覆盖，使用现有 vendor 类。
+- **交互与页面**：新增 1 个可操作 demo，覆盖受控单值、非受控区间、竖向小数、动态显示/只读/禁用。回归覆盖数字输入、事件次数、清空、键盘、双向交叉及连续拖动、非零 min 步长、拖动中禁用、提示延迟/时长/焦点/配置优先级/取消及区间编辑文本同步；所有前批回归保留并通过。Slider 页面探针 issues / badResources 均为空，截图已检查。
+- **生成进度**：API、demo-sources 和 progress 由脚本同步。示例 324 → 325；已对齐 1050 → 1052（66.8%），真实深度债 236 → 234，零债务目录 40 → 41。Slider 目录真实债务 2 → 0。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有批次交互回归、`pnpm check:progress` 与 `git diff --check` 通过，missing 0 / extra 0。库构建发现 replaceAll 不属于当前 ES 目标，已改为 split/join；保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 795.40 kB）。
+
+本批结束第 2 轮，第 1～2 轮达到计划 M1 的局部能力验收口径。**接续任务**：第 3 轮 Input → Textarea / Checkbox / Radio / Switch → Form，按原计划核实已有实现、补齐真实缺口；M2～M5 仍未完成。

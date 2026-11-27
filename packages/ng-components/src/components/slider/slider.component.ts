@@ -1,6 +1,7 @@
-﻿import { booleanAttribute, ChangeDetectionStrategy, Component, computed, ElementRef, inject, Injector, input, OnDestroy, output, signal, ViewEncapsulation, afterNextRender } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, Injector, input, OnDestroy, output, signal, untracked, ViewEncapsulation, afterNextRender } from '@angular/core';
 import { TTooltip } from '../tooltip';
-import type { SliderLayout, SliderMark, SliderMarks, SliderValue } from './slider.types';
+import { TInputNumber, type InputNumberChangeEvent } from '../input-number';
+import type { SliderInputNumberProps, SliderTooltipProps, SliderLayout, SliderMark, SliderMarks, SliderValue } from './slider.types';
 
 /** 把数值限制在区间内。 */
 function clamp(value: number, min: number, max: number): number {
@@ -22,7 +23,7 @@ function precisionOf(value: number): number {
 
 @Component({
   selector: 't-slider',
-  imports: [TTooltip],
+  imports: [TTooltip, TInputNumber],
   templateUrl: './slider.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -109,6 +110,19 @@ export class TSlider implements OnDestroy {
    */
   readonly marks = input<SliderMarks | undefined>(undefined);
 
+  /** @zh 数字输入框配置，true 使用默认配置 @en Number editor options, true uses defaults @defaultValue false */
+  readonly inputNumberProps = input<boolean | SliderInputNumberProps>(false);
+  /** @zh 提示配置，显式 label 优先 @en Tooltip options, explicit label takes precedence @defaultValue undefined */
+  readonly tooltipProps = input<SliderTooltipProps | undefined>(undefined);
+  protected readonly numberOptions = computed(() => {
+    const props = this.inputNumberProps();
+    return typeof props === 'object' ? props : {};
+  });
+  protected readonly numberDisabled = computed(() => this.disabled() || !!this.numberOptions().disabled);
+  protected readonly focused = signal(-1);
+  private readonly tooltipTarget = signal(-1);
+  private lastCommitted: SliderValue | undefined;
+
   /**
    * 拖动过程中值变化时触发。
    * @zh 值变化时触发
@@ -129,7 +143,13 @@ export class TSlider implements OnDestroy {
   private railEl?: HTMLElement;
 
   /** 当前值：受控优先，其次内部值，最后默认值。 */
-  private readonly currentValue = computed<SliderValue>(() => this.value() ?? this.innerValue() ?? this.defaultValue());
+  private readonly currentValue = computed<SliderValue>(() => {
+    const value = this.value() ?? this.innerValue() ?? this.defaultValue();
+    const bounded = (n: number) => clamp(Number.isFinite(n) ? n : this.min(), this.min(), this.max());
+    if (!this.range()) return bounded(Array.isArray(value) ? value[0] : value);
+    const values = Array.isArray(value) ? value : [value, value];
+    return [bounded(values[0]), bounded(values[1])].sort((a, b) => a - b);
+  });
 
   protected readonly vertical = computed(() => this.layout() === 'vertical');
 
@@ -144,7 +164,7 @@ export class TSlider implements OnDestroy {
   });
 
   /** 数值精度：由 min / max / step 的小数位决定。 */
-  private readonly precision = computed(() => Math.max(precisionOf(this.min()), precisionOf(this.max()), precisionOf(this.step())));
+  protected readonly precision = computed(() => Math.max(precisionOf(this.min()), precisionOf(this.max()), precisionOf(this.step())));
 
   protected readonly rangeStart = computed(() => (this.range() ? Math.min(this.firstValue(), this.secondValue()) : this.firstValue()));
 
@@ -197,6 +217,22 @@ export class TSlider implements OnDestroy {
   });
 
   constructor() {
+    effect(() => {
+      if (this.disabled()) untracked(() => this.stopDrag());
+    });
+    effect((cleanup) => {
+      const options = this.tooltipProps();
+      const blocked = this.disabled() || options?.disabled || this.label() === false;
+      const index = this.dragging() ? this.draggingIndex() : this.hovered() >= 0 ? this.hovered() : this.focused();
+      const delay = this.dragging() ? 0 : options?.delay ?? 0;
+      this.tooltipTarget.set(-1);
+      if (blocked || index < 0) return;
+      if (delay <= 0) this.tooltipTarget.set(index);
+      else {
+        const timer = setTimeout(() => this.tooltipTarget.set(index), delay);
+        cleanup(() => clearTimeout(timer));
+      }
+    });
     afterNextRender(() => {
       this.railEl = this.host.nativeElement.querySelector('.t-slider__rail') ?? undefined;
     }, { injector: this.injector });
@@ -224,7 +260,7 @@ export class TSlider implements OnDestroy {
 
   /** 提示是否可见：拖动中或鼠标悬停在对应滑块上。 */
   protected isTooltipVisible(index: number): boolean {
-    return this.isButtonDragging(index) || this.hovered() === index;
+    return !this.disabled() && !this.tooltipProps()?.disabled && this.label() !== false && this.tooltipTarget() === index;
   }
 
   /** 该滑块是否正在被拖动。 */
@@ -239,9 +275,9 @@ export class TSlider implements OnDestroy {
       return String(value);
     }
     if (typeof label === 'string') {
-      return label.replace('{value}', String(value));
+      return label.split('{value}').join(String(value));
     }
-    return '';
+    return label === false ? '' : this.tooltipProps()?.content ?? '';
   }
 
   /** 由百分比位置算出对齐步长的数值。 */
@@ -251,7 +287,7 @@ export class TSlider implements OnDestroy {
     const total = max - min;
     const raw = min + (clamp(percent, 0, 100) / 100) * total;
     const step = this.step();
-    const snapped = step > 0 ? Math.round(raw / step) * step : raw;
+    const snapped = step > 0 ? min + Math.round((raw - min) / step) * step : raw;
     return roundTo(clamp(snapped, min, max), this.precision());
   }
 
@@ -270,6 +306,7 @@ export class TSlider implements OnDestroy {
 
   /** 提交新值：非受控时写内部值，并触发 change。 */
   private commit(value: SliderValue): void {
+    this.lastCommitted = value;
     if (this.value() === undefined) {
       this.innerValue.set(value);
     }
@@ -296,7 +333,8 @@ export class TSlider implements OnDestroy {
   private setRangeValue(index: number, next: number, emitEnd = false): void {
     const first = index === 0 ? next : this.firstValue();
     const second = index === 1 ? next : this.secondValue();
-    const value: SliderValue = first <= second ? [first, second] : index === 0 ? [second, first] : [first, second];
+    const value: SliderValue = first <= second ? [first, second] : [second, first];
+    if (first > second && this.dragging()) this.draggingIndex.set(index === 0 ? 1 : 0);
     this.commit(value);
     if (emitEnd) {
       this.changeEnd.emit(value);
@@ -309,6 +347,7 @@ export class TSlider implements OnDestroy {
     }
     event.preventDefault();
     event.stopPropagation();
+    this.lastCommitted = undefined;
     this.setDragging(index);
     document.addEventListener('mousemove', this.handleDragMove);
     document.addEventListener('mouseup', this.handleDragEnd);
@@ -351,7 +390,7 @@ export class TSlider implements OnDestroy {
 
   /** 拖动中用指针位置直接换算数值，避免累计误差。 */
   private readonly handleDragMove = (event: MouseEvent): void => {
-    if (this.draggingIndex() < 0) {
+    if (this.disabled() || this.draggingIndex() < 0) {
       return;
     }
     const next = this.valueOfPercent(this.percentOfEvent(event));
@@ -363,8 +402,9 @@ export class TSlider implements OnDestroy {
   };
 
   private readonly handleDragEnd = (): void => {
+    if (this.disabled() || this.draggingIndex() < 0) return;
     this.setDragging(-1);
-    this.changeEnd.emit(this.currentValue());
+    this.changeEnd.emit(this.lastCommitted ?? this.currentValue());
   };
 
   private setDragging(index: number): void {
@@ -378,10 +418,24 @@ export class TSlider implements OnDestroy {
   }
 
   private stopDrag(): void {
-    document.removeEventListener('mousemove', this.handleDragMove);
-    document.removeEventListener('mouseup', this.handleDragEnd);
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('mousemove', this.handleDragMove);
+      document.removeEventListener('mouseup', this.handleDragEnd);
+    }
     this.draggingIndex.set(-1);
     this.dragging.set(false);
+  }
+
+  protected handleNumberChange(event: InputNumberChangeEvent, index: number): void {
+    const options = this.numberOptions();
+    if (this.numberDisabled() || options.readonly || options.inputProps?.disabled || options.inputProps?.readonly) return;
+    if (event.value !== undefined && event.value !== '' && Number.isFinite(Number(event.value))) {
+      const next = clamp(Number(event.value), this.min(), this.max());
+      if (this.range()) this.setRangeValue(index, next);
+      else this.commit(next);
+    }
+    const { value, ...context } = event;
+    options.onChange?.(value, context);
   }
 }
 

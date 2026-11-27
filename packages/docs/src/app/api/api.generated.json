@@ -8608,6 +8608,24 @@
           "zh": "刻度标记",
           "en": "Slider marks",
           "values": []
+        },
+        {
+          "name": "inputNumberProps",
+          "type": "boolean | SliderInputNumberProps",
+          "default": "false",
+          "required": false,
+          "zh": "数字输入框配置，true 使用默认配置",
+          "en": "Number editor options, true uses defaults",
+          "values": []
+        },
+        {
+          "name": "tooltipProps",
+          "type": "SliderTooltipProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "提示配置，显式 label 优先",
+          "en": "Tooltip options, explicit label takes precedence",
+          "values": []
         }
       ],
       "outputs": [
