@@ -6,10 +6,11 @@ import { DemoRateBasic } from './demos/rate-basic';
 import { DemoRateHalf } from './demos/rate-half';
 import { DemoRateOptions } from './demos/rate-options';
 import { DemoRateText } from './demos/rate-text';
+import { DemoRateIcon } from './demos/rate-icon';
 
 @Component({
   selector: 'rate-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoRateBasic, DemoRateHalf, DemoRateText, DemoRateOptions],
+  imports: [ApiTable, DemoBlock, PageNav, DemoRateBasic, DemoRateHalf, DemoRateText, DemoRateOptions, DemoRateIcon],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">评分 Rate</h1>
@@ -31,6 +32,10 @@ import { DemoRateText } from './demos/rate-text';
 
       <docs-demo id="rate-options" title="更多配置" description="count 控制星星数量、gap 控制间距、color 支持 [选中色, 未选中色]、clearable 支持再次点击清空、disabled 禁用。">
         <demo-rate-options />
+      </docs-demo>
+
+      <docs-demo id="rate-icon" title="自定义图标" description="icon 支持字符串或模板，模板使用 currentColor 继承选中和未选中颜色；保留半星、清空与禁用行为。">
+        <demo-rate-icon />
       </docs-demo>
 
       <h2 class="docs-section__title" id="rate-api">API</h2>

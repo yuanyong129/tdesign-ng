@@ -8,6 +8,7 @@ import { DemoTabsCard } from './demos/tabs-card';
 import { DemoTabsDragSort } from './demos/tabs-drag-sort';
 import { DemoTabsLazy } from './demos/tabs-lazy';
 import { DemoTabsPlacement } from './demos/tabs-placement';
+import { DemoTabsAction } from './demos/tabs-action';
 
 @Component({
   selector: 'tabs-docs',
@@ -21,6 +22,7 @@ import { DemoTabsPlacement } from './demos/tabs-placement';
     DemoTabsDragSort,
     DemoTabsLazy,
     DemoTabsPlacement,
+    DemoTabsAction,
   ],
   template: `
     <div class="docs-page">
@@ -67,6 +69,10 @@ import { DemoTabsPlacement } from './demos/tabs-placement';
         description="面板的 lazy 让内容在首次激活时挂载，destroyOnHide 让内容在切走后销毁。"
       >
         <demo-tabs-lazy />
+      </docs-demo>
+
+      <docs-demo id="tabs-action" title="自定义操作区" description="action 支持字符串和模板，与新增按钮共存；操作区内容不会成为页签面板。">
+        <demo-tabs-action />
       </docs-demo>
 
       <h2 class="docs-section__title" id="tabs-api">API</h2>

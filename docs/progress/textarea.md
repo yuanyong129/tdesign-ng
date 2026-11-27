@@ -4,7 +4,7 @@
 
 - 目录：`packages/ng-components/src/components/textarea/`
 - 文档页：`/textarea`（`packages/docs/src/app/docs/textarea/textarea.component.ts`）
-- 状态：🚧 有深度债 2 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
@@ -13,16 +13,16 @@
 | 上游属性 | 21 |
 | 已对齐 | 12 |
 | 覆盖率 | 57.1% |
-| 深度债 | 2（D1 0 / D2 2 / D3 0） |
-| Angular 惯用映射 | 7（插槽 / 双向绑定 / 事件名，不计债） |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
+| Angular 惯用映射 | 9（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 5 个 |
+| 文档示例 | 6 个 |
 
 ## 组件明细
 
 ### `TTextarea`（`<t-textarea>`）
 
-上游接口 `TdTextareaProps`；上游属性 21、已对齐 12（57.1%）；深度债 2 项；未登记缺失 0 项。
+上游接口 `TdTextareaProps`；上游属性 21、已对齐 12（57.1%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -35,7 +35,7 @@
 | `readonly` | boolean | false | 是否只读 |
 | `autofocus` | boolean | false | 自动聚焦 |
 | `autosize` | boolean \| TextareaAutosize | false | 是否根据内容自动撑高，可传 `{ minRows, maxRows }` |
-| `maxcharacter` | number \| undefined | undefined | 最大字符数，按字符（而非字节）计算，超出时截断 |
+| `maxcharacter` | number \| undefined | undefined | 最大字符数，ASCII 计 1，非 ASCII 每个 UTF-16 单元计 2，超出时截断 |
 | `maxlength` | string \| number \| undefined | undefined | 原生 maxlength，超出时浏览器直接阻止输入 |
 | `allowInputOverMax` | boolean | false | 是否允许输入超过最大字符数 |
 | `name` | string \| undefined | undefined | 原生的 name 属性 |
@@ -51,6 +51,8 @@
 | `blur` | FocusEvent | 失去焦点 |
 | `keydown` | KeyboardEvent | 键盘按下 |
 | `keyup` | KeyboardEvent | 键盘抬起 |
+| `keypress` | KeyboardEvent | 字符按键事件（原生 keypress），不以 keydown 代替 |
+| `validate` | TextareaValidateEvent | 超过长度限制或恢复正常时触发 |
 
 **未实现（深度债）**
 
@@ -62,9 +64,9 @@
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出，参数是 { value, event } |
 | `onFocus` | Angular 惯用映射 | Angular 用 (focus) 输出 |
 | `onKeydown` | Angular 惯用映射 | Angular 用 (keydown) 输出 |
-| `onKeypress` | D2 录入与反馈线 | 已由 (keydown)/(keyup) 覆盖 |
+| `onKeypress` | Angular 惯用映射 | Angular 用 (keypress) 输出原生 KeyboardEvent，组件内部阻止冒泡以避免重复触发 |
 | `onKeyup` | Angular 惯用映射 | Angular 用 (keyup) 输出 |
-| `onValidate` | D2 录入与反馈线 | 数值越界校验由 t-form 承担，P2 表单落地后再补 |
+| `onValidate` | Angular 惯用映射 | Angular 用 (validate) 输出，参数 { error }；初始超限及超限状态切换时触发 |
 
 ## 文档示例
 
@@ -73,3 +75,4 @@
 - `packages/docs/src/app/docs/textarea/demos/textarea-disabled.ts`
 - `packages/docs/src/app/docs/textarea/demos/textarea-limit.ts`
 - `packages/docs/src/app/docs/textarea/demos/textarea-status.ts`
+- `packages/docs/src/app/docs/textarea/demos/textarea-validate.ts`

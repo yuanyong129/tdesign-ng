@@ -6,10 +6,11 @@ import { DemoTypographyBase } from './demos/typography-base';
 import { DemoTypographyParagraph } from './demos/typography-paragraph';
 import { DemoTypographySlot } from './demos/typography-slot';
 import { DemoTypographyTitle } from './demos/typography-title';
+import { DemoTypographyCopyable } from './demos/typography-copyable';
 
 @Component({
   selector: 'typography-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoTypographyBase, DemoTypographyParagraph, DemoTypographySlot, DemoTypographyTitle],
+  imports: [ApiTable, DemoBlock, PageNav, DemoTypographyBase, DemoTypographyParagraph, DemoTypographySlot, DemoTypographyTitle, DemoTypographyCopyable],
   template: `
     <article class="docs-page">
       <h1 class="docs-page__title">排版 Typography</h1>
@@ -47,6 +48,10 @@ import { DemoTypographyTitle } from './demos/typography-title';
         description="content 同时接受字符串与 TemplateRef，模板内容里可以继续放组件。"
       >
         <demo-typography-slot />
+      </docs-demo>
+
+      <docs-demo id="typography-copyable" title="复制文本" description="copyable 支持自定义文本、后缀模板、提示和成功回调。复制失败会显示反馈，禁用时不能复制。">
+        <demo-typography-copyable />
       </docs-demo>
 
       <h2 class="docs-section__title" id="typography-api">API</h2>

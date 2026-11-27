@@ -20,6 +20,8 @@ import {
   viewChildren,
 } from '@angular/core';
 import { TTabPanel } from './tab-panel.component';
+import { isContentEmpty, isTemplateContent } from '../../_utils/content';
+import type { Content } from '../../_utils/content';
 import {
   TabValue,
   TabsAddEvent,
@@ -77,6 +79,12 @@ export class TTabs implements OnDestroy {
   /** @zh 默认激活的选项卡值 @en Default active tab value @defaultValue '' */
   readonly defaultValue = input<TabValue>('');
 
+  /** @zh 导航栏右侧的操作内容，支持字符串或模板 @en Actions beside the tab navigation, as text or a template @defaultValue undefined */
+  readonly action = input<Content>(undefined);
+
+  protected readonly isTemplateContent = isTemplateContent;
+  protected readonly hasAction = computed(() => !isContentEmpty(this.action()));
+
   /** @zh 激活选项卡变化时触发 @en Emits when the active tab changes */
   readonly change = output<TabValue>();
 
@@ -108,6 +116,8 @@ export class TTabs implements OnDestroy {
 
   private readonly navScrollRef = viewChild<ElementRef<HTMLElement>>('navScroll');
   private readonly navWrapRef = viewChild<ElementRef<HTMLElement>>('navWrap');
+  private readonly operationsRef = viewChild<ElementRef<HTMLElement>>('operations');
+  protected readonly operationsWidth = signal(0);
   private readonly navItemRefs = viewChildren<ElementRef<HTMLElement>>('navItem');
 
   /** 普通主题下当前选项卡下方的指示条位置 */
@@ -137,6 +147,7 @@ export class TTabs implements OnDestroy {
       this.placement();
       this.isCard();
       this.scrollPosition();
+      this.action();
       untracked(() => this.scheduleNavUpdate());
     });
     afterNextRender(() => {
@@ -299,10 +310,17 @@ export class TTabs implements OnDestroy {
     }
     this.resizeObserver?.disconnect();
     this.resizeObserver = new ResizeObserver(() => {
+      this.measureOperations();
       this.measureNavScroll();
       this.updateBar();
     });
     this.resizeObserver.observe(scroll);
+    const operations = this.operationsRef()?.nativeElement;
+    if (operations) this.resizeObserver.observe(operations);
+  }
+
+  private measureOperations(): void {
+    this.operationsWidth.set(this.operationsRef()?.nativeElement.getBoundingClientRect().width ?? 0);
   }
 
   private measureNavScroll(): void {

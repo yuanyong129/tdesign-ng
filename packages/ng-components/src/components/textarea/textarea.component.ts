@@ -20,6 +20,7 @@ import type {
   TextareaChangeEvent,
   TextareaStatus,
   TextareaValue,
+  TextareaValidateEvent,
 } from './textarea.types';
 
 const PREFIX_CLS = 't-textarea';
@@ -86,7 +87,7 @@ export class TTextarea implements ControlValueAccessor {
     transform: toAutosize,
   });
 
-  /** @zh 最大字符数，按字符（而非字节）计算，超出时截断 @en Maximum characters, truncates when exceeded @defaultValue undefined */
+  /** @zh 最大字符数，ASCII 计 1，非 ASCII 每个 UTF-16 单元计 2，超出时截断 @en Maximum weighted length: ASCII counts as 1, non-ASCII UTF-16 units as 2 @defaultValue undefined */
   readonly maxcharacter = input<number | undefined>(undefined);
 
   /** @zh 原生 maxlength，超出时浏览器直接阻止输入 @en Native maxlength @defaultValue undefined */
@@ -119,6 +120,12 @@ export class TTextarea implements ControlValueAccessor {
   /** @zh 键盘抬起 @en Keyup event */
   readonly keyup = output<KeyboardEvent>();
 
+  /** @zh 字符按键事件（原生 keypress），不以 keydown 代替 @en Native keypress event */
+  readonly keypress = output<KeyboardEvent>();
+
+  /** @zh 超过长度限制或恢复正常时触发 @en Emitted when the length limit is exceeded or the value becomes valid again */
+  readonly validate = output<TextareaValidateEvent>();
+
   protected readonly innerId = `${PREFIX_CLS}-${++uid}`;
 
   private readonly innerTextarea = viewChild<ElementRef<HTMLTextAreaElement>>('inner');
@@ -130,6 +137,8 @@ export class TTextarea implements ControlValueAccessor {
   private onChange: (value: TextareaValue) => void = () => {};
 
   private onTouched: () => void = () => {};
+
+  private composing = false;
 
   constructor() {
     effect(() => {
@@ -143,6 +152,15 @@ export class TTextarea implements ControlValueAccessor {
     });
 
     afterNextRender(() => this.resize());
+
+    let previousError: TextareaValidateEvent['error'];
+    effect(() => {
+      const error = this.lengthError();
+      if (error !== previousError) {
+        previousError = error;
+        untracked(() => this.validate.emit({ error }));
+      }
+    });
   }
 
   protected readonly text = computed(() => String(this.innerValue() ?? ''));
@@ -156,7 +174,16 @@ export class TTextarea implements ControlValueAccessor {
     return Number.isFinite(parsed) ? parsed : null;
   });
 
-  protected readonly characterCount = computed(() => Array.from(this.text()).length);
+  protected readonly characterCount = computed(() => this.weightedLength(this.text()));
+
+  private readonly lengthError = computed<TextareaValidateEvent['error']>(() => {
+    const max = this.maxlengthValue();
+    const weightedMax = this.maxcharacter();
+    const exceeded = max !== null && max > 0
+      ? Array.from(this.text()).length > max
+      : weightedMax !== undefined && weightedMax > 0 && this.characterCount() > weightedMax;
+    return exceeded ? 'exceed-maximum' : undefined;
+  });
 
   protected readonly showLimit = computed(
     () => !!(this.maxcharacter() ?? this.maxlengthValue()),
@@ -164,7 +191,8 @@ export class TTextarea implements ControlValueAccessor {
 
   protected readonly limitText = computed(() => {
     const max = this.maxcharacter() ?? this.maxlengthValue() ?? 0;
-    return `${this.characterCount()}/${max}`;
+    const count = this.maxcharacter() ? this.characterCount() : Array.from(this.text()).length;
+    return `${count}/${max}`;
   });
 
   /** `autosize` 打开后交给脚本算高度，原生 resize 手柄要关掉。 */
@@ -208,12 +236,23 @@ export class TTextarea implements ControlValueAccessor {
   }
 
   protected handleInput(event: Event): void {
+    if (this.composing || this.mergedDisabled() || this.readonly()) return;
     const element = event.target as HTMLTextAreaElement;
     let next = element.value;
+    // 部分浏览器在 compositionend 后再派发同值 input，避免重复提交一次编辑。
+    if (next === this.text()) return;
 
     const max = this.maxcharacter();
-    if (max !== undefined && !this.allowInputOverMax() && Array.from(next).length > max) {
-      next = Array.from(next).slice(0, max).join('');
+    if (!this.allowInputOverMax()) {
+      if (max !== undefined && max > 0 && this.weightedLength(next) > max) {
+        let length = 0;
+        next = Array.from(next).filter((character) => {
+          length += this.weightedLength(character);
+          return length <= max;
+        }).join('');
+      }
+      const maxlength = this.maxlengthValue();
+      if (maxlength !== null && maxlength > 0) next = Array.from(next).slice(0, maxlength).join('');
       element.value = next;
     }
 
@@ -222,6 +261,26 @@ export class TTextarea implements ControlValueAccessor {
     this.valueChange.emit(next);
     this.change.emit({ value: next, event });
     this.resize();
+  }
+
+  protected handleCompositionStart(): void {
+    this.composing = true;
+  }
+
+  protected handleCompositionEnd(event: CompositionEvent): void {
+    this.composing = false;
+    this.handleInput(event);
+  }
+
+  protected handleKeypress(event: KeyboardEvent): void {
+    event.stopPropagation();
+    if (!this.mergedDisabled()) this.keypress.emit(event);
+  }
+
+  private weightedLength(value: string): number {
+    let length = 0;
+    for (let index = 0; index < value.length; index++) length += value.charCodeAt(index) > 127 ? 2 : 1;
+    return length;
   }
 
   protected handleFocus(event: FocusEvent): void {

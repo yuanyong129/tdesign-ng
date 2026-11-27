@@ -16,7 +16,7 @@
 | 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 1（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 3 个 |
+| 文档示例 | 4 个 |
 
 ## 组件明细
 
@@ -36,7 +36,7 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `default` | Angular 惯用映射 | [D3] 子项默认插槽用 display:none + textContent 快照，仅支持纯文本，富内容用 [content]="tpl" |
+| `default` | Angular 惯用映射 | Angular 用默认内容投影，在描述单元格内通过模板渲染富内容并保留动态绑定 |
 
 ### `TDescriptions`（`<t-descriptions>`）
 
@@ -62,4 +62,5 @@
 
 - `packages/docs/src/app/docs/descriptions/demos/descriptions-base.ts`
 - `packages/docs/src/app/docs/descriptions/demos/descriptions-bordered.ts`
+- `packages/docs/src/app/docs/descriptions/demos/descriptions-content.ts`
 - `packages/docs/src/app/docs/descriptions/demos/descriptions-layout.ts`

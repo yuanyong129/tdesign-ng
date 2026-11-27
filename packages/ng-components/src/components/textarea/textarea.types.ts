@@ -3,6 +3,11 @@ export type TextareaStatus = (typeof TEXTAREA_STATUSES)[number];
 
 export type TextareaValue = string | number;
 
+/** 与上游 onValidate 的上下文一致；恢复正常时 error 为 undefined。 */
+export interface TextareaValidateEvent {
+  error?: 'exceed-maximum' | 'below-minimum';
+}
+
 /** 自动撑高配置：`true` 表示不限制行数。 */
 export interface TextareaAutosize {
   /** 最少展示的行数 */

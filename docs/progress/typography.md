@@ -4,19 +4,19 @@
 
 - 目录：`packages/ng-components/src/components/typography/`
 - 文档页：`/typography`（`packages/docs/src/app/docs/typography/typography.component.ts`）
-- 状态：🚧 有深度债 1 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 20 |
-| 已对齐 | 16 |
-| 覆盖率 | 80.0% |
-| 深度债 | 1（D1 0 / D2 0 / D3 1） |
+| 已对齐 | 17 |
+| 覆盖率 | 85.0% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 3（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 4 个 |
+| 文档示例 | 5 个 |
 
 ## 组件明细
 
@@ -39,13 +39,14 @@
 
 ### `TText`（`<t-text>`）
 
-上游接口 `TdTextProps`；上游属性 13、已对齐 11（84.6%）；深度债 1 项；未登记缺失 0 项。
+上游接口 `TdTextProps`；上游属性 13、已对齐 12（92.3%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `content` | TypographyContent | undefined | 文本内容 |
+| `copyable` | boolean \| TypographyCopyable | false | 是否显示复制按钮，可配置复制文本、后缀模板、提示及成功回调 |
 | `code` | boolean | false | 代码样式 |
 | `delete` | boolean | false | 删除线 |
 | `disabled` | boolean | false | 禁用 |
@@ -61,7 +62,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `copyable` | D3 其余组件与边角能力 | [D3] 复制交互（图标 + copyable.text/suffix/tooltipProps/onCopy）未实现 |
 | `default` | Angular 惯用映射 | Angular 用 <ng-content> 承载文本内容 |
 
 ### `TTitle`（`<t-title>`）
@@ -85,6 +85,7 @@
 ## 文档示例
 
 - `packages/docs/src/app/docs/typography/demos/typography-base.ts`
+- `packages/docs/src/app/docs/typography/demos/typography-copyable.ts`
 - `packages/docs/src/app/docs/typography/demos/typography-paragraph.ts`
 - `packages/docs/src/app/docs/typography/demos/typography-slot.ts`
 - `packages/docs/src/app/docs/typography/demos/typography-title.ts`

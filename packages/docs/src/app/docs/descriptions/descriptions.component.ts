@@ -5,10 +5,11 @@ import { PageNav } from '../page-nav';
 import { DemoDescriptionsBase } from './demos/descriptions-base';
 import { DemoDescriptionsBordered } from './demos/descriptions-bordered';
 import { DemoDescriptionsLayout } from './demos/descriptions-layout';
+import { DemoDescriptionsContent } from './demos/descriptions-content';
 
 @Component({
   selector: 'descriptions-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoDescriptionsBase, DemoDescriptionsBordered, DemoDescriptionsLayout],
+  imports: [ApiTable, DemoBlock, PageNav, DemoDescriptionsBase, DemoDescriptionsBordered, DemoDescriptionsLayout, DemoDescriptionsContent],
   template: `
     <article class="docs-page">
       <h1 class="docs-page__title">描述列表 Descriptions</h1>
@@ -38,6 +39,10 @@ import { DemoDescriptionsLayout } from './demos/descriptions-layout';
         description="layout 控制整体布局，itemLayout 控制标签与内容的排列方向，两者组合共四种排布方式。"
       >
         <demo-descriptions-layout />
+      </docs-demo>
+
+      <docs-demo id="descriptions-content" title="动态富内容" description="默认投影支持组件、事件和动态绑定；显式 content 输入优先。">
+        <demo-descriptions-content />
       </docs-demo>
 
       <h2 class="docs-section__title" id="descriptions-api">API</h2>

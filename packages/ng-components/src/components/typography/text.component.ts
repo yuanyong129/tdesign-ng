@@ -1,14 +1,23 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { TTooltip } from '../tooltip/tooltip.component';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  ElementRef,
+  PLATFORM_ID,
   ViewEncapsulation,
   booleanAttribute,
   computed,
   input,
+  inject,
+  signal,
+  viewChild,
 } from '@angular/core';
 import {
   TypographyContent,
+  TypographyCopyable,
   TypographyEllipsis,
   TypographyTheme,
   asTemplateRef,
@@ -22,8 +31,7 @@ import {
  * `mark` / `kbd` / `i` 这些装饰属性按上游的包裹顺序渲染成真实的语义元素，
  * 视觉全部来自 `.t-typography` 及其后代选择器，组件本身不写任何样式。
  *
- * `ellipsis` 只实现静态 CSS 截断（单行或多行），复制、展开收起与 Tooltip 属于
- * 本期不实现的 [D3] 交互，因此没有对应输入属性。
+ * `ellipsis` 只实现静态 CSS 截断（单行或多行）；copyable 提供独立的复制按钮。
  *
  * 注意：`.t-typography` 的禁用/主题色规则写在类自身上，而标题规则是 `h1&` 这种
  * 元素限定选择器，所以宿主元素只是壳：真正的语义元素（span）带 `t-typography` 类，
@@ -32,7 +40,7 @@ import {
 @Component({
   selector: 't-text',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, TTooltip],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -76,14 +84,94 @@ import {
       }
     </ng-template>
 
-    <span [class]="classes()" [style]="ellipsisStyle()">
+    <span #textContent [class]="classes()" [style]="ellipsisStyle()">
       <ng-container *ngTemplateOutlet="decorate; context: { $implicit: decorateTags(), inner: contentTpl, index: 0 }" />
     </span>
+    @if (copyable()) {
+      <t-tooltip [content]="copyOptions().tooltipProps?.content ?? copyLabel()"
+        [placement]="copyOptions().tooltipProps?.placement ?? 'top'"
+        [theme]="copyOptions().tooltipProps?.theme ?? 'default'"
+        [showArrow]="copyOptions().tooltipProps?.showArrow ?? true"
+        [delay]="copyOptions().tooltipProps?.delay ?? 0"
+        [duration]="copyOptions().tooltipProps?.duration ?? 0"
+        [disabled]="copyOptions().tooltipProps?.disabled ?? false"
+        [destroyOnClose]="copyOptions().tooltipProps?.destroyOnClose ?? false"
+        [zIndex]="copyOptions().tooltipProps?.zIndex">
+        <button type="button" class="t-button t-button--variant-text t-button--theme-default t-size-s"
+          [disabled]="disabled() || copying()" [attr.aria-label]="copyLabel()" (click)="copyText()">
+          @if (copyOptions().suffix; as suffix) {
+            @if (asTemplate(suffix); as template) {
+              <ng-container *ngTemplateOutlet="template; context: { copied: copied() }" />
+            } @else { {{ suffix }} }
+          } @else {
+            <svg [class]="copied() ? 't-icon t-icon-checked' : 't-icon t-icon-copy'"
+              viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" aria-hidden="true">
+              @if (copied()) { <path d="m4 12 5 5L20 6" stroke-width="2" /> }
+              @else { <path d="M8 8h12v12H8zM4 16V4h12" stroke-width="2" /> }
+            </svg>
+          }
+        </button>
+      </t-tooltip>
+      <span role="status" class="t-typography">{{ copyMessage() }}</span>
+    }
   `,
 })
 export class TText {
   /** 文本内容。 @zh 文本内容 @en content @defaultValue undefined */
   content = input<TypographyContent>(undefined);
+
+  /** @zh 是否显示复制按钮，可配置复制文本、后缀模板、提示及成功回调 @en Enable copying with optional text, suffix template, tooltip and success callback @defaultValue false */
+  readonly copyable = input<boolean | TypographyCopyable>(false);
+
+  protected readonly copyOptions = computed(() => {
+    const config = this.copyable();
+    return typeof config === 'object' ? config : {};
+  });
+  protected readonly copied = signal(false);
+  protected readonly copying = signal(false);
+  protected readonly copyMessage = signal('');
+  protected readonly copyLabel = computed(() => this.copied() ? '已复制' : '复制');
+  private readonly textContent = viewChild<ElementRef<HTMLElement>>('textContent');
+  private readonly clipboard = inject(Clipboard);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
+  private resetTimer?: ReturnType<typeof setTimeout>;
+  private destroyed = false;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
+      clearTimeout(this.resetTimer);
+    });
+  }
+
+  protected async copyText(): Promise<void> {
+    if (!this.copyable() || this.disabled() || this.copying() || !isPlatformBrowser(this.platformId)) return;
+    const options = this.copyOptions();
+    const text = options.text ?? this.textContent()?.nativeElement.textContent ?? '';
+    this.copying.set(true);
+    clearTimeout(this.resetTimer);
+    try {
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+      else if (!this.clipboard.copy(text)) throw new Error('Clipboard unavailable');
+      if (this.destroyed) return;
+      this.copied.set(true);
+      this.copyMessage.set('已复制');
+      this.resetTimer = setTimeout(() => {
+        this.copied.set(false);
+        this.copyMessage.set('');
+      }, 2000);
+    } catch {
+      if (this.destroyed) return;
+      this.copied.set(false);
+      this.copyMessage.set('复制失败，请重试');
+      return;
+    } finally {
+      if (!this.destroyed) this.copying.set(false);
+    }
+    // 消费方回调错误不应被误报为剪贴板失败。
+    options.onCopy?.();
+  }
 
   /** 是否使用代码样式。 @zh 代码样式 @en code @defaultValue false */
   code = input(false, { transform: booleanAttribute });

@@ -4,37 +4,40 @@
 
 - 目录：`packages/ng-components/src/components/pagination/`
 - 文档页：`/pagination`（`packages/docs/src/app/docs/pagination/pagination.component.ts`）
-- 状态：⚠️ 有 3 项未登记缺失（需补 align-check 或实现）
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 23 |
-| 已对齐 | 16 |
-| 覆盖率 | 69.6% |
+| 已对齐 | 19 |
+| 覆盖率 | 82.6% |
 | 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 4（插槽 / 双向绑定 / 事件名，不计债） |
-| 未登记缺失 | 3 |
+| 未登记缺失 | 0 |
 | 文档示例 | 6 个 |
 
 ## 组件明细
 
 ### `TPagination`（`<t-pagination>`）
 
-上游接口 `TdPaginationProps`；上游属性 23、已对齐 16（69.6%）；深度债 0 项；未登记缺失 3 项。
+上游接口 `TdPaginationProps`；上游属性 23、已对齐 19（82.6%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `current` | number | 1 | 当前页，用于双向绑定 |
+| `current` | number \| undefined | undefined | 当前页，受控用法传入（配合 (currentChange) 双向绑定） |
+| `defaultCurrent` | number | 1 | 默认当前页，非受控用法 |
 | `total` | number | 0 | 数据总条数 |
-| `pageSize` | number | 10 | 每页条数，用于双向绑定 |
+| `pageSize` | number \| undefined | undefined | 每页条数，受控用法传入（配合 (pageSizeChange) 双向绑定） |
+| `defaultPageSize` | number | 10 | 默认每页条数，非受控用法 |
 | `pageSizeOptions` | PaginationPageSizeOptions | [10, 20, 50] | 每页条数选项 |
 | `showPageSize` | boolean | true | 是否显示每页条数选择器 |
 | `showJumper` | boolean | false | 是否显示跳转输入框 |
-| `totalContent` | string \| boolean | true | 自定义数据统计内容，false 隐藏 |
+| `totalContent` | Content \| boolean | true | 自定义数据统计内容，支持字符串与模板，false 隐藏 |
+| `selectProps` | PaginationSelectProps \| undefined | undefined | 每页条数选择器的透传配置 |
 | `showFirstAndLastPageBtn` | boolean | true | 是否显示首页/末页按钮 |
 | `showPreviousAndNextBtn` | boolean | true | 是否显示上一页/下一页按钮 |
 | `showPageNumber` | boolean | true | 是否显示页码 |
@@ -61,9 +64,6 @@
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出，携带 PageInfo |
 | `onCurrentChange` | Angular 惯用映射 | Angular 用 (currentChange) 输出 |
 | `onPageSizeChange` | Angular 惯用映射 | Angular 用 (pageSizeChange) 输出 |
-| `defaultCurrent` | ⚠️ 未登记 | 尚未实现也未在 `scripts/align-check.config/TPagination.mjs` 登记原因 |
-| `defaultPageSize` | ⚠️ 未登记 | 尚未实现也未在 `scripts/align-check.config/TPagination.mjs` 登记原因 |
-| `selectProps` | ⚠️ 未登记 | 尚未实现也未在 `scripts/align-check.config/TPagination.mjs` 登记原因 |
 
 ## 文档示例
 

@@ -6,6 +6,6 @@ export default {
     renames: {},
     angularOnly: [],
     ignoreUpstream: {
-      default: '[D3] 子项默认插槽用 display:none + textContent 快照，仅支持纯文本，富内容用 [content]="tpl"',
+      default: 'Angular 用默认内容投影，在描述单元格内通过模板渲染富内容并保留动态绑定',
     },
   };

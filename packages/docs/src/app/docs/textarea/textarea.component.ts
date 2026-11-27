@@ -7,6 +7,7 @@ import { DemoTextareaBasic } from './demos/textarea-basic';
 import { DemoTextareaDisabled } from './demos/textarea-disabled';
 import { DemoTextareaLimit } from './demos/textarea-limit';
 import { DemoTextareaStatus } from './demos/textarea-status';
+import { DemoTextareaValidate } from './demos/textarea-validate';
 
 @Component({
   selector: 'textarea-docs',
@@ -19,6 +20,7 @@ import { DemoTextareaStatus } from './demos/textarea-status';
     DemoTextareaStatus,
     DemoTextareaLimit,
     DemoTextareaDisabled,
+    DemoTextareaValidate,
   ],
   template: `
     <div class="docs-page">
@@ -45,6 +47,10 @@ import { DemoTextareaStatus } from './demos/textarea-status';
 
       <docs-demo id="textarea-disabled" title="禁用与只读" description="disabled 不可交互；readonly 可选中复制但不可修改。">
         <demo-textarea-disabled />
+      </docs-demo>
+
+      <docs-demo id="textarea-validate" title="长度校验与键盘事件" description="validate 在首次超限和恢复正常时触发；allowInputOverMax 允许超过限制。keypress 为原生字符按键事件。">
+        <demo-textarea-validate />
       </docs-demo>
 
       <h2 class="docs-section__title" id="textarea-api">API</h2>

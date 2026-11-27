@@ -1,5 +1,27 @@
 import { TemplateRef } from '@angular/core';
 import type { Content } from '../../_utils/content';
+import type { TooltipPlacement, TooltipTheme } from '../tooltip/tooltip.component';
+
+/** 复制按钮的提示配置，仅接受当前 Tooltip 支持的输入。 */
+export interface TypographyCopyTooltipProps {
+  content?: string;
+  placement?: TooltipPlacement;
+  theme?: TooltipTheme;
+  showArrow?: boolean;
+  delay?: number;
+  duration?: number;
+  disabled?: boolean;
+  destroyOnClose?: boolean;
+  zIndex?: number;
+}
+
+/** 复制配置，模板 suffix 可通过 let-copied="copied" 读取成功状态。 */
+export interface TypographyCopyable {
+  text?: string;
+  suffix?: Content;
+  tooltipProps?: TypographyCopyTooltipProps;
+  onCopy?: () => void;
+}
 
 /**
  * 排版富文本内容：字符串按纯文本渲染，TemplateRef 交给 *ngTemplateOutlet 渲染。

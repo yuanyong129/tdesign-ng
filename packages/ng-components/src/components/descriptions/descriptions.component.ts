@@ -149,8 +149,7 @@ export class TDescriptions {
     }
     return this.itemChildren().map((child) => ({
       label: child.label(),
-      // 元素里直接写的纯文本作为 content 兜底，对齐上游默认插槽。
-      content: child.content() ?? (child.projectedText() || undefined),
+        content: child.content() ?? child.projectedContent(),
       span: child.span(),
     }));
   });

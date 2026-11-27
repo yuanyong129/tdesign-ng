@@ -4,25 +4,25 @@
 
 - 目录：`packages/ng-components/src/components/rate/`
 - 文档页：`/rate`（`packages/docs/src/app/docs/rate/rate.component.ts`）
-- 状态：🚧 有深度债 1 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 14 |
-| 已对齐 | 11 |
-| 覆盖率 | 78.6% |
-| 深度债 | 1（D1 0 / D2 0 / D3 1） |
+| 已对齐 | 12 |
+| 覆盖率 | 85.7% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 2（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 4 个 |
+| 文档示例 | 5 个 |
 
 ## 组件明细
 
 ### `TRate`（`<t-rate>`）
 
-上游接口 `TdRateProps`；上游属性 14、已对齐 11（78.6%）；深度债 1 项；未登记缺失 0 项。
+上游接口 `TdRateProps`；上游属性 14、已对齐 12（85.7%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -34,6 +34,7 @@
 | `count` | number | 5 | 评分总数。 |
 | `disabled` | boolean | false | 是否禁用评分。 |
 | `gap` | number | 4 | 图标之间的间距，单位 px。 |
+| `icon` | Content | undefined | 自定义评分图标，支持字符串或模板，模板内使用 currentColor 继承颜色 |
 | `showText` | boolean | false | 是否在评分右侧显示文案。 |
 | `size` | RateSize | '24px' | 图标尺寸，任意 CSS 长度。 |
 | `texts` | string[] | [] | 评分对应的文案，默认使用内置文案（极差 / 失望 / 一般 / 满意 / 惊喜）。 |
@@ -50,7 +51,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `icon` | D3 其余组件与边角能力 | 自定义评分图标在后续版本实现，当前固定使用内置星形 |
 | `modelValue` | Angular 惯用映射 | Angular 用 value 双向绑定 |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出 |
 
@@ -58,5 +58,6 @@
 
 - `packages/docs/src/app/docs/rate/demos/rate-basic.ts`
 - `packages/docs/src/app/docs/rate/demos/rate-half.ts`
+- `packages/docs/src/app/docs/rate/demos/rate-icon.ts`
 - `packages/docs/src/app/docs/rate/demos/rate-options.ts`
 - `packages/docs/src/app/docs/rate/demos/rate-text.ts`

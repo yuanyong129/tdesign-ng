@@ -6401,11 +6401,20 @@
       "inputs": [
         {
           "name": "current",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "当前页，受控用法传入（配合 (currentChange) 双向绑定）",
+          "en": "Current page, pass it for controlled usage",
+          "values": []
+        },
+        {
+          "name": "defaultCurrent",
           "type": "number",
           "default": "1",
           "required": false,
-          "zh": "当前页，用于双向绑定",
-          "en": "Current page, used for two-way binding",
+          "zh": "默认当前页，非受控用法",
+          "en": "Default current page, used when uncontrolled",
           "values": []
         },
         {
@@ -6419,11 +6428,20 @@
         },
         {
           "name": "pageSize",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "每页条数，受控用法传入（配合 (pageSizeChange) 双向绑定）",
+          "en": "Page size, pass it for controlled usage",
+          "values": []
+        },
+        {
+          "name": "defaultPageSize",
           "type": "number",
           "default": "10",
           "required": false,
-          "zh": "每页条数，用于双向绑定",
-          "en": "Page size, used for two-way binding",
+          "zh": "默认每页条数，非受控用法",
+          "en": "Default page size, used when uncontrolled",
           "values": []
         },
         {
@@ -6455,11 +6473,20 @@
         },
         {
           "name": "totalContent",
-          "type": "string | boolean",
+          "type": "Content | boolean",
           "default": "true",
           "required": false,
-          "zh": "自定义数据统计内容，false 隐藏",
-          "en": "Custom total content, false hides it",
+          "zh": "自定义数据统计内容，支持字符串与模板，false 隐藏",
+          "en": "Custom total content, string or template, false hides it",
+          "values": []
+        },
+        {
+          "name": "selectProps",
+          "type": "PaginationSelectProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "每页条数选择器的透传配置",
+          "en": "Props passed to the page size selector",
           "values": []
         },
         {
@@ -7625,6 +7652,15 @@
           "required": false,
           "zh": "图标之间的间距，单位 px。",
           "en": "Gap between icons in px.",
+          "values": []
+        },
+        {
+          "name": "icon",
+          "type": "Content",
+          "default": "undefined",
+          "required": false,
+          "zh": "自定义评分图标，支持字符串或模板，模板内使用 currentColor 继承颜色",
+          "en": "Custom rating icon as text or a template; use currentColor in templates",
           "values": []
         },
         {
@@ -9275,11 +9311,29 @@
           "values": []
         },
         {
+          "name": "displayColumns",
+          "type": "string[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "实际显示的列，按 colKey 的顺序渲染；传入后表格只渲染这些列",
+          "en": "Columns to display, rendered in the order of the colKeys",
+          "values": []
+        },
+        {
+          "name": "defaultDisplayColumns",
+          "type": "string[] | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "实际显示的列默认值，非受控场景生效",
+          "en": "Default columns to display, used when uncontrolled",
+          "values": []
+        },
+        {
           "name": "rowKey",
           "type": "string",
           "default": "'id'",
           "required": false,
-          "zh": "行唯一标识字段名",
+          "zh": "行唯一标识字段",
           "en": "Field name of the row key",
           "values": []
         },
@@ -9362,14 +9416,14 @@
           "type": "boolean",
           "default": "false",
           "required": false,
-          "zh": "是否显示加载中",
+          "zh": "是否显示加载态",
           "en": "Whether the table is loading",
           "values": []
         },
         {
           "name": "loadingText",
           "type": "string",
-          "default": "'加载中'",
+          "default": "'加载。",
           "required": false,
           "zh": "加载提示文字",
           "en": "Loading text",
@@ -9380,7 +9434,7 @@
           "type": "string",
           "default": "'暂无数据'",
           "required": false,
-          "zh": "空数据提示文字",
+          "zh": "空数据提示文案",
           "en": "Empty content",
           "values": []
         },
@@ -9484,6 +9538,18 @@
           "values": []
         },
         {
+          "name": "rowSelectionType",
+          "type": "TableRowSelectionType | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "行选择器类型，覆盖列上 type 的渲染",
+          "en": "Row selector type, overrides the type declared on the column",
+          "values": [
+            "single",
+            "multiple"
+          ]
+        },
+        {
           "name": "selectOnRowClick",
           "type": "boolean",
           "default": "false",
@@ -9529,12 +9595,30 @@
           "values": []
         },
         {
+          "name": "expandedRow",
+          "type": "TableExpandedRowContent | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "展开行内容，支持字符串与模板；传函数时按行返回内容",
+          "en": "Expanded row content, accepts a string or a template; a function receives the row",
+          "values": []
+        },
+        {
           "name": "pagination",
           "type": "TablePagination | undefined",
           "default": "undefined",
           "required": false,
-          "zh": "分页配置，传入后表格底部显示分页；数据超过一页且未开启 disableDataPage 时自动本地分页",
+          "zh": "分页配置，传入后表格底部显示分页；数据超过一页且未开启 disableDataPage 时自动本地分页。",
           "en": "Pagination config; the table renders a pager and paginates locally unless disableDataPage is on",
+          "values": []
+        },
+        {
+          "name": "reserveSelectedRowOnPaginate",
+          "type": "boolean",
+          "default": "true",
+          "required": false,
+          "zh": "翻页时是否保留已选中的行",
+          "en": "Whether selected rows are kept when changing page",
           "values": []
         },
         {
@@ -9542,7 +9626,7 @@
           "type": "boolean",
           "default": "false",
           "required": false,
-          "zh": "关闭本地分页，只显示分页器并把翻页事件交给使用方（服务端分页）",
+          "zh": "关闭本地分页，只显示分页器并把翻页事件交给使用方（服务端分页。",
           "en": "Disable local pagination, only render the pager and emit page changes (server-side paging)",
           "values": []
         },
@@ -9571,6 +9655,234 @@
           "required": false,
           "zh": "是否允许拖拽表头调整列宽，单列可以用 `resizable: false` 关闭",
           "en": "Whether column widths can be adjusted by dragging the header edge",
+          "values": []
+        },
+        {
+          "name": "activeRowKeys",
+          "type": "Array<string | number> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控的高亮行 key，传入后表格不再自己记录高亮行",
+          "en": "Controlled active row keys, the table stops keeping highlight state once provided",
+          "values": []
+        },
+        {
+          "name": "defaultActiveRowKeys",
+          "type": "Array<string | number> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "默认高亮行 key，仅初始生效",
+          "en": "Default active row keys, applied initially",
+          "values": []
+        },
+        {
+          "name": "activeRowType",
+          "type": "TableActiveRowType | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "键盘操作的高亮模式，`single` 单行、`multiple` 多行",
+          "en": "Highlight mode used by keyboard operations, `single` or `multiple`",
+          "values": [
+            "single",
+            "multiple"
+          ]
+        },
+        {
+          "name": "disableSpaceInactiveRow",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "空格键是否禁用取消高亮行",
+          "en": "Whether pressing space can deactivate the active row",
+          "values": []
+        },
+        {
+          "name": "keyboardRowHover",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "键盘移动时是否显示行悬停高亮",
+          "en": "Whether keyboard navigation highlights the row",
+          "values": []
+        },
+        {
+          "name": "topContent",
+          "type": "Content",
+          "default": "undefined",
+          "required": false,
+          "zh": "表格顶部内容，渲染在表格内容之上",
+          "en": "Content rendered above the table content",
+          "values": []
+        },
+        {
+          "name": "bottomContent",
+          "type": "Content",
+          "default": "undefined",
+          "required": false,
+          "zh": "表格底部内容，渲染在分页之上",
+          "en": "Content rendered below the table content, above the pager",
+          "values": []
+        },
+        {
+          "name": "firstFullRow",
+          "type": "Content",
+          "default": "undefined",
+          "required": false,
+          "zh": "表头下方的整行内容",
+          "en": "Full-width content rendered as the first body row",
+          "values": []
+        },
+        {
+          "name": "lastFullRow",
+          "type": "Content",
+          "default": "undefined",
+          "required": false,
+          "zh": "表尾上方的整行内容",
+          "en": "Full-width content rendered as the last body row",
+          "values": []
+        },
+        {
+          "name": "cellEmptyContent",
+          "type": "TableCellEmptyContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "单元格内容为空时的占位，支持回调按单元格取值",
+          "en": "Placeholder rendered when a cell is empty, a callback can return per-cell content",
+          "values": []
+        },
+        {
+          "name": "footData",
+          "type": "TableRow[]",
+          "default": "[]",
+          "required": false,
+          "zh": "表尾数据，渲染在 `tfoot` 里",
+          "en": "Footer data rendered in `tfoot`",
+          "values": []
+        },
+        {
+          "name": "footerSummary",
+          "type": "Content",
+          "default": "undefined",
+          "required": false,
+          "zh": "表尾整行总结内容，与 `footData` 二选一",
+          "en": "Full-width footer summary, alternative to `footData`",
+          "values": []
+        },
+        {
+          "name": "rowspanAndColspanInFooter",
+          "type": "((params: TableRowspanParams) => TableRowspan | undefined) | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "表尾单元格合并回调",
+          "en": "Merge footer cells by returning `{ rowspan, colspan }`",
+          "values": []
+        },
+        {
+          "name": "fixedRows",
+          "type": "number[]",
+          "default": "[]",
+          "required": false,
+          "zh": "固定行数，`[顶部固定行数, 底部固定行数]`，固定行不随内容滚动",
+          "en": "Fixed row counts as `[top, bottom]`, fixed rows stay in place while the content scrolls",
+          "values": []
+        },
+        {
+          "name": "rowAttributes",
+          "type": "TableRowAttributes | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "行属性，支持对象、回调或它们的数组，`class` / `style` 会被合并",
+          "en": "Row attributes: an object, a callback, or an array of both",
+          "values": []
+        },
+        {
+          "name": "rowClassName",
+          "type": "TableRowClassName | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "行类名，支持字符串、回调、按行下标或行 key 取值的映射、以及它们的数组",
+          "en": "Row class names: a string, a callback, a map keyed by row index or row key, or an array of them",
+          "values": []
+        },
+        {
+          "name": "tableContentWidth",
+          "type": "string | number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "表格内容宽度，超过容器宽度时出现横向滚动条",
+          "en": "Width of the table content, a horizontal scrollbar shows up when it exceeds the container",
+          "values": []
+        },
+        {
+          "name": "loadingProps",
+          "type": "TableLoadingProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "加载状态配置，可覆盖文案、图标与遮罩",
+          "en": "Loading config overriding the text, indicator and overlay",
+          "values": []
+        },
+        {
+          "name": "locale",
+          "type": "TableLocale | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "语言配置，传入的字段优先于同名属性（如 `empty`、`loadingText`、`size`）",
+          "en": "Locale config, its fields take precedence over the same-named props",
+          "values": []
+        },
+        {
+          "name": "headerAffixedTop",
+          "type": "boolean | TableAffixProps",
+          "default": "false",
+          "required": false,
+          "zh": "表头吸顶，表格滚出可视区后表头固定在容器顶部；传对象可配置 `offsetTop` / `zIndex` / `container`",
+          "en": "Affix the header to the top of the container once it scrolls out of view; pass an object to configure it",
+          "values": []
+        },
+        {
+          "name": "headerAffixProps",
+          "type": "TableAffixProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "表头吸顶的附加配置，优先于 `headerAffixedTop` 里的对象",
+          "en": "Extra affix config for the header, wins over the object passed to `headerAffixedTop`",
+          "values": []
+        },
+        {
+          "name": "footerAffixedBottom",
+          "type": "boolean | TableAffixProps",
+          "default": "false",
+          "required": false,
+          "zh": "表尾吸底，表格滚出可视区后表尾固定在容器底部",
+          "en": "Affix the footer to the bottom of the container once it scrolls out of view",
+          "values": []
+        },
+        {
+          "name": "footerAffixProps",
+          "type": "TableAffixProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "表尾吸底的附加配置，优先于 `footerAffixedBottom` 里的对象",
+          "en": "Extra affix config for the footer, wins over the object passed to `footerAffixedBottom`",
+          "values": []
+        },
+        {
+          "name": "paginationAffixedBottom",
+          "type": "boolean | TableAffixProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "分页吸底，分页器滚出可视区后固定在容器底部",
+          "en": "Affix the pager to the bottom of the container once it scrolls out of view",
+          "values": []
+        },
+        {
+          "name": "horizontalScrollAffixedBottom",
+          "type": "boolean | TableAffixProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "横向滚动条吸底，表格较宽时在容器底部固定一条横向滚动条",
+          "en": "Affix a horizontal scrollbar to the bottom of the container when the table is wider than it",
           "values": []
         }
       ],
@@ -9610,6 +9922,84 @@
           "type": "TableColumnResizeEvent",
           "zh": "列宽拖拽结束，携带拖拽后的列宽",
           "en": "Emitted after a column resize drag ends"
+        },
+        {
+          "name": "activeChange",
+          "type": "TableActiveChangeEvent",
+          "zh": "高亮行变化",
+          "en": "Emitted when the active rows change"
+        },
+        {
+          "name": "activeRowAction",
+          "type": "TableActiveRowActionEvent",
+          "zh": "键盘操作高亮行时的动作",
+          "en": "Emitted with the keyboard action applied to active rows"
+        },
+        {
+          "name": "rowClick",
+          "type": "TableRowEventContext",
+          "zh": "点击行",
+          "en": "Emitted when a row is clicked"
+        },
+        {
+          "name": "rowDblclick",
+          "type": "TableRowEventContext",
+          "zh": "双击行",
+          "en": "Emitted when a row is double clicked"
+        },
+        {
+          "name": "rowMousedown",
+          "type": "TableRowEventContext",
+          "zh": "行内按下鼠标",
+          "en": "Emitted when the mouse button is pressed on a row"
+        },
+        {
+          "name": "rowMouseup",
+          "type": "TableRowEventContext",
+          "zh": "行内松开鼠标",
+          "en": "Emitted when the mouse button is released on a row"
+        },
+        {
+          "name": "rowMouseenter",
+          "type": "TableRowEventContext",
+          "zh": "鼠标进入行",
+          "en": "Emitted when the pointer enters a row"
+        },
+        {
+          "name": "rowMouseleave",
+          "type": "TableRowEventContext",
+          "zh": "鼠标离开行",
+          "en": "Emitted when the pointer leaves a row"
+        },
+        {
+          "name": "rowMouseover",
+          "type": "TableRowEventContext",
+          "zh": "鼠标在行内移动",
+          "en": "Emitted when the pointer moves inside a row"
+        },
+        {
+          "name": "cellClick",
+          "type": "TableCellClickEvent",
+          "zh": "点击单元格",
+          "en": "Emitted when a cell is clicked"
+        },
+        {
+          "name": "scrollChange",
+          "type": "TableScrollEvent",
+          "zh": "表格滚动",
+          "en": "Emitted when the table scrolls, horizontally or vertically"
+        },
+        {
+          "name": "scrollXChange",
+          "type": "TableScrollEvent",
+          "zh": "表格横向滚动",
+          "en": "Emitted when the table scrolls horizontally"
+        },
+        {
+          "name": "scrollYChange",
+          "type": "TableScrollEvent",
+          "zh": "表格纵向滚动",
+          "en": "Emitted when the table scrolls vertically"
         }
       ]
     },
@@ -9784,6 +10174,15 @@
           "required": false,
           "zh": "默认激活的选项卡值",
           "en": "Default active tab value",
+          "values": []
+        },
+        {
+          "name": "action",
+          "type": "Content",
+          "default": "undefined",
+          "required": false,
+          "zh": "导航栏右侧的操作内容，支持字符串或模板",
+          "en": "Actions beside the tab navigation, as text or a template",
           "values": []
         }
       ],
@@ -10268,6 +10667,15 @@
           "values": []
         },
         {
+          "name": "copyable",
+          "type": "boolean | TypographyCopyable",
+          "default": "false",
+          "required": false,
+          "zh": "是否显示复制按钮，可配置复制文本、后缀模板、提示及成功回调",
+          "en": "Enable copying with optional text, suffix template, tooltip and success callback",
+          "values": []
+        },
+        {
           "name": "code",
           "type": "boolean",
           "default": "false",
@@ -10441,8 +10849,8 @@
           "type": "number | undefined",
           "default": "undefined",
           "required": false,
-          "zh": "最大字符数，按字符（而非字节）计算，超出时截断",
-          "en": "Maximum characters, truncates when exceeded",
+          "zh": "最大字符数，ASCII 计 1，非 ASCII 每个 UTF-16 单元计 2，超出时截断",
+          "en": "Maximum weighted length: ASCII counts as 1, non-ASCII UTF-16 units as 2",
           "values": []
         },
         {
@@ -10518,6 +10926,18 @@
           "type": "KeyboardEvent",
           "zh": "键盘抬起",
           "en": "Keyup event"
+        },
+        {
+          "name": "keypress",
+          "type": "KeyboardEvent",
+          "zh": "字符按键事件（原生 keypress），不以 keydown 代替",
+          "en": "Native keypress event"
+        },
+        {
+          "name": "validate",
+          "type": "TextareaValidateEvent",
+          "zh": "超过长度限制或恢复正常时触发",
+          "en": "Emitted when the length limit is exceeded or the value becomes valid again"
         }
       ]
     },

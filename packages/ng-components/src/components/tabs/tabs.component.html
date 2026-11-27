@@ -20,7 +20,7 @@
     [class.t-is-left]="placement() === 'left'"
     [class.t-is-right]="placement() === 'right'"
   >
-    <div class="t-tabs__nav" [style.min-height]="addable() ? '48px' : null">
+    <div class="t-tabs__nav" [style.min-height]="addable() || hasAction() ? '48px' : null">
       <div class="t-tabs__operations t-tabs__operations--left">
         @if (canToLeft()) {
           <div
@@ -41,7 +41,16 @@
         }
       </div>
 
-      <div class="t-tabs__operations t-tabs__operations--right">
+      <div #operations class="t-tabs__operations t-tabs__operations--right">
+        @if (action(); as content) {
+          <div class="t-tabs__nav-action">
+            @if (isTemplateContent(content)) {
+              <ng-container [ngTemplateOutlet]="content" />
+            } @else {
+              {{ content }}
+            }
+          </div>
+        }
         @if (canToRight()) {
           <div
             class="t-tabs__btn t-tabs__btn--right"
@@ -75,6 +84,7 @@
 
       <div
         class="t-tabs__nav-container"
+        [style.margin-right.px]="hasAction() && !vertical() ? operationsWidth() : null"
         [class.t-tabs__nav--card]="isCard()"
         [class.t-is-top]="placement() === 'top'"
         [class.t-is-bottom]="placement() === 'bottom'"

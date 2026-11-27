@@ -1,3 +1,6 @@
+import { NgTemplateOutlet } from '@angular/common';
+import { isTemplateContent } from '../../_utils/content';
+import type { Content } from '../../_utils/content';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -23,6 +26,7 @@ import {
 @Component({
   selector: 't-rate',
   standalone: true,
+  imports: [NgTemplateOutlet],
   templateUrl: './rate.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -69,6 +73,11 @@ export class TRate {
    * @defaultValue 4
    */
   readonly gap = input(4);
+
+  /** @zh 自定义评分图标，支持字符串或模板，模板内使用 currentColor 继承颜色 @en Custom rating icon as text or a template; use currentColor in templates @defaultValue undefined */
+  readonly icon = input<Content>(undefined);
+
+  protected readonly isTemplateContent = isTemplateContent;
 
   /**
    * @zh 是否在评分右侧显示文案。
