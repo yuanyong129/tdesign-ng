@@ -71,6 +71,7 @@ try {
   await send('Runtime.enable');
   await send('Network.enable');
   await send('Page.enable');
+  await send('Emulation.setDeviceMetricsOverride',{width:1365,height:900,deviceScaleFactor:1,mobile:false});
   await page('/textarea', 'demo-textarea-validate textarea');
   const textarea = await evaluate(`(async () => {
     const root = document.querySelector('demo-textarea-validate');
@@ -748,6 +749,148 @@ try {
   assert.equal(slider.verticalState.value,'0.7'); assert.equal(slider.verticalState.bottom,'70%'); assert.ok(slider.verticalState.height>100);
   assert.equal(slider.removed,true); assert.equal(slider.restored,true);
   console.log('PASS Slider options: numeric linkage, range crossing, min-relative steps, readonly/disabled, drag cancellation, tooltip delay/focus/priority, vertical');
+  await page('/input', 'demo-input-editing input');
+  const inputState = await evaluate(`(async () => {
+    const root=document.querySelector('demo-input-editing'), demo=ng.getComponent(root);
+    const host=root.querySelector('.editing-weighted'), component=ng.getComponent(host), input=host.querySelector('input');
+    const edit=async (element,value)=>{element.value=value; element.dispatchEvent(new Event('input',{bubbles:true})); ${settle}};
+    await edit(input,'a中😀z');
+    const weighted={value:demo.value(),text:input.value,count:host.querySelector('.t-input__limit-number').textContent.trim()};
+    input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));
+    input.value='中文测试'; input.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true})); ${settle}
+    input.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,key:'Enter',isComposing:true})); ${settle}
+    const composing={value:demo.value(),text:input.value,enters:demo.enters()};
+    const beforeEnd=demo.changes();
+    input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));
+    input.dispatchEvent(new InputEvent('input',{bubbles:true})); ${settle}
+    const composition={value:demo.value(),text:input.value,events:demo.compositions(),changes:demo.changes()-beforeEnd};
+    input.dispatchEvent(new KeyboardEvent('keypress',{bubbles:true,key:'a'}));
+    input.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,key:'Enter'}));
+    const data=new DataTransfer(); data.setData('text/plain','粘贴文本');
+    input.dispatchEvent(new ClipboardEvent('paste',{bubbles:true,clipboardData:data}));
+    input.dispatchEvent(new WheelEvent('wheel',{bubbles:true,deltaY:1}));
+    host.dispatchEvent(new MouseEvent('mouseenter'));
+    host.dispatchEvent(new MouseEvent('mouseleave')); ${settle}
+    const events={keys:demo.keys(),enters:demo.enters(),paste:demo.pasted(),wheels:demo.wheels(),enter:demo.mouseEnters(),leave:demo.mouseLeaves()};
+    demo.overflow.set(true); ng.applyChanges(demo); ${settle}
+    await edit(input,'中文测试'); await edit(input,'中文测试多');
+    const exceeded={value:demo.value(),error:input.getAttribute('aria-invalid'),errors:[...demo.errors()]};
+    await edit(input,'a'); const recovery=[...demo.errors()];
+    demo.value.set('程序写入超限'); ng.applyChanges(demo); ${settle}
+    const programError=demo.errors().at(-1);
+    demo.value.set('a'); demo.acceptChanges.set(false); ng.applyChanges(demo); ${settle}
+    await edit(input,'rejected'); const controlled={value:demo.value(),text:input.value};
+    demo.acceptChanges.set(true); demo.overflow.set(false); ng.applyChanges(demo); ${settle}
+    demo.readonly.set(true); ng.applyChanges(demo); ${settle}
+    const readOnly={native:input.readOnly,clear:!!host.querySelector('.t-input__suffix-clear')};
+    const beforeReadOnly=demo.changes(); await edit(input,'修改'); component.handleClear(new MouseEvent('click')); ${settle}
+    readOnly.stable=demo.changes()===beforeReadOnly;
+    demo.readonly.set(false); demo.disabled.set(true); ng.applyChanges(demo); ${settle}
+    const beforeDisabled={changes:demo.changes(),keys:demo.keys()}; await edit(input,'禁用');
+    input.dispatchEvent(new KeyboardEvent('keypress',{bubbles:true,key:'x'})); ${settle}
+    const disabled={native:input.disabled,stable:demo.changes()===beforeDisabled.changes && demo.keys()===beforeDisabled.keys};
+    demo.disabled.set(false); demo.inputClass.set(['changed-class','second-class']); ng.applyChanges(demo); ${settle}
+    const classChanged=!!host.querySelector('.t-input.changed-class.second-class') && !host.querySelector('.editing-inner');
+    demo.inputClass.set({'conditional-class':true,'changed-class':false}); ng.applyChanges(demo); ${settle}
+    const classObject=!!host.querySelector('.conditional-class') && !host.querySelector('.second-class');
+    const defaultHost=root.querySelector('.editing-default'), defaultInput=defaultHost.querySelector('input');
+    const defaultInitial=defaultInput.value; await edit(defaultInput,'用户编辑');
+    demo.initial.set('新的默认值'); ng.applyChanges(demo); ${settle}
+    const defaultEdited=defaultInput.value; defaultHost.querySelector('.t-input__suffix-clear').dispatchEvent(new MouseEvent('click',{bubbles:true})); ${settle}
+    const cleared={text:defaultInput.value,focused:document.activeElement===defaultInput};
+    const formHost=root.querySelector('.editing-form'), formInput=formHost.querySelector('input');
+    const formInitial=formInput.value; await edit(formInput,'表单编辑'); formInput.dispatchEvent(new FocusEvent('blur')); ${settle}
+    const formEdited={value:demo.control.value,touched:demo.control.touched};
+    demo.control.disable(); ng.applyChanges(demo); ${settle}
+    const formDisabled=formInput.disabled; await edit(formInput,'不应更新');
+    const formStable=demo.control.value==='表单编辑';
+    demo.control.enable(); demo.control.reset(); ng.applyChanges(demo); ${settle}
+    const formReset={text:formInput.value,value:demo.control.value,touched:demo.control.touched};
+    const formatted=root.querySelector('.editing-formatted input'); await edit(formatted,'ab😀cd');
+    const formatText=formatted.value;
+    const auto=root.querySelector('.editing-auto'), autoInput=auto.querySelector('input');
+    const shortWidth=auto.querySelector('.t-input').getBoundingClientRect().width;
+    await edit(autoInput,'自动宽度内容明显变长');
+    const longWidth=auto.querySelector('.t-input').getBoundingClientRect().width;
+    autoInput.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));
+    autoInput.value='组合输入中内容也会撑宽输入框'; autoInput.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true})); ${settle}
+    const draftWidth=auto.querySelector('.t-input').getBoundingClientRect().width;
+    autoInput.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true})); ${settle}
+    demo.autoValue.set(''); demo.autoPlaceholder.set('比原来更长的占位提示'); ng.applyChanges(demo); ${settle}
+    const placeholderWidth=auto.querySelector('.t-input').getBoundingClientRect().width;
+    demo.autoSize.set('large'); ng.applyChanges(demo); ${settle}
+    const largeWidth=auto.querySelector('.t-input').getBoundingClientRect().width;
+    demo.autoWidth.set(false); ng.applyChanges(demo); ${settle}
+    const autoOff={pre:!!auto.querySelector('.t-input__input-pre'),width:autoInput.style.width};
+    const groupRoot=document.querySelector('demo-input-group'), groupDemo=ng.getComponent(groupRoot), group=groupRoot.querySelector('t-input-group');
+    const groupInputs=group.querySelectorAll('input'); await edit(groupInputs[0],'李');
+    const borders=[...group.querySelectorAll('.t-input')].map(el=>({left:getComputedStyle(el).borderTopLeftRadius,right:getComputedStyle(el).borderTopRightRadius}));
+    groupDemo.separate.set(true); ng.applyChanges(groupDemo); ${settle}
+    const groupGap=parseFloat(getComputedStyle(group.querySelectorAll('t-input')[1]).marginLeft);
+    const separateBorders=[...group.querySelectorAll('.t-input')].every(el=>getComputedStyle(el).borderTopLeftRadius!=='0px' && getComputedStyle(el).borderTopRightRadius!=='0px');
+    return {weighted,composing,composition,events,exceeded,recovery,programError,controlled,readOnly,disabled,classChanged,classObject,
+      defaultInitial,defaultEdited,cleared,formInitial,formEdited,formDisabled,formStable,formReset,formatText,
+      shortWidth,longWidth,draftWidth,placeholderWidth,largeWidth,autoOff,borders,groupGap,separateBorders,groupValues:[...groupInputs].map(input=>input.value)};
+  })()`);
+  assert.deepEqual(inputState.weighted,{value:'a中',text:'a中',count:'3/6'});
+  assert.deepEqual(inputState.composing,{value:'a中',text:'中文测试',enters:0});
+  assert.deepEqual(inputState.composition,{value:'中文测',text:'中文测',events:['a中','中文测'],changes:1});
+  assert.deepEqual(inputState.events,{keys:1,enters:1,paste:'粘贴文本',wheels:1,enter:1,leave:1});
+  assert.deepEqual(inputState.exceeded,{value:'中文测试多',error:'true',errors:['exceed-maximum']});
+  assert.deepEqual(inputState.recovery,['exceed-maximum','valid']); assert.equal(inputState.programError,'exceed-maximum');
+  assert.deepEqual(inputState.controlled,{value:'a',text:'a'});
+  assert.deepEqual(inputState.readOnly,{native:true,clear:false,stable:true}); assert.deepEqual(inputState.disabled,{native:true,stable:true});
+  assert.equal(inputState.classChanged,true); assert.equal(inputState.classObject,true);
+  assert.equal(inputState.defaultInitial,'初始值'); assert.equal(inputState.defaultEdited,'用户编辑'); assert.deepEqual(inputState.cleared,{text:'',focused:true});
+  assert.equal(inputState.formInitial,'表单初始值'); assert.deepEqual(inputState.formEdited,{value:'表单编辑',touched:true});
+  assert.equal(inputState.formDisabled,true); assert.equal(inputState.formStable,true);
+  assert.deepEqual(inputState.formReset,{text:'表单初始值',value:'表单初始值',touched:false}); assert.equal(inputState.formatText,'AB😀C');
+  assert.ok(inputState.longWidth>inputState.shortWidth+40); assert.ok(inputState.draftWidth>inputState.longWidth);
+  assert.ok(inputState.placeholderWidth>inputState.shortWidth); assert.ok(inputState.largeWidth>=inputState.placeholderWidth);
+  assert.deepEqual(inputState.autoOff,{pre:false,width:''});
+  assert.equal(inputState.borders[0].right,'0px'); assert.equal(inputState.borders[1].left,'0px');
+  assert.ok(inputState.groupGap>0); assert.equal(inputState.separateBorders,true); assert.deepEqual(inputState.groupValues,['李','三']);
+  console.log('PASS Input/InputGroup: controlled/default/CVA, weighted limits and validation, IME once, events, format, auto width, classes, group borders/gap');
+  const inputPointer = await evaluate(`(async () => {
+    const root=document.querySelector('demo-input-editing'), demo=ng.getComponent(root), input=root.querySelector('.editing-weighted .t-input');
+    input.scrollIntoView({block:'center',behavior:'instant'}); ${settle}
+    demo.mouseEnters.set(0); demo.mouseLeaves.set(0);
+    const rect=input.getBoundingClientRect(); return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+  })()`);
+  await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:5,y:5});
+  await evaluate(`(async()=>{${settle}})()`);
+  await send('Input.dispatchMouseEvent',{type:'mouseMoved',...inputPointer});
+  await evaluate(`(async()=>{${settle}})()`);
+  await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:5,y:5});
+  await evaluate(`(async()=>{${settle}})()`);
+  const pointerEvents = await evaluate(`(() => {const demo=ng.getComponent(document.querySelector('demo-input-editing')); return {enter:demo.mouseEnters(),leave:demo.mouseLeaves()};})()`);
+  assert.deepEqual(pointerEvents,{enter:1,leave:1});
+  await page('/auto-complete', 'demo-auto-complete-basic input');
+  const autoCompleteInput = await evaluate(`(async () => {
+    const root=document.querySelector('demo-auto-complete-basic'), host=root.querySelector('t-auto-complete'), component=ng.getComponent(host);
+    const input=host.querySelector('input'), changes=[], compositions=[], enters=[];
+    component.change.subscribe(event=>changes.push(event.value));
+    component.compositionstart.subscribe(event=>compositions.push(event.value));
+    component.compositionend.subscribe(event=>compositions.push(event.value));
+    component.enter.subscribe(event=>enters.push(event.value));
+    input.value='v'; input.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    input.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,key:'ArrowDown'})); ${settle}
+    const active=component.active();
+    input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));
+    input.value='vue'; input.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true})); ${settle}
+    input.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,key:'Enter',isComposing:true})); ${settle}
+    const composing={value:ng.getComponent(root).value,changes:changes.length,enters:enters.length};
+    input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));
+    input.dispatchEvent(new InputEvent('input',{bubbles:true})); ${settle}
+    const committed={value:ng.getComponent(root).value,changes:[...changes],compositions:[...compositions]};
+    input.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,key:'ArrowDown'})); ${settle}
+    const chosen=component.active(); input.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,key:'Enter'})); ${settle}
+    return {active,composing,committed,chosen,selected:ng.getComponent(root).value,enters:enters.length};
+  })()`);
+  assert.ok(autoCompleteInput.active); assert.deepEqual(autoCompleteInput.composing,{value:'v',changes:1,enters:0});
+  assert.deepEqual(autoCompleteInput.committed,{value:'vue',changes:['v','vue'],compositions:['v','vue']});
+  assert.equal(autoCompleteInput.selected,autoCompleteInput.chosen); assert.equal(autoCompleteInput.enters,1);
+  console.log('PASS AutoComplete consuming Input: composition once, Enter ignored during IME, arrow selection and Enter once');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

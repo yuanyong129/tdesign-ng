@@ -320,6 +320,7 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   }
 
   protected handleBlur(event: FocusEvent): void {
+    this.inputComposing = false;
     this.onTouched();
     this.blur.emit({ e: event, value: this.innerValue() });
   }
@@ -330,6 +331,7 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
 
   protected handleKeydown(event: KeyboardEvent): void {
     if (this.mergedDisabled()) return;
+    if (this.inputComposing || event.isComposing || event.keyCode === 229) return;
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       this.showPanel();
@@ -348,12 +350,16 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   }
 
   protected handleCompositionStart(event: CompositionEvent): void {
+    this.inputComposing = true;
     this.compositionstart.emit({ e: event, value: this.innerValue() });
   }
 
   protected handleCompositionEnd(event: CompositionEvent): void {
+    this.inputComposing = false;
     this.compositionend.emit({ e: event, value: this.innerValue() });
   }
+
+  private inputComposing = false;
 
   protected handleVisibleChange(visible: boolean): void {
     if (visible) {

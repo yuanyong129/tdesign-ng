@@ -29,8 +29,8 @@
         (enter)="handleEnter($event)"
         (keydown)="handleKeydown($event)"
         (clear)="handleClear($event)"
-        (compositionstart)="handleCompositionStart($event)"
-        (compositionend)="handleCompositionEnd($event)"
+        (compositionstart)="handleCompositionStart($event.e)"
+        (compositionend)="handleCompositionEnd($event.e)"
       />
     }
   </div>

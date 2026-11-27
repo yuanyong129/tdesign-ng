@@ -445,3 +445,17 @@ t-upload {
 .t-head-menu .t-menu > * + * {
   margin-left: var(--td-comp-margin-s);
 }
+
+// InputGroup：Angular 的 t-input 宿主隔开了上游针对 __wrap 的相邻与首尾选择器。
+t-input-group.t-input-group {
+  > t-input { min-width: 0; }
+  > t-input > .t-input__wrap:only-child > .t-input { border-radius: 0; }
+  > t-input + t-input .t-input { margin-left: -1px; }
+  > t-input:first-child > .t-input__wrap:only-child > .t-input { border-radius: var(--td-radius-default) 0 0 var(--td-radius-default); }
+  > t-input:last-child > .t-input__wrap:only-child > .t-input { border-radius: 0 var(--td-radius-default) var(--td-radius-default) 0; }
+  > t-input:only-child > .t-input__wrap:only-child > .t-input { border-radius: var(--td-radius-default); }
+  &.t-input-group--separate {
+    > t-input + t-input { margin-left: var(--td-comp-margin-xxxl); }
+    > t-input > .t-input__wrap:only-child > .t-input { margin-left: 0; border-radius: var(--td-radius-default); }
+  }
+}

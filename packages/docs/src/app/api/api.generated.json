@@ -5100,11 +5100,38 @@
       "inputs": [
         {
           "name": "value",
+          "type": "InputValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控输入值，未设置时使用非受控状态",
+          "en": "Controlled value, omitted for uncontrolled usage",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
           "type": "InputValue",
           "default": "''",
           "required": false,
-          "zh": "输入框的值",
-          "en": "Value of the input",
+          "zh": "非受控初始值，仅初始化时读取",
+          "en": "Initial uncontrolled value, read only on initialization",
+          "values": []
+        },
+        {
+          "name": "autoWidth",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "根据内容自动调整宽度",
+          "en": "Adjust width to the content",
+          "values": []
+        },
+        {
+          "name": "inputClass",
+          "type": "string | string[] | Record<string, boolean> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "内层输入框容器的类名",
+          "en": "Classes on the inner input container",
           "values": []
         },
         {
@@ -5246,8 +5273,8 @@
           "type": "number | undefined",
           "default": "undefined",
           "required": false,
-          "zh": "最大字符数，按字符（而非字节）计算，超出时截断",
-          "en": "Maximum characters, truncates when exceeded",
+          "zh": "最大加权长度，ASCII 计 1，非 ASCII 每个 UTF-16 单元计 2",
+          "en": "Maximum weighted length: ASCII counts as 1, non-ASCII UTF-16 units as 2",
           "values": []
         },
         {
@@ -5255,8 +5282,8 @@
           "type": "string | number | undefined",
           "default": "undefined",
           "required": false,
-          "zh": "原生 maxlength，超出时浏览器直接阻止输入",
-          "en": "Native maxlength",
+          "zh": "最大 Unicode 码点数，由组件限制以保留完整 emoji 和组合输入",
+          "en": "Maximum Unicode code points, preserving emoji and composition",
           "values": []
         },
         {
@@ -5353,6 +5380,42 @@
           "type": "MouseEvent",
           "zh": "点击清空图标",
           "en": "Clear icon click event"
+        },
+        {
+          "name": "keypress",
+          "type": "KeyboardEvent",
+          "zh": "原生字符按键事件",
+          "en": "Native keypress event"
+        },
+        {
+          "name": "compositionstart",
+          "type": "InputCompositionEvent",
+          "zh": "组合输入开始",
+          "en": "Composition started"
+        },
+        {
+          "name": "compositionend",
+          "type": "InputCompositionEvent",
+          "zh": "组合输入结束",
+          "en": "Composition ended"
+        },
+        {
+          "name": "paste",
+          "type": "InputPasteEvent",
+          "zh": "粘贴事件与纯文本内容",
+          "en": "Paste event and plain text"
+        },
+        {
+          "name": "wheel",
+          "type": "{ e: WheelEvent }",
+          "zh": "滚轮事件",
+          "en": "Wheel event"
+        },
+        {
+          "name": "validate",
+          "type": "InputValidateEvent",
+          "zh": "超过长度限制或恢复正常时触发",
+          "en": "Length limit exceeded or recovered"
         }
       ]
     },
@@ -5377,6 +5440,23 @@
           "required": false,
           "zh": "前缀",
           "en": "prepend",
+          "values": []
+        }
+      ],
+      "outputs": []
+    },
+    "TInputGroup": {
+      "className": "TInputGroup",
+      "selector": "t-input-group",
+      "file": "packages/ng-components/src/components/input/input-group.component.ts",
+      "inputs": [
+        {
+          "name": "separate",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否在输入框之间显示间距",
+          "en": "Whether to separate the inputs",
           "values": []
         }
       ],

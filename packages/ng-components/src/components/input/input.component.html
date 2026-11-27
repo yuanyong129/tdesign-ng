@@ -1,8 +1,8 @@
-<div class="t-input__wrap">
+<div class="t-input__wrap" [class.t-input--auto-width]="autoWidth()">
   @if (label()) {
     <label class="t-input__label" [attr.for]="innerId">{{ label() }}</label>
   }
-  <div [class]="classes()">
+  <div [class]="classes()" [ngClass]="inputClass()" (wheel)="handleWheel($event)">
     <span class="t-input__prefix">
       <ng-content select="[tInputPrefixIcon]" />
     </span>
@@ -13,10 +13,13 @@
       [attr.type]="type()"
       [attr.name]="name()"
       [attr.autocomplete]="autocomplete()"
-      [attr.maxlength]="maxlengthValue()"
       [attr.spellcheck]="spellCheck()"
       [attr.autofocus]="autofocus() ? '' : null"
-      [value]="text()"
+      [value]="displayText()"
+      [style.width.px]="inputWidth()"
+      [style.flex]="autoWidth() ? 'none' : null"
+      [attr.aria-invalid]="resolvedStatus() === 'error' ? 'true' : null"
+      [attr.aria-describedby]="tips() || showLimit() ? innerId + '-info' : null"
       [placeholder]="placeholder() ?? ''"
       [disabled]="mergedDisabled()"
       [readOnly]="readonly()"
@@ -25,7 +28,14 @@
       (blur)="handleBlur($event)"
       (keydown)="handleKeydown($event)"
       (keyup)="handleKeyup($event)"
+      (keypress)="handleKeypress($event)"
+      (compositionstart)="handleCompositionStart($event)"
+      (compositionend)="handleCompositionEnd($event)"
+      (paste)="handlePaste($event)"
     />
+    @if (autoWidth()) {
+      <span #inputPre class="t-input__input-pre" aria-hidden="true">{{ displayText() || placeholder() || '' }}</span>
+    }
     <span class="t-input__suffix">
       @if (canClear()) {
         <svg
@@ -47,8 +57,8 @@
     </span>
   </div>
   @if (tips()) {
-    <div [class]="tipsClasses()">{{ tips() }}</div>
+    <div [class]="tipsClasses()" [id]="innerId + '-info'">{{ tips() }}</div>
   } @else if (showLimit()) {
-    <div class="t-input__tips t-input__limit-number">{{ limitText() }}</div>
+    <div class="t-input__tips t-input__limit-number" [id]="innerId + '-info'">{{ limitText() }}</div>
   }
 </div>

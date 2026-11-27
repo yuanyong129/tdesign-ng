@@ -1,7 +1,10 @@
+import { NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  afterNextRender,
+  afterRenderEffect,
   ViewEncapsulation,
   booleanAttribute,
   computed,
@@ -14,7 +17,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import type { InputAlign, InputChangeEvent, InputSize, InputStatus, InputType, InputValue } from './input.types';
+import type { InputAlign, InputChangeEvent, InputSize, InputStatus, InputType, InputValue, InputCompositionEvent, InputPasteEvent, InputValidateEvent } from './input.types';
+import { limitInputText } from './input-options';
 
 const PREFIX_CLS = 't-input';
 
@@ -66,6 +70,7 @@ function buildClasses(options: {
 @Component({
   selector: 't-input',
   standalone: true,
+  imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './input.component.html',
@@ -78,8 +83,17 @@ function buildClasses(options: {
   ],
 })
 export class TInput implements ControlValueAccessor {
-  /** @zh 输入框的值 @en Value of the input @defaultValue '' */
-  readonly value = input<InputValue>('');
+  /** @zh 受控输入值，未设置时使用非受控状态 @en Controlled value, omitted for uncontrolled usage @defaultValue undefined */
+  readonly value = input<InputValue | undefined>(undefined);
+
+  /** @zh 非受控初始值，仅初始化时读取 @en Initial uncontrolled value, read only on initialization @defaultValue '' */
+  readonly defaultValue = input<InputValue>('');
+
+  /** @zh 根据内容自动调整宽度 @en Adjust width to the content @defaultValue false */
+  readonly autoWidth = input(false, { transform: booleanAttribute });
+
+  /** @zh 内层输入框容器的类名 @en Classes on the inner input container @defaultValue undefined */
+  readonly inputClass = input<string | string[] | Record<string, boolean> | undefined>(undefined);
 
   /** @zh 输入框尺寸 @en Size of the input @defaultValue 'medium' @values small medium large */
   readonly size = input<InputSize>('medium');
@@ -123,10 +137,10 @@ export class TInput implements ControlValueAccessor {
   /** @zh 原生的 name 属性 @en Native name attribute @defaultValue undefined */
   readonly name = input<string | undefined>(undefined);
 
-  /** @zh 最大字符数，按字符（而非字节）计算，超出时截断 @en Maximum characters, truncates when exceeded @defaultValue undefined */
+  /** @zh 最大加权长度，ASCII 计 1，非 ASCII 每个 UTF-16 单元计 2 @en Maximum weighted length: ASCII counts as 1, non-ASCII UTF-16 units as 2 @defaultValue undefined */
   readonly maxcharacter = input<number | undefined>(undefined);
 
-  /** @zh 原生 maxlength，超出时浏览器直接阻止输入 @en Native maxlength @defaultValue undefined */
+  /** @zh 最大 Unicode 码点数，由组件限制以保留完整 emoji 和组合输入 @en Maximum Unicode code points, preserving emoji and composition @defaultValue undefined */
   readonly maxlength = input<string | number | undefined>(undefined);
 
   /** @zh 是否允许输入超过最大字符数 @en Whether input over the maximum is allowed @defaultValue false */
@@ -168,9 +182,30 @@ export class TInput implements ControlValueAccessor {
   /** @zh 点击清空图标 @en Clear icon click event */
   readonly clear = output<MouseEvent>();
 
+  /** @zh 原生字符按键事件 @en Native keypress event */
+  readonly keypress = output<KeyboardEvent>();
+  /** @zh 组合输入开始 @en Composition started */
+  readonly compositionstart = output<InputCompositionEvent>();
+  /** @zh 组合输入结束 @en Composition ended */
+  readonly compositionend = output<InputCompositionEvent>();
+  /** @zh 粘贴事件与纯文本内容 @en Paste event and plain text */
+  readonly paste = output<InputPasteEvent>();
+  /** @zh 滚轮事件 @en Wheel event */
+  readonly wheel = output<{ e: WheelEvent }>();
+  /** @zh 超过长度限制或恢复正常时触发 @en Length limit exceeded or recovered */
+  readonly validate = output<InputValidateEvent>();
+
   protected readonly innerId = `${PREFIX_CLS}-${++uid}`;
 
   private readonly innerInput = viewChild<ElementRef<HTMLInputElement>>('inner');
+  private readonly inputPre = viewChild<ElementRef<HTMLElement>>('inputPre');
+  protected readonly inputWidth = signal<number | null>(null);
+  private readonly compositionDraft = signal<string | null>(null);
+  private readonly formsBound = signal(false);
+  private readonly editRevision = signal(0);
+  private initialized = false;
+  private composing = false;
+  private compositionInput: string | undefined;
 
   /** 表单通过 `setDisabledState` 下发的禁用态，与模板上的 `disabled` 取并集。 */
   private readonly disabledByForms = signal(false);
@@ -184,17 +219,41 @@ export class TInput implements ControlValueAccessor {
   private onTouched: () => void = () => {};
 
   constructor() {
-    // 外部 `[value]` 变化时同步到内部状态；用户输入时不回写，避免打断正在输入的内容。
+    // defaultValue 仅在第一次渲染读取；CVA 写值优先于默认值。
     effect(() => {
-      const next = this.value();
       untracked(() => {
-        if (next !== this.innerValue()) this.innerValue.set(next);
+        if (!this.initialized && !this.formsBound()) this.innerValue.set(this.defaultValue());
+        this.initialized = true;
       });
+    });
+    afterRenderEffect((cleanup) => {
+      this.editRevision();
+      const text = this.displayText();
+      const element = this.innerInput()?.nativeElement;
+      if (element && element.value !== text) element.value = text;
+      this.autoWidth(); this.placeholder(); this.size(); this.inputClass();
+      const pre = this.inputPre()?.nativeElement;
+      this.inputWidth.set(this.autoWidth() && pre ? Math.ceil(pre.getBoundingClientRect().width) + 2 : null);
+      if (this.autoWidth() && pre && typeof ResizeObserver !== 'undefined') {
+        const observer = new ResizeObserver(() => this.inputWidth.set(Math.ceil(pre.getBoundingClientRect().width) + 2));
+        observer.observe(pre);
+        cleanup(() => observer.disconnect());
+      }
+    });
+    afterNextRender(() => { if (this.autofocus() && !this.mergedDisabled()) this.focusInput(); });
+    let previousError: InputValidateEvent['error'];
+    effect(() => {
+      const error = this.lengthError();
+      if (error !== previousError) {
+        previousError = error;
+        untracked(() => this.validate.emit({ error }));
+      }
     });
   }
 
   /** 当前值的字符串形式，`number` 也要能喂给 `<input>`。 */
-  protected readonly text = computed(() => String(this.innerValue() ?? ''));
+  protected readonly text = computed(() => String((this.formsBound() ? this.innerValue() : this.value() ?? this.innerValue()) ?? ''));
+  protected readonly displayText = computed(() => this.compositionDraft() ?? this.text());
 
   protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms());
 
@@ -203,18 +262,28 @@ export class TInput implements ControlValueAccessor {
     const raw = this.maxlength();
     if (raw === undefined || raw === null || raw === '') return null;
     const parsed = Number(raw);
-    return Number.isFinite(parsed) ? parsed : null;
+    return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : null;
   });
 
   /** 字符数按码点计算，避免 emoji 被拆成两个字符。 */
-  protected readonly characterCount = computed(() => Array.from(this.text()).length);
+  protected readonly characterCount = computed(() => {
+    if (this.maxlengthValue() !== null) return Array.from(this.text()).length;
+    let count = 0;
+    for (let i = 0; i < this.text().length; i++) count += this.text().charCodeAt(i) > 127 ? 2 : 1;
+    return count;
+  });
+  private readonly lengthError = computed<InputValidateEvent['error']>(() => {
+    const max = this.maxlengthValue() ?? this.maxcharacter();
+    return max !== undefined && max !== null && max >= 0 && this.characterCount() > max ? 'exceed-maximum' : undefined;
+  });
+  protected readonly resolvedStatus = computed(() => this.status() !== 'default' ? this.status() : this.lengthError() ? 'error' : 'default');
 
   protected readonly showLimit = computed(
-    () => this.showLimitNumber() && !!(this.maxcharacter() ?? this.maxlengthValue()),
+    () => this.showLimitNumber() && (this.maxlengthValue() !== null || this.maxcharacter() !== undefined),
   );
 
   protected readonly limitText = computed(() => {
-    const max = this.maxcharacter() ?? this.maxlengthValue() ?? 0;
+    const max = this.maxlengthValue() ?? this.maxcharacter() ?? 0;
     return `${this.characterCount()}/${max}`;
   });
 
@@ -226,7 +295,7 @@ export class TInput implements ControlValueAccessor {
   protected readonly classes = computed(() =>
     buildClasses({
       size: this.size(),
-      status: this.status(),
+      status: this.resolvedStatus(),
       align: this.align(),
       borderless: this.borderless(),
       focused: this.focused(),
@@ -235,9 +304,12 @@ export class TInput implements ControlValueAccessor {
     }).join(' '),
   );
 
-  protected readonly tipsClasses = computed(() => `${PREFIX_CLS}__tips ${PREFIX_CLS}__tips--${this.status()}`);
+  protected readonly tipsClasses = computed(() => `${PREFIX_CLS}__tips ${PREFIX_CLS}__tips--${this.resolvedStatus()}`);
 
   writeValue(value: InputValue | null | undefined): void {
+    this.formsBound.set(true);
+    this.composing = false;
+    this.compositionDraft.set(null);
     this.innerValue.set(value ?? '');
   }
 
@@ -260,16 +332,56 @@ export class TInput implements ControlValueAccessor {
 
   protected handleInput(event: Event): void {
     const element = event.target as HTMLInputElement;
+    if (this.mergedDisabled() || this.readonly()) { element.value = this.text(); return; }
+    if (this.composing || (event as InputEvent).isComposing) {
+      this.compositionDraft.set(element.value);
+      return;
+    }
+    if (this.compositionInput !== undefined) {
+      const duplicate = element.value === this.compositionInput || element.value === this.text();
+      this.compositionInput = undefined;
+      if (duplicate) return;
+    }
     const formatter = this.format();
     let next = formatter ? formatter(element.value) : element.value;
-
-    const max = this.maxcharacter();
-    if (max !== undefined && !this.allowInputOverMax() && Array.from(next).length > max) {
-      next = Array.from(next).slice(0, max).join('');
-      element.value = next;
-    }
-
+    const max = this.maxlengthValue();
+    next = limitInputText(next, { maxlength: max ?? undefined, maxcharacter: max === null ? this.maxcharacter() : undefined, allowInputOverMax: this.allowInputOverMax() });
+    element.value = next;
     this.commit(next, 'input', event);
+  }
+
+  protected handleCompositionStart(event: CompositionEvent): void {
+    event.stopPropagation();
+    if (this.mergedDisabled() || this.readonly()) return;
+    this.composing = true;
+    this.compositionInput = undefined;
+    this.compositionDraft.set((event.target as HTMLInputElement).value);
+    this.compositionstart.emit({ value: (event.target as HTMLInputElement).value, e: event });
+  }
+
+  protected handleCompositionEnd(event: CompositionEvent): void {
+    event.stopPropagation();
+    if (!this.composing) return;
+    this.composing = false;
+    this.compositionDraft.set(null);
+    this.handleInput(event);
+    this.compositionInput = (event.target as HTMLInputElement).value;
+    this.compositionend.emit({ value: this.compositionInput, e: event });
+  }
+
+  protected handleKeypress(event: KeyboardEvent): void {
+    event.stopPropagation();
+    if (!this.mergedDisabled()) this.keypress.emit(event);
+  }
+
+  protected handlePaste(event: ClipboardEvent): void {
+    event.stopPropagation();
+    if (!this.mergedDisabled()) this.paste.emit({ e: event, pasteValue: event.clipboardData?.getData('text/plain') ?? '' });
+  }
+
+  protected handleWheel(event: WheelEvent): void {
+    event.stopPropagation();
+    this.wheel.emit({ e: event });
   }
 
   protected handleFocus(event: FocusEvent): void {
@@ -278,32 +390,43 @@ export class TInput implements ControlValueAccessor {
   }
 
   protected handleBlur(event: FocusEvent): void {
+    this.composing = false;
+    this.compositionDraft.set(null);
+    this.compositionInput = undefined;
+    this.editRevision.update((revision) => revision + 1);
     this.focused.set(false);
     this.onTouched();
     this.blur.emit(event);
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') this.enter.emit(event);
+    event.stopPropagation();
+    if (this.mergedDisabled()) return;
+    if (event.key === 'Enter' && !this.composing && !event.isComposing && event.keyCode !== 229) this.enter.emit(event);
     this.keydown.emit(event);
   }
 
   protected handleKeyup(event: KeyboardEvent): void {
-    this.keyup.emit(event);
+    event.stopPropagation();
+    if (!this.mergedDisabled()) this.keyup.emit(event);
   }
 
   protected handleClear(event: MouseEvent): void {
     event.stopPropagation();
     if (this.mergedDisabled() || this.readonly()) return;
+    this.composing = false;
+    this.compositionDraft.set(null);
+    this.compositionInput = undefined;
     this.commit('', 'clear', event);
     this.clear.emit(event);
     this.focusInput();
   }
 
   private commit(value: InputValue, trigger: InputChangeEvent['trigger'], event?: Event): void {
-    this.innerValue.set(value);
+    if (this.formsBound() || this.value() === undefined) this.innerValue.set(value);
     this.onChange(value);
     this.valueChange.emit(value);
     this.change.emit({ value, trigger, event });
+    this.editRevision.update((revision) => revision + 1);
   }
 }

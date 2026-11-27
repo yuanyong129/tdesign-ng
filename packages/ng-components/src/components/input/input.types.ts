@@ -21,6 +21,13 @@ export type InputType = (typeof INPUT_TYPES)[number];
 
 export type InputValue = string | number;
 
+/** 组合输入上下文。 */
+export interface InputCompositionEvent { value: string; e: CompositionEvent; }
+/** 粘贴仅通知，不阻止浏览器的默认粘贴行为。 */
+export interface InputPasteEvent { e: ClipboardEvent; pasteValue: string; }
+/** 长度超限状态；程序写值也参与校验。 */
+export interface InputValidateEvent { error?: 'exceed-maximum' | 'below-minimum'; }
+
 /** 值变化时携带的上下文，字段与上游 `onChange` 的第二个参数对齐。 */
 export interface InputChangeEvent {
   /** 变化后的值 */

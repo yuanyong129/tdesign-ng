@@ -10,6 +10,8 @@ import { DemoInputLimit } from './demos/input-limit';
 import { DemoInputSize } from './demos/input-size';
 import { DemoInputState } from './demos/input-state';
 import { DemoInputStatus } from './demos/input-status';
+import { DemoInputEditing } from './demos/input-editing';
+import { DemoInputGroup } from './demos/input-group';
 
 @Component({
   selector: 'input-docs',
@@ -25,6 +27,8 @@ import { DemoInputStatus } from './demos/input-status';
     DemoInputStatus,
     DemoInputLimit,
     DemoInputState,
+    DemoInputEditing,
+    DemoInputGroup,
   ],
   template: `
     <div class="docs-page">
@@ -57,7 +61,7 @@ import { DemoInputStatus } from './demos/input-status';
         <demo-input-status />
       </docs-demo>
 
-      <docs-demo id="input-limit" title="字数限制" description="maxcharacter 按字符截断，配合 showLimitNumber 显示计数。">
+      <docs-demo id="input-limit" title="字数限制" description="maxcharacter 按加权长度截断：ASCII 计 1，非 ASCII 每个 UTF-16 单元计 2；maxlength 按 Unicode 码点计数，同时设置时优先。">
         <demo-input-limit />
       </docs-demo>
 
@@ -65,9 +69,18 @@ import { DemoInputStatus } from './demos/input-status';
         <demo-input-state />
       </docs-demo>
 
+      <docs-demo id="input-editing" title="输入状态、事件与自动宽度" description="组合输入结束后统一格式化和截断；validate 通知超限与恢复。defaultValue 仅初始化，value 为受控值，表单 reset 恢复表单默认值。autoWidth 根据内容或占位文字撑宽。">
+        <demo-input-editing />
+      </docs-demo>
+      <p class="demo-hint">inputClass 作用于内层 .t-input，宿主 class 仍用于外层定位。compositionstart/end 输出 value 和 e，paste 输出 e 和 pasteValue，wheel 输出 e 上下文；mouseenter/leave 使用宿主原生事件，范围包含标签和提示区域，参数为 MouseEvent。其余现有焦点与键盘事件保留原生事件参数。粘贴回调可通过 e.preventDefault() 取消默认粘贴。keydown/keyup/keypress 在内部阻止冒泡，避免同名原生事件导致重复回调。不要同时使用 value 与表单绑定。</p>
+      <docs-demo id="input-group" title="输入框组合" description="InputGroup 的 separate 控制间距，输入框保持各自的值、焦点及表单状态。">
+        <demo-input-group />
+      </docs-demo>
+
       <h2 class="docs-section__title" id="input-api">API</h2>
       <div class="api-table__scroll">
         <api-table component="TInput" />
+        <api-table component="TInputGroup" />
       </div>
 
       <docs-page-nav current="/input" />

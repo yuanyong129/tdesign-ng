@@ -160,3 +160,17 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有批次交互回归、`pnpm check:progress` 与 `git diff --check` 通过，missing 0 / extra 0。库构建发现 replaceAll 不属于当前 ES 目标，已改为 split/join；保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 795.40 kB）。
 
 本批结束第 2 轮，第 1～2 轮达到计划 M1 的局部能力验收口径。**接续任务**：第 3 轮 Input → Textarea / Checkbox / Radio / Switch → Form，按原计划核实已有实现、补齐真实缺口；M2～M5 仍未完成。
+
+### 2026-11-27：第 3 轮 Input / InputGroup
+
+- **状态契约**：Input 新增 defaultValue，首次初始化读取，后续修改不覆盖用户编辑；value 未绑定时维护内部值，绑定时保留父级控制权，父级拒绝修改会恢复原生展示。CVA 写值优先于默认值，验证 disable / enable / reset / touched；不建议同时绑定 value 与表单。
+- **输入与校验**：组合输入期间保留草稿，结束后统一格式化和截断，去重浏览器紧接着的同值 input；IME 回车不发 enter。maxcharacter 对齐 ASCII 计 1、非 ASCII 每个 UTF-16 单元计 2，截断保留完整码点；maxlength 按码点计数，二者同时设置时 maxlength 优先。组件主动处理长度以保留 emoji、IME 和 allowInputOverMax，不再由原生 maxlength 提前拦截。validate 在初始超限及超限状态切换时输出 { error }，覆盖程序写值；默认状态自动呈现长度错误，并提供 aria-invalid / aria-describedby。
+- **事件**：新增 compositionstart / compositionend（{ value, e }）、keypress（原生 KeyboardEvent）、paste（{ e, pasteValue }）和 wheel（{ e }）。保持既有 change / focus / blur / enter 等参数，内部阻止同名冒泡事件导致重复回调；paste 不主动改值，允许回调取消默认行为。真实鼠标验证发现同名 mouseenter / mouseleave 输出会与宿主原生事件重复，最终保留宿主原生 MouseEvent，明确其范围包含标签和提示区域。
+- **自动宽度与类名**：autoWidth 复用 vendor 的隐藏文本镜像与自动宽度类，随值、草稿、占位文字、尺寸变化测量；ResizeObserver 处理字体/布局变化并在销毁或关闭时断开。inputClass 支持字符串、数组、条件对象，写入内层 .t-input，保留宿主 class；动态替换会清理旧类名。
+- **InputGroup**：核实 separate 属于 TdInputGroupProps，新增独立 TInputGroup 及模块导出；TInput / TInputGroup 分别对齐明确接口，总上游属性仍为 46，不通过减少分母改善进度。组内输入保持各自值及表单状态。bridge 仅补 Angular 宿主隔开的上游相邻、首尾和分离间距选择器，沿用 vendor 的 -1px、圆角与 comp-margin-xxxl 变量。
+- **AutoComplete 消费修复**：改为消费 Input 组合事件的 e，记录组合状态，阻止组合期间 Enter / 方向键选项操作；组合结束与键盘选项选择各只发一次预期事件。本批不替代后续 AutoComplete 独立完善任务。
+- **生成进度与边界**：新增 2 个 demo，总数 325 → 327；已对齐 1052 → 1056（67.0%）、真实深度债 234 → 223、零债务目录 41 → 42。11 项债务减少中，8 项对应新增行为（autoWidth、6 类事件、InputGroup.separate），另 3 项是经验证的原生鼠标事件和已存在 suffixIcon 投影映射修正；defaultValue / inputClass 此前被误列为映射，本批实际补齐。标签 / tips 仍为字符串，图标和 suffix 使用投影，零债务不代表所有 Vue 渲染函数或完整 SSR 已实现。
+- **交互与页面验证**：所有前批回归保留并通过；新增受控拒绝、默认值不重写、CVA 禁用/恢复/reset/touched、格式化、加权截断、初始及程序超限/恢复、IME 单次提交、只读/禁用、动态类名、自动宽度（含组合草稿、占位与尺寸）、组合边框/分离间距与独立编辑。真实 CDP 鼠标移动验证宿主 enter / leave 各一次；AutoComplete 验证 IME Enter 不选项、组合结束单次提交、方向键与 Enter 选项提交。Input / AutoComplete / Form 页面探针 issues / badResources 均为空，Input 页面截图已检查。
+- **检查结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、交互回归、`pnpm check:progress` 和 `git diff --check` 通过，missing 0 / extra 0。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 799.52 kB）。生成 API / demo 时开发服务可能触发整页重载，最终回归在文件稳定后运行通过。
+
+**接续任务**：第 3 轮 Textarea / Checkbox / Radio / Switch → Form → SelectInput，先核实已有实现。第 3 轮整体与 M2 尚未完成。
