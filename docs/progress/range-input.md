@@ -4,25 +4,25 @@
 
 - 目录：`packages/ng-components/src/components/range-input/`
 - 文档页：`/range-input`（`packages/docs/src/app/docs/range-input/range-input.component.ts`）
-- 状态：🚧 有深度债 3 项
+- 状态：🚧 有深度债 2 项
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 28 |
-| 已对齐 | 18 |
-| 覆盖率 | 64.3% |
-| 深度债 | 3（D1 0 / D2 0 / D3 3） |
+| 已对齐 | 19 |
+| 覆盖率 | 67.9% |
+| 深度债 | 2（D1 0 / D2 0 / D3 2） |
 | Angular 惯用映射 | 7（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 3 个 |
+| 文档示例 | 4 个 |
 
 ## 组件明细
 
 ### `TRangeInput`（`<t-range-input>`）
 
-上游接口 `TdRangeInputProps`；上游属性 28、已对齐 18（64.3%）；深度债 3 项；未登记缺失 0 项。
+上游接口 `TdRangeInputProps`；上游属性 28、已对齐 19（67.9%）；深度债 2 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -33,6 +33,7 @@
 | `clearable` | boolean | false | 可清空 |
 | `disabled` | boolean \| boolean[] | false | 禁用 |
 | `format` | RangeInputFormat \| RangeInputFormat[] \| undefined | undefined | 格式化函数 |
+| `inputProps` | InputOptions \| ReadonlyArray<InputOptions> \| undefined | undefined | 编辑区的 InputOptions 配置，单对象作用于两侧，数组分别配置左右两侧 |
 | `label` | string \| TemplateRef<unknown> \| undefined | undefined | 前缀内容 |
 | `placeholder` | string \| string[] \| undefined | undefined | 占位文本 |
 | `prefixIcon` | TemplateRef<unknown> \| undefined | undefined | 前置图标 |
@@ -65,7 +66,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `inputProps` | D3 其余组件与边角能力 | [D3] Vue 的 InputProps 任意透传在 Angular 无等价物（inputs 编译期声明） |
 | `modelValue` | Angular 惯用映射 | [D3] Angular 用 [(value)] 双向绑定表达 v-model |
 | `onBlur` | Angular 惯用映射 | Angular 用 (blur) 输出 |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出 |
@@ -81,3 +81,4 @@
 - `packages/docs/src/app/docs/range-input/demos/range-input-advanced.ts`
 - `packages/docs/src/app/docs/range-input/demos/range-input-basic.ts`
 - `packages/docs/src/app/docs/range-input/demos/range-input-disabled.ts`
+- `packages/docs/src/app/docs/range-input/demos/range-input-input-props.ts`

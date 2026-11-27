@@ -5,10 +5,11 @@ import { PageNav } from '../page-nav';
 import { DemoInputNumberBasic } from './demos/input-number-basic';
 import { DemoInputNumberAdvanced } from './demos/input-number-advanced';
 import { DemoInputNumberDisabled } from './demos/input-number-disabled';
+import { DemoInputNumberInputProps } from './demos/input-number-input-props';
 
 @Component({
   selector: 'input-number-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoInputNumberBasic, DemoInputNumberAdvanced, DemoInputNumberDisabled],
+  imports: [ApiTable, DemoBlock, PageNav, DemoInputNumberBasic, DemoInputNumberAdvanced, DemoInputNumberDisabled, DemoInputNumberInputProps],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">数字输入框 InputNumber</h1>
@@ -38,6 +39,10 @@ import { DemoInputNumberDisabled } from './demos/input-number-disabled';
         description="disabled 与 readonly 都不可编辑，值超出 min / max 时状态自动切换为 error，size 提供三档尺寸。"
       >
         <demo-input-number-disabled />
+      </docs-demo>
+
+      <docs-demo id="input-number-input-props" title="编辑区配置" description="inputProps 支持 name、autocomplete、spellCheck、autofocus、长度限制、readonly、disabled 和输入/焦点/键盘回调；只读及禁用与显式输入、表单状态合并。">
+        <demo-input-number-input-props />
       </docs-demo>
 
       <h2 class="docs-section__title" id="input-number-api">API</h2>

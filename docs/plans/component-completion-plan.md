@@ -134,3 +134,16 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部组件交互回归及 `pnpm check:progress` 通过；missing 0 / extra 0。保留已有 footer slot、Browserslist、qrcode CommonJS 和首包预算告警，本批首包约 795.23 kB。浏览器验证已完成，完整 SSR/水合验证仍属后续质量任务。
 
 **接续任务**：第 2 轮 InputNumber / RangeInput / TagInput 的类型化属性透传 → Slider；第 2 轮与 M1 尚未全部完成。
+
+### 2026-11-27：第 2 轮复合录入属性透传
+
+- **共享配置**：新增公开类型 InputOptions 和内部 InputOptionsDirective，只接受实际支持的原生编辑区属性：name、autocomplete、spellCheck、autofocus、disabled、readonly、maxlength、maxcharacter、allowInputOverMax，以及输入/焦点/键盘/组合输入回调。回调参数为 `(value, { e })`。不接受 value、defaultValue、type、format、clearable、size、status、任意 DOM 属性或外框模板；这不是完整 Vue InputProps 的复制。
+- **InputNumber.inputProps**：原生配置、键盘/焦点回调与数值处理共存。输入长度限制作用于用户键入，程序写值和步进仍按原数值逻辑处理。显式禁用、表单禁用及 inputProps.disabled 取并集；readonly 同样合并，步进按钮和键盘修改路径同时受保护。
+- **RangeInput.inputProps**：支持公共单对象或左右配置数组；左右 readonly/disabled 独立合并。任一侧不可编辑时隐藏整体清空并保护清空入口，避免修改受保护侧。动态替换配置后，原生属性、长度限制及只读立即更新。IME 期间不截断，compositionend 后归一化并避免浏览器紧接着派发的同值 input 导致重复事件。
+- **TagInput.inputProps / tagProps**：输入区使用 InputOptions；TagInputTagProps 支持主题、变体、形状、颜色、title、maxWidth、disabled、closable 和 onClose。标签内容/尺寸、输入值、标签数组和删除流程由 TagInput 管理；关闭回调与 remove 各触发一次，折叠计数标签保留默认样式。不接收未接入的任意 TagProps。
+- **关联交互修复**：TagInput 只读/禁用时回车、删除与清空均不可改值；IME 回车不清空草稿也不创建标签，组合输入结束后再按长度限制提交。InputNumber 非法字符继续回退到上次合法文本；RangeInput 回车事件继续带位置信息。
+- **文档与进度**：新增 3 个可操作 demo，示例共 324 个；生成 API、demo-sources、`docs/progress/input-number.md`、`range-input.md`、`tag-input.md` 和总表。已对齐 1046 → 1050（66.6%），真实深度债 240 → 236，零债务目录 39 → 40；这些是顶层属性登记口径，不代表完整 Vue 透传对象的所有字段已经实现。
+- **交互回归**：覆盖原生属性、单对象/左右数组、中文限制、IME 单次提交、非法数字恢复、键盘步进、关闭回调、动态配置、单侧保护、显式禁用优先、Reactive Forms 禁用/启用及 reset。保留之前所有批次的回归；3 个文档页面探针均无 console 异常与失败资源。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、交互回归及 `pnpm check:progress` 通过；missing 0 / extra 0。构建保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 795.23 kB），无构建错误。
+
+**接续任务**：第 2 轮 Slider 的 inputNumberProps / tooltipProps；其他轮次仍按原顺序，M1 尚未全部完成。

@@ -12,6 +12,8 @@ import {
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { InputOptionsDirective, limitInputText } from '../input/input-options';
+import type { InputOptions } from '../input/input-options';
 import type {
   RangeInputChangeEvent,
   RangeInputClearEvent,
@@ -35,7 +37,7 @@ const COMPONENT_CLS = 't-range-input';
 @Component({
   selector: 't-range-input',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, InputOptionsDirective],
   templateUrl: './range-input.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -62,6 +64,15 @@ export class TRangeInput implements ControlValueAccessor {
 
   /** 展示值格式化函数，传数组可分别格式化左右输入框。 @zh 格式化函数 @en format */
   readonly format = input<RangeInputFormat | RangeInputFormat[] | undefined>(undefined);
+
+  /** @zh 编辑区的 InputOptions 配置，单对象作用于两侧，数组分别配置左右两侧 @en Supported editor options, shared as one object or configured separately as an array @defaultValue undefined */
+  readonly inputProps = input<InputOptions | ReadonlyArray<InputOptions> | undefined>(undefined);
+
+  protected readonly fieldOptions = computed<readonly [InputOptions | undefined, InputOptions | undefined]>(() => {
+    const options = this.inputProps();
+    return Array.isArray(options) ? [options[0], options[1]] : [options as InputOptions | undefined, options as InputOptions | undefined];
+  });
+  protected readonly readonlyFields = computed(() => this.fieldOptions().map((options) => this.readonly() || !!options?.readonly));
 
   /** 整体前缀文本或模板。 @zh 前缀内容 @en label */
   readonly label = input<string | TemplateRef<unknown> | undefined>(undefined);
@@ -143,6 +154,9 @@ export class TRangeInput implements ControlValueAccessor {
 
   private onTouched: () => void = () => {};
 
+  private readonly composing = new Set<number>();
+  private readonly compositionValues = new Map<number, string>();
+
   /** 受控值优先，其次内部值，最后回落到 defaultValue。 */
   protected readonly current = computed<RangeInputValue>(() => {
     const outer = this.value();
@@ -169,8 +183,8 @@ export class TRangeInput implements ControlValueAccessor {
   protected readonly disabledFields = computed<readonly [boolean, boolean]>(() => {
     if (this.innerDisabled()) return [true, true];
     const disabled = this.disabled();
-    if (Array.isArray(disabled)) return [disabled[0] === true, disabled[1] === true];
-    return [disabled === true, disabled === true];
+    const flags = Array.isArray(disabled) ? disabled : [disabled, disabled];
+    return [!!flags[0] || !!this.fieldOptions()[0]?.disabled, !!flags[1] || !!this.fieldOptions()[1]?.disabled];
   });
 
   /** 是否整体禁用。 */
@@ -184,7 +198,8 @@ export class TRangeInput implements ControlValueAccessor {
 
   /** 是否展示清除图标。 */
   protected readonly showClearIcon = computed(() => {
-    const clearable = this.clearable() && this.hasValue() && !this.allDisabled();
+    if (this.readonlyFields().some(Boolean) || this.disabledFields().some(Boolean)) return false;
+    const clearable = this.clearable() && this.hasValue();
     return (clearable || this.showClearIconOnEmpty()) && this.hover();
   });
 
@@ -233,16 +248,36 @@ export class TRangeInput implements ControlValueAccessor {
     const classes = ['t-input'];
     if (this.disabledFields()[index]) classes.push('t-is-disabled');
     if (this.activeField() === index || this.activeIndex() === index) classes.push('t-is-focused');
-    if (this.readonly()) classes.push('t-is-readonly');
+    if (this.readonlyFields()[index]) classes.push('t-is-readonly');
     return classes.join(' ');
   }
 
   /** 输入过程中的处理。 */
   protected handleInput(index: number, event: Event): void {
+    if (this.disabledFields()[index] || this.readonlyFields()[index] || this.composing.has(index)) return;
     const element = event.target as HTMLInputElement;
+    if (event.type === 'input' && this.compositionValues.has(index)) {
+      const previous = this.compositionValues.get(index);
+      this.compositionValues.delete(index);
+      if (element.value === previous) return;
+    }
+    element.value = limitInputText(element.value, this.fieldOptions()[index]);
+    if (String(this.current()[index] ?? '') === element.value) return;
     const next = [...this.current()];
     next[index] = element.value;
     this.commit(next, 'input', this.positionOf(index), event);
+    this.fieldOptions()[index]?.onChange?.(element.value, { e: event });
+  }
+
+  protected handleCompositionStart(index: number): void {
+    this.composing.add(index);
+    this.compositionValues.delete(index);
+  }
+
+  protected handleCompositionEnd(index: number, event: CompositionEvent): void {
+    this.composing.delete(index);
+    this.handleInput(index, event);
+    this.compositionValues.set(index, (event.target as HTMLInputElement).value);
   }
 
   /** 聚焦时上报位置。 */
@@ -262,6 +297,7 @@ export class TRangeInput implements ControlValueAccessor {
 
   /** 按键处理：回车上报。 */
   protected handleKeydown(index: number, event: KeyboardEvent): void {
+    if (this.disabledFields()[index]) return;
     if (event.code === 'Enter' || event.key === 'Enter') {
       this.enter.emit({ value: this.current(), position: this.positionOf(index), e: event });
     }
@@ -293,6 +329,7 @@ export class TRangeInput implements ControlValueAccessor {
   /** 点击清除图标。 */
   protected handleClear(event: MouseEvent): void {
     event.stopPropagation();
+    if (this.readonlyFields().some(Boolean) || this.disabledFields().some(Boolean)) return;
     this.clear.emit({ e: event });
     this.commit(['', ''], 'clear', 'all');
   }

@@ -1,5 +1,19 @@
 import type { TemplateRef } from '@angular/core';
 import type { Content } from '../../_utils/content';
+import type { TagShape, TagTheme, TagVariant } from '../tag/tag.types';
+
+/** 标签外观与关闭配置；标签内容和值仍由 TagInput 管理。 */
+export interface TagInputTagProps {
+  theme?: TagTheme;
+  variant?: TagVariant;
+  shape?: TagShape;
+  color?: string;
+  title?: string | boolean;
+  maxWidth?: string | number;
+  closable?: boolean;
+  disabled?: boolean;
+  onClose?: (context: { e: MouseEvent }) => void;
+}
 
 /** 标签输入框尺寸。 */
 export const TAG_INPUT_SIZES = ['small', 'medium', 'large'] as const;

@@ -495,6 +495,164 @@ try {
   assert.equal(avatarGroup.negative, 3); assert.equal(avatarGroup.disabled, true);
   assert.equal(avatarGroup.arrowOpened, true); assert.equal(avatarGroup.disposed, true);
   console.log('PASS AvatarGroup.popupProps: original hosts/projection/events, dynamic deletion, max/size, stacking, keyboard, disposal');
+
+  await page('/input-number', 'demo-input-number-input-props input');
+  const numberOptions = await evaluate(`(async () => {
+    const root = document.querySelector('demo-input-number-input-props');
+    const demo = ng.getComponent(root);
+    const components = root.querySelectorAll('t-input-number');
+    const input = components[0].querySelector('input');
+    const attributes = {name:input.name,autocomplete:input.autocomplete,spellcheck:input.spellcheck,maxlength:input.maxLength};
+    const values = [];
+    const subscription = ng.getComponent(components[0]).change.subscribe(event=>values.push(event.value));
+    input.value = '1234'; input.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const limited = {text:input.value,value:demo.value(),changes:demo.changes()};
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowUp',bubbles:true})); ${settle}
+    const step = {value:demo.value(),keys:demo.keys(),events:[...values]};
+    input.value = 'hello'; input.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const invalidRestored = input.value;
+    demo.readonly.set(true); ng.applyChanges(demo); ${settle}
+    const readOnly = input.readOnly;
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowUp',bubbles:true})); ${settle}
+    components[0].querySelector('.t-input-number__increase').dispatchEvent(new MouseEvent('click',{bubbles:true})); ${settle}
+    const readonlyValue = demo.value();
+    const disabledButtons = [...components[0].querySelectorAll('button')].every(button=>button.disabled);
+    const explicitDisabled = components[1].querySelector('input').disabled;
+    const formDisabled = components[2].querySelector('input').disabled;
+    demo.control.enable(); ng.applyChanges(demo); ${settle}
+    const formInput = components[2].querySelector('input');
+    formInput.value = '21'; formInput.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const formValue = demo.control.value;
+    demo.control.reset(); ng.applyChanges(demo); ${settle}
+    const reset = formInput.value;
+    demo.readonly.set(false); ng.applyChanges(demo); ${settle}
+    subscription.unsubscribe();
+    return {attributes,limited,step,invalidRestored,readOnly,readonlyValue,disabledButtons,explicitDisabled,formDisabled,
+      formValue,reset,unlocked:!input.readOnly};
+  })()`);
+  assert.deepEqual(numberOptions.attributes, {name:'amount',autocomplete:'off',spellcheck:false,maxlength:3});
+  assert.deepEqual(numberOptions.limited,{text:'123',value:123,changes:1});
+  assert.deepEqual(numberOptions.step,{value:124,keys:1,events:[123,124]});
+  assert.equal(numberOptions.invalidRestored,'124'); assert.equal(numberOptions.readOnly,true);
+  assert.equal(numberOptions.readonlyValue,124); assert.equal(numberOptions.disabledButtons,true);
+  assert.equal(numberOptions.explicitDisabled,true); assert.equal(numberOptions.formDisabled,true);
+  assert.equal(numberOptions.formValue,21); assert.equal(numberOptions.reset,'9'); assert.equal(numberOptions.unlocked,true);
+  console.log('PASS InputNumber.inputProps: native attrs, length/numeric validation, step callbacks once, readonly, CVA/reset');
+
+  await page('/range-input', 'demo-range-input-input-props input');
+  const rangeOptions = await evaluate(`(async () => {
+    const root = document.querySelector('demo-range-input-input-props');
+    const demo = ng.getComponent(root);
+    const ranges = root.querySelectorAll('t-range-input');
+    const [left,right] = ranges[0].querySelectorAll('input');
+    const attributes = {left:left.name,right:right.name,spellcheck:left.spellcheck,maxlength:right.maxLength,readonly:right.readOnly};
+    left.value='中文测试'; left.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const limited = {text:left.value,value:[...demo.value()],changes:demo.changes(),callback:demo.callbackChanges()};
+    right.value='illegal'; right.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const protectedValue = [...demo.value()];
+    ranges[0].querySelector('.t-range-input').dispatchEvent(new MouseEvent('mouseenter'));
+    left.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); ${settle}
+    const keyboard = {enters:demo.enters(),keys:demo.keys()};
+    const protectedClear = !ranges[0].querySelector('.t-range-input__suffix-clear');
+    left.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));
+    left.value='测试输入'; left.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true})); ${settle}
+    const composingText=left.value;
+    left.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));
+    left.dispatchEvent(new InputEvent('input',{bubbles:true})); ${settle}
+    const composition={text:left.value,changes:demo.changes(),callback:demo.callbackChanges()};
+    demo.options.set([{name:'changed-left'}, {name:'changed-right',maxlength:2}]); ng.applyChanges(demo); ${settle}
+    right.value='abcdef'; right.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const dynamic = {left:left.name,right:right.name,maxlength:right.maxLength,value:[...demo.value()],readonly:right.readOnly};
+    ranges[0].querySelector('.t-range-input').dispatchEvent(new MouseEvent('mouseenter')); ${settle}
+    ranges[0].querySelector('.t-range-input__suffix-clear').dispatchEvent(new MouseEvent('click',{bubbles:true})); ${settle}
+    const cleared = [...demo.value()];
+    const shared = [...ranges[1].querySelectorAll('input')].every(input=>input.name==='shared-range' && !input.spellcheck);
+    const disabled = [...ranges[2].querySelectorAll('input')].map(input=>input.disabled);
+    const formDisabled = [...ranges[3].querySelectorAll('input')].every(input=>input.disabled);
+    demo.control.enable(); ng.applyChanges(demo); ${settle}
+    const formInput=ranges[3].querySelector('input');
+    formInput.value='3'; formInput.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const formValue=[...demo.control.value];
+    demo.control.reset(); ng.applyChanges(demo); ${settle}
+    return {attributes,limited,protectedValue,keyboard,protectedClear,composingText,composition,dynamic,cleared,shared,disabled,formDisabled,
+      formValue,reset:[...ranges[3].querySelectorAll('input')].map(input=>input.value)};
+  })()`);
+  assert.deepEqual(rangeOptions.attributes,{left:'range-start',right:'range-end',spellcheck:false,maxlength:3,readonly:true});
+  assert.deepEqual(rangeOptions.limited,{text:'中文',value:['中文','right'],changes:1,callback:1});
+  assert.deepEqual(rangeOptions.protectedValue,['中文','right']);
+  assert.deepEqual(rangeOptions.keyboard,{enters:1,keys:1}); assert.equal(rangeOptions.protectedClear,true);
+  assert.equal(rangeOptions.composingText,'测试输入');
+  assert.deepEqual(rangeOptions.composition,{text:'测试',changes:2,callback:2});
+  assert.deepEqual(rangeOptions.dynamic,{left:'changed-left',right:'changed-right',maxlength:2,value:['测试','ab'],readonly:false});
+  assert.deepEqual(rangeOptions.cleared,['','']); assert.equal(rangeOptions.shared,true);
+  assert.deepEqual(rangeOptions.disabled,[false,true]); assert.equal(rangeOptions.formDisabled,true);
+  assert.deepEqual(rangeOptions.formValue,['3','2']); assert.deepEqual(rangeOptions.reset,['1','2']);
+  console.log('PASS RangeInput.inputProps: shared/per-side attrs, weighted limit, protected side, callbacks, dynamic config, clear, CVA');
+
+  await page('/tag-input', 'demo-tag-input-props input');
+  const tagOptions = await evaluate(`(async () => {
+    const root = document.querySelector('demo-tag-input-props');
+    const demo = ng.getComponent(root);
+    const components = root.querySelectorAll('t-tag-input');
+    const component=ng.getComponent(components[0]);
+    const input=components[0].querySelector('input');
+    const attributes={name:input.name,autocomplete:input.autocomplete,spellcheck:input.spellcheck};
+    const firstTag=components[0].querySelector('t-tag > .t-tag');
+    const appearance={theme:firstTag.classList.contains('t-tag--success'),light:firstTag.classList.contains('t-tag--light'),
+      round:firstTag.classList.contains('t-tag--round'), color:firstTag.style.color,
+      width:firstTag.querySelector('.t-tag--text')?.style.maxWidth,title:firstTag.querySelector('[title]')?.title};
+    input.value='abcdX'; input.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    const limited={text:input.value,callbacks:demo.callbacks()};
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,isComposing:true})); ${settle}
+    const composingUnchanged=component.mergedInputValue()==='abcd' && demo.value().length===3;
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); ${settle}
+    const entered=[...demo.value()];
+    input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));
+    input.value='中文测试'; input.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true})); ${settle}
+    const duringComposition=input.value;
+    input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));
+    input.dispatchEvent(new InputEvent('input',{bubbles:true})); ${settle}
+    const composition={text:input.value,callbacks:demo.callbacks(),compositions:demo.compositions()};
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); ${settle}
+    components[0].querySelector('.t-tag__icon-close').dispatchEvent(new MouseEvent('click',{bubbles:true})); ${settle}
+    const removed={value:[...demo.value()],removes:demo.removes(),closes:demo.closes()};
+    demo.tags.set({...demo.tags(),closable:false}); ng.applyChanges(demo); ${settle}
+    const noClose=!components[0].querySelector('.t-tag__icon-close');
+    component.removeTag(0,new MouseEvent('click')); ${settle}
+    const protectedTag=demo.value().length===4;
+    demo.readonly.set(true); ng.applyChanges(demo); ${settle}
+    const readOnly=input.readOnly;
+    const before=[...demo.value()];
+    input.value='test'; input.dispatchEvent(new Event('input',{bubbles:true}));
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+    component.handleClear(new MouseEvent('click')); ${settle}
+    const unchanged=JSON.stringify(before)===JSON.stringify(demo.value());
+    demo.readonly.set(false); demo.tags.set({theme:'danger',variant:'outline',closable:true}); ng.applyChanges(demo); ${settle}
+    const updated=components[0].querySelector('t-tag > .t-tag');
+    const dynamic={danger:updated.classList.contains('t-tag--danger'),outline:updated.classList.contains('t-tag--outline'),color:updated.style.color};
+    const explicitDisabled=components[1].querySelector('input').disabled;
+    const formDisabled=components[2].querySelector('input').disabled;
+    demo.control.enable(); ng.applyChanges(demo); ${settle}
+    const formInput=components[2].querySelector('input');
+    formInput.value='new'; formInput.dispatchEvent(new Event('input',{bubbles:true})); ${settle}
+    formInput.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); ${settle}
+    const formValue=[...demo.control.value];
+    demo.control.reset(); ng.applyChanges(demo); ${settle}
+    return {attributes,appearance,limited,composingUnchanged,entered,duringComposition,composition,removed,noClose,protectedTag,
+      readOnly,unchanged,dynamic,explicitDisabled,formDisabled,formValue,reset:[...demo.control.value]};
+  })()`);
+  assert.deepEqual(tagOptions.attributes,{name:'tags',autocomplete:'off',spellcheck:false});
+  assert.deepEqual(tagOptions.appearance,{theme:true,light:true,round:true,color:'rgb(0, 82, 217)',width:'80px',title:'第一个长标签'});
+  assert.deepEqual(tagOptions.limited,{text:'abcd',callbacks:1}); assert.equal(tagOptions.composingUnchanged,true);
+  assert.deepEqual(tagOptions.entered,['第一个长标签','第二个','第三个','abcd']);
+  assert.equal(tagOptions.duringComposition,'中文测试'); assert.deepEqual(tagOptions.composition,{text:'中文',callbacks:2,compositions:1});
+  assert.deepEqual(tagOptions.removed,{value:['第二个','第三个','abcd','中文'],removes:1,closes:1});
+  assert.equal(tagOptions.noClose,true); assert.equal(tagOptions.protectedTag,true);
+  assert.equal(tagOptions.readOnly,true); assert.equal(tagOptions.unchanged,true);
+  assert.deepEqual(tagOptions.dynamic,{danger:true,outline:true,color:''});
+  assert.equal(tagOptions.explicitDisabled,true); assert.equal(tagOptions.formDisabled,true);
+  assert.deepEqual(tagOptions.formValue,['表单禁用','new']); assert.deepEqual(tagOptions.reset,['表单禁用']);
+  console.log('PASS TagInput input/tag props: attrs/style, IME, callbacks once, close/removal, readonly, dynamic appearance, CVA');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

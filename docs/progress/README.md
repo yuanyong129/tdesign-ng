@@ -6,10 +6,10 @@
 | --- | --- |
 | 组件目录 | 73 |
 | 上游属性 | 1576 |
-| 已对齐 | 1046 |
-| 覆盖率 | 66.4% |
-| 深度债 | 240 项 |
-| 零债务组件 | 39 / 73 |
+| 已对齐 | 1050 |
+| 覆盖率 | 66.6% |
+| 深度债 | 236 项 |
+| 零债务组件 | 40 / 73 |
 
 状态图例：✅ 无债务；🚧 有深度债（D1 表格与选择线 / D2 录入与反馈 / D3 其余）；⚠️ 有未登记缺失。
 
@@ -33,17 +33,16 @@
 | [对话框 Dialog](dialog.md) | `dialog` | 37 | 22 | 59.5% | 0 | 10 | 0 | 0 | 4 | 🚧 |
 | [树形控件 Tree](tree.md) | `tree` | 50 | 30 | 60.0% | 10 | 8 | 1 | 0 | 3 | 🚧 |
 | [链接 Link](link.md) | `link` | 13 | 8 | 61.5% | 0 | 0 | 0 | 0 | 6 | ✅ |
-| [标签输入框 TagInput](tag-input.md) | `tag-input` | 39 | 24 | 61.5% | 2 | 0 | 1 | 0 | 3 | 🚧 |
 | [穿梭框 Transfer](transfer.md) | `transfer` | 26 | 16 | 61.5% | 4 | 4 | 2 | 0 | 3 | 🚧 |
 | [多选框 Checkbox](checkbox.md) | `checkbox` | 24 | 15 | 62.5% | 0 | 0 | 2 | 0 | 6 | 🚧 |
 | [全局提示 Message](message.md) | `message` | 8 | 5 | 62.5% | 0 | 0 | 1 | 0 | 3 | 🚧 |
 | [选项卡 Tabs](tabs.md) | `tabs` | 16 | 10 | 62.5% | 0 | 0 | 1 | 0 | 7 | 🚧 |
 | [通知 Notification](notification.md) | `notification` | 11 | 7 | 63.6% | 0 | 0 | 1 | 0 | 3 | 🚧 |
-| [范围输入框 RangeInput](range-input.md) | `range-input` | 28 | 18 | 64.3% | 0 | 0 | 3 | 0 | 3 | 🚧 |
 | [分割线 Divider](divider.md) | `divider` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [布局 Layout](layout.md) | `layout` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [标签输入框 TagInput](tag-input.md) | `tag-input` | 39 | 26 | 66.7% | 0 | 0 | 1 | 0 | 4 | 🚧 |
 | [选择器输入 SelectInput](select-input.md) | `select-input` | 43 | 29 | 67.4% | 0 | 2 | 2 | 0 | 3 | 🚧 |
-| [数字输入框 InputNumber](input-number.md) | `input-number` | 31 | 21 | 67.7% | 0 | 0 | 1 | 0 | 3 | 🚧 |
+| [范围输入框 RangeInput](range-input.md) | `range-input` | 28 | 19 | 67.9% | 0 | 0 | 2 | 0 | 4 | 🚧 |
 | [单选框 Radio](radio.md) | `radio` | 25 | 17 | 68.0% | 0 | 0 | 0 | 0 | 7 | ✅ |
 | [滑块 Slider](slider.md) | `slider` | 16 | 11 | 68.8% | 0 | 0 | 2 | 0 | 4 | 🚧 |
 | [加载 Loading](loading.md) | `loading` | 13 | 9 | 69.2% | 0 | 0 | 3 | 0 | 2 | 🚧 |
@@ -51,6 +50,7 @@
 | [列表 List](list.md) | `list` | 10 | 7 | 70.0% | 0 | 0 | 1 | 0 | 4 | 🚧 |
 | [开关 Switch](switch.md) | `switch` | 10 | 7 | 70.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
 | [导航菜单 Menu](menu.md) | `menu` | 34 | 24 | 70.6% | 0 | 4 | 0 | 0 | 4 | 🚧 |
+| [数字输入框 InputNumber](input-number.md) | `input-number` | 31 | 22 | 71.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [固钉 Affix](affix.md) | `affix` | 7 | 5 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [引导 Guide](guide.md) | `guide` | 21 | 15 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [骨架屏 Skeleton](skeleton.md) | `skeleton` | 7 | 5 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |

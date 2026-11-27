@@ -4,25 +4,25 @@
 
 - 目录：`packages/ng-components/src/components/input-number/`
 - 文档页：`/input-number`（`packages/docs/src/app/docs/input-number/input-number.component.ts`）
-- 状态：🚧 有深度债 1 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 31 |
-| 已对齐 | 21 |
-| 覆盖率 | 67.7% |
-| 深度债 | 1（D1 0 / D2 0 / D3 1） |
+| 已对齐 | 22 |
+| 覆盖率 | 71.0% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 9（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 3 个 |
+| 文档示例 | 4 个 |
 
 ## 组件明细
 
 ### `TInputNumber`（`<t-input-number>`）
 
-上游接口 `TdInputNumberProps`；上游属性 31、已对齐 21（67.7%）；深度债 1 项；未登记缺失 0 项。
+上游接口 `TdInputNumberProps`；上游属性 31、已对齐 22（71.0%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -32,6 +32,7 @@
 | `allowInputOverLimit` | boolean | true | 允许超限输入 |
 | `autoWidth` | boolean | false | 自适应宽度 |
 | `autofocus` | boolean | false | 自动聚焦 |
+| `inputProps` | InputOptions \| undefined | undefined | 原生编辑区配置，支持 InputOptions 白名单，值与数值格式化由本组件管理 |
 | `decimalPlaces` | InputNumberDecimalPlaces \| undefined | undefined | 小数位数 |
 | `disabled` | boolean | false | 禁用 |
 | `format` | InputNumberFormat \| undefined | undefined | 格式化函数 |
@@ -68,7 +69,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `inputProps` | D3 其余组件与边角能力 | [D3] Vue 的 InputProps 任意透传在 Angular 无等价物（inputs 编译期声明） |
 | `modelValue` | Angular 惯用映射 | [D3] Angular 用 [(value)] 双向绑定表达 v-model |
 | `onBlur` | Angular 惯用映射 | Angular 用 (blur) 输出 |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出 |
@@ -84,3 +84,4 @@
 - `packages/docs/src/app/docs/input-number/demos/input-number-advanced.ts`
 - `packages/docs/src/app/docs/input-number/demos/input-number-basic.ts`
 - `packages/docs/src/app/docs/input-number/demos/input-number-disabled.ts`
+- `packages/docs/src/app/docs/input-number/demos/input-number-input-props.ts`

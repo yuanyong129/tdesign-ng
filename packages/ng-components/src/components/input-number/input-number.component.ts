@@ -14,6 +14,8 @@ import {
   untracked,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { InputOptionsDirective, limitInputText } from '../input/input-options';
+import type { InputOptions } from '../input/input-options';
 import type {
   InputNumberAlign,
   InputNumberChangeEvent,
@@ -47,7 +49,7 @@ const PREFIX_CLS = 't-input-number';
 @Component({
   selector: 't-input-number',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, InputOptionsDirective],
   templateUrl: './input-number.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -82,6 +84,12 @@ export class TInputNumber implements ControlValueAccessor {
 
   /** 是否自动聚焦。 @zh 自动聚焦 @en autofocus @defaultValue false */
   readonly autofocus = input(false, { transform: booleanAttribute });
+
+  /** @zh 原生编辑区配置，支持 InputOptions 白名单，值与数值格式化由本组件管理 @en Supported native editor options; value and numeric formatting remain controlled by InputNumber @defaultValue undefined */
+  readonly inputProps = input<InputOptions | undefined>(undefined);
+
+  protected readonly mergedReadonly = computed(() => this.readonly() || !!this.inputProps()?.readonly);
+  protected readonly mergedAutofocus = computed(() => this.autofocus() || !!this.inputProps()?.autofocus);
 
   /** 保留小数位数，数字表示位数，对象形式可指定是否四舍五入。 @zh 小数位数 @en decimalPlaces */
   readonly decimalPlaces = input<InputNumberDecimalPlaces | undefined>(undefined);
@@ -186,7 +194,7 @@ export class TInputNumber implements ControlValueAccessor {
   });
 
   /** 是否被禁用的合并结果。 */
-  protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms());
+  protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms() || !!this.inputProps()?.disabled);
 
   /** 当前值是否越界（用于状态与校验事件）。 */
   protected readonly error = computed(() => this.errorOf(this.current()));
@@ -198,12 +206,12 @@ export class TInputNumber implements ControlValueAccessor {
 
   /** 减少按钮可用状态。 */
   protected readonly canReduce = computed(
-    () => !this.mergedDisabled() && canReduceNumber(this.current(), this.min(), this.largeNumber()),
+    () => !this.mergedDisabled() && !this.mergedReadonly() && canReduceNumber(this.current(), this.min(), this.largeNumber()),
   );
 
   /** 增加按钮可用状态。 */
   protected readonly canAdd = computed(
-    () => !this.mergedDisabled() && canAddNumber(this.current(), this.max(), this.largeNumber()),
+    () => !this.mergedDisabled() && !this.mergedReadonly() && canAddNumber(this.current(), this.max(), this.largeNumber()),
   );
 
   /** 减少按钮类名。 */
@@ -228,7 +236,7 @@ export class TInputNumber implements ControlValueAccessor {
     if (align === 'right') classes.push('t-align-right');
     if (this.focused()) classes.push('t-input--focused', 't-is-focused');
     if (this.mergedDisabled()) classes.push('t-is-disabled');
-    if (this.readonly()) classes.push('t-is-readonly');
+    if (this.mergedReadonly()) classes.push('t-is-readonly');
     return classes.join(' ');
   });
 
@@ -275,14 +283,16 @@ export class TInputNumber implements ControlValueAccessor {
 
   /** 输入过程中的处理。 */
   protected handleInput(event: Event): void {
+    if (this.mergedDisabled() || this.mergedReadonly()) return;
     const element = event.target as HTMLInputElement;
-    const processed = this.clampDecimals(formatThousandths(element.value));
+    const processed = this.clampDecimals(formatThousandths(limitInputText(element.value, this.inputProps())));
     if (!canInputNumber(processed, this.largeNumber())) {
       element.value = this.userInput();
       return;
     }
     this.userInput.set(processed);
     if (element.value !== processed) element.value = processed;
+    this.inputProps()?.onChange?.(processed, { e: event });
     if (processed === '') {
       this.applyValue(undefined, 'input', event);
       return;
@@ -329,7 +339,7 @@ export class TInputNumber implements ControlValueAccessor {
   /** 按键处理：上下键步进、回车提交。 */
   protected handleKeydown(event: KeyboardEvent): void {
     const code = event.code || event.key;
-    if (!this.mergedDisabled()) {
+    if (!this.mergedDisabled() && !this.mergedReadonly()) {
       if (code === 'ArrowUp' || code === 'Up') {
         event.preventDefault();
         this.handleStep('add', event);
@@ -364,7 +374,7 @@ export class TInputNumber implements ControlValueAccessor {
 
   /** 步进逻辑，与上游 handleStepValue 一致。 */
   private handleStep(op: 'add' | 'reduce', event: MouseEvent | KeyboardEvent): void {
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.mergedReadonly()) return;
     const next = getStepValue({
       op,
       step: this.step(),

@@ -6,7 +6,6 @@ export default {
     renames: {},
     angularOnly: [],
     ignoreUpstream: {
-      inputProps: "[D3] Vue 的 InputProps 任意透传在 Angular 无等价物（inputs 编译期声明）",
       modelValue: "[D3] Angular 用 [(value)] 双向绑定表达 v-model",
       onBlur: "Angular 用 (blur) 输出",
       onChange: "Angular 用 (change) 输出",

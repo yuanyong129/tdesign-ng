@@ -6,8 +6,6 @@ export default {
     renames: {},
     angularOnly: [],
     ignoreUpstream: {
-      inputProps: "[D1] Vue 的 InputProps 任意透传在 Angular 无等价物，输入框能力用独立 input 表达",
-      tagProps: "[D1] 标签主题/尺寸由 t-tag 自身属性表达，不做对象透传",
       modelValue: "[D2] Angular 用 [(value)] 双向绑定表达 v-model",
       onBlur: "Angular 用 (blur) 输出",
       onChange: "Angular 用 (change) 输出",

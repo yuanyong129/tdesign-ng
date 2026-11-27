@@ -5,10 +5,11 @@ import { PageNav } from '../page-nav';
 import { DemoTagInputBasic } from './demos/tag-input-basic';
 import { DemoTagInputDrag } from './demos/tag-input-drag';
 import { DemoTagInputMax } from './demos/tag-input-max';
+import { DemoTagInputProps } from './demos/tag-input-props';
 
 @Component({
   selector: 'tag-input-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoTagInputBasic, DemoTagInputMax, DemoTagInputDrag],
+  imports: [ApiTable, DemoBlock, PageNav, DemoTagInputBasic, DemoTagInputMax, DemoTagInputDrag, DemoTagInputProps],
   template: `
     <article class="docs-page">
       <h1 class="docs-page__title">标签输入框 TagInput</h1>
@@ -38,6 +39,10 @@ import { DemoTagInputMax } from './demos/tag-input-max';
         description="dragSort 开启拖拽，dragSortChange 返回排序后的 newTags。"
       >
         <demo-tag-input-drag />
+      </docs-demo>
+
+      <docs-demo id="tag-input-props" title="输入与标签配置" description="inputProps 支持 InputOptions 白名单；tagProps 配置主题、变体、形状、颜色、宽度、title、禁用、关闭按钮及回调。标签内容、尺寸、输入值和删除流程由 TagInput 管理。">
+        <demo-tag-input-props />
       </docs-demo>
 
       <h2 class="docs-section__title" id="tag-input-api">API</h2>

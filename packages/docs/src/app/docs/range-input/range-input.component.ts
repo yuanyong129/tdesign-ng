@@ -5,10 +5,11 @@ import { PageNav } from '../page-nav';
 import { DemoRangeInputBasic } from './demos/range-input-basic';
 import { DemoRangeInputAdvanced } from './demos/range-input-advanced';
 import { DemoRangeInputDisabled } from './demos/range-input-disabled';
+import { DemoRangeInputInputProps } from './demos/range-input-input-props';
 
 @Component({
   selector: 'range-input-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoRangeInputBasic, DemoRangeInputAdvanced, DemoRangeInputDisabled],
+  imports: [ApiTable, DemoBlock, PageNav, DemoRangeInputBasic, DemoRangeInputAdvanced, DemoRangeInputDisabled, DemoRangeInputInputProps],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">范围输入框 RangeInput</h1>
@@ -38,6 +39,10 @@ import { DemoRangeInputDisabled } from './demos/range-input-disabled';
         description="disabled 传布尔值时整体禁用，传数组时可按左右输入框分别禁用；clearable 开启后鼠标移入显示清除图标，borderless 为无边框风格。"
       >
         <demo-range-input-disabled />
+      </docs-demo>
+
+      <docs-demo id="range-input-input-props" title="左右编辑区配置" description="inputProps 支持 InputOptions 白名单；传单对象供两侧共用，传数组分别配置。外层 value、placeholder、format 和状态保持优先。">
+        <demo-range-input-input-props />
       </docs-demo>
 
       <h2 class="docs-section__title" id="range-input-api">API</h2>

@@ -21,6 +21,7 @@ export type {
   TagInputRichText,
   TagInputSize,
   TagInputStatus,
+  TagInputTagProps,
   TagInputValue,
   TagInputValueDisplayContext,
 } from './tag-input.types';

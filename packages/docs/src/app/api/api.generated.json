@@ -5428,6 +5428,15 @@
           "values": []
         },
         {
+          "name": "inputProps",
+          "type": "InputOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生编辑区配置，支持 InputOptions 白名单，值与数值格式化由本组件管理",
+          "en": "Supported native editor options; value and numeric formatting remain controlled by InputNumber",
+          "values": []
+        },
+        {
           "name": "decimalPlaces",
           "type": "InputNumberDecimalPlaces | undefined",
           "default": "undefined",
@@ -7481,6 +7490,15 @@
           "required": false,
           "zh": "格式化函数",
           "en": "format",
+          "values": []
+        },
+        {
+          "name": "inputProps",
+          "type": "InputOptions | ReadonlyArray<InputOptions> | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "编辑区的 InputOptions 配置，单对象作用于两侧，数组分别配置左右两侧",
+          "en": "Supported editor options, shared as one object or configured separately as an array",
           "values": []
         },
         {
@@ -10457,6 +10475,24 @@
           "required": false,
           "zh": "输入框内容",
           "en": "Input value",
+          "values": []
+        },
+        {
+          "name": "inputProps",
+          "type": "InputOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生编辑区配置，支持 InputOptions 白名单，标签值与输入值仍由本组件管理",
+          "en": "Supported native editor options; tag and input values remain managed by TagInput",
+          "values": []
+        },
+        {
+          "name": "tagProps",
+          "type": "TagInputTagProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "标签外观与关闭配置，尺寸、内容和删除流程由本组件管理",
+          "en": "Tag appearance and close options; size, content and removal remain managed by TagInput",
           "values": []
         },
         {

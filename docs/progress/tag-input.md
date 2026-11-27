@@ -4,25 +4,25 @@
 
 - 目录：`packages/ng-components/src/components/tag-input/`
 - 文档页：`/tag-input`（`packages/docs/src/app/docs/tag-input/tag-input.component.ts`）
-- 状态：🚧 有深度债 3 项
+- 状态：🚧 有深度债 1 项
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 39 |
-| 已对齐 | 24 |
-| 覆盖率 | 61.5% |
-| 深度债 | 3（D1 2 / D2 0 / D3 1） |
+| 已对齐 | 26 |
+| 覆盖率 | 66.7% |
+| 深度债 | 1（D1 0 / D2 0 / D3 1） |
 | Angular 惯用映射 | 12（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 3 个 |
+| 文档示例 | 4 个 |
 
 ## 组件明细
 
 ### `TTagInput`（`<t-tag-input>`）
 
-上游接口 `TdTagInputProps`；上游属性 39、已对齐 24（61.5%）；深度债 3 项；未登记缺失 0 项。
+上游接口 `TdTagInputProps`；上游属性 39、已对齐 26（66.7%）；深度债 1 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -31,6 +31,8 @@
 | `value` | TagInputValue \| undefined | undefined | 标签列表 |
 | `defaultValue` | TagInputValue | [] | 初始标签列表 |
 | `inputValue` | string \| undefined | undefined | 输入框内容 |
+| `inputProps` | InputOptions \| undefined | undefined | 原生编辑区配置，支持 InputOptions 白名单，标签值与输入值仍由本组件管理 |
+| `tagProps` | TagInputTagProps \| undefined | undefined | 标签外观与关闭配置，尺寸、内容和删除流程由本组件管理 |
 | `defaultInputValue` | string | '' | 初始输入内容 |
 | `placeholder` | string \| undefined | undefined | 占位文字 |
 | `size` | TagInputSize | medium | 尺寸 |
@@ -75,7 +77,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `inputProps` | D1 表格与选择线 | [D1] Vue 的 InputProps 任意透传在 Angular 无等价物，输入框能力用独立 input 表达 |
 | `modelValue` | Angular 惯用映射 | [D2] Angular 用 [(value)] 双向绑定表达 v-model |
 | `onBlur` | Angular 惯用映射 | Angular 用 (blur) 输出 |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出 |
@@ -89,10 +90,10 @@
 | `onMouseleave` | Angular 惯用映射 | Angular 用 (mouseleave) 输出 |
 | `onPaste` | Angular 惯用映射 | Angular 用 (paste) 输出 |
 | `onRemove` | Angular 惯用映射 | Angular 用 (remove) 输出 |
-| `tagProps` | D1 表格与选择线 | [D1] 标签主题/尺寸由 t-tag 自身属性表达，不做对象透传 |
 
 ## 文档示例
 
 - `packages/docs/src/app/docs/tag-input/demos/tag-input-basic.ts`
 - `packages/docs/src/app/docs/tag-input/demos/tag-input-drag.ts`
 - `packages/docs/src/app/docs/tag-input/demos/tag-input-max.ts`
+- `packages/docs/src/app/docs/tag-input/demos/tag-input-props.ts`

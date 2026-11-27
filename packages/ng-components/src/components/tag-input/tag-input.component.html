@@ -35,8 +35,11 @@
           >
             <t-tag
               [size]="size()"
-              [disabled]="mergedDisabled()"
-              [closable]="!mergedReadonly() && !mergedDisabled()"
+              [theme]="tagProps()?.theme ?? 'default'" [variant]="tagProps()?.variant ?? 'dark'"
+              [shape]="tagProps()?.shape ?? 'square'" [color]="tagProps()?.color"
+              [title]="tagProps()?.title" [maxWidth]="tagProps()?.maxWidth"
+              [disabled]="mergedDisabled() || !!tagProps()?.disabled"
+              [closable]="!mergedReadonly() && !mergedDisabled() && !tagProps()?.disabled && tagProps()?.closable !== false"
               (close)="removeTag(entry.index, $event)"
             >
               @if (tagTemplate(); as tagTpl) {
@@ -62,6 +65,8 @@
     <input
       #inner
       class="t-input__inner"
+      [tInputOptions]="inputProps()"
+      [optionsAutofocus]="inputProps()?.autofocus ?? false"
       [class.t-input--soft-hidden]="!showInput()"
       [attr.placeholder]="placeholderText()"
       [disabled]="mergedDisabled()"
@@ -69,6 +74,8 @@
       [value]="mergedInputValue()"
       [style.width.px]="autoWidth() ? inputWidth() : null"
       (input)="handleInput($event)"
+      (compositionstart)="handleCompositionStart()"
+      (compositionend)="handleCompositionEnd($event)"
       (keydown)="handleKeydown($event)"
       (focus)="handleFocus($event)"
       (blur)="handleBlur($event)"

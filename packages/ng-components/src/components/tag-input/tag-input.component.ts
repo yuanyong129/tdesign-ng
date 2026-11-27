@@ -19,6 +19,8 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TTag } from '../tag/tag.component';
+import { InputOptionsDirective, limitInputText } from '../input/input-options';
+import type { InputOptions } from '../input/input-options';
 import type {
   TagInputChangeEvent,
   TagInputChangeTrigger,
@@ -36,6 +38,7 @@ import type {
   TagInputStatus,
   TagInputValue,
   TagInputValueDisplayContext,
+  TagInputTagProps,
 } from './tag-input.types';
 
 /** 把 `size` 翻译成类名，`medium` 是默认值不产生类名。 */
@@ -67,7 +70,7 @@ function toNumber(value: unknown): number | undefined {
 @Component({
   selector: 't-tag-input',
   standalone: true,
-  imports: [NgTemplateOutlet, TTag],
+  imports: [NgTemplateOutlet, TTag, InputOptionsDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './tag-input.component.html',
@@ -91,6 +94,12 @@ export class TTagInput implements ControlValueAccessor {
 
   /** 输入框的内容。 @zh 输入框内容 @en Input value */
   readonly inputValue = input<string | undefined>(undefined);
+
+  /** @zh 原生编辑区配置，支持 InputOptions 白名单，标签值与输入值仍由本组件管理 @en Supported native editor options; tag and input values remain managed by TagInput @defaultValue undefined */
+  readonly inputProps = input<InputOptions | undefined>(undefined);
+
+  /** @zh 标签外观与关闭配置，尺寸、内容和删除流程由本组件管理 @en Tag appearance and close options; size, content and removal remain managed by TagInput @defaultValue undefined */
+  readonly tagProps = input<TagInputTagProps | undefined>(undefined);
 
   /** 非受控模式下输入框的初始内容。 @zh 初始输入内容 @en Default input value @defaultValue '' */
   readonly defaultInputValue = input<string>('');
@@ -245,9 +254,9 @@ export class TTagInput implements ControlValueAccessor {
     () => this.inputValue() ?? this.inputOverride() ?? this.defaultInputValue(),
   );
 
-  protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms());
+  protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms() || !!this.inputProps()?.disabled);
 
-  protected readonly mergedReadonly = computed(() => this.readonly());
+  protected readonly mergedReadonly = computed(() => this.readonly() || !!this.inputProps()?.readonly);
 
   protected readonly hasTags = computed(() => this.mergedValue().length > 0);
 
@@ -402,8 +411,17 @@ export class TTagInput implements ControlValueAccessor {
   }
 
   protected handleInput(event: Event): void {
+    if (this.mergedDisabled() || this.mergedReadonly() || this.composing) return;
     const target = event.target as HTMLInputElement;
+    if (event.type === 'input' && this.compositionValue !== undefined) {
+      const previous = this.compositionValue;
+      this.compositionValue = undefined;
+      if (target.value === previous) return;
+    }
+    target.value = limitInputText(target.value, this.inputProps());
+    if (target.value === this.mergedInputValue()) return;
     this.updateInputValue(target.value, 'input', event);
+    this.inputProps()?.onChange?.(target.value, { e: event });
   }
 
   protected handlePaste(event: ClipboardEvent): void {
@@ -411,6 +429,7 @@ export class TTagInput implements ControlValueAccessor {
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
+    if (this.mergedDisabled() || this.mergedReadonly() || event.isComposing || this.composing) return;
     if (event.key === 'Enter') {
       event.preventDefault();
       const inputValue = this.mergedInputValue();
@@ -454,13 +473,27 @@ export class TTagInput implements ControlValueAccessor {
   }
 
   protected removeTag(index: number, event?: MouseEvent): void {
-    if (this.mergedDisabled() || this.mergedReadonly()) return;
+    if (this.mergedDisabled() || this.mergedReadonly() || this.tagProps()?.disabled || this.tagProps()?.closable === false) return;
     const list = this.mergedValue();
     const item = list[index];
     if (item === undefined) return;
     const next = list.filter((_, i) => i !== index);
     this.commitValue(next, 'tag-remove', { index, item, event });
     this.remove.emit({ value: next, index, item, trigger: 'tag-remove', event });
+    if (event) this.tagProps()?.onClose?.({ e: event });
+  }
+
+  private composing = false;
+  private compositionValue: string | undefined;
+
+  protected handleCompositionStart(): void {
+    this.composing = true;
+    this.compositionValue = undefined;
+  }
+  protected handleCompositionEnd(event: CompositionEvent): void {
+    this.composing = false;
+    if ((event.target as HTMLInputElement).value !== this.mergedInputValue()) this.handleInput(event);
+    this.compositionValue = (event.target as HTMLInputElement).value;
   }
 
   protected handleDragStart(event: DragEvent, index: number): void {

@@ -28,10 +28,10 @@
     <input
       class="t-input__inner"
       type="text"
-      autocomplete="off"
-      [attr.autofocus]="autofocus() ? '' : null"
+      [tInputOptions]="inputProps()"
+      [optionsAutofocus]="mergedAutofocus()"
       [disabled]="mergedDisabled()"
-      [readOnly]="readonly()"
+      [readOnly]="mergedReadonly()"
       [placeholder]="placeholder() ?? ''"
       [value]="userInput()"
       (input)="handleInput($event)"
