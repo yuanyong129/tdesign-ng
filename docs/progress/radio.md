@@ -11,24 +11,25 @@
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 25 |
-| 已对齐 | 17 |
-| 覆盖率 | 68.0% |
+| 已对齐 | 19 |
+| 覆盖率 | 76.0% |
 | 深度债 | 0（D1 0 / D2 0 / D3 0） |
-| Angular 惯用映射 | 8（插槽 / 双向绑定 / 事件名，不计债） |
+| Angular 惯用映射 | 6（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 7 个 |
+| 文档示例 | 8 个 |
 
 ## 组件明细
 
 ### `TRadio`（`<t-radio>`）
 
-上游接口 `TdRadioProps`；上游属性 12、已对齐 7（58.3%）；深度债 0 项；未登记缺失 0 项。
+上游接口 `TdRadioProps`；上游属性 12、已对齐 8（66.7%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `checked` | boolean | false | 是否选中，独立使用时生效 |
+| `checked` | boolean \| undefined | undefined | 是否选中，独立使用时生效 |
+| `defaultChecked` | boolean | false | 非受控初始选中态，仅初始化时读取 |
 | `value` | RadioValue | true | 单选框的值，在单选框组中用于匹配 |
 | `disabled` | boolean | false | 是否禁用 |
 | `readonly` | boolean | false | 是否只读 |
@@ -48,20 +49,20 @@
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
 | `default` | Angular 惯用映射 | 内容通过 ng-content 投影，无需 default 插槽属性 |
-| `defaultChecked` | Angular 惯用映射 | Angular 用 [checked] 作为受控初始值 |
 | `modelValue` | Angular 惯用映射 | Angular 用 [(checked)] 双向绑定 + ControlValueAccessor |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出，参数是 { value, event } |
 | `onClick` | Angular 惯用映射 | Angular 用 (click) 输出 |
 
 ### `TRadioGroup`（`<t-radio-group>`）
 
-上游接口 `TdRadioGroupProps`；上游属性 13、已对齐 10（76.9%）；深度债 0 项；未登记缺失 0 项。
+上游接口 `TdRadioGroupProps`；上游属性 13、已对齐 11（84.6%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `value` | RadioValue \| undefined | undefined | 选中的值 |
+| `defaultValue` | RadioValue \| undefined | undefined | 非受控初始值，仅初始化时读取 |
 | `options` | RadioOption[] \| undefined | undefined | 选项列表，也可以用内容投影声明单选框 |
 | `direction` | RadioDirection | horizontal | 排列方向 |
 | `theme` | RadioTheme | radio | 形态：普通单选框或按钮式单选框 |
@@ -83,7 +84,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `defaultValue` | Angular 惯用映射 | Angular 用 [value] 作为受控初始值 |
 | `modelValue` | Angular 惯用映射 | Angular 用 [(value)] 双向绑定 + ControlValueAccessor |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出，参数是 { value, event } |
 
@@ -96,3 +96,4 @@
 - `packages/docs/src/app/docs/radio/demos/radio-group.ts`
 - `packages/docs/src/app/docs/radio/demos/radio-options.ts`
 - `packages/docs/src/app/docs/radio/demos/radio-state.ts`
+- `packages/docs/src/app/docs/radio/demos/radio-stateful.ts`

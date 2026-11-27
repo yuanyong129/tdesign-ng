@@ -2,6 +2,7 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
   contentChildren,
   effect,
@@ -17,6 +18,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from '@angular/forms';
+import { createControllableState } from '../../_utils/controllable-state';
 import { TRadio } from './radio.component';
 import {
   normalizeRadioOption,
@@ -45,6 +47,9 @@ const SIZE_CLASS: Record<RadioSize, string> = {
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'classes()',
+    role: 'radiogroup',
+    '(keydown)': 'handleGroupKeydown($event)',
+    '(focusout)': 'handleFocusOut($event)',
   },
   providers: [
     {
@@ -61,6 +66,9 @@ export class TRadioGroup implements ControlValueAccessor {
    * @defaultValue undefined
    */
   readonly value = input<RadioValue | undefined>(undefined);
+
+  /** @zh 非受控初始值，仅初始化时读取 @en Initial uncontrolled value, read once @defaultValue undefined */
+  readonly defaultValue = input<RadioValue | undefined>(undefined);
 
   /**
    * @zh 选项列表，也可以用内容投影声明单选框
@@ -140,8 +148,9 @@ export class TRadioGroup implements ControlValueAccessor {
   private readonly viewRadios = viewChildren(TRadio);
   private readonly contentRadios = contentChildren(TRadio, { descendants: true });
 
-  private readonly innerValue = signal<RadioValue | undefined>(undefined);
+  private readonly state = createControllableState<RadioValue | undefined>(this.value, () => this.defaultValue());
   private readonly disabledByForms = signal(false);
+  private bgFrame: number | undefined;
 
   private onChange: (value: RadioValue | undefined) => void = () => {};
   private onTouched: () => void = () => {};
@@ -172,19 +181,21 @@ export class TRadioGroup implements ControlValueAccessor {
   protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms());
 
   constructor() {
-    // 外部 value 同步到内部状态
-    effect(() => {
-      const value = this.value();
-      untracked(() => this.innerValue.set(value));
+    inject(DestroyRef).onDestroy(() => {
+      this.radios().forEach((radio) => radio.clearGroup());
+      if (this.bgFrame !== undefined && typeof cancelAnimationFrame !== 'undefined') cancelAnimationFrame(this.bgFrame);
     });
-
     // 把选中态、形态、name 下发给组内单选框，并按需更新按钮式的滑块
     effect(() => {
-      const value = this.innerValue();
+      const value = this.state.current();
       const isButton = this.theme() === 'button';
       const name = this.name();
-      for (const radio of this.radios()) {
-        radio.setGroupState(radio.value() === value, isButton, name);
+      const radios = this.radios();
+      const first = radios.find((radio) => !radio.disabled());
+      const selected = radios.find((radio) => radio.value() === value && !radio.disabled()) ?? first;
+      const allowUncheck = this.allowUncheck();
+      for (const radio of radios) {
+        radio.setGroupState(radio.value() === value, isButton, name, allowUncheck, radio === selected ? 0 : -1);
       }
       this.scheduleBgBlockUpdate();
     });
@@ -204,7 +215,8 @@ export class TRadioGroup implements ControlValueAccessor {
       const subscriptions = this.radios().map((radio) =>
         radio.change.subscribe((event) => this.handleRadioChange(radio, event)),
       );
-      onCleanup(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
+      const radios = this.radios();
+      onCleanup(() => { subscriptions.forEach((subscription) => subscription.unsubscribe()); untracked(() => radios.filter((radio) => !this.radios().includes(radio)).forEach((radio) => radio.clearGroup())); });
     });
   }
 
@@ -219,18 +231,37 @@ export class TRadioGroup implements ControlValueAccessor {
   }
 
   private apply(value: RadioValue | undefined, event: Event): void {
-    if (value === this.innerValue()) return;
-    this.innerValue.set(value);
-    this.onTouched();
+    if (value === this.state.current()) return;
+    this.state.set(value);
     this.onChange(value);
     this.valueChange.emit(value);
-    this.change.emit({ value: value as RadioValue, event });
+    this.change.emit({ value, event });
+  }
+
+  protected handleGroupKeydown(event: KeyboardEvent): void {
+    if (this.mergedDisabled() || this.readonly() || event.altKey || event.ctrlKey || event.metaKey) return;
+    const radios = this.radios().filter((radio) => radio.isEditable());
+    const index = radios.findIndex((radio) => radio.containsTarget(event.target));
+    if (index < 0 || !radios.length) return;
+    let next: number;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % radios.length;
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index - 1 + radios.length) % radios.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = radios.length - 1;
+    else return;
+    event.preventDefault();
+    radios[next].focusInput(); radios[next].selectFromGroup(event);
+  }
+
+  protected handleFocusOut(event: FocusEvent): void {
+    if (!event.relatedTarget || !this.host.nativeElement.contains(event.relatedTarget as Node)) this.onTouched();
   }
 
   /** 按钮式填充变体需要用一块背景色跟随选中的按钮，这里同步它的位置和宽度。 */
   private scheduleBgBlockUpdate(): void {
     if (typeof requestAnimationFrame === 'undefined') return;
-    requestAnimationFrame(() => this.updateBgBlock());
+    if (this.bgFrame !== undefined) cancelAnimationFrame(this.bgFrame);
+    this.bgFrame = requestAnimationFrame(() => { this.bgFrame = undefined; this.updateBgBlock(); });
   }
 
   private updateBgBlock(): void {
@@ -252,7 +283,7 @@ export class TRadioGroup implements ControlValueAccessor {
   }
 
   writeValue(value: RadioValue | null): void {
-    this.innerValue.set(value ?? undefined);
+    this.state.write(value ?? undefined);
   }
 
   registerOnChange(fn: (value: RadioValue | undefined) => void): void {

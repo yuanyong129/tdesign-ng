@@ -1784,11 +1784,20 @@
       "inputs": [
         {
           "name": "checked",
-          "type": "boolean",
-          "default": "false",
+          "type": "boolean | undefined",
+          "default": "undefined",
           "required": false,
           "zh": "是否选中，独立使用时生效",
           "en": "Whether the checkbox is checked, used when standalone",
+          "values": []
+        },
+        {
+          "name": "defaultChecked",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "非受控初始选中态，仅初始化时读取",
+          "en": "Initial uncontrolled checked state, read once",
           "values": []
         },
         {
@@ -1886,11 +1895,20 @@
       "inputs": [
         {
           "name": "value",
-          "type": "CheckboxGroupValue",
-          "default": "[]",
+          "type": "CheckboxGroupValue | undefined",
+          "default": "undefined",
           "required": false,
           "zh": "选中的值集合",
           "en": "The checked values",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "CheckboxGroupValue",
+          "default": "[]",
+          "required": false,
+          "zh": "非受控初始值，仅初始化时读取",
+          "en": "Initial uncontrolled value, read once",
           "values": []
         },
         {
@@ -7320,11 +7338,20 @@
       "inputs": [
         {
           "name": "checked",
-          "type": "boolean",
-          "default": "false",
+          "type": "boolean | undefined",
+          "default": "undefined",
           "required": false,
           "zh": "是否选中，独立使用时生效",
           "en": "Whether the radio is checked, used when standalone",
+          "values": []
+        },
+        {
+          "name": "defaultChecked",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "非受控初始选中态，仅初始化时读取",
+          "en": "Initial uncontrolled checked state, read once",
           "values": []
         },
         {
@@ -7409,6 +7436,15 @@
           "required": false,
           "zh": "选中的值",
           "en": "The selected value",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
+          "type": "RadioValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "非受控初始值，仅初始化时读取",
+          "en": "Initial uncontrolled value, read once",
           "values": []
         },
         {
@@ -9412,11 +9448,20 @@
       "inputs": [
         {
           "name": "value",
+          "type": "SwitchValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控开关值，未设置时使用非受控状态",
+          "en": "Controlled switch value, omitted for uncontrolled usage",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
           "type": "SwitchValue",
           "default": "false",
           "required": false,
-          "zh": "开关的值",
-          "en": "Value of the switch",
+          "zh": "非受控初始值，仅初始化时读取",
+          "en": "Initial uncontrolled value, read once",
           "values": []
         },
         {
@@ -11005,11 +11050,20 @@
       "inputs": [
         {
           "name": "value",
+          "type": "TextareaValue | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "受控输入值，未设置时使用非受控状态",
+          "en": "Controlled textarea value, omitted for uncontrolled usage",
+          "values": []
+        },
+        {
+          "name": "defaultValue",
           "type": "TextareaValue",
           "default": "''",
           "required": false,
-          "zh": "输入框的值",
-          "en": "Value of the textarea",
+          "zh": "非受控初始值，仅初始化时读取",
+          "en": "Initial uncontrolled value, read once",
           "values": []
         },
         {
@@ -11082,8 +11136,8 @@
           "type": "string | number | undefined",
           "default": "undefined",
           "required": false,
-          "zh": "原生 maxlength，超出时浏览器直接阻止输入",
-          "en": "Native maxlength",
+          "zh": "最大 Unicode 码点数，组件主动限制以保留完整 emoji 与组合输入",
+          "en": "Maximum Unicode code points, preserving emoji and composition",
           "values": []
         },
         {

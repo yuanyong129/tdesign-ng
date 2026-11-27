@@ -1,7 +1,7 @@
 <span class="t-switch__handle">
-  @if (loading()) {
+  @if (loading() || pending()) {
     <span class="t-loading">
-      <svg class="t-loading__gradient t-icon-loading" viewBox="0 0 12 12" width="1em" height="1em">
+      <svg class="t-icon t-loading__gradient t-icon-loading" viewBox="0 0 12 12" width="1em" height="1em" aria-hidden="true">
         <foreignObject x="0" y="0" width="12" height="12">
           <div class="t-loading__gradient-conic"></div>
         </foreignObject>

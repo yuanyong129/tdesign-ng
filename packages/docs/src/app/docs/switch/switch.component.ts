@@ -1,3 +1,4 @@
+import { DemoSwitchGuard } from './demos/switch-guard';
 import { Component } from '@angular/core';
 import { ApiTable } from '../../api/api-table.component';
 import { DemoBlock } from '../demo-block';
@@ -10,7 +11,7 @@ import { DemoSwitchState } from './demos/switch-state';
 
 @Component({
   selector: 'switch-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoSwitchBasic, DemoSwitchLabel, DemoSwitchSize, DemoSwitchState, DemoSwitchCustom],
+  imports: [DemoSwitchGuard, ApiTable, DemoBlock, PageNav, DemoSwitchBasic, DemoSwitchLabel, DemoSwitchSize, DemoSwitchState, DemoSwitchCustom],
   template: `
     <div class="docs-page">
       <h1 class="docs-page__title">开关 Switch</h1>
@@ -36,6 +37,10 @@ import { DemoSwitchState } from './demos/switch-state';
 
       <docs-demo id="switch-custom" title="自定义值" description="customValue 传 [选中值, 未选中值]，可以是字符串或数字。">
         <demo-switch-custom />
+      </docs-demo>
+
+      <docs-demo id="switch-guard" title="默认值、受控状态与表单" description="beforeChange 支持异步确认；等待期间防止重复请求，失效或失败的请求不会切换；表单在离焦时提交。">
+        <demo-switch-guard />
       </docs-demo>
 
       <h2 class="docs-section__title" id="switch-api">API</h2>

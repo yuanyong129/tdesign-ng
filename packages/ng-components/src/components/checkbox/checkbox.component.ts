@@ -2,16 +2,19 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  afterRenderEffect,
+  ElementRef,
   computed,
-  effect,
   forwardRef,
   input,
   output,
   signal,
+  viewChild,
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from '@angular/forms';
+import { createControllableState } from '../../_utils/controllable-state';
 import type { CheckboxChangeEvent, CheckboxValue } from './checkbox.types';
 
 @Component({
@@ -32,9 +35,12 @@ export class TCheckbox implements ControlValueAccessor {
   /**
    * @zh 是否选中，独立使用时生效
    * @en Whether the checkbox is checked, used when standalone
-   * @defaultValue false
+   * @defaultValue undefined
    */
-  readonly checked = input(false, { transform: booleanAttribute });
+  readonly checked = input<boolean | undefined, boolean | string | undefined>(undefined, { transform: (value) => value === undefined ? undefined : booleanAttribute(value) });
+
+  /** @zh 非受控初始选中态，仅初始化时读取 @en Initial uncontrolled checked state, read once @defaultValue false */
+  readonly defaultChecked = input(false, { transform: booleanAttribute });
 
   /**
    * @zh 复选框的值，在复选框组中用于匹配
@@ -98,11 +104,15 @@ export class TCheckbox implements ControlValueAccessor {
   /** @zh 值变化事件 @en Change event */
   readonly change = output<CheckboxChangeEvent>();
 
-  private readonly innerChecked = signal(false);
+  private readonly state = createControllableState<boolean>(this.checked, () => this.defaultChecked());
+  private readonly former = viewChild<ElementRef<HTMLInputElement>>('former');
+  private readonly editRevision = signal(0);
   private readonly groupChecked = signal<boolean | null>(null);
   private readonly groupIndeterminate = signal(false);
   private readonly groupDisabled = signal(false);
   private readonly groupReadonly = signal(false);
+  private readonly groupName = signal<string | undefined>(undefined);
+  protected readonly mergedName = computed(() => this.name() ?? this.groupName());
   private readonly disabledByForms = signal(false);
 
   private onChange: (value: any) => void = () => {};
@@ -114,7 +124,7 @@ export class TCheckbox implements ControlValueAccessor {
 
   protected readonly isReadonly = computed(() => this.readonly() || this.groupReadonly());
 
-  protected readonly isChecked = computed(() => this.groupChecked() ?? this.innerChecked());
+  protected readonly isChecked = computed(() => this.groupChecked() ?? this.state.current());
 
   protected readonly isIndeterminate = computed(
     () => this.groupIndeterminate() || (this.indeterminate() && !this.isChecked()),
@@ -129,11 +139,11 @@ export class TCheckbox implements ControlValueAccessor {
   });
 
   constructor() {
-    // 独立使用时，外部 checked 变化同步到内部状态；受组控制时不覆盖组下发的状态
-    effect(() => {
-      const checked = this.checked();
-      if (this.groupChecked() !== null) return;
-      untracked(() => this.innerChecked.set(checked));
+    afterRenderEffect(() => {
+      this.editRevision();
+      const input = this.former()?.nativeElement;
+      const checked = this.isChecked(), indeterminate = this.isIndeterminate();
+      if (input) { input.checked = checked; input.indeterminate = indeterminate; }
     });
   }
 
@@ -155,9 +165,17 @@ export class TCheckbox implements ControlValueAccessor {
     this.groupReadonly.set(readonly);
   }
 
+  setGroupName(name: string | undefined): void { this.groupName.set(name); }
+  isProtectedForGroup(): boolean { return this.disabled() || this.disabledByForms() || this.readonly(); }
+
+  clearGroup(): void {
+    this.groupChecked.set(null); this.groupIndeterminate.set(false);
+    this.groupDisabled.set(false); this.groupReadonly.set(false); this.groupName.set(undefined);
+  }
+
   /** 供复选框组在取消失败时回滚显示。 */
   resetFromInput(): void {
-    this.innerChecked.set(this.checked());
+    this.editRevision.update((revision) => revision + 1);
   }
 
   protected handleClick(event: MouseEvent): void {
@@ -168,6 +186,7 @@ export class TCheckbox implements ControlValueAccessor {
   }
 
   protected handleChange(event: Event): void {
+    event.stopPropagation();
     const input = event.target as HTMLInputElement;
     if (this.isDisabled() || this.isReadonly()) {
       input.checked = this.isChecked();
@@ -175,15 +194,17 @@ export class TCheckbox implements ControlValueAccessor {
     }
 
     const next = !this.isChecked();
-    this.innerChecked.set(next);
-    this.onTouched();
+    if (this.groupChecked() === null) this.state.set(next);
     this.onChange(next);
     this.checkedChange.emit(next);
     this.change.emit({ checked: next, value: this.value(), event });
+    this.editRevision.update((revision) => revision + 1);
   }
 
+  protected handleBlur(): void { this.onTouched(); }
+
   writeValue(value: boolean | null): void {
-    this.innerChecked.set(!!value);
+    this.state.write(!!value);
   }
 
   registerOnChange(fn: (value: boolean) => void): void {

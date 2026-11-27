@@ -11,24 +11,25 @@
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 21 |
-| 已对齐 | 12 |
-| 覆盖率 | 57.1% |
+| 已对齐 | 13 |
+| 覆盖率 | 61.9% |
 | 深度债 | 0（D1 0 / D2 0 / D3 0） |
-| Angular 惯用映射 | 9（插槽 / 双向绑定 / 事件名，不计债） |
+| Angular 惯用映射 | 8（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 6 个 |
+| 文档示例 | 7 个 |
 
 ## 组件明细
 
 ### `TTextarea`（`<t-textarea>`）
 
-上游接口 `TdTextareaProps`；上游属性 21、已对齐 12（57.1%）；深度债 0 项；未登记缺失 0 项。
+上游接口 `TdTextareaProps`；上游属性 21、已对齐 13（61.9%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `value` | TextareaValue | '' | 输入框的值 |
+| `value` | TextareaValue \| undefined | undefined | 受控输入值，未设置时使用非受控状态 |
+| `defaultValue` | TextareaValue | '' | 非受控初始值，仅初始化时读取 |
 | `placeholder` | string \| undefined | undefined | 占位文字 |
 | `status` | TextareaStatus | 'default' | 输入框状态 |
 | `disabled` | boolean | false | 是否禁用 |
@@ -36,7 +37,7 @@
 | `autofocus` | boolean | false | 自动聚焦 |
 | `autosize` | boolean \| TextareaAutosize | false | 是否根据内容自动撑高，可传 `{ minRows, maxRows }` |
 | `maxcharacter` | number \| undefined | undefined | 最大字符数，ASCII 计 1，非 ASCII 每个 UTF-16 单元计 2，超出时截断 |
-| `maxlength` | string \| number \| undefined | undefined | 原生 maxlength，超出时浏览器直接阻止输入 |
+| `maxlength` | string \| number \| undefined | undefined | 最大 Unicode 码点数，组件主动限制以保留完整 emoji 与组合输入 |
 | `allowInputOverMax` | boolean | false | 是否允许输入超过最大字符数 |
 | `name` | string \| undefined | undefined | 原生的 name 属性 |
 | `tips` | string \| undefined | undefined | 输入框下方的提示文字 |
@@ -58,7 +59,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `defaultValue` | Angular 惯用映射 | Angular 用 [value] 初始值 + ControlValueAccessor |
 | `modelValue` | Angular 惯用映射 | Angular 用 [(value)] 双向绑定 + ControlValueAccessor |
 | `onBlur` | Angular 惯用映射 | Angular 用 (blur) 输出 |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出，参数是 { value, event } |
@@ -74,5 +74,6 @@
 - `packages/docs/src/app/docs/textarea/demos/textarea-basic.ts`
 - `packages/docs/src/app/docs/textarea/demos/textarea-disabled.ts`
 - `packages/docs/src/app/docs/textarea/demos/textarea-limit.ts`
+- `packages/docs/src/app/docs/textarea/demos/textarea-stateful.ts`
 - `packages/docs/src/app/docs/textarea/demos/textarea-status.ts`
 - `packages/docs/src/app/docs/textarea/demos/textarea-validate.ts`

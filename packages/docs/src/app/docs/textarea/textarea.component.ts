@@ -1,3 +1,4 @@
+import { DemoTextareaStateful } from './demos/textarea-stateful';
 import { Component } from '@angular/core';
 import { ApiTable } from '../../api/api-table.component';
 import { DemoBlock } from '../demo-block';
@@ -12,6 +13,7 @@ import { DemoTextareaValidate } from './demos/textarea-validate';
 @Component({
   selector: 'textarea-docs',
   imports: [
+    DemoTextareaStateful,
     ApiTable,
     DemoBlock,
     PageNav,
@@ -51,6 +53,10 @@ import { DemoTextareaValidate } from './demos/textarea-validate';
 
       <docs-demo id="textarea-validate" title="长度校验与键盘事件" description="validate 在首次超限和恢复正常时触发；allowInputOverMax 允许超过限制。keypress 为原生字符按键事件。">
         <demo-textarea-validate />
+      </docs-demo>
+
+      <docs-demo id="textarea-stateful" title="默认值、受控状态与表单" description="defaultValue 仅初始化；支持受控拒绝与表单 reset，组合输入结束后统一限制，autosize 可动态调整。">
+        <demo-textarea-stateful />
       </docs-demo>
 
       <h2 class="docs-section__title" id="textarea-api">API</h2>

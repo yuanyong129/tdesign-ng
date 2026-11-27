@@ -891,6 +891,191 @@ try {
   assert.deepEqual(autoCompleteInput.committed,{value:'vue',changes:['v','vue'],compositions:['v','vue']});
   assert.equal(autoCompleteInput.selected,autoCompleteInput.chosen); assert.equal(autoCompleteInput.enters,1);
   console.log('PASS AutoComplete consuming Input: composition once, Enter ignored during IME, arrow selection and Enter once');
+  await page('/textarea', 'demo-textarea-stateful textarea');
+  const textareaState = await evaluate(`(async () => {
+    const root=document.querySelector('demo-textarea-stateful'), demo=ng.getComponent(root);
+    const [defaultInput,input,formInput]=root.querySelectorAll('textarea');
+    const edit=async(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));${settle}};
+    const initial=defaultInput.value; await edit(defaultInput,'用户编辑');
+    demo.initial.set('不覆盖编辑'); ng.applyChanges(demo); ${settle}
+    const defaultEdited=defaultInput.value;
+    const minHeight=defaultInput.getBoundingClientRect().height;
+    demo.rows.set({minRows:4,maxRows:5}); ng.applyChanges(demo); ${settle}
+    const larger=defaultInput.getBoundingClientRect().height>minHeight+20;
+    demo.rows.set(false); ng.applyChanges(demo); ${settle}
+    const autoOff=defaultInput.style.height==='';
+    await edit(input,'中😀文x'); const unicode=input.value;
+    const before=demo.changes(); input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));
+    input.value='组合测试'; input.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true})); ${settle}
+    const draft=input.value;
+    input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true})); input.dispatchEvent(new InputEvent('input',{bubbles:true})); ${settle}
+    const composition={text:input.value,count:demo.changes()-before};
+    demo.acceptChanges.set(false); ng.applyChanges(demo); ${settle}
+    await edit(input,'拒绝'); const rejected=input.value;
+    demo.disabled.set(true); ng.applyChanges(demo); ${settle}
+    const keys=demo.keys(),changes=demo.changes(); await edit(input,'禁用');
+    input.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,key:'x'})); ${settle}
+    const disabled=input.disabled && demo.keys()===keys && demo.changes()===changes;
+    demo.disabled.set(false); demo.readonly.set(true); ng.applyChanges(demo); ${settle}
+    await edit(input,'只读'); const readonly=input.readOnly && demo.changes()===changes;
+    formInput.focus(); await edit(formInput,'延迟表单');
+    const pending={model:demo.control.value,text:formInput.value,touched:demo.control.touched};
+    formInput.blur(); ${settle}
+    const blurred={model:demo.control.value,touched:demo.control.touched};
+    demo.control.disable(); ng.applyChanges(demo); ${settle} const formDisabled=formInput.disabled;
+    demo.control.enable(); demo.control.reset(); ng.applyChanges(demo); ${settle}
+    return {initial,defaultEdited,larger,autoOff,unicode,draft,composition,rejected,disabled,readonly,pending,blurred,formDisabled,
+      reset:{text:formInput.value,touched:demo.control.touched}};
+  })()`);
+  assert.equal(textareaState.initial,'默认内容'); assert.equal(textareaState.defaultEdited,'用户编辑');
+  assert.equal(textareaState.larger,true); assert.equal(textareaState.autoOff,true); assert.equal(textareaState.unicode,'中😀文');
+  assert.equal(textareaState.draft,'组合测试'); assert.deepEqual(textareaState.composition,{text:'组合测',count:1});
+  assert.equal(textareaState.rejected,'组合测'); assert.equal(textareaState.disabled,true); assert.equal(textareaState.readonly,true);
+  assert.deepEqual(textareaState.pending,{model:'表单默认',text:'延迟表单',touched:false});
+  assert.deepEqual(textareaState.blurred,{model:'延迟表单',touched:true}); assert.equal(textareaState.formDisabled,true);
+  assert.deepEqual(textareaState.reset,{text:'表单默认',touched:false});
+  console.log('PASS Textarea state: default once, controlled rejection, Unicode/IME, dynamic autosize, readonly/disabled, updateOn blur/reset');
+
+  await page('/checkbox', 'demo-checkbox-stateful input');
+  const checkboxState = await evaluate(`(async () => {
+    const root=document.querySelector('demo-checkbox-stateful'), demo=ng.getComponent(root);
+    const click=async el=>{el.click();${settle}};
+    const first=root.querySelector('.stateful-default input'); const initial=first.checked;
+    await click(first); demo.initial.set(false); ng.applyChanges(demo); ${settle}
+    demo.initial.set(true); ng.applyChanges(demo); ${settle} const defaultEdited=first.checked;
+    const controlled=root.querySelector('.stateful-controlled input'); await click(controlled);
+    const rejected={checked:controlled.checked,events:demo.proposals()};
+    const group=root.querySelector('.stateful-group'); let items=group.querySelectorAll('input');
+    const initialGroup=[...items].map(el=>el.checked); const names=[...items].map(el=>el.name);
+    await click(items[0]); const limited={value:[...demo.value()],checks:[...items].map(el=>el.checked),lastDisabled:items[3].disabled,events:demo.groupChanges()};
+    await click(items[2]); demo.dynamicValue.set('x'); ng.applyChanges(demo); ${settle}
+    await click(items[0]); const renamed=[...demo.value()];
+    demo.max.set(4); demo.extra.set(true); ng.applyChanges(demo); ${settle}
+    items=group.querySelectorAll('input'); await click(items[0]); const all=[...demo.value()];
+    await click(items[0]); const preserved=[...demo.value()];
+    demo.readonly.set(true); ng.applyChanges(demo); ${settle}
+    const before=demo.groupChanges(); await click(items[0]); const readonly=demo.groupChanges()===before;
+    demo.readonly.set(false); demo.disabled.set(true); ng.applyChanges(demo); ${settle}
+    const disabled=[...items].every(el=>el.disabled); await click(items[0]); const disabledStable=demo.groupChanges()===before;
+    const rejectedGroup=root.querySelector('.stateful-rejected-group');
+    await click(rejectedGroup.querySelectorAll('input')[1]); const rejectedChecks=[...rejectedGroup.querySelectorAll('input')].map(el=>el.checked);
+    const single=root.querySelector('.stateful-form-single input'); single.focus(); await click(single);
+    const singlePending={model:demo.single.value,checked:single.checked,touched:demo.single.touched}; single.blur(); ${settle}
+    const singleBlurred={model:demo.single.value,touched:demo.single.touched};
+    const formGroup=root.querySelector('.stateful-form-group'), formInputs=formGroup.querySelectorAll('input');
+    formInputs[1].focus(); await click(formInputs[1]);
+    const groupPending={model:[...demo.group.value],checks:[...formInputs].map(el=>el.checked),touched:demo.group.touched};
+    formInputs[2].focus(); ${settle} const internalFocusUntouched=!demo.group.touched;
+    formInputs[2].blur(); ${settle} const groupBlurred={model:[...demo.group.value],touched:demo.group.touched};
+    demo.single.disable(); demo.group.disable(); ng.applyChanges(demo); ${settle}
+    const formDisabled=single.disabled && [...formInputs].every(el=>el.disabled);
+    demo.single.enable(); demo.group.enable(); demo.single.reset(); demo.group.reset(); ng.applyChanges(demo); ${settle}
+    return {initial,defaultEdited,rejected,initialGroup,names,limited,renamed,all,preserved,readonly,disabled,disabledStable,rejectedChecks,
+      singlePending,singleBlurred,groupPending,internalFocusUntouched,groupBlurred,formDisabled,reset:{single:single.checked,group:[...formInputs].map(el=>el.checked),touched:demo.group.touched}};
+  })()`);
+  assert.equal(checkboxState.initial,true); assert.equal(checkboxState.defaultEdited,false);
+  assert.deepEqual(checkboxState.rejected,{checked:false,events:1}); assert.deepEqual(checkboxState.initialGroup,[false,true,false,false]);
+  assert.ok(checkboxState.names.every(name=>name==='stateful-checkbox'));
+  assert.deepEqual(checkboxState.limited,{value:['locked','a'],checks:[false,true,true,false],lastDisabled:true,events:1});
+  assert.deepEqual(checkboxState.renamed,['locked','x']); assert.deepEqual(checkboxState.all,['locked','x','b','c']); assert.deepEqual(checkboxState.preserved,['locked']);
+  assert.equal(checkboxState.readonly,true); assert.equal(checkboxState.disabled,true); assert.equal(checkboxState.disabledStable,true);
+  assert.deepEqual(checkboxState.rejectedChecks,[true,false]); assert.deepEqual(checkboxState.singlePending,{model:true,checked:false,touched:false});
+  assert.deepEqual(checkboxState.singleBlurred,{model:false,touched:true});
+  assert.deepEqual(checkboxState.groupPending,{model:['a'],checks:[true,true,false],touched:false});
+  assert.equal(checkboxState.internalFocusUntouched,true); assert.deepEqual(checkboxState.groupBlurred,{model:['a','b'],touched:true});
+  assert.equal(checkboxState.formDisabled,true); assert.deepEqual(checkboxState.reset,{single:true,group:[true,false,false],touched:false});
+  console.log('PASS Checkbox state: defaults, controlled rejection, check-all/max/protected items, dynamic values, names, CVA blur/reset');
+
+  await page('/radio', 'demo-radio-stateful input');
+  const radioState = await evaluate(`(async () => {
+    const root=document.querySelector('demo-radio-stateful'), demo=ng.getComponent(root);
+    const click=async el=>{el.click();${settle}};
+    const key=async(el,key)=>{el.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,key}));${settle}};
+    const first=root.querySelector('.stateful-default input'); const initial=first.checked;
+    await click(first); demo.initial.set(false); ng.applyChanges(demo); ${settle} demo.initial.set(true); ng.applyChanges(demo); ${settle}
+    const defaultEdited=first.checked;
+    const controlled=root.querySelector('.stateful-controlled input'); await click(controlled); const rejected={checked:controlled.checked,events:demo.proposals()};
+    const group=root.querySelector('.stateful-group'); let items=group.querySelectorAll('input');
+    const tab=[...items].map(el=>el.tabIndex); await click(items[1]); const unchecked=[...items].every(el=>!el.checked);
+    demo.allowUncheck.set(false); ng.applyChanges(demo); ${settle} await click(items[1]);
+    await key(items[1],'ArrowRight'); const next={value:demo.value(),focused:document.activeElement===items[2],checks:[...items].map(el=>el.checked)};
+    const focusOutline=getComputedStyle(items[2].closest('label')).outlineWidth;
+    await key(items[2],'ArrowRight'); const wrapped=demo.value();
+    demo.extra.set(true); ng.applyChanges(demo); ${settle} items=group.querySelectorAll('input'); await key(items[1],'End'); const end=demo.value();
+    await key(items[3],'Home'); const home=demo.value();
+    demo.readonly.set(true); ng.applyChanges(demo); ${settle} const before=demo.groupChanges(); await click(items[2]); await key(items[1],'ArrowRight');
+    const readonly=demo.groupChanges()===before;
+    demo.readonly.set(false); demo.disabled.set(true); ng.applyChanges(demo); ${settle} const disabled=[...items].every(el=>el.disabled && el.tabIndex===-1);
+    const rejectedGroup=root.querySelector('.stateful-rejected-group'); await click(rejectedGroup.querySelectorAll('input')[1]);
+    const rejectedChecks=[...rejectedGroup.querySelectorAll('input')].map(el=>el.checked);
+    const single=root.querySelector('.stateful-form-single input'); single.focus(); await click(single);
+    const singlePending={model:demo.single.value,checked:single.checked,touched:demo.single.touched}; single.blur(); ${settle}
+    const singleBlurred={model:demo.single.value,touched:demo.single.touched};
+    const formGroup=root.querySelector('.stateful-form-group'), formInputs=formGroup.querySelectorAll('input');
+    formInputs[1].focus(); await click(formInputs[1]); const groupPending={model:demo.group.value,checked:formInputs[1].checked,touched:demo.group.touched};
+    formInputs[1].blur(); ${settle} const groupBlurred={model:demo.group.value,touched:demo.group.touched};
+    demo.single.disable(); demo.group.disable(); ng.applyChanges(demo); ${settle} const formDisabled=single.disabled && [...formInputs].every(el=>el.disabled);
+    demo.single.enable(); demo.group.enable(); demo.single.reset(); demo.group.reset(); ng.applyChanges(demo); ${settle}
+    return {initial,defaultEdited,rejected,tab,unchecked,next,focusOutline,wrapped,end,home,readonly,disabled,rejectedChecks,
+      singlePending,singleBlurred,groupPending,groupBlurred,formDisabled,reset:{single:single.checked,group:[...formInputs].map(el=>el.checked),touched:demo.group.touched}};
+  })()`);
+  assert.equal(radioState.initial,true); assert.equal(radioState.defaultEdited,false); assert.deepEqual(radioState.rejected,{checked:false,events:1});
+  assert.deepEqual(radioState.tab,[-1,0,-1]); assert.equal(radioState.unchecked,true);
+  assert.deepEqual(radioState.next,{value:'c',focused:true,checks:[false,false,true]});
+  assert.equal(radioState.focusOutline,'2px');
+  assert.equal(radioState.wrapped,'b'); assert.equal(radioState.end,'d'); assert.equal(radioState.home,'b');
+  assert.equal(radioState.readonly,true); assert.equal(radioState.disabled,true); assert.deepEqual(radioState.rejectedChecks,[true,false]);
+  assert.deepEqual(radioState.singlePending,{model:true,checked:false,touched:false}); assert.deepEqual(radioState.singleBlurred,{model:false,touched:true});
+  assert.deepEqual(radioState.groupPending,{model:'b',checked:true,touched:false}); assert.deepEqual(radioState.groupBlurred,{model:'c',touched:true});
+  assert.equal(radioState.formDisabled,true); assert.deepEqual(radioState.reset,{single:true,group:[true,false],touched:false});
+  console.log('PASS Radio state: defaults, rejection, allowUncheck, roving focus/arrows/Home/End, disabled/readonly, CVA blur/reset');
+
+  await page('/switch', 'demo-switch-guard .guarded-switch');
+  const switchState = await evaluate(`(async () => {
+    const root=document.querySelector('demo-switch-guard'), demo=ng.getComponent(root);
+    let host=root.querySelector('.guarded-switch');
+    const click=async()=>{host.click();${settle}};
+    await click(); await click(); const pending={calls:demo.calls(),changes:demo.changes(),busy:host.getAttribute('aria-busy'),spinner:!!host.querySelector('.t-loading')};
+    const spinnerFits=parseFloat(getComputedStyle(host.querySelector('.t-icon-loading')).width)<=parseFloat(getComputedStyle(host).height);
+    demo.finish(true); ${settle} const accepted={value:demo.value(),changes:demo.changes(),busy:host.getAttribute('aria-busy')};
+    await click(); demo.finish(false); ${settle} const denied=demo.value()===true && demo.changes()===1;
+    await click(); demo.fail(); ${settle} const rejected=demo.value()===true && demo.changes()===1 && !ng.getComponent(host).pending();
+    await click(); demo.disabled.set(true); ng.applyChanges(demo); ${settle} demo.finish(true); ${settle} const disabledStable=demo.changes()===1;
+    demo.disabled.set(false); ng.applyChanges(demo); ${settle}
+    await click(); demo.loading.set(true); ng.applyChanges(demo); ${settle} demo.finish(true); ${settle} const loadingStable=demo.changes()===1;
+    demo.loading.set(false); ng.applyChanges(demo); ${settle}
+    await click(); const staleResolve=demo.resolve;
+    demo.disabled.set(true); ng.applyChanges(demo); ${settle}
+    demo.disabled.set(false); ng.applyChanges(demo); ${settle}
+    await click(); staleResolve(true); ${settle}
+    const oldRequestStable=ng.getComponent(host).pending() && demo.changes()===1;
+    demo.finish(false); ${settle}
+    await click(); demo.value.set(false); ng.applyChanges(demo); ${settle} demo.finish(true); ${settle} const writtenStable=demo.value()===false && demo.changes()===1;
+    await click(); demo.customValue.set(['on','off']); ng.applyChanges(demo); ${settle} demo.finish(true); ${settle} const configStable=demo.changes()===1;
+    await click(); demo.mounted.set(false); ng.applyChanges(demo); ${settle} demo.finish(true); ${settle} const destroyedStable=demo.changes()===1;
+    demo.mounted.set(true); demo.customValue.set([true,false]); demo.mode.set('deny'); ng.applyChanges(demo); ${settle} host=root.querySelector('.guarded-switch');
+    await click(); const syncDenied=demo.changes()===1;
+    demo.mode.set('throw'); await click(); const syncFailed=demo.changes()===1;
+    demo.mode.set('allow'); demo.acceptChanges.set(false); await click(); const controlled=host.getAttribute('aria-checked')==='false' && demo.value()===false;
+    demo.acceptChanges.set(true); host.dispatchEvent(new KeyboardEvent('keydown',{key:' ',bubbles:true})); ${settle} const keyboard=demo.value()===true;
+    const defaultHost=root.querySelector('.default-switch'); const defaultInitial=defaultHost.getAttribute('aria-checked'); defaultHost.click(); ${settle}
+    demo.initial.set('off'); ng.applyChanges(demo); ${settle} demo.initial.set('on'); ng.applyChanges(demo); ${settle}
+    const defaultEdited=defaultHost.getAttribute('aria-checked');
+    const form=root.querySelector('.form-switch'); form.focus(); form.click(); ${settle}
+    const formPending={model:demo.control.value,checked:form.getAttribute('aria-checked'),touched:demo.control.touched}; form.blur(); ${settle}
+    const formBlurred={model:demo.control.value,touched:demo.control.touched};
+    demo.control.disable(); ng.applyChanges(demo); ${settle} const formDisabled=form.tabIndex===-1 && form.getAttribute('aria-disabled')==='true';
+    demo.control.enable(); demo.control.reset(); ng.applyChanges(demo); ${settle}
+    return {pending,spinnerFits,accepted,denied,rejected,disabledStable,loadingStable,oldRequestStable,writtenStable,configStable,destroyedStable,syncDenied,syncFailed,controlled,keyboard,
+      defaultInitial,defaultEdited,formPending,formBlurred,formDisabled,reset:{checked:form.getAttribute('aria-checked'),model:demo.control.value,touched:demo.control.touched}};
+  })()`);
+  assert.deepEqual(switchState.pending,{calls:1,changes:0,busy:'true',spinner:true}); assert.deepEqual(switchState.accepted,{value:true,changes:1,busy:null});
+  assert.equal(switchState.spinnerFits,true);
+  for (const key of ['denied','rejected','disabledStable','loadingStable','oldRequestStable','writtenStable','configStable','destroyedStable','syncDenied','syncFailed','controlled','keyboard']) assert.equal(switchState[key],true,key);
+  assert.equal(switchState.defaultInitial,'true'); assert.equal(switchState.defaultEdited,'false');
+  assert.deepEqual(switchState.formPending,{model:'off',checked:'true',touched:false}); assert.deepEqual(switchState.formBlurred,{model:'on',touched:true});
+  assert.equal(switchState.formDisabled,true); assert.deepEqual(switchState.reset,{checked:'false',model:'off',touched:false});
+  console.log('PASS Switch state: default/custom/CVA, sync and async guards, one pending request, rejection, stale result cancellation, destroy, keyboard');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

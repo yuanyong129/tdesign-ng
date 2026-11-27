@@ -17,6 +17,13 @@ t-radio {
   display: contents;
 }
 
+// Radio 的可聚焦节点移到原生 input；把 vendor label:focus-visible 的轮廓等价映射回来。
+t-radio > label:has(> input:focus-visible) {
+  outline: 2px solid var(--td-brand-color);
+  outline-offset: var(--td-comp-paddingTB-xs);
+  border-radius: 0;
+}
+
 // 图标宿主默认是 inline 元素，保证其在文本流中与上游 svg 表现一致
 t-icon {
   display: inline-block;

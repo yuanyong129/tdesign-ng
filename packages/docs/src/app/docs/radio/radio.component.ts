@@ -1,3 +1,4 @@
+import { DemoRadioStateful } from './demos/radio-stateful';
 import { Component } from '@angular/core';
 import { ApiTable } from '../../api/api-table.component';
 import { DemoBlock } from '../demo-block';
@@ -13,6 +14,7 @@ import { DemoRadioState } from './demos/radio-state';
 @Component({
   selector: 'radio-docs',
   imports: [
+    DemoRadioStateful,
     ApiTable,
     DemoBlock,
     PageNav,
@@ -57,6 +59,10 @@ import { DemoRadioState } from './demos/radio-state';
 
       <docs-demo id="radio-state" title="禁用与只读" description="整组或单项都可以禁用，readonly 保持样式但不响应点击。">
         <demo-radio-state />
+      </docs-demo>
+
+      <docs-demo id="radio-stateful" title="默认值、受控状态与表单" description="支持默认选中与组默认值；allowUncheck 下发子项；Tab、方向键、Home/End 支持组内导航，跳过禁用项。">
+        <demo-radio-stateful />
       </docs-demo>
 
       <h2 class="docs-section__title" id="radio-api">API</h2>

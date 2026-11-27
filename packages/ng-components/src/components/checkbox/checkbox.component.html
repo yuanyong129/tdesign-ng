@@ -3,13 +3,15 @@
     #former
     type="checkbox"
     class="t-checkbox__former"
-    [attr.name]="name()"
+    [attr.name]="mergedName()"
     [checked]="isChecked()"
     [indeterminate]="isIndeterminate()"
     [disabled]="isDisabled()"
     [attr.aria-checked]="isIndeterminate() ? 'mixed' : isChecked()"
+    [attr.aria-readonly]="isReadonly() ? 'true' : null"
     (click)="handleClick($event)"
     (change)="handleChange($event)"
+    (blur)="handleBlur()"
   />
   <span class="t-checkbox__input">
     @if (isIndeterminate()) {

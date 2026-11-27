@@ -174,3 +174,17 @@ node scripts/qa-component-completion.mjs
 - **检查结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、交互回归、`pnpm check:progress` 和 `git diff --check` 通过，missing 0 / extra 0。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 799.52 kB）。生成 API / demo 时开发服务可能触发整页重载，最终回归在文件稳定后运行通过。
 
 **接续任务**：第 3 轮 Textarea / Checkbox / Radio / Switch → Form → SelectInput，先核实已有实现。第 3 轮整体与 M2 尚未完成。
+
+### 2026-11-27：第 3 轮 Textarea / Checkbox / Radio / Switch 状态
+
+- **默认值与受控/CVA**：新增 Textarea.defaultValue、Checkbox.defaultChecked、CheckboxGroup.defaultValue、Radio.defaultChecked、RadioGroup.defaultValue、Switch.defaultValue。六个入口复用内部 createControllableState：默认值只初始化一次；绑定值时修改只发提案，父级拒绝后恢复显示；CVA 写值优先于默认值，支持 disable / enable / reset。未设置受控值的输入默认改为 undefined，非受控仍保持原空值/未选中默认行为。使用表单时不同时绑定 value / checked。
+- **Textarea**：组合输入保留草稿，结束后统一归一化并去重尾随 input；受控拒绝不遗留原生草稿。maxlength 按 Unicode 码点限制并优先于 maxcharacter，移除原生 maxlength 对 emoji 和 IME 的提前拦截；零上限、计数、超限校验同步。autosize 现在响应程序写值、默认值、草稿与配置变化，关闭时清理行内高度；补 getComputedStyle 环境守卫。keydown / keyup 不再与原生冒泡事件重复触发，禁用下不发键盘输出。
+- **Checkbox / Group**：全选只修改可编辑项，保留禁用/只读及当前未渲染项，并遵守 max；达到上限后禁用未选中项。动态 value、checkAll、禁用与只读变化参与组内同步；组 name 下发到原生 input；订阅在成员移除/销毁时释放。原生 change 在内部停止冒泡，组 change 一次编辑只发一次；受控拒绝和 max 拒绝恢复原生 checked / indeterminate。
+- **Radio / Group**：组 allowUncheck 实际下发子项；取消选中事件值明确为 undefined。原生 input 承担可聚焦的 radio 语义；组提供 radiogroup 语义和单一 Tab 入口，方向键循环跳过禁用项，Home / End 定位首尾可编辑项。只读阻止原生方向键改值；补 aria-readonly。bridge 将 vendor 的 label:focus-visible 轮廓等价映射到 input 聚焦状态，保留键盘焦点提示；组内焦点移动不误报 touched；背景动画帧去重并在销毁时取消。
+- **表单失焦语义**：Checkbox、Radio、Switch 改为失焦通知 touched；组通过焦点离开整组通知。验证 updateOn: 'blur' 编辑时模型不提前提交，离焦后提交；整组内部换焦点保持未 touched。Textarea 保留失焦语义并验证相同流程。
+- **Switch 异步拦截**：等待时显示内置 loading 与 aria-busy，重复点击不重复调用 beforeChange；同步 false/抛错、Promise false/拒绝均不切换。值、禁用/加载、customValue、beforeChange、CVA 写值或销毁使旧请求失效；版本检查保证旧请求不会覆盖新请求或清除新请求的等待状态。键盘重复按下不重复切换；CVA 空值归一到自定义未选中值。加载图标补齐 vendor 的 t-icon 类，使用开关的图标尺寸规则，避免继承 Loading 的 36px 默认尺寸。
+- **进度与边界**：新增 4 个可操作 demo，共 327 → 331 个；已对齐 1056 → 1062（67.4%）。六项默认值此前误记为 Angular 映射，本批补齐真实功能；真实债务仍为 223，零债务目录仍为 42/73，不将映射修正冒充债务清零。Checkbox / Group 的 lazyLoad 两项继续保留，富内容与完整 SSR/水合等差异不在本批声称完成。
+- **交互与页面**：新增默认值不覆盖编辑、受控拒绝、CVA disable / enable / reset / updateOn blur / touched、Unicode / IME、动态 autosize、组全选上限与保护项、动态成员和值、单次 change、allowUncheck、Tab 入口与方向键 / Home / End、焦点轮廓、Switch 同步/异步拒绝及多种失效取消、销毁、防重和旧新请求隔离回归，保留前批全部交互检查并通过。四个页面探针均 issues / badResources 为空；Radio / Switch 截图已检查。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、交互回归、`pnpm check:progress` 和 `git diff --check` 通过，missing 0 / extra 0。保留既有 footer slot、Browserslist、qrcode CommonJS 和首包预算告警（约 799.66 kB）。
+
+**接续任务**：第 3 轮 Form → SelectInput → AutoComplete → Tabs.list → Breadcrumb / Steps / Statistic，继续核实已有实现。第 3 轮整体与 M2 尚未完成。

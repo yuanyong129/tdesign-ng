@@ -36,7 +36,7 @@ export interface RadioChangeEvent {
 }
 
 export interface RadioGroupChangeEvent {
-  value: RadioValue;
+  value: RadioValue | undefined;
   event: Event;
 }
 

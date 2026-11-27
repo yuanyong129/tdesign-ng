@@ -24,7 +24,7 @@ export interface CheckboxChangeEvent {
 /** 复选框组的变更事件。 */
 export interface CheckboxGroupChangeEvent {
   value: CheckboxGroupValue;
-  current: CheckboxValue;
+  current: CheckboxValue | undefined;
   option: CheckboxOption | undefined;
   type: 'check' | 'uncheck';
   event: Event;

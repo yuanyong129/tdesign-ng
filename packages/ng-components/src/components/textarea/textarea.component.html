@@ -4,9 +4,8 @@
     [class]="innerClasses()"
     [id]="innerId"
     [attr.name]="name()"
-    [attr.maxlength]="allowInputOverMax() ? null : maxlengthValue()"
     [attr.autofocus]="autofocus() ? '' : null"
-    [value]="text()"
+    [value]="displayText()"
     [placeholder]="placeholder() ?? ''"
     [disabled]="mergedDisabled()"
     [readOnly]="readonly()"
@@ -15,8 +14,8 @@
     (compositionend)="handleCompositionEnd($event)"
     (focus)="handleFocus($event)"
     (blur)="handleBlur($event)"
-    (keydown)="keydown.emit($event)"
-    (keyup)="keyup.emit($event)"
+    (keydown)="handleKey($event, 'keydown')"
+    (keyup)="handleKey($event, 'keyup')"
     (keypress)="handleKeypress($event)"
   ></textarea>
   @if (tips() || showLimit()) {

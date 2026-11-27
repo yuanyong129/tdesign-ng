@@ -11,24 +11,25 @@
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 10 |
-| 已对齐 | 7 |
-| 覆盖率 | 70.0% |
+| 已对齐 | 8 |
+| 覆盖率 | 80.0% |
 | 深度债 | 0（D1 0 / D2 0 / D3 0） |
-| Angular 惯用映射 | 3（插槽 / 双向绑定 / 事件名，不计债） |
+| Angular 惯用映射 | 2（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 5 个 |
+| 文档示例 | 6 个 |
 
 ## 组件明细
 
 ### `TSwitch`（`<t-switch>`）
 
-上游接口 `TdSwitchProps`；上游属性 10、已对齐 7（70.0%）；深度债 0 项；未登记缺失 0 项。
+上游接口 `TdSwitchProps`；上游属性 10、已对齐 8（80.0%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `value` | SwitchValue | false | 开关的值 |
+| `value` | SwitchValue \| undefined | undefined | 受控开关值，未设置时使用非受控状态 |
+| `defaultValue` | SwitchValue | false | 非受控初始值，仅初始化时读取 |
 | `size` | SwitchSize | 'medium' | 开关尺寸 |
 | `disabled` | boolean | false | 是否禁用 |
 | `loading` | boolean | false | 是否加载中 |
@@ -47,7 +48,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `defaultValue` | Angular 惯用映射 | Angular 用 [value] 初始值 + ControlValueAccessor |
 | `modelValue` | Angular 惯用映射 | Angular 用 [(value)] 双向绑定 + ControlValueAccessor |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出，参数是 { value, event } |
 
@@ -55,6 +55,7 @@
 
 - `packages/docs/src/app/docs/switch/demos/switch-basic.ts`
 - `packages/docs/src/app/docs/switch/demos/switch-custom.ts`
+- `packages/docs/src/app/docs/switch/demos/switch-guard.ts`
 - `packages/docs/src/app/docs/switch/demos/switch-label.ts`
 - `packages/docs/src/app/docs/switch/demos/switch-size.ts`
 - `packages/docs/src/app/docs/switch/demos/switch-state.ts`

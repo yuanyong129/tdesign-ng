@@ -2,16 +2,20 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  afterRenderEffect,
+  ElementRef,
+  inject,
   computed,
-  effect,
   forwardRef,
   input,
   output,
   signal,
+  viewChild,
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from '@angular/forms';
+import { createControllableState } from '../../_utils/controllable-state';
 import type { RadioChangeEvent, RadioValue } from './radio.types';
 
 @Component({
@@ -32,9 +36,12 @@ export class TRadio implements ControlValueAccessor {
   /**
    * @zh 是否选中，独立使用时生效
    * @en Whether the radio is checked, used when standalone
-   * @defaultValue false
+   * @defaultValue undefined
    */
-  readonly checked = input(false, { transform: booleanAttribute });
+  readonly checked = input<boolean | undefined, boolean | string | undefined>(undefined, { transform: (value) => value === undefined ? undefined : booleanAttribute(value) });
+
+  /** @zh 非受控初始选中态，仅初始化时读取 @en Initial uncontrolled checked state, read once @defaultValue false */
+  readonly defaultChecked = input(false, { transform: booleanAttribute });
 
   /**
    * @zh 单选框的值，在单选框组中用于匹配
@@ -84,11 +91,16 @@ export class TRadio implements ControlValueAccessor {
   /** @zh 值变化事件 @en Change event */
   readonly change = output<RadioChangeEvent>();
 
-  private readonly innerChecked = signal(false);
+  private readonly state = createControllableState<boolean>(this.checked, () => this.defaultChecked());
+  private readonly former = viewChild<ElementRef<HTMLInputElement>>('former');
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly editRevision = signal(0);
   private readonly groupChecked = signal<boolean | null>(null);
   private readonly groupDisabled = signal(false);
   private readonly groupReadonly = signal(false);
   private readonly groupName = signal<string | undefined>(undefined);
+  private readonly groupAllowUncheck = signal(false);
+  protected readonly groupTabIndex = signal(0);
   private readonly disabledByForms = signal(false);
   private readonly isButton = signal(false);
 
@@ -103,7 +115,7 @@ export class TRadio implements ControlValueAccessor {
 
   protected readonly isReadonly = computed(() => this.readonly() || this.groupReadonly());
 
-  protected readonly isChecked = computed(() => this.groupChecked() ?? this.innerChecked());
+  protected readonly isChecked = computed(() => this.groupChecked() ?? this.state.current());
 
   protected readonly mergedName = computed(() => this.name() ?? this.groupName());
 
@@ -115,20 +127,22 @@ export class TRadio implements ControlValueAccessor {
   });
 
   constructor() {
-    // 独立使用时，外部 checked 变化同步到内部状态；受组控制时不覆盖组下发的状态
-    effect(() => {
-      const checked = this.checked();
-      if (this.groupChecked() !== null) return;
-      untracked(() => this.innerChecked.set(checked));
+    afterRenderEffect(() => {
+      this.editRevision();
+      const checked = this.isChecked();
+      const input = this.former()?.nativeElement;
+      if (input) input.checked = checked;
     });
   }
 
   /** 由单选框组调用，下发选中态与形态。 */
-  setGroupState(checked: boolean, isButton: boolean, name?: string): void {
+  setGroupState(checked: boolean, isButton: boolean, name?: string, allowUncheck = false, tabIndex = 0): void {
     untracked(() => {
       this.groupChecked.set(checked);
       this.isButton.set(isButton);
       this.groupName.set(name);
+      this.groupAllowUncheck.set(allowUncheck);
+      this.groupTabIndex.set(tabIndex);
     });
   }
 
@@ -142,6 +156,16 @@ export class TRadio implements ControlValueAccessor {
     this.groupReadonly.set(readonly);
   }
 
+  clearGroup(): void {
+    this.groupChecked.set(null); this.groupDisabled.set(false); this.groupReadonly.set(false);
+    this.groupName.set(undefined); this.groupAllowUncheck.set(false); this.groupTabIndex.set(0); this.isButton.set(false);
+  }
+
+  focusInput(): void { this.former()?.nativeElement.focus(); }
+  containsTarget(target: EventTarget | null): boolean { return target instanceof Node && this.host.nativeElement.contains(target); }
+  isEditable(): boolean { return !this.isDisabled() && !this.isReadonly(); }
+  selectFromGroup(event: KeyboardEvent): void { if (this.isEditable() && !this.isChecked()) this.commit(true, event); }
+
   protected handleClick(event: MouseEvent): void {
     if (this.isDisabled() || this.isReadonly()) {
       event.preventDefault();
@@ -151,30 +175,38 @@ export class TRadio implements ControlValueAccessor {
 
     // 阻止原生 radio 的选中行为，由组件按 allowUncheck 自行决定
     event.preventDefault();
-    const next = this.isChecked() ? !this.allowUncheck() : true;
+    this.focusInput();
+    const next = this.isChecked() ? !(this.allowUncheck() || this.groupAllowUncheck()) : true;
     if (next === this.isChecked()) return;
     this.commit(next, event);
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
+    if (this.isReadonly() && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) {
+      event.preventDefault();
+      return;
+    }
     if (event.key !== 'Enter' && event.key !== ' ') return;
     if (this.isDisabled() || this.isReadonly()) return;
     event.preventDefault();
-    const next = this.isChecked() ? !this.allowUncheck() : true;
+    if (event.repeat) return;
+    const next = this.isChecked() ? !(this.allowUncheck() || this.groupAllowUncheck()) : true;
     if (next === this.isChecked()) return;
     this.commit(next, event);
   }
 
   private commit(checked: boolean, event: Event): void {
-    this.innerChecked.set(checked);
-    this.onTouched();
+    if (this.groupChecked() === null) this.state.set(checked);
     this.onChange(checked);
     this.checkedChange.emit(checked);
     this.change.emit({ checked, value: this.value(), event });
+    this.editRevision.update((revision) => revision + 1);
   }
 
+  protected handleBlur(): void { this.onTouched(); }
+
   writeValue(value: boolean | null): void {
-    this.innerChecked.set(!!value);
+    this.state.write(!!value);
   }
 
   registerOnChange(fn: (value: boolean) => void): void {

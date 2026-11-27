@@ -1,17 +1,20 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ViewEncapsulation,
   booleanAttribute,
   computed,
   effect,
   forwardRef,
+  inject,
   input,
   output,
   signal,
   untracked,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { createControllableState } from '../../_utils/controllable-state';
 import type { SwitchChangeEvent, SwitchSize, SwitchValue } from './switch.types';
 
 /**
@@ -46,14 +49,19 @@ import type { SwitchChangeEvent, SwitchSize, SwitchValue } from './switch.types'
     'role': 'switch',
     '[attr.aria-checked]': 'isChecked()',
     '[attr.aria-disabled]': 'mergedDisabled() ? "true" : null',
+    '[attr.aria-busy]': 'pending() || loading() ? "true" : null',
     '[attr.tabindex]': 'mergedDisabled() ? -1 : 0',
     '(click)': 'handleClick($event)',
     '(keydown)': 'handleKeydown($event)',
+    '(blur)': 'handleBlur()',
   },
 })
 export class TSwitch implements ControlValueAccessor {
-  /** @zh 开关的值 @en Value of the switch @defaultValue false */
-  readonly value = input<SwitchValue>(false);
+  /** @zh 受控开关值，未设置时使用非受控状态 @en Controlled switch value, omitted for uncontrolled usage @defaultValue undefined */
+  readonly value = input<SwitchValue | undefined>(undefined);
+
+  /** @zh 非受控初始值，仅初始化时读取 @en Initial uncontrolled value, read once @defaultValue false */
+  readonly defaultValue = input<SwitchValue>(false);
 
   /** @zh 开关尺寸 @en Size of the switch @defaultValue 'medium' @values small,medium,large */
   readonly size = input<SwitchSize>('medium');
@@ -91,7 +99,10 @@ export class TSwitch implements ControlValueAccessor {
   /** @zh 值变化事件，携带原始事件 @en Change event with the raw event */
   readonly change = output<SwitchChangeEvent>();
 
-  private readonly innerValue = signal<SwitchValue>(false);
+  private readonly state = createControllableState(this.value, () => this.defaultValue());
+  protected readonly pending = signal(false);
+  private requestVersion = 0;
+  private destroyed = false;
 
   private readonly disabledByForms = signal(false);
 
@@ -105,7 +116,7 @@ export class TSwitch implements ControlValueAccessor {
 
   protected readonly inactiveValue = computed<SwitchValue>(() => this.customValue()?.[1] ?? false);
 
-  protected readonly isChecked = computed(() => this.innerValue() === this.activeValue());
+  protected readonly isChecked = computed(() => this.state.current() === this.activeValue());
 
   protected readonly labelText = computed(() => {
     const label = this.label();
@@ -122,7 +133,7 @@ export class TSwitch implements ControlValueAccessor {
     if (this.mergedDisabled()) {
       classes.push('t-is-disabled');
     }
-    if (this.loading()) {
+    if (this.loading() || this.pending()) {
       classes.push('t-is-loading');
     }
     return classes.join(' ');
@@ -131,17 +142,19 @@ export class TSwitch implements ControlValueAccessor {
   /** 外部 `value` 变化时同步到内部状态；用户点击时内部状态先变，再通过输出回写。 */
   constructor() {
     effect(() => {
-      const next = this.value();
+      this.state.current(); this.mergedDisabled(); this.loading(); this.customValue(); this.beforeChange();
       untracked(() => {
-        if (next !== this.innerValue()) {
-          this.innerValue.set(next);
-        }
+        this.requestVersion++;
+        this.pending.set(false);
       });
     });
+    inject(DestroyRef).onDestroy(() => { this.destroyed = true; this.requestVersion++; });
   }
 
   writeValue(value: SwitchValue | null | undefined): void {
-    this.innerValue.set(value ?? false);
+    this.requestVersion++;
+    this.pending.set(false);
+    this.state.write(value ?? this.inactiveValue());
   }
 
   registerOnChange(fn: (value: SwitchValue) => void): void {
@@ -157,33 +170,43 @@ export class TSwitch implements ControlValueAccessor {
   }
 
   protected handleClick(event: MouseEvent): void {
-    if (this.mergedDisabled() || this.loading()) return;
+    if (this.mergedDisabled() || this.loading() || this.pending()) return;
     this.toggle(event);
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Enter' && event.key !== ' ') return;
-    if (this.mergedDisabled() || this.loading()) return;
     event.preventDefault();
+    if (this.mergedDisabled() || this.loading() || this.pending() || event.repeat) return;
     this.toggle(event);
   }
 
   private toggle(event: MouseEvent | KeyboardEvent): void {
-    const guard = this.beforeChange()?.();
+    const snapshot = this.state.current();
+    const active = this.activeValue(), inactive = this.inactiveValue();
+    const next = snapshot === active ? inactive : active;
+    const callback = this.beforeChange();
+    let guard: boolean | Promise<boolean> | undefined;
+    try { guard = callback?.(); } catch { return; }
     if (guard === false) return;
-    if (guard instanceof Promise) {
-      void guard.then((allowed) => {
-        if (allowed) this.apply(event);
-      });
+    if (guard && typeof (guard as Promise<boolean>).then === 'function') {
+      const version = ++this.requestVersion;
+      this.pending.set(true);
+      void Promise.resolve(guard).then((allowed) => {
+        if (allowed && version === this.requestVersion && !this.destroyed && !this.mergedDisabled() && !this.loading()
+          && this.state.current() === snapshot && this.activeValue() === active && this.inactiveValue() === inactive
+          && this.beforeChange() === callback) this.apply(next, event);
+      }).catch(() => { /* 拦截失败按拒绝处理，避免未捕获的 Promise rejection。 */ })
+        .finally(() => { if (version === this.requestVersion && !this.destroyed) this.pending.set(false); });
       return;
     }
-    this.apply(event);
+    this.apply(next, event);
   }
 
-  private apply(event: MouseEvent | KeyboardEvent): void {
-    const next = this.isChecked() ? this.inactiveValue() : this.activeValue();
-    this.innerValue.set(next);
-    this.onTouched();
+  protected handleBlur(): void { this.onTouched(); }
+
+  private apply(next: SwitchValue, event: MouseEvent | KeyboardEvent): void {
+    this.state.set(next);
     this.onChange(next);
     this.valueChange.emit(next);
     this.change.emit({ value: next, event });

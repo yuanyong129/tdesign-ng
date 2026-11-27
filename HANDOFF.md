@@ -1,6 +1,6 @@
 # 交接文档 · TDesign Angular
 
-> 2026-11-27 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮 Input / InputGroup 批次已完成。当前生成进度：已对齐 1056/1576，真实深度债 223，零债务目录 42/73，示例 327 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续第 3 轮 Textarea / Checkbox / Radio / Switch，核实已有实现再补真实缺口。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）。
+> 2026-11-27 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮 Input / InputGroup 及 Textarea / Checkbox / Radio / Switch 状态批次已完成。当前生成进度：已对齐 1062/1576，真实深度债 223，零债务目录 42/73，示例 331 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续第 3 轮 Form，核实已有实现再补真实缺口；Checkbox 的 lazyLoad 两项仍保留。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）。
 >
 > 用户明确要求（2026-11-27）：后续每批验证完成后可自动 commit，不必询问；及时同步计划与交接文档，尤其 `docs/progress/`。progress 必须通过 `pnpm gen:progress` 生成，并用 `pnpm check:progress` 校验，不手改生成物。
 

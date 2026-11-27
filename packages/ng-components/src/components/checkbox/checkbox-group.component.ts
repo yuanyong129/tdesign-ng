@@ -2,18 +2,22 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  ElementRef,
   computed,
   contentChildren,
   viewChildren,
   effect,
   forwardRef,
   input,
+  inject,
   output,
   signal,
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from '@angular/forms';
+import { createControllableState } from '../../_utils/controllable-state';
 import { TCheckbox } from './checkbox.component';
 import {
   normalizeOption,
@@ -26,7 +30,7 @@ import {
 @Component({
   selector: 't-checkbox-group',
   templateUrl: './checkbox-group.component.html',
-  host: { class: 't-checkbox-group' },
+  host: { class: 't-checkbox-group', role: 'group', '(focusout)': 'handleFocusOut($event)' },
   standalone: true,
   imports: [TCheckbox],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,9 +47,12 @@ export class TCheckboxGroup implements ControlValueAccessor {
   /**
    * @zh 选中的值集合
    * @en The checked values
-   * @defaultValue []
+   * @defaultValue undefined
    */
-  readonly value = input<CheckboxGroupValue>([]);
+  readonly value = input<CheckboxGroupValue | undefined>(undefined);
+
+  /** @zh 非受控初始值，仅初始化时读取 @en Initial uncontrolled value, read once @defaultValue [] */
+  readonly defaultValue = input<CheckboxGroupValue>([]);
 
   /**
    * @zh 选项列表，配置后用 options 渲染；不配置时使用内容投影
@@ -98,7 +105,8 @@ export class TCheckboxGroup implements ControlValueAccessor {
   private readonly viewCheckboxes = viewChildren(TCheckbox);
   private readonly children = computed(() => [...this.viewCheckboxes(), ...this.contentCheckboxes()]);
 
-  private readonly innerValue = signal<CheckboxGroupValue>([]);
+  private readonly state = createControllableState(this.value, () => [...this.defaultValue()]);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly disabledByForms = signal(false);
 
   private onChange: (value: CheckboxGroupValue) => void = () => {};
@@ -106,24 +114,14 @@ export class TCheckboxGroup implements ControlValueAccessor {
 
   protected readonly items = computed(() => (this.options() ?? []).map((option) => normalizeOption(option)));
 
-  protected readonly allValues = computed(() =>
-    this.children()
-      .filter((child) => !child.checkAll())
-      .map((child) => child.value()),
-  );
-
   constructor() {
-    effect(() => {
-      const value = this.value();
-      untracked(() => this.innerValue.set(value ?? []));
-    });
-
+    inject(DestroyRef).onDestroy(() => this.children().forEach((child) => child.clearGroup()));
     // 组内选中态统一由 group 决定，向下推送
     effect(() => {
-      const value = this.innerValue();
+      const value = this.state.current();
       const children = this.children();
       if (!children.length) return;
-      untracked(() => this.syncChildren(value, children));
+      this.syncChildren(value, children);
     });
 
     // 禁用与只读向下推送，并订阅子项变更
@@ -131,25 +129,30 @@ export class TCheckboxGroup implements ControlValueAccessor {
       const children = this.children();
       const disabled = this.disabled() || this.disabledByForms();
       const readonly = this.readonly();
+      const name = this.name();
+      const value = this.state.current();
+      const max = this.max();
       const subscriptions = children.map((child) => {
-        child.setGroupDisabled(disabled);
+        child.setGroupDisabled(disabled || (!child.checkAll() && !value.includes(child.value()) && max !== undefined && value.length >= max));
         child.setGroupReadonly(readonly);
+        child.setGroupName(name);
         return child.change.subscribe((event) => this.handleChildChange(child, event));
       });
-      onCleanup(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
+      onCleanup(() => { subscriptions.forEach((subscription) => subscription.unsubscribe()); untracked(() => children.filter((child) => !this.children().includes(child)).forEach((child) => child.clearGroup())); });
     });
   }
 
   private syncChildren(value: CheckboxGroupValue, children: readonly TCheckbox[]): void {
     const items = children.filter((child) => !child.checkAll());
+    const editable = items.filter((child) => !child.isProtectedForGroup());
     let checkedCount = 0;
     for (const child of items) {
       const checked = value.includes(child.value());
-      if (checked) checkedCount += 1;
+      if (checked && editable.includes(child)) checkedCount += 1;
       child.setGroupState(checked);
     }
-    const allChecked = items.length > 0 && checkedCount === items.length;
-    const indeterminate = checkedCount > 0 && checkedCount < items.length;
+    const allChecked = editable.length > 0 && checkedCount === editable.length;
+    const indeterminate = checkedCount > 0 && checkedCount < editable.length;
     for (const child of children) {
       if (child.checkAll()) child.setGroupState(allChecked, indeterminate);
     }
@@ -157,7 +160,7 @@ export class TCheckboxGroup implements ControlValueAccessor {
 
   private handleChildChange(child: TCheckbox, event: { checked: boolean; event: Event }): void {
     if (this.isDisabled() || this.isReadonly()) {
-      this.syncChildren(this.innerValue(), this.children());
+      this.syncChildren(this.state.current(), this.children());
       return;
     }
 
@@ -166,7 +169,7 @@ export class TCheckboxGroup implements ControlValueAccessor {
       return;
     }
 
-    const current = this.innerValue();
+    const current = this.state.current();
     const value = child.value();
     const exists = current.includes(value);
     const max = this.max();
@@ -181,7 +184,18 @@ export class TCheckboxGroup implements ControlValueAccessor {
 
   private setAll(checked: boolean, event: Event): void {
     if (this.isDisabled() || this.isReadonly()) return;
-    this.apply(checked ? [...this.allValues()] : [], undefined, checked ? 'check' : 'uncheck', event);
+    const editable = this.children().filter((child) => !child.checkAll() && !child.isProtectedForGroup()).map((child) => child.value());
+    const current = this.state.current();
+    const next = checked ? [...current] : current.filter((value) => !editable.includes(value));
+    if (checked) {
+      const max = this.max();
+      for (const value of editable) {
+        if (max !== undefined && next.length >= max) break;
+        if (!next.includes(value)) next.push(value);
+      }
+    }
+    if (next.length === current.length && next.every((value, index) => value === current[index])) return;
+    this.apply(next, undefined, checked ? 'check' : 'uncheck', event);
   }
 
   private apply(
@@ -190,17 +204,21 @@ export class TCheckboxGroup implements ControlValueAccessor {
     type: 'check' | 'uncheck',
     event: Event,
   ): void {
-    this.innerValue.set(next);
-    this.onTouched();
+    this.state.set(next);
     this.onChange(next);
     this.valueChange.emit(next);
     this.change.emit({
       value: next,
-      current: current as CheckboxValue,
+      current,
       option: this.options()?.find((option) => normalizeOption(option).value === current),
       type,
       event,
     });
+    this.syncChildren(this.state.current(), this.children());
+  }
+
+  protected handleFocusOut(event: FocusEvent): void {
+    if (!event.relatedTarget || !this.host.nativeElement.contains(event.relatedTarget as Node)) this.onTouched();
   }
 
   private isDisabled(): boolean {
@@ -212,7 +230,7 @@ export class TCheckboxGroup implements ControlValueAccessor {
   }
 
   writeValue(value: CheckboxGroupValue | null): void {
-    this.innerValue.set(value ?? []);
+    this.state.write(value ?? []);
   }
 
   registerOnChange(fn: (value: CheckboxGroupValue) => void): void {

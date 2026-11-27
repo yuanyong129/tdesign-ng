@@ -1,18 +1,20 @@
 <label
   [class]="classes()"
-  [attr.tabindex]="isDisabled() ? null : 0"
   (click)="handleClick($event)"
   (keydown)="handleKeydown($event)"
 >
   <input
+    #former
     type="radio"
     [class]="prefixClass() + '__former'"
     [attr.name]="mergedName()"
     [attr.value]="value()"
     [checked]="isChecked()"
     [disabled]="isDisabled()"
-    tabindex="-1"
+    [attr.tabindex]="isDisabled() ? -1 : groupTabIndex()"
+    (blur)="handleBlur()"
     [attr.aria-checked]="isChecked()"
+    [attr.aria-readonly]="isReadonly() ? 'true' : null"
   />
   <span [class]="prefixClass() + '__input'"></span>
   <span [class]="prefixClass() + '__label'"

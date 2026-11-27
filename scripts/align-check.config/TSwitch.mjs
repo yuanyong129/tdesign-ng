@@ -8,6 +8,5 @@ export default {
     ignoreUpstream: {
       ...ANGULAR_EVENT_IGNORES,
       'modelValue': 'Angular 用 [(value)] 双向绑定 + ControlValueAccessor',
-      'defaultValue': 'Angular 用 [value] 初始值 + ControlValueAccessor',
     },
   };

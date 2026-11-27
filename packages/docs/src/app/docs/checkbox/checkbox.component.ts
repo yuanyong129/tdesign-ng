@@ -1,3 +1,4 @@
+import { DemoCheckboxStateful } from './demos/checkbox-stateful';
 import { Component } from '@angular/core';
 import { ApiTable } from '../../api/api-table.component';
 import { DemoBlock } from '../demo-block';
@@ -12,6 +13,7 @@ import { DemoCheckboxState } from './demos/checkbox-state';
 @Component({
   selector: 'checkbox-docs',
   imports: [
+    DemoCheckboxStateful,
     ApiTable,
     DemoBlock,
     PageNav,
@@ -51,6 +53,10 @@ import { DemoCheckboxState } from './demos/checkbox-state';
 
       <docs-demo id="checkbox-state" title="禁用、只读与半选" description="disabled 不可交互，readonly 只读，indeterminate 显示半选图标。">
         <demo-checkbox-state />
+      </docs-demo>
+
+      <docs-demo id="checkbox-stateful" title="默认值、受控状态与表单" description="defaultChecked / defaultValue 只初始化；全选遵守 max，保留禁用和只读项；表单 touched 在离焦时更新。">
+        <demo-checkbox-stateful />
       </docs-demo>
 
       <h2 class="docs-section__title" id="checkbox-api">API</h2>
