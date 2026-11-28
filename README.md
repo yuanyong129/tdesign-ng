@@ -2,7 +2,7 @@
 
 [TDesign](https://tdesign.tencent.com/) 的 Angular 实现。
 
-> **状态：`0.1.0` 首个公开预发布版本，发布准备已就绪（见 [RELEASING.md](./RELEASING.md)）。** API 仍可能在小版本内调整，生产使用请锁版本。变更见 [CHANGELOG](./CHANGELOG.md)。
+> **状态：当前已发布 `0.1.1`，下一版本 `0.2.0` 的更新日志正在整理（见 [CHANGELOG](./CHANGELOG.md)）。** API 仍可能在小版本内调整，生产使用请锁版本。发布流程见 [RELEASING.md](./RELEASING.md)。
 
 ## 安装
 
