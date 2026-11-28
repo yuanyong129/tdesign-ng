@@ -1,4 +1,4 @@
-# 前后缀 InputAdornment · 开发进度
+# InputAdornment 输入装饰器 · 开发进度
 
 > 本文件由 `pnpm gen:progress` 生成，请勿手改；进度真相是 `align-check` 与源码。
 

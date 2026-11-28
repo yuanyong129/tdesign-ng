@@ -1,4 +1,4 @@
-# 选择器 Select · 开发进度
+# Select 选择器 · 开发进度
 
 > 本文件由 `pnpm gen:progress` 生成，请勿手改；进度真相是 `align-check` 与源码。
 

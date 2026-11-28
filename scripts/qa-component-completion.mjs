@@ -1858,6 +1858,53 @@ try {
   assert.equal(popupPosition.flipped,'top-start');assert.equal(popupPosition.noFlip,'bottom-start');assert.equal(popupPosition.emptyFallback,'bottom-start');
   assert.equal(popupPosition.protectedViewport,true);assert.equal(popupPosition.overflowAllowed,true);assert.equal(popupPosition.retained,true);
   console.log('PASS Popup positioning: four-side signed offset, placement override, last modifier wins, disabled/invalid reset, fallback/flip disable, viewport push/padding, dynamic reset with original content');
+  await page('/loading', 'demo-loading-content .business-draft');
+  const loadingContent=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-loading-content'),demo=ng.getComponent(root),wrapped=root.querySelector('.loading-wrapped');
+    const apply=async()=>{ng.applyChanges(demo);${settle}};
+    const input=root.querySelector('.business-draft'),button=root.querySelector('.projected-business'),a=root.querySelector('.loading-target-a'),b=root.querySelector('.loading-target-b');
+    input.value='draft';button.click();${settle}demo.loading.set(true);await apply();
+    const panel=wrapped.querySelector('.t-loading'),parent=panel.parentElement,panelRect=panel.getBoundingClientRect(),parentRect=parent.getBoundingClientRect();
+    const initial={full:panel.classList.contains('t-loading--full'),mask:panel.classList.contains('t-loading__overlay'),busy:parent.getAttribute('aria-busy'),sized:Math.abs(panelRect.width-parentRect.width)<2&&Math.abs(panelRect.height-parentRect.height)<2};
+    demo.indicatorValue.set(demo.indicator());demo.label.set('Live loading');demo.size.set('32px');await apply();
+    const custom=!!wrapped.querySelector('.custom-loading-indicator')&&!wrapped.querySelector('svg')&&wrapped.querySelector('.custom-loading-text').textContent==='Live loading'&&getComputedStyle(wrapped.querySelector('.t-loading')).fontSize==='32px';
+    demo.indicatorValue.set(false);demo.overlay.set(false);await apply();
+    const hiddenIndicator=!wrapped.querySelector('svg,.custom-loading-indicator')&&!!wrapped.querySelector('.custom-loading-text')&&!wrapped.querySelector('.t-loading__overlay');
+    demo.content.set(demo.business());await apply();root.querySelector('.explicit-business').click();${settle}
+    const explicit=demo.explicitCount()===1&&getComputedStyle(button.parentElement.parentElement).display==='none';
+    demo.content.set('');await apply();const empty=!root.querySelector('.explicit-business')&&getComputedStyle(button.parentElement.parentElement).display==='none';
+    demo.content.set('<b>plain</b>');await apply();const escaped=wrapped.textContent.includes('<b>plain</b>')&&!wrapped.querySelector('b');
+    demo.content.set(undefined);demo.loading.set(false);await apply();
+    const preserved=root.querySelector('.business-draft')===input&&input.value==='draft'&&root.querySelector('.projected-business')===button&&demo.count()===1&&!wrapped.querySelector('.t-loading')&&parent.getAttribute('aria-busy')==='false';
+    demo.delay.set(120);demo.loading.set(true);await apply();const delayed=!wrapped.querySelector('.t-loading');demo.loading.set(false);await apply();await new Promise(r=>setTimeout(r,150));${settle}const cancelled=!wrapped.querySelector('.t-loading');
+    demo.delay.set(NaN);demo.loading.set(true);demo.indicatorValue.set(true);await apply();const immediate=!!wrapped.querySelector('svg');
+    demo.loading.set(false);demo.delay.set(0);demo.overlay.set(true);demo.attachedLoading.set(true);await apply();
+    const attached=!!a.querySelector('[data-t-loading-attachment] .t-loading--full')&&getComputedStyle(a).position==='relative'&&a.classList.contains('t-loading__parent--relative');
+    demo.attach.set(b);await apply();const moved=!a.querySelector('[data-t-loading-attachment]')&&!a.classList.contains('t-loading__parent--relative')&&!!b.querySelector('.t-loading')&&b.style.position==='relative';
+    demo.attach.set(()=>a);await apply();const resolved=!!a.querySelector('.t-loading');
+    for(const target of ['[','#missing-loading-target',document.createElement('div'),root.querySelector('.loading-attached'),root.querySelector('.loading-attached > div')]){demo.attach.set(target);await apply();if(!root.querySelector('.loading-attached .t-loading')||a.querySelector('[data-t-loading-attachment]'))throw new Error('Loading invalid attach fallback');}
+    let dynamic=a;demo.attach.set(()=>dynamic);await apply();dynamic=b;demo.attached().update();${settle}const updated=!!b.querySelector('.t-loading')&&!a.querySelector('.t-loading');
+    // Wrapped content has priority over attach. Input changes stay in the caller's view.
+    demo.loading.set(true);await apply();const wrappedPriority=!!wrapped.querySelector('.t-loading')&&!a.querySelector('.t-loading');
+    demo.attach.set(a);await apply();const service=demo.service,viewCount=service.appRef.viewCount;
+    const one=service.show({attach:a,fullscreen:false,indicator:demo.indicator(),text:'service'});await apply();
+    const owned=service.appRef.viewCount===viewCount+1&&a.querySelectorAll('[data-t-loading-attachment]').length===2&&!!a.querySelector('.custom-loading-indicator');
+    one.hide();one.hide();await apply();const shared=service.appRef.viewCount===viewCount&&a.classList.contains('t-loading__parent--relative')&&a.querySelectorAll('[data-t-loading-attachment]').length===1;
+    const delayedService=service.show({delay:120});delayedService.hide();await new Promise(r=>setTimeout(r,150));await apply();const serviceCancelled=service.appRef.viewCount===viewCount&&!document.body.classList.contains('t-loading--lock');
+    const disabled=service.show(false);disabled.hide();const noOp=service.appRef.viewCount===viewCount;
+    const first=service.show({size:'small',inheritColor:true}),second=service.show();await apply();const locked=document.body.classList.contains('t-loading--lock');
+    const fullSize=document.querySelector('.t-loading__fullscreen.t-size-s.t-loading--inherit-color'),fullscreenSize=!!fullSize&&getComputedStyle(fullSize).fontSize===getComputedStyle(fullSize.querySelector('svg')).fontSize;
+    first.hide();await apply();const stillLocked=document.body.classList.contains('t-loading--lock');
+    service.hideAll();second.hide();await apply();const cleaned=!document.body.classList.contains('t-loading--lock')&&service.appRef.viewCount===viewCount&&!!root.querySelector('.loading-independent')&&!!a.querySelector('.t-loading')&&!!wrapped.querySelector('.t-loading');
+    demo.attachedLoading.set(false);demo.loading.set(false);await apply();const released=!a.classList.contains('t-loading__parent--relative')&&!a.querySelector('[data-t-loading-attachment]');
+    a.classList.add('t-loading__parent--relative');demo.attachedLoading.set(true);await apply();demo.attachedLoading.set(false);await apply();const originalClass=a.classList.contains('t-loading__parent--relative');a.classList.remove('t-loading__parent--relative');
+    document.body.classList.add('t-loading--lock');const external=service.show();await apply();external.hide();await apply();const externalLock=document.body.classList.contains('t-loading--lock');document.body.classList.remove('t-loading--lock');
+    const temporary=service.show({attach:a,fullscreen:false,delay:100});service.hideAll();await new Promise(r=>setTimeout(r,130));await apply();temporary.hide();const disposed=service.appRef.viewCount===viewCount&&!a.querySelector('[data-t-loading-attachment]')&&a.isConnected&&b.isConnected;
+    return {initial,custom,hiddenIndicator,explicit,empty,escaped,preserved,delayed,cancelled,immediate,attached,moved,resolved,updated,wrappedPriority,owned,shared,serviceCancelled,noOp,locked,fullscreenSize,stillLocked,cleaned,released,originalClass,externalLock,disposed};
+  })()`);
+  assert.deepEqual(loadingContent.initial,{full:true,mask:true,busy:'true',sized:true});
+  for(const [key,value] of Object.entries(loadingContent))if(key!=='initial')assert.equal(value,true,'Loading '+key);
+  console.log('PASS Loading: wrapped content identity/priority, live templates/indicator/size/mask, delay cancellation, attachment resolver/fallback/update, shared parent ownership, service view destruction/idempotence/hideAll isolation, scroll-lock ownership');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

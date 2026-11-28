@@ -1,41 +1,28 @@
-@if (visible()) {
-  @if (fullscreen()) {
-    <div [class]="fullscreenClasses()" [style.z-index]="zIndex() ?? null">
-      <div [class]="baseClasses()">
-        <svg
-          class="t-loading__gradient t-icon-loading"
-          viewBox="0 0 12 12"
-          width="1em"
-          height="1em"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <foreignObject x="0" y="0" width="12" height="12">
-            <div class="t-loading__gradient-conic"></div>
-          </foreignObject>
-        </svg>
-        @if (text()) {
-          <div class="t-loading__text">{{ text() }}</div>
-        }
-      </div>
-    </div>
-  } @else {
-    <div [class]="normalClasses()">
-      <svg
-        class="t-loading__gradient t-icon-loading"
-        viewBox="0 0 12 12"
-        width="1em"
-        height="1em"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <foreignObject x="0" y="0" width="12" height="12">
-          <div class="t-loading__gradient-conic"></div>
-        </foreignObject>
-      </svg>
-      @if (text()) {
-        <div class="t-loading__text">{{ text() }}</div>
-      }
-    </div>
+<div [class.t-loading__parent--relative]="hasContent()" [style.display]="hasContent() ? null : 'contents'" [attr.aria-busy]="hasContent() ? visible() : null">
+  <span #projected [style.display]="content() === undefined ? 'contents' : 'none'"><ng-content /></span>
+  @if (content(); as value) {
+    @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} }
   }
-}
+  @if (visible() && !target()) { <ng-container [ngTemplateOutlet]="overlayTemplate" /> }
+</div>
+
+<ng-template #overlayTemplate>
+  <div [class]="overlayClasses()" [style.z-index]="zIndex() ?? null" [style.font-size]="customSize()" role="status" aria-live="polite">
+    @if (fullscreen()) {
+      <div [class]="baseClasses()" [style.font-size]="customSize()"><ng-container [ngTemplateOutlet]="indicatorTemplate" /></div>
+    } @else { <ng-container [ngTemplateOutlet]="indicatorTemplate" /> }
+  </div>
+</ng-template>
+
+<ng-template #indicatorTemplate>
+  @if (customIndicator(); as value) {
+    @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} }
+  } @else if (indicator() !== false) {
+    <svg class="t-loading__gradient t-icon-loading" viewBox="0 0 12 12" width="1em" height="1em" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <foreignObject x="0" y="0" width="12" height="12"><div class="t-loading__gradient-conic"></div></foreignObject>
+    </svg>
+  }
+  @if (text(); as value) {
+    <div class="t-loading__text">@if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} }</div>
+  }
+</ng-template>

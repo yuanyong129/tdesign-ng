@@ -6122,6 +6122,33 @@
       "file": "packages/ng-components/src/components/loading/loading.component.ts",
       "inputs": [
         {
+          "name": "content",
+          "type": "LoadingContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "包裹的业务内容，字符串或模板，优先于默认投影",
+          "en": "Wrapped text or template, takes precedence over projection",
+          "values": []
+        },
+        {
+          "name": "indicator",
+          "type": "boolean | LoadingContent",
+          "default": "true",
+          "required": false,
+          "zh": "加载图标，true 为默认、false 隐藏，也支持文本或模板",
+          "en": "Indicator, true for built-in, false to hide, or text/template",
+          "values": []
+        },
+        {
+          "name": "attach",
+          "type": "LoadingAttachNode",
+          "default": "undefined",
+          "required": false,
+          "zh": "挂载节点、选择器或函数，仅无包裹内容或全屏时生效",
+          "en": "Attachment element, selector or resolver, used without wrapped content or in fullscreen mode",
+          "values": []
+        },
+        {
           "name": "loading",
           "type": "boolean",
           "default": "true",
@@ -6132,7 +6159,7 @@
         },
         {
           "name": "text",
-          "type": "string | undefined",
+          "type": "LoadingContent",
           "default": "undefined",
           "required": false,
           "zh": "加载提示文字",
@@ -6144,8 +6171,8 @@
           "type": "LoadingSize",
           "default": "'medium'",
           "required": false,
-          "zh": "图标尺寸",
-          "en": "Icon size",
+          "zh": "图标尺寸，支持预设或 CSS 尺寸",
+          "en": "Icon size, preset or CSS length",
           "values": [
             "small",
             "medium",
@@ -6166,8 +6193,8 @@
           "type": "boolean",
           "default": "true",
           "required": false,
-          "zh": "是否显示遮罩，仅全屏时生效",
-          "en": "Whether to show the overlay, only works in full screen",
+          "zh": "是否显示全屏、包裹或挂载模式的遮罩",
+          "en": "Whether to show a mask in fullscreen, wrapped or attached mode",
           "values": []
         },
         {

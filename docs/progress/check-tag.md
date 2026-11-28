@@ -1,4 +1,4 @@
-# 可选标签 CheckTag · 开发进度
+# CheckTag 可选标签 · 开发进度
 
 > 本文件由 `pnpm gen:progress` 生成，请勿手改；进度真相是 `align-check` 与源码。
 

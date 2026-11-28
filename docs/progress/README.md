@@ -6,10 +6,10 @@
 | --- | --- |
 | 组件目录 | 73 |
 | 上游属性 | 1576 |
-| 已对齐 | 1082 |
-| 覆盖率 | 68.7% |
-| 深度债 | 200 项 |
-| 零债务组件 | 48 / 73 |
+| 已对齐 | 1085 |
+| 覆盖率 | 68.8% |
+| 深度债 | 197 项 |
+| 零债务组件 | 49 / 73 |
 
 状态图例：✅ 无债务；🚧 有深度债（D1 表格与选择线 / D2 录入与反馈 / D3 其余）；⚠️ 有未登记缺失。
 
@@ -17,79 +17,79 @@
 
 | 组件 | 目录 | 上游 | 已对齐 | 覆盖率 | D1 | D2 | D3 | 未登记 | 示例 | 状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [选择器 Select](select.md) | `select` | 55 | 20 | 36.4% | 22 | 0 | 0 | 0 | 7 | 🚧 |
-| [时间选择 TimePicker](time-picker.md) | `time-picker` | 33 | 12 | 36.4% | 17 | 0 | 0 | 0 | 3 | 🚧 |
-| [级联选择 Cascader](cascader.md) | `cascader` | 53 | 22 | 41.5% | 25 | 0 | 0 | 0 | 7 | 🚧 |
-| [树选择 TreeSelect](tree-select.md) | `tree-select` | 44 | 20 | 45.5% | 16 | 0 | 0 | 0 | 6 | 🚧 |
-| [日期选择 DatePicker](date-picker.md) | `date-picker` | 44 | 22 | 50.0% | 19 | 0 | 0 | 0 | 11 | 🚧 |
-| [日期范围 DateRangePicker](date-range-picker.md) | `date-range-picker` | 44 | 23 | 52.3% | 18 | 0 | 0 | 0 | 5 | 🚧 |
-| [输入框 Input](input.md) | `input` | 46 | 26 | 56.5% | 0 | 0 | 0 | 0 | 10 | ✅ |
-| [上传 Upload](upload.md) | `upload` | 63 | 36 | 57.1% | 0 | 7 | 3 | 0 | 3 | 🚧 |
-| [抽屉 Drawer](drawer.md) | `drawer` | 31 | 18 | 58.1% | 0 | 8 | 0 | 0 | 3 | 🚧 |
-| [对话框 Dialog](dialog.md) | `dialog` | 37 | 22 | 59.5% | 0 | 10 | 0 | 0 | 4 | 🚧 |
-| [树形控件 Tree](tree.md) | `tree` | 50 | 30 | 60.0% | 10 | 8 | 1 | 0 | 3 | 🚧 |
-| [链接 Link](link.md) | `link` | 13 | 8 | 61.5% | 0 | 0 | 0 | 0 | 6 | ✅ |
-| [穿梭框 Transfer](transfer.md) | `transfer` | 26 | 16 | 61.5% | 4 | 4 | 2 | 0 | 3 | 🚧 |
-| [文本域 Textarea](textarea.md) | `textarea` | 21 | 13 | 61.9% | 0 | 0 | 0 | 0 | 7 | ✅ |
-| [全局提示 Message](message.md) | `message` | 8 | 5 | 62.5% | 0 | 0 | 1 | 0 | 3 | 🚧 |
-| [通知 Notification](notification.md) | `notification` | 11 | 7 | 63.6% | 0 | 0 | 1 | 0 | 3 | 🚧 |
-| [自动补全 AutoComplete](auto-complete.md) | `auto-complete` | 32 | 21 | 65.6% | 1 | 0 | 0 | 0 | 4 | 🚧 |
-| [分割线 Divider](divider.md) | `divider` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [布局 Layout](layout.md) | `layout` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [标签输入框 TagInput](tag-input.md) | `tag-input` | 39 | 26 | 66.7% | 0 | 0 | 1 | 0 | 4 | 🚧 |
-| [范围输入框 RangeInput](range-input.md) | `range-input` | 28 | 19 | 67.9% | 0 | 0 | 2 | 0 | 4 | 🚧 |
-| [选项卡 Tabs](tabs.md) | `tabs` | 16 | 11 | 68.8% | 0 | 0 | 0 | 0 | 8 | ✅ |
-| [加载 Loading](loading.md) | `loading` | 13 | 9 | 69.2% | 0 | 0 | 3 | 0 | 2 | 🚧 |
-| [可选标签 CheckTag](check-tag.md) | `check-tag` | 20 | 14 | 70.0% | 0 | 0 | 1 | 0 | 4 | 🚧 |
-| [列表 List](list.md) | `list` | 10 | 7 | 70.0% | 0 | 0 | 1 | 0 | 4 | 🚧 |
-| [导航菜单 Menu](menu.md) | `menu` | 34 | 24 | 70.6% | 0 | 4 | 0 | 0 | 4 | 🚧 |
-| [多选框 Checkbox](checkbox.md) | `checkbox` | 24 | 17 | 70.8% | 0 | 0 | 2 | 0 | 7 | 🚧 |
-| [数字输入框 InputNumber](input-number.md) | `input-number` | 31 | 22 | 71.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [固钉 Affix](affix.md) | `affix` | 7 | 5 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [引导 Guide](guide.md) | `guide` | 21 | 15 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [骨架屏 Skeleton](skeleton.md) | `skeleton` | 7 | 5 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [标签 Tag](tag.md) | `tag` | 14 | 10 | 71.4% | 0 | 0 | 0 | 0 | 5 | ✅ |
-| [选择器输入 SelectInput](select-input.md) | `select-input` | 43 | 31 | 72.1% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [按钮 Button](button.md) | `button` | 18 | 13 | 72.2% | 0 | 0 | 0 | 0 | 11 | ✅ |
-| [表格 Table](table.md) | `table` | 62 | 45 | 72.6% | 1 | 1 | 0 | 0 | 23 | 🚧 |
-| [警告提示 Alert](alert.md) | `alert` | 11 | 8 | 72.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [面包屑 Breadcrumb](breadcrumb.md) | `breadcrumb` | 19 | 14 | 73.7% | 0 | 0 | 3 | 0 | 4 | 🚧 |
-| [图片预览 ImageViewer](image-viewer.md) | `image-viewer` | 23 | 17 | 73.9% | 0 | 1 | 1 | 0 | 3 | 🚧 |
-| [气泡确认 Popconfirm](popconfirm.md) | `popconfirm` | 16 | 12 | 75.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [弹出层 Popup](popup.md) | `popup` | 24 | 18 | 75.0% | 0 | 0 | 0 | 0 | 8 | ✅ |
-| [单选框 Radio](radio.md) | `radio` | 25 | 19 | 76.0% | 0 | 0 | 0 | 0 | 8 | ✅ |
-| [日历 Calendar](calendar.md) | `calendar` | 22 | 17 | 77.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [侧边悬浮 StickyTool](sticky-tool.md) | `sticky-tool` | 9 | 7 | 77.8% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [头像 Avatar](avatar.md) | `avatar` | 15 | 12 | 80.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
-| [开关 Switch](switch.md) | `switch` | 10 | 8 | 80.0% | 0 | 0 | 0 | 0 | 6 | ✅ |
-| [滑块 Slider](slider.md) | `slider` | 16 | 13 | 81.3% | 0 | 0 | 0 | 0 | 5 | ✅ |
-| [回到顶部 BackTop](back-top.md) | `back-top` | 11 | 9 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [折叠面板 Collapse](collapse.md) | `collapse` | 11 | 9 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [颜色选择器 ColorPicker](color-picker.md) | `color-picker` | 22 | 18 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [步骤条 Steps](steps.md) | `steps` | 17 | 14 | 82.4% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [分页 Pagination](pagination.md) | `pagination` | 23 | 19 | 82.6% | 0 | 0 | 0 | 0 | 6 | ✅ |
-| [锚点 Anchor](anchor.md) | `anchor` | 12 | 10 | 83.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [排版 Typography](typography.md) | `typography` | 20 | 17 | 85.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
-| [空状态 Empty](empty.md) | `empty` | 7 | 6 | 85.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [评分 Rate](rate.md) | `rate` | 14 | 12 | 85.7% | 0 | 0 | 0 | 0 | 5 | ✅ |
-| [表单 Form](form.md) | `form` | 34 | 30 | 88.2% | 0 | 0 | 0 | 0 | 8 | ✅ |
-| [栅格 Grid](grid.md) | `grid` | 17 | 15 | 88.2% | 0 | 0 | 2 | 0 | 4 | 🚧 |
-| [图片 Image](image.md) | `image` | 17 | 15 | 88.2% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [徽标 Badge](badge.md) | `badge` | 10 | 9 | 90.0% | 0 | 0 | 0 | 0 | 2 | ✅ |
-| [下拉菜单 Dropdown](dropdown.md) | `dropdown` | 21 | 19 | 90.5% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [二维码 QRCode](qrcode.md) | `qrcode` | 12 | 11 | 91.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [时间轴 Timeline](timeline.md) | `timeline` | 12 | 11 | 91.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [卡片 Card](card.md) | `card` | 25 | 23 | 92.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [描述列表 Descriptions](descriptions.md) | `descriptions` | 15 | 14 | 93.3% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [轮播 Swiper](swiper.md) | `swiper` | 15 | 14 | 93.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [水印 Watermark](watermark.md) | `watermark` | 17 | 16 | 94.1% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [评论 Comment](comment.md) | `comment` | 7 | 7 | 100.0% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [全局配置 ConfigProvider](config-provider.md) | `config-provider` | 1 | 1 | 100.0% | 0 | 0 | 0 | 0 | 1 | ✅ |
-| [前后缀 InputAdornment](input-adornment.md) | `input-adornment` | 2 | 2 | 100.0% | 0 | 0 | 0 | 0 | 2 | ✅ |
-| [进度条 Progress](progress.md) | `progress` | 8 | 8 | 100.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
-| [间距 Space](space.md) | `space` | 5 | 5 | 100.0% | 0 | 0 | 0 | 0 | 6 | ✅ |
-| [统计数值 Statistic](statistic.md) | `statistic` | 15 | 15 | 100.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
-| [文字提示 Tooltip](tooltip.md) | `tooltip` | 6 | 6 | 100.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Select 选择器](select.md) | `select` | 55 | 20 | 36.4% | 22 | 0 | 0 | 0 | 7 | 🚧 |
+| [TimePicker 时间选择器](time-picker.md) | `time-picker` | 33 | 12 | 36.4% | 17 | 0 | 0 | 0 | 3 | 🚧 |
+| [Cascader 级联组件](cascader.md) | `cascader` | 53 | 22 | 41.5% | 25 | 0 | 0 | 0 | 7 | 🚧 |
+| [TreeSelect 树选择](tree-select.md) | `tree-select` | 44 | 20 | 45.5% | 16 | 0 | 0 | 0 | 6 | 🚧 |
+| [DatePicker 日期选择器](date-picker.md) | `date-picker` | 44 | 22 | 50.0% | 19 | 0 | 0 | 0 | 11 | 🚧 |
+| [DateRangePicker 日期范围](date-range-picker.md) | `date-range-picker` | 44 | 23 | 52.3% | 18 | 0 | 0 | 0 | 5 | 🚧 |
+| [Input 输入框](input.md) | `input` | 46 | 26 | 56.5% | 0 | 0 | 0 | 0 | 10 | ✅ |
+| [Upload 上传](upload.md) | `upload` | 63 | 36 | 57.1% | 0 | 7 | 3 | 0 | 3 | 🚧 |
+| [Drawer 抽屉](drawer.md) | `drawer` | 31 | 18 | 58.1% | 0 | 8 | 0 | 0 | 3 | 🚧 |
+| [Dialog 对话框](dialog.md) | `dialog` | 37 | 22 | 59.5% | 0 | 10 | 0 | 0 | 4 | 🚧 |
+| [Tree 树](tree.md) | `tree` | 50 | 30 | 60.0% | 10 | 8 | 1 | 0 | 3 | 🚧 |
+| [Link 链接](link.md) | `link` | 13 | 8 | 61.5% | 0 | 0 | 0 | 0 | 6 | ✅ |
+| [Transfer 穿梭框](transfer.md) | `transfer` | 26 | 16 | 61.5% | 4 | 4 | 2 | 0 | 3 | 🚧 |
+| [Textarea 多行文本框](textarea.md) | `textarea` | 21 | 13 | 61.9% | 0 | 0 | 0 | 0 | 7 | ✅ |
+| [Message 全局提示](message.md) | `message` | 8 | 5 | 62.5% | 0 | 0 | 1 | 0 | 3 | 🚧 |
+| [Notification 消息通知](notification.md) | `notification` | 11 | 7 | 63.6% | 0 | 0 | 1 | 0 | 3 | 🚧 |
+| [AutoComplete 自动填充](auto-complete.md) | `auto-complete` | 32 | 21 | 65.6% | 1 | 0 | 0 | 0 | 4 | 🚧 |
+| [Divider 分割线](divider.md) | `divider` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Layout 布局](layout.md) | `layout` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [TagInput 标签输入框](tag-input.md) | `tag-input` | 39 | 26 | 66.7% | 0 | 0 | 1 | 0 | 4 | 🚧 |
+| [RangeInput 范围输入框](range-input.md) | `range-input` | 28 | 19 | 67.9% | 0 | 0 | 2 | 0 | 4 | 🚧 |
+| [Tabs 选项卡](tabs.md) | `tabs` | 16 | 11 | 68.8% | 0 | 0 | 0 | 0 | 8 | ✅ |
+| [CheckTag 可选标签](check-tag.md) | `check-tag` | 20 | 14 | 70.0% | 0 | 0 | 1 | 0 | 4 | 🚧 |
+| [List 列表](list.md) | `list` | 10 | 7 | 70.0% | 0 | 0 | 1 | 0 | 4 | 🚧 |
+| [Menu 导航菜单](menu.md) | `menu` | 34 | 24 | 70.6% | 0 | 4 | 0 | 0 | 4 | 🚧 |
+| [Checkbox 多选框](checkbox.md) | `checkbox` | 24 | 17 | 70.8% | 0 | 0 | 2 | 0 | 7 | 🚧 |
+| [InputNumber 数字输入框](input-number.md) | `input-number` | 31 | 22 | 71.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Affix 固钉](affix.md) | `affix` | 7 | 5 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Guide 引导](guide.md) | `guide` | 21 | 15 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Skeleton 骨架屏](skeleton.md) | `skeleton` | 7 | 5 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Tag 标签](tag.md) | `tag` | 14 | 10 | 71.4% | 0 | 0 | 0 | 0 | 5 | ✅ |
+| [SelectInput 筛选器输入框](select-input.md) | `select-input` | 43 | 31 | 72.1% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Button 按钮](button.md) | `button` | 18 | 13 | 72.2% | 0 | 0 | 0 | 0 | 11 | ✅ |
+| [Table 表格](table.md) | `table` | 62 | 45 | 72.6% | 1 | 1 | 0 | 0 | 23 | 🚧 |
+| [Alert 警告提醒](alert.md) | `alert` | 11 | 8 | 72.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Breadcrumb 面包屑](breadcrumb.md) | `breadcrumb` | 19 | 14 | 73.7% | 0 | 0 | 3 | 0 | 4 | 🚧 |
+| [ImageViewer 图片预览](image-viewer.md) | `image-viewer` | 23 | 17 | 73.9% | 0 | 1 | 1 | 0 | 3 | 🚧 |
+| [Popconfirm 气泡确认框](popconfirm.md) | `popconfirm` | 16 | 12 | 75.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Popup 弹出层](popup.md) | `popup` | 24 | 18 | 75.0% | 0 | 0 | 0 | 0 | 8 | ✅ |
+| [Radio 单选框](radio.md) | `radio` | 25 | 19 | 76.0% | 0 | 0 | 0 | 0 | 8 | ✅ |
+| [Calendar 日历](calendar.md) | `calendar` | 22 | 17 | 77.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [StickyTool 侧边栏](sticky-tool.md) | `sticky-tool` | 9 | 7 | 77.8% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Avatar 头像](avatar.md) | `avatar` | 15 | 12 | 80.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
+| [Switch 开关](switch.md) | `switch` | 10 | 8 | 80.0% | 0 | 0 | 0 | 0 | 6 | ✅ |
+| [Slider 滑块](slider.md) | `slider` | 16 | 13 | 81.3% | 0 | 0 | 0 | 0 | 5 | ✅ |
+| [BackTop 回到顶部](back-top.md) | `back-top` | 11 | 9 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Collapse 折叠面板](collapse.md) | `collapse` | 11 | 9 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [ColorPicker 颜色选择器](color-picker.md) | `color-picker` | 22 | 18 | 81.8% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Steps 步骤条](steps.md) | `steps` | 17 | 14 | 82.4% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Pagination 分页](pagination.md) | `pagination` | 23 | 19 | 82.6% | 0 | 0 | 0 | 0 | 6 | ✅ |
+| [Anchor 锚点](anchor.md) | `anchor` | 12 | 10 | 83.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Typography 排版](typography.md) | `typography` | 20 | 17 | 85.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
+| [Empty 空状态](empty.md) | `empty` | 7 | 6 | 85.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Rate 评分](rate.md) | `rate` | 14 | 12 | 85.7% | 0 | 0 | 0 | 0 | 5 | ✅ |
+| [Form 表单](form.md) | `form` | 34 | 30 | 88.2% | 0 | 0 | 0 | 0 | 8 | ✅ |
+| [Grid 栅格](grid.md) | `grid` | 17 | 15 | 88.2% | 0 | 0 | 2 | 0 | 4 | 🚧 |
+| [Image 图片](image.md) | `image` | 17 | 15 | 88.2% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Badge 徽标](badge.md) | `badge` | 10 | 9 | 90.0% | 0 | 0 | 0 | 0 | 2 | ✅ |
+| [Dropdown 下拉菜单](dropdown.md) | `dropdown` | 21 | 19 | 90.5% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [QRCode 二维码](qrcode.md) | `qrcode` | 12 | 11 | 91.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Timeline 时间轴](timeline.md) | `timeline` | 12 | 11 | 91.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Card 卡片](card.md) | `card` | 25 | 23 | 92.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Loading 加载](loading.md) | `loading` | 13 | 12 | 92.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Descriptions 描述](descriptions.md) | `descriptions` | 15 | 14 | 93.3% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Swiper 轮播框](swiper.md) | `swiper` | 15 | 14 | 93.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Watermark 水印](watermark.md) | `watermark` | 17 | 16 | 94.1% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [Comment 评论](comment.md) | `comment` | 7 | 7 | 100.0% | 0 | 0 | 0 | 0 | 3 | ✅ |
+| [全局特性配置](config-provider.md) | `config-provider` | 1 | 1 | 100.0% | 0 | 0 | 0 | 0 | 1 | ✅ |
+| [InputAdornment 输入装饰器](input-adornment.md) | `input-adornment` | 2 | 2 | 100.0% | 0 | 0 | 0 | 0 | 2 | ✅ |
+| [Progress 进度条](progress.md) | `progress` | 8 | 8 | 100.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
+| [Space 间距](space.md) | `space` | 5 | 5 | 100.0% | 0 | 0 | 0 | 0 | 6 | ✅ |
+| [Statistic 统计数值](statistic.md) | `statistic` | 15 | 15 | 100.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Tooltip 文字提示](tooltip.md) | `tooltip` | 6 | 6 | 100.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
 
 ## 无上游对照
 

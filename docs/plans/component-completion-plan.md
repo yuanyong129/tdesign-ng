@@ -309,3 +309,13 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部既有及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。实测四侧偏移和位置覆盖误差小于 2px，验证同名覆盖/disabled/非法数值恢复、视口边缘翻转/禁止翻转/空候选、16px 视口推移与关闭保护允许溢出、移除配置恢复默认并保留原内容和计数。打包检出 Array.at 超出库目标后改兼容写法，最终完整构建和回归重新通过。Popup / Tooltip / SelectInput / AutoComplete 页面 issues / badResources 为空，Popup 截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.67 kB）。
 
 **接续任务**：第 4 轮 Loading → Message / Notification → Dialog → Drawer → ImageViewer，先核实已有实现，再分批完善。
+
+### 2026-11-28：第 4 轮 Loading 内容、挂载与服务清理
+
+- **内容与图标**：新增 content、indicator、attach 和公开 LoadingContent / LoadingAttachNode / LoadingServiceOptions。content 支持字符串或模板，显式空串同样覆盖默认投影；默认 ng-content 常驻，加载切换、延迟及显式内容切换保留原业务节点、输入草稿与事件。indicator 支持默认图标、隐藏、字符串和模板，text 扩展为字符串或模板，size 支持 CSS 尺寸；修复全屏模式未应用预设尺寸与继承色的问题。包裹区域使用 aria-busy，加载标识使用 status，不自动禁用业务控件或接管业务焦点。
+- **挂载与所有权**：沿用全屏 → 内容包裹 → 指定挂载 → 行内的优先级。attach 支持选择器、节点及函数，非法/缺失/未连接/跨文档或自身后代目标回退本地，update() 重新解析目标。每实例创建独立 Portal 容器，切换与销毁移除自有容器；静态局部目标按引用计数添加 vendor relative 类，保留原定位及外部同名类，不移除调用方节点。包裹/挂载模式使用 vendor full 与 overlay 类，无新增样式覆盖。
+- **服务与生命周期**：hideAll 改为销毁本服务持有的 Angular 实例，修复此前只移除 DOM 导致视图、延迟和滚动锁残留，并避免删除组件式 Loading。hide 幂等，服务销毁清理所有自有实例，false 返回空实例；延迟关闭/销毁取消计时，多实例 body 滚动锁及外部锁所有权保留。服务扩展配置与 Button / Card 原 LoadingOptions 白名单分开，未接入的复合组件字段不静默承诺透传。
+- **生成进度与边界**：示例 342 → 343；对齐 1082 → 1085（68.8%）、真实深度债 200 → 197、零债务目录 48 → 49。Loading 已登记债务为 0（default 映射 ng-content）；切换挂载点可重建加载标识，业务投影常驻。全屏仍遵循 CSS fixed，transform 祖先可能改变包含块；全局配置合并、完整 SSR / 水合及跨组件反馈验收仍未完成，第 4 轮与 M2 尚未完成。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。覆盖业务节点/草稿/计数保留、显式模板/空串/转义优先、动态图标/文字/CSS 尺寸/遮罩、延迟取消与非法值、选择器/节点/函数/无效及自身目标回退、update 重解析、内容优先、共享挂载定位类及原类所有权、服务视图数量恢复/重复 hide/hideAll 隔离、多个全屏/外部滚动锁与销毁后无延迟残留。Button/Card 既有加载回归通过；Loading / Button / Card 页面 issues / badResources 为空，Loading 截图已检查。构建生成 API 触发 HMR 后，待稳定重新跑最终交互回归通过；最终重新生成 progress 并校验。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.51 kB）。
+
+**接续任务**：第 4 轮 Message / Notification → Dialog → Drawer → ImageViewer，先核实服务实例、计时器、挂载和关闭回调的生命周期。

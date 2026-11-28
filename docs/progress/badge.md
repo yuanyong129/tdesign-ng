@@ -1,4 +1,4 @@
-# 徽标 Badge · 开发进度
+# Badge 徽标 · 开发进度
 
 > 本文件由 `pnpm gen:progress` 生成，请勿手改；进度真相是 `align-check` 与源码。
 

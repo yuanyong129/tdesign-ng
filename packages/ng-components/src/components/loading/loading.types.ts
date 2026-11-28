@@ -1,12 +1,23 @@
+import type { Content } from '../../_utils/content';
+
+export type LoadingContent = Content;
+export type LoadingAttachNode = string | HTMLElement | null | undefined | (() => string | HTMLElement | null | undefined);
+/** 服务专属扩展；复合组件 LoadingOptions 保持已接入字段白名单。 */
+export interface LoadingServiceOptions extends LoadingOptions {
+  attach?: LoadingAttachNode;
+  content?: LoadingContent;
+  indicator?: boolean | LoadingContent;
+}
+
 /** 加载图标尺寸。 */
 export const LOADING_SIZES = ['small', 'medium', 'large'] as const;
 
-export type LoadingSize = (typeof LOADING_SIZES)[number];
+export type LoadingSize = (typeof LOADING_SIZES)[number] | (string & {});
 
 /** 全屏加载的配置。 */
 export interface LoadingOptions {
   /** 加载提示文字 */
-  text?: string;
+  text?: LoadingContent;
   /** 是否全屏，服务式调用默认 true */
   fullscreen?: boolean;
   /** 图标尺寸 */
