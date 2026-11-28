@@ -1,6 +1,6 @@
 # 交接文档 · TDesign Angular
 
-> 2026-11-28 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮顺序任务已走完，现完成第 4 轮 Popup 显隐/样式/滚动与生命周期首批。当前生成进度：已对齐 1079/1576，真实深度债 203，零债务目录 47/73，示例 340 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续 Popup 挂载点 / 独立触发元素 / 定位配置评估 → Loading → Message / Notification。Popup 新增 defaultVisible、内外层样式、scroll / scrollToBottom、visibleChangeContext；受控显隐只发提案，程序同步不重复通知，禁用关闭实际显示并保留请求。新样式尚未扩散到复合组件 PopupOptions 白名单。Breadcrumb 路由、AutoComplete.textareaProps、Checkbox.lazyLoad 和 SSR / 水合等跨轮任务继续保留，M2 尚未达成。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）；页面探针复用已有 CDP 页面，必须在交互回归结束后串行运行。
+> 2026-11-28 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮顺序任务已走完，现完成第 4 轮 Popup 生命周期首批及挂载点/独立触发器批次。当前生成进度：已对齐 1081/1576，真实深度债 201，零债务目录 47/73，示例 341 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续 Popup 定位配置评估（popperOptions 仍 1 项债务）→ Loading → Message / Notification。Popup.attach 通过独立容器仅移动本实例 CDK host，支持节点/选择器/函数；triggerElement 为外部选择器或模板。平移/正向轴对齐缩放和滚动已验证，旋转/倾斜/透视等仍不支持；新字段未扩散到复合组件 PopupOptions 白名单。Breadcrumb 路由、AutoComplete.textareaProps、Checkbox.lazyLoad 和 SSR / 水合等跨轮任务继续保留，M2 尚未达成。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）；页面探针复用已有 CDP 页面，必须在交互回归结束后串行运行。
 >
 > 用户明确要求（2026-11-27）：后续每批验证完成后可自动 commit，不必询问；及时同步计划与交接文档，尤其 `docs/progress/`。progress 必须通过 `pnpm gen:progress` 生成，并用 `pnpm check:progress` 校验，不手改生成物。
 

@@ -7045,6 +7045,24 @@
           "values": []
         },
         {
+          "name": "attach",
+          "type": "PopupAttachNode",
+          "default": "undefined",
+          "required": false,
+          "zh": "挂载节点、选择器或返回节点的函数，缺省挂到 body 的 CDK 容器",
+          "en": "Attachment element, selector, or resolver, defaults to the body CDK container",
+          "values": []
+        },
+        {
+          "name": "triggerElement",
+          "type": "PopupTriggerElement | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "外部触发元素选择器或替换默认触发区的模板",
+          "en": "External trigger selector or a template replacing the default trigger",
+          "values": []
+        },
+        {
           "name": "placement",
           "type": "PopupPlacement",
           "default": "'top'",

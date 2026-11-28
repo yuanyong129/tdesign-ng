@@ -1775,6 +1775,49 @@ try {
   assert.equal(popupState.scrolled.scrolls,popupState.scrolled.native);assert.ok(popupState.scrolled.scrolls>=3);assert.equal(popupState.scrolled.bottoms,1);
   for(const key of ['closedDebounce','retained','detached','recreated','disabled','reenabled','cancelledShow','delayedShow','triggerCancelsHide','ownFocus','leftFocus','emptyHidden','loadedContent','emptied','disposed','listeners']) assert.equal(popupState[key],true,key);
   console.log('PASS Popup: default once/controlled proposals, context/no duplicate notifications, style functions/replacement, scroll/debounce, destroy/retain, disable/delay cancellation, own focus, listener/disposal cleanup');
+  await page('/popup', 'demo-popup-attachment .attach-trigger-a');
+  const popupAttach=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-popup-attachment'),demo=ng.getComponent(root),popup=demo.popup(),other=demo.other();
+    const apply=async()=>{ng.applyChanges(demo);${settle}};const triggerA=root.querySelector('.attach-trigger-a'),triggerB=root.querySelector('.attach-trigger-b');
+    const position=(trigger)=>{const anchor=trigger.getBoundingClientRect(),panel=popup.getOverlay().closest('.cdk-overlay-pane').getBoundingClientRect();return {dx:Math.abs(panel.left-anchor.left),dy:Math.min(Math.abs(panel.top-anchor.bottom),Math.abs(panel.bottom-anchor.top))}};
+    root.scrollIntoView({block:'center',behavior:'instant'});${settle}triggerA.click();${settle}
+    const overlay=popup.getOverlay(),content=overlay.querySelector('.attach-content'),button=content.querySelector('.attach-counter'),input=content.querySelector('input');
+    input.value='draft';button.click();${settle}const initial={open:popup.isVisible(),target:!!root.querySelector('.attach-target-a [data-t-popup-attachment] .attachment-panel'),proposals:demo.changes(),count:demo.count()};
+    const firstPosition=position(triggerA);other.show();${settle}const otherOverlay=other.getOverlay();
+    input.focus();demo.attach.set('#popup-attach-b');await apply();const scaledPosition=position(triggerA);
+    const moved={same:popup.getOverlay()===overlay&&overlay.querySelector('.attach-content')===content,button:overlay.querySelector('.attach-counter')===button,input:input.value,target:!!root.querySelector('.attach-target-b .attachment-panel'),other:other.getOverlay()===otherOverlay&&!root.querySelector('.attach-target-b .attachment-other-panel'),count:demo.count(),focus:document.activeElement===input};
+    const scroll=root.querySelector('.attach-scroll');scroll.scrollTop=60;scroll.dispatchEvent(new Event('scroll'));${settle}const scrolledPosition=position(triggerA);
+    demo.attach.set(root.querySelector('.attach-target-a'));await apply();const direct=!!root.querySelector('.attach-target-a .attachment-panel');
+    demo.attach.set(()=>root.querySelector('.attach-target-b'));await apply();const callback=!!root.querySelector('.attach-target-b .attachment-panel');
+    demo.attach.set('#missing-mount');await apply();const fallback=popup.getOverlay()===overlay&&!root.querySelector('[data-t-popup-attachment]');
+    demo.attach.set('[');await apply();const invalidSelector=popup.isVisible();
+    const disconnected=document.createElement('div');demo.attach.set(disconnected);await apply();const disconnectedFallback=!disconnected.querySelector('.attachment-panel')&&popup.isVisible();
+    demo.attach.set('#popup-attach-a');await apply();popup.hide();${settle}const retained=popup.getOverlay()===overlay;
+    demo.attach.set('#popup-attach-b');await apply();popup.show();${settle}const reopened=popup.getOverlay()===overlay&&input.value==='draft';
+    demo.selectedTrigger.set('#popup-external-b');await apply();const retargeted=position(triggerB);const beforeOld=demo.changes();triggerA.click();${settle}
+    const oldDetached=demo.changes()===beforeOld&&popup.isVisible();triggerB.click();${settle}const newBound=!popup.isVisible()&&demo.changes()===beforeOld+1;
+    demo.trigger.set('focus');await apply();triggerB.focus();${settle}const focusOpen=popup.isVisible();input.focus();${settle}const ownFocus=popup.isVisible();root.querySelector('.attachment-other button').focus();${settle}const externalBlur=!popup.isVisible();
+    demo.trigger.set('context-menu');await apply();const contextEvent=new MouseEvent('contextmenu',{bubbles:true,cancelable:true});triggerB.dispatchEvent(contextEvent);${settle}const contextMenu=contextEvent.defaultPrevented&&popup.isVisible();popup.hide();${settle}
+    demo.trigger.set('click');demo.useTemplate();await apply();const custom=root.querySelector('.attach-template-trigger');custom.click();${settle}const template=popup.isVisible()&&popup.containsTarget(custom);demo.label.set('Live');await apply();const templateLive=custom.textContent.includes('Live');
+    demo.selectedTrigger.set(undefined);await apply();popup.hide();${settle}root.querySelector('.attach-default-trigger').click();${settle}const projected=popup.isVisible()&&!root.querySelector('.attach-template-trigger');
+    demo.selectedTrigger.set('#popup-external-b');demo.showB.set(false);await apply();popup.update();${settle}const missing=!popup.isVisible();
+    demo.showB.set(true);await apply();popup.update();${settle}const recovered=popup.isVisible();const replacement=root.querySelector('.attach-trigger-b');
+    const beforeReplacement=demo.changes();triggerB.click();${settle}const removedOldDetached=demo.changes()===beforeReplacement;replacement.click();${settle}const replacementBound=!popup.isVisible();
+    demo.selectedTrigger.set('[');await apply();popup.show();${settle}const invalidTrigger=!popup.isVisible();
+    demo.selectedTrigger.set('#popup-external-a');await apply();popup.show();${settle}
+    const target=root.querySelector('.attach-target-b'),targetStyle=target.getAttribute('style');demo.attach.set(target);await apply();const untouched=target.getAttribute('style')===targetStyle;
+    demo.destroy.set(true);await apply();popup.hide();${settle}const destroyedContent=popup.getOverlay()===null;popup.show();${settle}const newContent=popup.getOverlay()!==overlay;
+    popup.hide();other.hide();${settle}
+    demo.temporary.set(true);await apply();const temporary=ng.getComponent(root.querySelector('.attachment-temporary')),temporaryContainer=temporary.getOverlay().closest('[data-t-popup-attachment]');
+    demo.temporary.set(false);await apply();const atDestroy=demo.temporaryEvents();replacement.click();${settle}temporary.show();temporary.update();
+    const disposed=!temporaryContainer.isConnected&&!document.querySelector('.attachment-temporary-panel')&&demo.temporaryEvents()===atDestroy&&triggerA.isConnected&&replacement.isConnected;
+    return {initial,firstPosition,scaledPosition,moved,scrolledPosition,direct,callback,fallback,invalidSelector,disconnectedFallback,retained,reopened,retargeted,oldDetached,newBound,focusOpen,ownFocus,externalBlur,contextMenu,template,templateLive,projected,missing,recovered,removedOldDetached,replacementBound,invalidTrigger,untouched,destroyedContent,newContent,disposed};
+  })()`);
+  assert.deepEqual(popupAttach.initial,{open:true,target:true,proposals:1,count:1});
+  for(const key of ['firstPosition','scaledPosition','scrolledPosition','retargeted']){assert.ok(popupAttach[key].dx<2,key+' horizontal alignment');assert.ok(popupAttach[key].dy<2,key+' vertical alignment');}
+  assert.deepEqual(popupAttach.moved,{same:true,button:true,input:'draft',target:true,other:true,count:1,focus:true});
+  for(const key of ['direct','callback','fallback','invalidSelector','disconnectedFallback','retained','reopened','oldDetached','newBound','focusOpen','ownFocus','externalBlur','contextMenu','template','templateLive','projected','missing','recovered','removedOldDetached','replacementBound','invalidTrigger','untouched','destroyedContent','newContent','disposed'])assert.equal(popupAttach[key],true,key);
+  console.log('PASS Popup attachment/trigger: selector/node/resolver/fallback, instance isolation, transformed/scroll alignment, original content preservation, external listener replacement/focus/context-menu, template/projection, missing-node recovery');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

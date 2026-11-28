@@ -4,31 +4,33 @@
 
 - 目录：`packages/ng-components/src/components/popup/`
 - 文档页：`/popup`（`packages/docs/src/app/docs/popup/popup.component.ts`）
-- 状态：🚧 有深度债 3 项
+- 状态：🚧 有深度债 1 项
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 24 |
-| 已对齐 | 15 |
-| 覆盖率 | 62.5% |
-| 深度债 | 3（D1 0 / D2 3 / D3 0） |
+| 已对齐 | 17 |
+| 覆盖率 | 70.8% |
+| 深度债 | 1（D1 0 / D2 1 / D3 0） |
 | Angular 惯用映射 | 6（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 6 个 |
+| 文档示例 | 7 个 |
 
 ## 组件明细
 
 ### `TPopup`（`<t-popup>`）
 
-上游接口 `TdPopupProps`；上游属性 24、已对齐 15（62.5%）；深度债 3 项；未登记缺失 0 项。
+上游接口 `TdPopupProps`；上游属性 24、已对齐 17（70.8%）；深度债 1 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `content` | string \| undefined | undefined | 弹层内容（纯文本） |
+| `attach` | PopupAttachNode | undefined | 挂载节点、选择器或返回节点的函数，缺省挂到 body 的 CDK 容器 |
+| `triggerElement` | PopupTriggerElement \| undefined | undefined | 外部触发元素选择器或替换默认触发区的模板 |
 | `placement` | PopupPlacement | 'top' | 弹层位置 |
 | `trigger` | PopupTrigger | 'hover' | 触发方式 |
 | `delay` | number \| number[] | 0 | 显示/隐藏的延迟毫秒数，数组形式为 [显示延迟, 隐藏延迟] |
@@ -59,7 +61,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `attach` | D2 录入与反馈线 | 弹层固定挂到 body（CDK overlay），暂不支持自定义挂载点 |
 | `default` | Angular 惯用映射 | 触发器与内容都通过 ng-content 投影，不需要 default 插槽属性 |
 | `modelValue` | Angular 惯用映射 | Angular 用 [(visible)] 双向绑定 |
 | `onOverlayClick` | Angular 惯用映射 | Angular 用 (overlayClick) 输出 |
@@ -67,11 +68,11 @@
 | `onScrollToBottom` | Angular 惯用映射 | Angular 用 (scrollToBottom) 输出 { e: Event }，100ms 去抖 |
 | `onVisibleChange` | Angular 惯用映射 | Angular 用 (visibleChange) 输出 |
 | `popperOptions` | D2 录入与反馈线 | 定位由 CDK Overlay 负责，不透传 popper 配置 |
-| `triggerElement` | D2 录入与反馈线 | 触发元素就是默认投影的内容 |
 
 ## 文档示例
 
 - `packages/docs/src/app/docs/popup/demos/popup-arrow.ts`
+- `packages/docs/src/app/docs/popup/demos/popup-attachment.ts`
 - `packages/docs/src/app/docs/popup/demos/popup-basic.ts`
 - `packages/docs/src/app/docs/popup/demos/popup-content.ts`
 - `packages/docs/src/app/docs/popup/demos/popup-lifecycle.ts`

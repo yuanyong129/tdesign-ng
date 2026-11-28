@@ -288,3 +288,14 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。覆盖默认值仅初始化/受控优先、拒绝开关/程序同步/重复通知、上下文、样式函数节点与动态属性清理、原生滚动输出次数与原事件一致/到底去抖/关闭取消、关闭保留与销毁、禁用恢复/延迟取消/触发方式变化、面板内外焦点、动态空文本显隐、销毁后计时器/文档监听清理及实例方法无效。Popup / SelectInput / AutoComplete / Breadcrumb 页面 issues / badResources 均为空，Popup 截图已检查。页面探针会复用已有 CDP 页面，最终按交互回归→页面探针串行运行通过。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.67 kB）。
 
 **接续任务**：Popup 挂载点 / 独立触发元素 / 定位配置评估 → Loading → Message / Notification，按共享能力逐批验收。
+
+### 2026-11-28：第 4 轮 Popup 挂载点与独立触发器
+
+- **挂载契约**：新增 PopupAttachNode / attach，支持 CSS 选择器、HTMLElement、返回节点或选择器的函数；未设置或 body / documentElement 使用默认 CDK 容器，无效选择器、未连接/跨文档节点回退默认。每实例创建独立容器并只移动自己的 OverlayRef.hostElement，不移动共享 OverlayContainer，不修改调用方挂载节点样式；动态切换保留原浮层、投影事件、输入草稿、计数与焦点，移除销毁实例时清理容器，不删除调用方节点。
+- **定位与限制**：独立容器保持 CDK 使用的视口坐标，测量并抵消挂载祖先的平移和正向轴对齐缩放；document capture scroll 与窗口 resize 更新位置，关闭/销毁解绑。实测普通、translate + scale(0.8) 容器及容器滚动后对齐误差小于 2px。原挂载目标的 overflow 裁剪/层叠上下文仍生效；旋转、倾斜、负缩放、透视暂不支持，不宣传任意 CSS transform 均已兼容。函数每次打开或 update() 重新解析。
+- **触发器契约**：新增 PopupTriggerElement / triggerElement，字符串按锁定上游作为外部选择器，模板替换默认投影；缺省仍使用原投影。Renderer2 监听外部触发器的 hover / click / focus / mousedown / context-menu，切换和销毁解除旧监听；外部节点保持原位与所有权，模板动态绑定继续工作。定位、样式回调、外部点击和焦点边界统一使用真实触发器，不把整个 Popup 宿主误作外部触发区域。
+- **动态恢复**：外部触发器缺失或选择器非法时保持请求但关闭实际浮层，不在无效锚点上定位；节点之后出现或同选择器替换后可用 update() / show() 重新解析，旧节点点击不再影响实例。update() 可恢复缺失节点后的实际显示。挂载切换期间保护面板焦点，避免移动原节点造成 focus 触发器误关。
+- **进度与余项**：新增 1 个 demo，示例 340 → 341；已对齐 1079 → 1081（68.6%）、真实债务 203 → 201，零债务目录仍为 47/73。Popup 债务 3 → 1，保留 popperOptions，不伪造 getPopper()；复合组件 PopupOptions 未接入新字段，保持类型白名单，不静默接收后忽略。第 4 轮、M2 和完整 SSR / 水合验收仍未完成。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及本批交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增覆盖选择器/元素/函数挂载、缺失/非法/未连接回退、平移缩放与滚动实测坐标、实例隔离、动态挂载保留原节点/草稿/计数/焦点、关闭保留及销毁重建、外部触发器切换与旧节点解绑、focus 面板边界/context-menu、模板更新/投影回退、缺失节点恢复/同选择器替换、原目标样式和节点所有权、销毁后独立容器/外部监听清理及实例方法无效。Popup / SelectInput / AutoComplete / Breadcrumb 页面 issues / badResources 均为空，Popup 截图已检查；页面探针在交互回归后串行执行。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.67 kB）。
+
+**接续任务**：Popup 定位配置评估 → Loading → Message / Notification；先决定 CDK 下可兑现的定位配置契约，再推进上层组件。

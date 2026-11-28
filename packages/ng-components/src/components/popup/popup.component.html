@@ -1,4 +1,8 @@
-<ng-content />
+@if (triggerTemplate(); as template) {
+  <span #customTrigger style="display:contents"><ng-container [ngTemplateOutlet]="template" /></span>
+} @else if (!externalTrigger()) {
+  <ng-content />
+}
 
 <ng-template #overlayTemplate>
   <div

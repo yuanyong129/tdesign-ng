@@ -1,17 +1,21 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { NgStyle } from '@angular/common';
+import { NgStyle, NgTemplateOutlet } from '@angular/common';
+import { isTemplateContent } from '../../_utils/content';
+import { PopupAttachment } from './popup-attachment';
 import { createControllableState } from '../../_utils/controllable-state';
 import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
+  Renderer2,
   TemplateRef,
   ViewContainerRef,
   ViewEncapsulation,
   booleanAttribute,
   afterNextRender,
+  afterRenderEffect,
   computed,
   effect,
   inject,
@@ -31,6 +35,8 @@ import {
   PopupStyleInput,
   PopupScrollEvent,
   PopupVisibleChangeEvent,
+  PopupAttachNode,
+  PopupTriggerElement,
 } from './popup.types';
 
 function classList(value: string | string[] | Record<string, boolean> | null | undefined): string[] {
@@ -48,7 +54,7 @@ function classList(value: string | string[] | Record<string, boolean> | null | u
 @Component({
   selector: 't-popup',
   standalone: true,
-  imports: [NgStyle],
+  imports: [NgStyle, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './popup.component.html',
@@ -67,11 +73,25 @@ export class TPopup {
   private readonly overlay = inject(Overlay);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly attachment = new PopupAttachment(this.hostRef.nativeElement.ownerDocument);
+  private readonly customTrigger = viewChild<ElementRef<HTMLElement>>('customTrigger');
+  protected readonly triggerTemplate = computed(() => {
+    const trigger = this.triggerElement(); return isTemplateContent(trigger) ? trigger : null;
+  });
+  protected readonly externalTrigger = computed(() => typeof this.triggerElement() === 'string');
+  private triggerNode: HTMLElement | null = null;
+  private triggerCleanup: Array<() => void> = [];
+  private movingAttachment = false;
 
   private readonly overlayTemplate = viewChild.required<TemplateRef<unknown>>('overlayTemplate');
 
   /** @zh 弹层内容（纯文本） @en Popup content as plain text @defaultValue undefined */
   readonly content = input<string | undefined>();
+  /** @zh 挂载节点、选择器或返回节点的函数，缺省挂到 body 的 CDK 容器 @en Attachment element, selector, or resolver, defaults to the body CDK container @defaultValue undefined */
+  readonly attach = input<PopupAttachNode>(undefined);
+  /** @zh 外部触发元素选择器或替换默认触发区的模板 @en External trigger selector or a template replacing the default trigger @defaultValue undefined */
+  readonly triggerElement = input<PopupTriggerElement | undefined>(undefined);
 
   /** @zh 弹层位置 @en The placement of the popup @defaultValue 'top' @values top, left, right, bottom, top-left, top-right, bottom-left, bottom-right, left-top, left-bottom, right-top, right-bottom */
   readonly placement = input<PopupPlacement>('top');
@@ -158,6 +178,7 @@ export class TPopup {
     if (this.trigger() === 'hover') this.scheduleHide({ e: event, trigger: 'hover' });
   };
   private readonly panelFocusOut = (event: FocusEvent) => {
+    if (this.movingAttachment) return;
     if (this.trigger() === 'focus' && !this.containsTarget(event.relatedTarget)) this.close({ e: event, trigger: 'focus' });
   };
 
@@ -183,6 +204,13 @@ export class TPopup {
   );
 
   constructor() {
+    afterRenderEffect(() => {
+      this.triggerElement(); this.customTrigger();
+      untracked(() => {
+        this.bindTrigger();
+        if (this.state.current() && this.ready() && !this.disabled()) this.renderOpen();
+      });
+    });
     afterNextRender(() => this.ready.set(true));
     effect(() => {
       const visible = this.state.current(), disabled = this.disabled(), ready = this.ready();
@@ -202,6 +230,14 @@ export class TPopup {
       this.overlayStyle(); this.overlayInnerStyle(); this.content(); this.hideEmptyPopup();
       untracked(() => { if (this.ready() && this.state.current() && !this.disabled()) this.renderOpen(); });
     });
+    effect(() => {
+      this.attach();
+      untracked(() => {
+        if (!this.overlayRef) return;
+        this.mountOverlay();
+        this.update();
+      });
+    });
 
     effect(() => {
       // 位置变化后同步更新定位策略，否则弹层还贴在旧位置
@@ -218,8 +254,11 @@ export class TPopup {
       this.clearTimers();
       this.clearBottomTimer();
       this.unbindOutsideListeners();
+      this.triggerCleanup.forEach((cleanup) => cleanup());
+      this.triggerCleanup = [];
       this.overlayRef?.dispose();
       this.overlayRef = null;
+      this.attachment.destroy();
     });
   }
 
@@ -241,11 +280,15 @@ export class TPopup {
   getOverlayState(): { hover: boolean } { return { hover: this.pointerInPanel }; }
   /** 更新样式函数和位置，可在异步内容改变后调用。 */
   update(): void {
-    if (this.destroyed || !this.overlayRef?.hasAttached()) return;
+    if (this.destroyed) return;
+    this.bindTrigger();
+    if (!this.innerVisible() && this.state.current() && this.ready() && !this.disabled() && this.getTriggerNode()) { this.renderOpen(); return; }
+    if (!this.overlayRef?.hasAttached()) return;
+    this.mountOverlay();
     const root = this.getOverlay(), content = root?.querySelector<HTMLElement>('.t-popup__content');
     if (!root || !content) return;
-    const host = this.hostRef.nativeElement;
-    const trigger = resolveAnchor((host.firstElementChild as HTMLElement | null) ?? host);
+    const trigger = this.getTriggerNode();
+    if (!trigger) { this.renderClose(); return; }
     const resolve = (style: PopupStyleInput | undefined) => typeof style === 'function' ? style(trigger, content) : style ?? {};
     this.rootStyle.set({ ...resolve(this.overlayStyle()) });
     this.innerStyle.set({ ...resolve(this.overlayInnerStyle()) });
@@ -274,16 +317,19 @@ export class TPopup {
   }
 
   protected handleHostEnter(event: MouseEvent): void {
+    if (!this.isTriggerEvent(event)) return;
     if (this.trigger() === 'hover') this.scheduleShow({ e: event, trigger: 'hover' });
   }
 
   protected handleHostLeave(event: MouseEvent): void {
+    if (!this.isTriggerEvent(event)) return;
     if (this.trigger() !== 'hover') return;
     if (this.pointerInPanel) return;
     this.scheduleHide({ e: event, trigger: 'hover' });
   }
 
   protected handleHostClick(event: MouseEvent): void {
+    if (!this.isTriggerEvent(event)) return;
     if (this.trigger() !== 'click') return;
     event.stopPropagation();
     if (this.innerVisible()) {
@@ -294,6 +340,7 @@ export class TPopup {
   }
 
   protected handleHostFocusIn(event: FocusEvent): void {
+    if (!this.isTriggerEvent(event)) return;
     if (this.trigger() !== 'focus') return;
     this.scheduleShow({ e: event, trigger: 'focus' });
   }
@@ -301,24 +348,28 @@ export class TPopup {
   /** 判断目标是否在本弹层触发区或浮层内，供复合输入统一焦点边界。 */
   containsTarget(target: EventTarget | null): boolean {
     if (typeof Node === 'undefined' || !(target instanceof Node)) return false;
-    return this.hostRef.nativeElement.contains(target) || !!this.overlayRef?.overlayElement.contains(target);
+    return (this.externalTrigger() ? !!this.triggerNode?.contains(target) : this.hostRef.nativeElement.contains(target)) || !!this.overlayRef?.overlayElement.contains(target);
   }
 
   protected handleHostFocusOut(event: FocusEvent): void {
+    if (this.movingAttachment) return;
+    if (!this.isTriggerEvent(event)) return;
     if (this.trigger() !== 'focus') return;
     const next = event.relatedTarget as Node | null;
-    if (next && (this.hostRef.nativeElement.contains(next) || this.overlayRef?.overlayElement.contains(next))) {
+    if (this.containsTarget(next)) {
       return;
     }
     this.close({ e: event, trigger: 'focus' });
   }
 
   protected handleHostMouseDown(event: MouseEvent): void {
+    if (!this.isTriggerEvent(event)) return;
     if (this.trigger() !== 'mousedown') return;
     this.scheduleShow({ e: event, trigger: 'mousedown' });
   }
 
   protected handleHostContextMenu(event: MouseEvent): void {
+    if (!this.isTriggerEvent(event)) return;
     if (this.trigger() !== 'context-menu') return;
     event.preventDefault();
     this.scheduleShow({ e: event, trigger: 'context-menu' });
@@ -332,7 +383,7 @@ export class TPopup {
     if (!this.innerVisible()) return;
     const target = event.target as Node | null;
     if (!target) return;
-    if (this.hostRef.nativeElement.contains(target) || this.overlayRef?.overlayElement.contains(target)) return;
+    if (this.containsTarget(target)) return;
     const ignoreSelector = this.ignoreOutsideSelector();
     if (ignoreSelector && target instanceof Element && target.closest(ignoreSelector)) return;
     this.close({ e: event as MouseEvent, trigger: 'outside' });
@@ -381,6 +432,7 @@ export class TPopup {
   private open(context: PopupVisibleChangeContext): void {
     if (this.destroyed || this.disabled()) return;
     this.clearTimers();
+    if (this.state.current() && this.ready()) { this.renderOpen(); return; }
     this.requestVisible(true, context);
   }
 
@@ -396,6 +448,8 @@ export class TPopup {
 
   private renderOpen(): void {
     if (this.destroyed || this.disabled()) return;
+    this.bindTrigger();
+    if (!this.getTriggerNode()) { this.renderClose(); return; }
     this.clearTimers();
 
     if (!this.overlayRef) {
@@ -411,6 +465,7 @@ export class TPopup {
     if (!this.overlayRef.hasAttached()) {
       this.overlayRef.attach(new TemplatePortal(this.overlayTemplate(), this.viewContainerRef));
     }
+    this.mountOverlay();
 
     this.panelHidden.set(false);
     this.applyPosition();
@@ -457,8 +512,8 @@ export class TPopup {
   }
 
   private applyPosition(): void {
-    const host = this.hostRef.nativeElement;
-    const anchor = resolveAnchor((host.firstElementChild as HTMLElement | null) ?? host);
+    const anchor = this.getTriggerNode();
+    if (!anchor) return;
     this.connector = connectPopup(this.overlay, anchor, this.placement());
     this.overlayRef?.updatePositionStrategy(this.connector.strategy);
     this.popperPlacement.set(this.popperPlacementOf(this.placement()));
@@ -474,11 +529,60 @@ export class TPopup {
   private bindOutsideListeners(): void {
     this.hostRef.nativeElement.ownerDocument.addEventListener('pointerdown', this.handleDocumentPointerDown);
     this.hostRef.nativeElement.ownerDocument.addEventListener('keydown', this.handleDocumentKeydown);
+    this.hostRef.nativeElement.ownerDocument.addEventListener('scroll', this.handleViewportChange, true);
+    this.hostRef.nativeElement.ownerDocument.defaultView?.addEventListener('resize', this.handleViewportChange);
   }
 
   private unbindOutsideListeners(): void {
     this.hostRef.nativeElement.ownerDocument.removeEventListener('pointerdown', this.handleDocumentPointerDown);
     this.hostRef.nativeElement.ownerDocument.removeEventListener('keydown', this.handleDocumentKeydown);
+    this.hostRef.nativeElement.ownerDocument.removeEventListener('scroll', this.handleViewportChange, true);
+    this.hostRef.nativeElement.ownerDocument.defaultView?.removeEventListener('resize', this.handleViewportChange);
+  }
+
+  private readonly handleViewportChange = () => {
+    if (!this.innerVisible()) return;
+    if (!this.getTriggerNode()) { this.renderClose(); return; }
+    this.attachment.update();
+    this.overlayRef?.updatePosition();
+  };
+
+  private mountOverlay(): void {
+    if (!this.overlayRef) return;
+    this.movingAttachment = true;
+    try { this.attachment.mount(this.overlayRef.hostElement, this.attach()); }
+    finally { this.movingAttachment = false; }
+  }
+
+  private getTriggerNode(): HTMLElement | null {
+    const host = this.hostRef.nativeElement;
+    if (this.externalTrigger()) return this.triggerNode?.isConnected ? resolveAnchor(this.triggerNode) : null;
+    const template = this.customTrigger()?.nativeElement;
+    return resolveAnchor((template?.firstElementChild as HTMLElement | null) ?? (host.firstElementChild as HTMLElement | null) ?? host);
+  }
+
+  private isTriggerEvent(event: Event): boolean {
+    return !this.externalTrigger() || (!!this.triggerNode && !!event.target && this.triggerNode.contains(event.target as Node));
+  }
+
+  private bindTrigger(): void {
+    const source = this.triggerElement();
+    let node: HTMLElement | null = null;
+    if (typeof source === 'string') {
+      try { node = this.hostRef.nativeElement.ownerDocument.querySelector<HTMLElement>(source); } catch { /* missing trigger stays closed */ }
+    }
+    if (node === this.triggerNode) return;
+    this.clearTimers();
+    this.triggerCleanup.forEach((cleanup) => cleanup()); this.triggerCleanup = [];
+    this.triggerNode = node;
+    if (!node || this.hostRef.nativeElement.contains(node)) return;
+    const events: Array<[string, (event: any) => void]> = [
+      ['mouseenter', (event: MouseEvent) => this.handleHostEnter(event)], ['mouseleave', (event: MouseEvent) => this.handleHostLeave(event)],
+      ['click', (event: MouseEvent) => this.handleHostClick(event)], ['focusin', (event: FocusEvent) => this.handleHostFocusIn(event)],
+      ['focusout', (event: FocusEvent) => this.handleHostFocusOut(event)], ['mousedown', (event: MouseEvent) => this.handleHostMouseDown(event)],
+      ['contextmenu', (event: MouseEvent) => this.handleHostContextMenu(event)],
+    ];
+    this.triggerCleanup = events.map(([name, listener]) => this.renderer.listen(node, name, listener));
   }
 
   private clearBottomTimer(): void {

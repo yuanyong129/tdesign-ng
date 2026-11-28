@@ -1,3 +1,10 @@
+import type { TemplateRef } from '@angular/core';
+
+/** 挂载目标；无效、未连接或跨文档的目标回退至默认 CDK 容器。 */
+export type PopupAttachNode = string | HTMLElement | null | undefined | (() => string | HTMLElement | null | undefined);
+/** 字符串是外部触发器选择器，模板替换默认触发内容。 */
+export type PopupTriggerElement = string | TemplateRef<unknown>;
+
 /** 弹窗位置，与 TDesign 的 `placement` 取值一致。 */
 export const POPUP_PLACEMENTS = [
   'top',
@@ -70,8 +77,8 @@ export interface PopupVisibleChangeEvent extends PopupVisibleChangeContext { vis
 /**
  * 弹层透传选项：组件把上游的 `popupProps` 收敛成这个形状，再交给 `t-popup`。
  *
- * 只收录 `TPopup` 真正实现的字段——`attach` / `overlayStyle` / `overlayInnerStyle` /
- * `popperOptions` / `triggerElement` 暂不支持（`TPopup` 侧仍是 `[D2]` 欠账），
+ * 只收录复合组件已经接入的字段——`attach` / `overlayStyle` / `overlayInnerStyle` /
+ * `triggerElement` 尚未在复合组件接入；`popperOptions` 在 `TPopup` 侧仍是欠账，
  * 与其收下一个被静默忽略的键，不如让 TypeScript 直接报错。
  *
  * 优先级：调用方显式写的 input **永远** 优先于 `popupProps` 里的同名键
