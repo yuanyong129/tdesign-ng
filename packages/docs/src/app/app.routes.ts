@@ -7,6 +7,10 @@ import { Routes } from '@angular/router';
  */
 export const routes: Routes = [
   {
+    path: 'changelog',
+    loadComponent: () => import('./docs/changelog/changelog.component').then((m) => m.ChangelogDocs),
+  },
+  {
     path: '',
     redirectTo: 'button',
     pathMatch: 'full',

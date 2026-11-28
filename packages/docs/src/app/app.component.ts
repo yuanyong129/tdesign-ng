@@ -83,9 +83,7 @@ function isMacPlatform(): boolean {
         >设计规范</a>
         <a
           class="docs-nav__link"
-          href="https://github.com/yuanyong129/tdesign-ng/releases"
-          target="_blank"
-          rel="noreferrer"
+          routerLink="/changelog"
         >更新日志</a>
         <a
           class="docs-nav__link"
@@ -220,6 +218,7 @@ function isMacPlatform(): boolean {
                 <a href="https://github.com/yuanyong129/tdesign-ng/issues" target="_blank" rel="noreferrer">问题反馈</a>
                 <a href="https://github.com/yuanyong129/tdesign-ng/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
                 <a routerLink="/button">组件总览</a>
+                <a routerLink="/changelog">更新日志</a>
               </div>
             </div>
           </div>
