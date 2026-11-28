@@ -5,9 +5,9 @@
 
 `0.x` 阶段按 `0.<minor>.<patch>` 发布：`minor` 可能带破坏性变更，`patch` 只修 bug。
 
-## [0.2.0] - 未发布
+## [0.2.0] - 2026-11-28
 
-本节为下一版本草稿，整理范围为 `v0.1.1` 之后的已提交改动；尚未发布到 npm。三个包计划继续统一版本号。
+本版本汇总 `v0.1.1` 之后的功能补齐与修复，三个包统一使用 `0.2.0` 版本号。
 
 ### Added
 
@@ -36,7 +36,7 @@
 
 - 本版本仍处于 pre-alpha 阶段，不代表全部上游 API 已实现；各组件的已实现范围和待完成项见 [组件进度](./docs/progress/README.md)。
 - Popup 定位配置只支持已声明的子集；Dialog 自定义挂载、局部显示与拖动等能力尚未完成，不应根据新增配置推断已支持全部上游能力。
-- 安装时请使用同版本的组件、样式和图标包。发布前仍需复核 API 行为变化、依赖范围并完成构建与打包校验。
+- 安装时请使用同版本的组件、样式和图标包；组件包的样式依赖范围已更新为 `^0.2.0`。
 
 ## [0.1.1] - 2026-11-24
 
@@ -73,6 +73,6 @@
 - 尚未提供聚合 NgModule（`TDesignModule` 之类），需要逐组件引入。
 - 尚未提供单元测试与 e2e 测试。
 
-[0.2.0]: https://github.com/yuanyong129/tdesign-ng/compare/v0.1.1...main
+[0.2.0]: https://github.com/yuanyong129/tdesign-ng/releases/tag/v0.2.0
 [0.1.1]: https://github.com/yuanyong129/tdesign-ng/releases/tag/v0.1.1
 [0.1.0]: https://github.com/yuanyong129/tdesign-ng/releases/tag/v0.1.0
