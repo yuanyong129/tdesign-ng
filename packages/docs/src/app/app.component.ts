@@ -60,7 +60,7 @@ function isMacPlatform(): boolean {
         </svg>
         <span class="docs-brand__name">TDesign</span>
         <span class="docs-brand__sub">Angular</span>
-        <span class="docs-brand__badge">pre-alpha</span>
+        <span class="docs-brand__badge">pre-alpha v0.0.0</span>
       </a>
 
       <button type="button" class="docs-search-trigger" aria-label="搜索文档" (click)="searchOpen.set(true)">
@@ -228,7 +228,7 @@ function isMacPlatform(): boolean {
             <span class="docs-footer__sep">·</span>
             <span>基于 TDesign 设计规范构建</span>
             <span class="docs-footer__spacer"></span>
-            <span class="docs-footer__badge">pre-alpha</span>
+            <span class="docs-footer__badge">pre-alpha v0.0.0</span>
           </div>
         </footer>
       </div>
