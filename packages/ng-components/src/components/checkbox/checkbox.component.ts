@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -62,6 +63,7 @@ export class TCheckbox implements ControlValueAccessor {
    * @defaultValue false
    */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /**
    * @zh 是否显示为半选状态
@@ -122,7 +124,7 @@ export class TCheckbox implements ControlValueAccessor {
     () => this.disabled() || this.disabledByForms() || this.groupDisabled(),
   );
 
-  protected readonly isReadonly = computed(() => this.readonly() || this.groupReadonly());
+  protected readonly isReadonly = computed(() => this.formReadonly() || this.groupReadonly());
 
   protected readonly isChecked = computed(() => this.groupChecked() ?? this.state.current());
 
@@ -166,7 +168,7 @@ export class TCheckbox implements ControlValueAccessor {
   }
 
   setGroupName(name: string | undefined): void { this.groupName.set(name); }
-  isProtectedForGroup(): boolean { return this.disabled() || this.disabledByForms() || this.readonly(); }
+  isProtectedForGroup(): boolean { return this.disabled() || this.disabledByForms() || this.formReadonly(); }
 
   clearGroup(): void {
     this.groupChecked.set(null); this.groupIndeterminate.set(false);

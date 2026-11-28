@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -81,6 +82,7 @@ export class TCheckboxGroup implements ControlValueAccessor {
    * @defaultValue false
    */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /**
    * @zh 原生 name 属性
@@ -128,7 +130,7 @@ export class TCheckboxGroup implements ControlValueAccessor {
     effect((onCleanup) => {
       const children = this.children();
       const disabled = this.disabled() || this.disabledByForms();
-      const readonly = this.readonly();
+      const readonly = this.formReadonly();
       const name = this.name();
       const value = this.state.current();
       const max = this.max();
@@ -226,7 +228,7 @@ export class TCheckboxGroup implements ControlValueAccessor {
   }
 
   private isReadonly(): boolean {
-    return this.readonly();
+    return this.formReadonly();
   }
 
   writeValue(value: CheckboxGroupValue | null): void {

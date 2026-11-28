@@ -5,7 +5,7 @@
 <t-popup
   [trigger]="popupTrigger()"
   [placement]="popupPlacement()"
-  [disabled]="mergedDisabled() || !hasPanel()"
+  [disabled]="mergedDisabled() || formReadonly() || !hasPanel()"
   [showArrow]="popupShowArrow()"
   [overlayClassName]="popupOverlayClassName()"
   [visible]="isPopupVisible()"
@@ -38,7 +38,7 @@
                       [theme]="tagTheme()"
                       [variant]="tagVariant()"
                       [maxWidth]="tagMaxWidth()"
-                      [closable]="!mergedDisabled() && !readonly()"
+                      [closable]="!mergedDisabled() && !formReadonly()"
                       (close)="removeTag($index, $event)"
                     >
                       {{ tag }}

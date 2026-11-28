@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -63,6 +64,7 @@ export class TRadio implements ControlValueAccessor {
    * @defaultValue false
    */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /**
    * @zh 再次点击已选中的单选框时是否允许取消选中
@@ -113,7 +115,7 @@ export class TRadio implements ControlValueAccessor {
     () => this.disabled() || this.disabledByForms() || this.groupDisabled(),
   );
 
-  protected readonly isReadonly = computed(() => this.readonly() || this.groupReadonly());
+  protected readonly isReadonly = computed(() => this.formReadonly() || this.groupReadonly());
 
   protected readonly isChecked = computed(() => this.groupChecked() ?? this.state.current());
 

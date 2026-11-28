@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -84,6 +85,7 @@ export class TTextarea implements ControlValueAccessor {
 
   /** @zh 是否只读 @en Whether the textarea is readonly @defaultValue false */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /** @zh 自动聚焦 @en Whether to focus automatically @defaultValue false */
   readonly autofocus = input(false, { transform: booleanAttribute });
@@ -150,6 +152,11 @@ export class TTextarea implements ControlValueAccessor {
   private compositionInput: string | undefined;
 
   constructor() {
+    effect(() => {
+      if (this.formReadonly() || this.mergedDisabled()) untracked(() => {
+        this.composing = false; this.compositionInput = undefined; this.draft.set(null);
+      });
+    });
     afterRenderEffect(() => {
       this.editRevision();
       const text = this.displayText();
@@ -249,7 +256,7 @@ export class TTextarea implements ControlValueAccessor {
 
   protected handleInput(event: Event): void {
     const element = event.target as HTMLTextAreaElement;
-    if (this.mergedDisabled() || this.readonly()) { element.value = this.text(); return; }
+    if (this.mergedDisabled() || this.formReadonly()) { element.value = this.text(); return; }
     if (this.composing || (event as InputEvent).isComposing) { this.draft.set(element.value); return; }
     if (this.compositionInput !== undefined) {
       const duplicate = element.value === this.compositionInput || element.value === this.text();
@@ -273,7 +280,7 @@ export class TTextarea implements ControlValueAccessor {
   }
 
   protected handleCompositionStart(): void {
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     this.composing = true;
     this.compositionInput = undefined;
   }

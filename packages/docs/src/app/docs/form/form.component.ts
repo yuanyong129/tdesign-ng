@@ -9,6 +9,7 @@ import { DemoFormLabel } from './demos/form-label';
 import { DemoFormRules } from './demos/form-rules';
 import { DemoFormValidator } from './demos/form-validator';
 import { DemoFormLifecycle } from './demos/form-lifecycle';
+import { DemoFormReadonly } from './demos/form-readonly';
 
 @Component({
   selector: 'form-docs',
@@ -23,6 +24,7 @@ import { DemoFormLifecycle } from './demos/form-lifecycle';
     DemoFormDisabled,
     DemoFormValidator,
     DemoFormLifecycle,
+    DemoFormReadonly,
   ],
   template: `
     <div class="docs-page">
@@ -74,7 +76,11 @@ import { DemoFormLifecycle } from './demos/form-lifecycle';
       <docs-demo id="form-lifecycle" title="重置、动态字段与异步校验" description="resetType 的 empty 清空字段，initial 恢复挂载初值；预先禁用的控件不会被表单解锁。异步校验按最新请求显示结果，提交等待期间重复提交无效。">
         <demo-form-lifecycle />
       </docs-demo>
-      <p class="demo-hint">id 设置在原生 form 上，可供外部按钮的 form 属性引用。validateAll / validateField 返回字段结果；字段被编辑、重置、移除或销毁时，过期结果带 stale=true 并阻止提交。submit 仍只在校验放行后输出；reset 输出重置后的字段值。errorMessage 的统一文字同时作用于界面与返回结果。数值与对象的 empty 值为 null，字符串为空串、布尔为 false、数组为空数组。readonly 尚未提供整表透传；每个表单项当前管理首个 Angular 表单控件，复合字段请用单一 CVA。不要同时用外部 FormGroup.disable/enable 与 t-form.disabled 管理同一锁定周期。</p>
+      <p class="demo-hint">id 设置在原生 form 上，可供外部按钮的 form 属性引用。validateAll / validateField 返回字段结果；字段被编辑、重置、移除或销毁时，过期结果带 stale=true 并阻止提交。submit 仍只在校验放行后输出；reset 输出重置后的字段值。errorMessage 的统一文字同时作用于界面与返回结果。数值与对象的 empty 值为 null，字符串为空串、布尔为 false、数组为空数组。每个表单项当前管理首个 Angular 表单控件，复合字段请用单一 CVA。不要同时用外部 FormGroup.disable/enable 与 t-form.disabled 管理同一锁定周期。</p>
+
+      <docs-demo id="form-readonly" title="表单只读" description="已有 readonly 能力的控件继承表单状态，与控件自身只读取并集；切换只读关闭选择弹层并阻止清空和移除，仍可聚焦和复制。">
+        <demo-form-readonly />
+      </docs-demo>
 
       <h2 class="docs-section__title" id="form-api">API</h2>
       <div class="api-table__scroll">

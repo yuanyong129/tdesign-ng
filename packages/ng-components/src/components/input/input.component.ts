@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -115,6 +116,7 @@ export class TInput implements ControlValueAccessor {
 
   /** @zh 是否只读 @en Whether the input is readonly @defaultValue false */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /** @zh 是否可清空 @en Whether the input is clearable @defaultValue false */
   readonly clearable = input(false, { transform: booleanAttribute });
@@ -219,6 +221,11 @@ export class TInput implements ControlValueAccessor {
   private onTouched: () => void = () => {};
 
   constructor() {
+    effect(() => {
+      if (this.formReadonly() || this.mergedDisabled()) untracked(() => {
+        this.composing = false; this.compositionInput = undefined; this.compositionDraft.set(null);
+      });
+    });
     // defaultValue 仅在第一次渲染读取；CVA 写值优先于默认值。
     effect(() => {
       untracked(() => {
@@ -288,7 +295,7 @@ export class TInput implements ControlValueAccessor {
   });
 
   protected readonly canClear = computed(() => {
-    if (!this.clearable() || this.mergedDisabled() || this.readonly()) return false;
+    if (!this.clearable() || this.mergedDisabled() || this.formReadonly()) return false;
     return this.text() !== '' || this.showClearIconOnEmpty();
   });
 
@@ -300,7 +307,7 @@ export class TInput implements ControlValueAccessor {
       borderless: this.borderless(),
       focused: this.focused(),
       disabled: this.mergedDisabled(),
-      readonly: this.readonly(),
+      readonly: this.formReadonly(),
     }).join(' '),
   );
 
@@ -332,7 +339,7 @@ export class TInput implements ControlValueAccessor {
 
   protected handleInput(event: Event): void {
     const element = event.target as HTMLInputElement;
-    if (this.mergedDisabled() || this.readonly()) { element.value = this.text(); return; }
+    if (this.mergedDisabled() || this.formReadonly()) { element.value = this.text(); return; }
     if (this.composing || (event as InputEvent).isComposing) {
       this.compositionDraft.set(element.value);
       return;
@@ -352,7 +359,7 @@ export class TInput implements ControlValueAccessor {
 
   protected handleCompositionStart(event: CompositionEvent): void {
     event.stopPropagation();
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     this.composing = true;
     this.compositionInput = undefined;
     this.compositionDraft.set((event.target as HTMLInputElement).value);
@@ -413,7 +420,7 @@ export class TInput implements ControlValueAccessor {
 
   protected handleClear(event: MouseEvent): void {
     event.stopPropagation();
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     this.composing = false;
     this.compositionDraft.set(null);
     this.compositionInput = undefined;

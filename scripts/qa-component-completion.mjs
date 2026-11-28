@@ -1196,6 +1196,85 @@ try {
   assert.deepEqual(formLifecycle.rejectResult,{result:false,message:'异步校验失败',type:'error'});
   for(const key of ['duplicate','duplicateSingle','submitted','resetCancelled','changeCancelled','renameCancelled','removeCancelled','additionCancelled','callbackCancelled','nativeOnce','externalSubmit','destroyCancelled','destroyStable']) assert.equal(formLifecycle[key],true,key);
   console.log('PASS Form lifecycle: reset modes/native reset, disabled ownership, IDs, validation triggers/regex/empty/warnings, dynamic fields, stale async results and submission');
+  await page('/form', 'demo-form-readonly .ro-input input');
+  const formReadonly = await evaluate(`(async () => {
+    const root=document.querySelector('demo-form-readonly'), demo=ng.getComponent(root), form=ng.getComponent(root.querySelector('t-form'));
+    const get=selector=>root.querySelector(selector), comp=selector=>ng.getComponent(get(selector));
+    const edit=async (input,value)=>{input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));${settle}};
+    const input=get('.ro-input input'); input.focus();
+    const initial={readonly:input.readOnly,disabled:input.disabled,enabled:demo.text.enabled,focused:document.activeElement===input,clear:!!get('.ro-input .t-input__suffix-clear')};
+    await edit(input,'不应修改'); const textStable=demo.text.value==='表单文本' && input.value==='表单文本';
+    const textarea=get('.ro-textarea textarea'); await edit(textarea,'不应修改'); const textareaStable=textarea.value==='多行内容';
+    const number=comp('.ro-number'), numberEvents=[]; number.change.subscribe(event=>numberEvents.push(event));
+    get('.ro-number input').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowUp',bubbles:true})); ${settle}
+    const numberStable=numberEvents.length===0 && get('.ro-number input').readOnly;
+    const range=comp('.ro-range'), rangeEvents=[]; range.change.subscribe(event=>rangeEvents.push(event));
+    await edit(get('.ro-range input'),'9'); const rangeStable=rangeEvents.length===0 && get('.ro-range input').readOnly && !get('.ro-range .t-range-input__suffix-clear');
+    const tags=comp('.ro-tags'), tagEvents=[]; tags.change.subscribe(event=>tagEvents.push(event));
+    tags.removeTag(0,new MouseEvent('click')); ${settle}
+    const tagReadonly=tags.mergedReadonly() && !tags.dragEnabled() && tagEvents.length===0 && !get('.ro-tags .t-tag__icon-close');
+    const checkbox=get('.ro-checkbox input'); checkbox.click(); ${settle}
+    const checkboxStable=checkbox.checked && checkbox.getAttribute('aria-readonly')==='true';
+    const checkboxGroup=get('.ro-checkbox-group'); checkboxGroup.querySelectorAll('input')[1].click(); ${settle}
+    const checkboxChecks=[...checkboxGroup.querySelectorAll('input')].map(el=>el.checked);
+    const radio=get('.ro-radio input'); radio.click(); ${settle} const radioStable=radio.checked;
+    const radios=get('.ro-radio-group').querySelectorAll('input'); radios[1].click();
+    radios[0].dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true})); ${settle}
+    const radioChecks=[...radios].map(el=>el.checked);
+    const select=comp('.ro-select'), selectInput=get('.ro-select input');
+    select.handleWrapperClick(new MouseEvent('click')); await edit(selectInput,'query');
+    const selectStable=!select.popupVisible() && selectInput.readOnly && select.query()==='';
+    const selectInputComp=comp('.ro-select-input'), selectionEvents=[]; selectInputComp.valueChange.subscribe(value=>selectionEvents.push(value));
+    selectInputComp.handlePopupVisibleChange(true); selectInputComp.handleClear(new MouseEvent('click'));
+    selectInputComp.removeTagAt(0); ${settle}
+    demo.popupVisible.set(true); ng.applyChanges(demo); ${settle}
+    const selectInputStable=!selectInputComp.isPopupVisible() && selectionEvents.length===0 && demo.selected().length===2 && get('.ro-select-input input').readOnly
+      && !ng.getComponent(get('.ro-select-input t-popup')).innerVisible();
+    demo.popupVisible.set(undefined); ng.applyChanges(demo); ${settle}
+    const auto=comp('.ro-auto'); auto.handleFocus(new FocusEvent('focus')); auto.handleKeydown(new KeyboardEvent('keydown',{key:'ArrowDown'})); ${settle}
+    const autoStable=!auto.open() && get('.ro-auto input').readOnly;
+    const date=comp('.ro-dates'), oldDates=JSON.stringify(demo.dates());
+    date.handleVisibleChange(true); date.handleClear(new MouseEvent('click')); date.commit(['2026-11-02','2026-11-03'],'clear'); ${settle}
+    const dateStable=!date.open() && oldDates===JSON.stringify(demo.dates()) && [...get('.ro-dates').querySelectorAll('input')].every(el=>el.readOnly);
+    demo.extra.set(true); ng.applyChanges(demo); ${settle} const dynamic=get('.ro-dynamic input').readOnly;
+    demo.text.setValue('程序更新'); ${settle} const programmatic=input.value==='程序更新';
+    const submission=await form.submitForm(); const submitAllowed=submission?.fields.text==='程序更新';
+    form.resetForm(); ${settle} const resetAllowed=demo.text.value==='' && input.readOnly;
+    const outside=get('.ro-outside input'); await edit(outside,'外部编辑'); const outsideEditable=!outside.readOnly && outside.value==='外部编辑';
+    const switchHost=get('.ro-switch'); switchHost.click(); ${settle} const switchIndependent=switchHost.getAttribute('aria-checked')==='true';
+    demo.readonly.set(false); ng.applyChanges(demo); ${settle}
+    const released={input:input.readOnly,explicit:get('.ro-explicit input').readOnly,textarea:textarea.readOnly,number:get('.ro-number input').readOnly,dynamic:get('.ro-dynamic input').readOnly};
+    await edit(input,'恢复编辑'); const editable=demo.text.value==='恢复编辑';
+    const popupCases=[];
+    for (const kind of ['select','select-input','auto','dates']) {
+      demo.readonly.set(false); ng.applyChanges(demo); ${settle}
+      if(kind==='select') select.handleWrapperClick(new MouseEvent('click'));
+      if(kind==='select-input') selectInputComp.handlePopupVisibleChange(true);
+      if(kind==='auto') auto.handleFocus(new FocusEvent('focus'));
+      if(kind==='dates') date.handleVisibleChange(true);
+      ${settle}
+      const before=kind==='select'?select.popupVisible():kind==='select-input'?selectInputComp.isPopupVisible():kind==='auto'?auto.open():date.open();
+      demo.readonly.set(true); ng.applyChanges(demo); ${settle}
+      const after=kind==='select'?select.popupVisible():kind==='select-input'?selectInputComp.isPopupVisible():kind==='auto'?auto.open():date.open();
+      const popup=kind==='select'?null:ng.getComponent(get('.ro-'+kind+' t-popup'));
+      const closed=kind==='select'?!select.overlayRef?.hasAttached():!popup.innerVisible();
+      popupCases.push({kind,before,after,closed});
+    }
+    demo.readonly.set(false); ng.applyChanges(demo); ${settle}
+    input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true})); input.value='组合草稿';
+    input.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true})); ${settle}
+    demo.readonly.set(true); ng.applyChanges(demo); ${settle}
+    input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true})); ${settle}
+    const compositionCancelled=input.value===demo.text.value && demo.text.value==='恢复编辑';
+    return {initial,textStable,textareaStable,numberStable,rangeStable,tagReadonly,checkboxStable,checkboxChecks,radioStable,radioChecks,
+      selectStable,selectInputStable,autoStable,dateStable,dynamic,programmatic,submitAllowed,resetAllowed,outsideEditable,switchIndependent,released,editable,popupCases,compositionCancelled};
+  })()`);
+  assert.deepEqual(formReadonly.initial,{readonly:true,disabled:false,enabled:true,focused:true,clear:false});
+  for(const key of ['textStable','textareaStable','numberStable','rangeStable','tagReadonly','checkboxStable','radioStable','selectStable','selectInputStable','autoStable','dateStable','dynamic','programmatic','submitAllowed','resetAllowed','outsideEditable','switchIndependent','editable','compositionCancelled']) assert.equal(formReadonly[key],true,key);
+  assert.deepEqual(formReadonly.checkboxChecks,[true,false]); assert.deepEqual(formReadonly.radioChecks,[true,false]);
+  assert.deepEqual(formReadonly.released,{input:false,explicit:true,textarea:false,number:false,dynamic:false});
+  assert.deepEqual(formReadonly.popupCases,['select','select-input','auto','dates'].map(kind=>({kind,before:true,after:false,closed:true})));
+  console.log('PASS Form readonly: inherited union, 13 control entries, editable recovery, dynamic fields, clear/removal guards, popup close, IME cancel, CVA enabled, reset/submit');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

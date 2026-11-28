@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -6,11 +7,13 @@ import {
   ViewEncapsulation,
   booleanAttribute,
   computed,
+  effect,
   inject,
   input,
   numberAttribute,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { TPopup } from '../popup';
 import { TSelect } from '../select';
@@ -63,6 +66,11 @@ type PanelSide = 'left' | 'right';
   host: { class: 't-date-range-picker' },
 })
 export class TDateRangePicker {
+  constructor() {
+    effect(() => {
+      if (this.formReadonly() || this.disabled()) untracked(() => { if (this.open()) this.closePanel(); });
+    });
+  }
   /**
    * @zh 选中的范围，受控用法。
    * @en Selected range in controlled mode.
@@ -199,6 +207,7 @@ export class TDateRangePicker {
    * @defaultValue false
    */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /**
    * @zh 是否允许选择时间（面板只展示一侧日期 + 时间列）。
@@ -380,7 +389,7 @@ export class TDateRangePicker {
     if (sizeClass) classes.push(sizeClass);
     if (this.open()) classes.push('t-is-focused');
     if (this.disabled()) classes.push('t-is-disabled');
-    if (this.readonly()) classes.push('t-is-readonly');
+    if (this.formReadonly()) classes.push('t-is-readonly');
     if (this.borderless()) classes.push('t-range-input--borderless');
     if (this.status() !== 'default') classes.push(`t-is-${this.status()}`);
     classes.push('t-range-input--suffix');
@@ -419,7 +428,7 @@ export class TDateRangePicker {
   protected readonly rightYearOptions = computed(() => this.buildYearOptions(this.rightYear()));
 
   protected handleVisibleChange(visible: boolean): void {
-    if (this.disabled()) return;
+    if (this.disabled() || this.formReadonly()) return;
     this.open.set(visible);
     this.visibleChange.emit(visible);
     this.pendingStart.set(null);
@@ -445,6 +454,7 @@ export class TDateRangePicker {
   }
 
   protected selectDate(cell: DatePickerCell): void {
+    if (this.formReadonly() || this.disabled()) return;
     if (this.isDateDisabled(cell.date)) return;
 
     if (this.enableTimePicker()) {
@@ -478,6 +488,7 @@ export class TDateRangePicker {
   }
 
   protected selectTime(type: TimePickerColumnType, item: string): void {
+    if (this.formReadonly() || this.disabled()) return;
     const parts = { ...this.activeTimeParts(), [type]: Number(item) };
     const text = formatTimeParts(parts, this.timeFormat());
     if (this.activeSide() === 'start') this.draftTimeStart.set(text);
@@ -495,6 +506,7 @@ export class TDateRangePicker {
 
   /** 时间模式下点「确定」：合并两端日期与时间后提交。 */
   protected confirmTimeRange(): void {
+    if (this.formReadonly() || this.disabled()) return;
     const start = this.pendingStart() ?? this.committedStart();
     const end = this.pendingEnd() ?? this.committedEnd();
     if (!start || !end) return;
@@ -508,7 +520,7 @@ export class TDateRangePicker {
   }
 
   protected handleInputText(side: 'start' | 'end', event: Event): void {
-    if (!this.allowInput() || this.disabled()) return;
+    if (!this.allowInput() || this.disabled() || this.formReadonly()) return;
     const value = (event.target as HTMLInputElement).value;
     if (side === 'start') this.draftStartText.set(value);
     else this.draftEndText.set(value);
@@ -518,7 +530,7 @@ export class TDateRangePicker {
   protected handleInputClick(event: MouseEvent): void {
     if (!this.allowInput()) return;
     event.stopPropagation();
-    if (this.disabled()) return;
+    if (this.disabled() || this.formReadonly()) return;
     if (!this.open()) this.openFromInput();
   }
 
@@ -542,7 +554,7 @@ export class TDateRangePicker {
 
   protected handleClear(event: MouseEvent): void {
     event.stopPropagation();
-    if (this.disabled()) return;
+    if (this.disabled() || this.formReadonly()) return;
     this.commit([], 'clear');
     this.closePanel();
   }
@@ -777,6 +789,7 @@ export class TDateRangePicker {
   }
 
   private commit(value: DateRangeValue, trigger: DateRangePickerChangeEvent['trigger']): void {
+    if (this.formReadonly() || this.disabled()) return;
     if (this.value() === undefined) this.innerValue.set(value);
     this.change.emit({ value, trigger });
   }

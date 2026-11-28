@@ -1,7 +1,11 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  afterRenderEffect,
+  ElementRef,
+  inject,
   TemplateRef,
   ViewEncapsulation,
   booleanAttribute,
@@ -72,7 +76,7 @@ export class TRangeInput implements ControlValueAccessor {
     const options = this.inputProps();
     return Array.isArray(options) ? [options[0], options[1]] : [options as InputOptions | undefined, options as InputOptions | undefined];
   });
-  protected readonly readonlyFields = computed(() => this.fieldOptions().map((options) => this.readonly() || !!options?.readonly));
+  protected readonly readonlyFields = computed(() => this.fieldOptions().map((options) => this.formReadonly() || !!options?.readonly));
 
   /** 整体前缀文本或模板。 @zh 前缀内容 @en label */
   readonly label = input<string | TemplateRef<unknown> | undefined>(undefined);
@@ -85,6 +89,7 @@ export class TRangeInput implements ControlValueAccessor {
 
   /** 是否只读。 @zh 只读 @en readonly @defaultValue false */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /** 左右输入框之间的分隔符。 @zh 分隔符 @en separator @defaultValue - */
   readonly separator = input<string | TemplateRef<unknown> | undefined>('-');
@@ -156,6 +161,20 @@ export class TRangeInput implements ControlValueAccessor {
 
   private readonly composing = new Set<number>();
   private readonly compositionValues = new Map<number, string>();
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  constructor() {
+    afterRenderEffect(() => {
+      const fields = this.readonlyFields();
+      const texts = this.displayTexts();
+      const inputs = this.host.nativeElement.querySelectorAll<HTMLInputElement>('input');
+      fields.forEach((readonly, index) => {
+        if (!readonly) return;
+        this.composing.delete(index); this.compositionValues.delete(index);
+        if (inputs[index]) inputs[index].value = texts[index];
+      });
+    });
+  }
 
   /** 受控值优先，其次内部值，最后回落到 defaultValue。 */
   protected readonly current = computed<RangeInputValue>(() => {
@@ -254,8 +273,9 @@ export class TRangeInput implements ControlValueAccessor {
 
   /** 输入过程中的处理。 */
   protected handleInput(index: number, event: Event): void {
-    if (this.disabledFields()[index] || this.readonlyFields()[index] || this.composing.has(index)) return;
     const element = event.target as HTMLInputElement;
+    if (this.disabledFields()[index] || this.readonlyFields()[index]) { element.value = this.displayTexts()[index]; return; }
+    if (this.composing.has(index)) return;
     if (event.type === 'input' && this.compositionValues.has(index)) {
       const previous = this.compositionValues.get(index);
       this.compositionValues.delete(index);

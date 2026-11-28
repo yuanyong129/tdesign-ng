@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import {
@@ -88,6 +89,7 @@ export class TSelect implements ControlValueAccessor {
 
   /** @zh 是否只读 @en Whether the select is readonly @defaultValue false */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /** @zh 是否加载中 @en Whether the options are loading @defaultValue false */
   readonly loading = input(false, { transform: booleanAttribute });
@@ -186,6 +188,7 @@ export class TSelect implements ControlValueAccessor {
   private onTouched: () => void = () => {};
 
   constructor() {
+    effect(() => { if (this.formReadonly() || this.mergedDisabled()) untracked(() => this.closePanel()); });
     // 外部 `[value]` 变化时同步到内部状态；用户操作时不回写，避免打断交互。
     effect(() => {
       const next = this.value();
@@ -308,7 +311,7 @@ export class TSelect implements ControlValueAccessor {
   });
 
   protected readonly canClear = computed(
-    () => this.clearable() && !this.mergedDisabled() && !this.readonly() && this.selectedValues().length > 0,
+    () => this.clearable() && !this.mergedDisabled() && !this.formReadonly() && this.selectedValues().length > 0,
   );
 
   protected readonly wrapperClasses = computed(() => {
@@ -329,7 +332,7 @@ export class TSelect implements ControlValueAccessor {
     if (this.borderless()) classes.push(`${PREFIX_CLS}--borderless`);
     if (this.focused() || this.popupVisible()) classes.push(`${PREFIX_CLS}--focused`, 't-is-focused');
     if (this.mergedDisabled()) classes.push('t-is-disabled');
-    if (this.readonly()) classes.push('t-is-readonly');
+    if (this.formReadonly()) classes.push('t-is-readonly');
 
     return classes.join(' ');
   });
@@ -403,7 +406,7 @@ export class TSelect implements ControlValueAccessor {
   }
 
   protected handleWrapperClick(event: MouseEvent): void {
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     if (this.popupVisible()) this.closePanel();
     else this.openPanel();
     this.focusSelect();
@@ -411,7 +414,7 @@ export class TSelect implements ControlValueAccessor {
   }
 
   protected handleInput(event: Event): void {
-    if (!this.allowInput()) return;
+    if (!this.allowInput() || this.formReadonly() || this.mergedDisabled()) return;
     const keyword = (event.target as HTMLInputElement).value;
     this.query.set(keyword);
     this.search.emit(keyword);
@@ -430,7 +433,7 @@ export class TSelect implements ControlValueAccessor {
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
 
     switch (event.key) {
       case 'ArrowDown':
@@ -510,7 +513,7 @@ export class TSelect implements ControlValueAccessor {
 
   protected removeTag(value: SelectValue, event: Event): void {
     event.stopPropagation();
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     const next = this.selectedValues().filter((item) => item !== value);
     const option = this.optionIndex().get(value);
     this.remove.emit({ value, option, event });
@@ -519,7 +522,7 @@ export class TSelect implements ControlValueAccessor {
 
   protected handleClear(event: MouseEvent): void {
     event.stopPropagation();
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     this.clear.emit(event);
     this.commit(this.multiple() ? [] : null, 'clear', undefined, event);
     this.focusSelect();
@@ -558,7 +561,7 @@ export class TSelect implements ControlValueAccessor {
   }
 
   private openPanel(): void {
-    if (this.mergedDisabled() || this.readonly() || this.popupVisible()) return;
+    if (this.mergedDisabled() || this.formReadonly() || this.popupVisible()) return;
 
     const template = this.panelTemplate();
     if (!this.overlayRef) {

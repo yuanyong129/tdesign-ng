@@ -201,3 +201,14 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及本批交互回归、`pnpm check:progress` 和 `git diff --check` 通过，missing 0 / extra 0。交互覆盖两种 reset、原生 reset/submit 单次输出、外部按钮按 id 提交、ngModel 初值、数组副本、动态字段、禁用所有权及共享锁、trigger/空规则覆盖/全局及非法正则/空值/warning、统一提示、内部换焦点、异步结果乱序/拒绝/清除、重复提交及各类失效。Form 页面 issues / badResources 为空，截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 799.66 kB）。
 
 **接续任务**：Form.readonly 跨控件上下文 → SelectInput → AutoComplete → Tabs.list → Breadcrumb / Steps / Statistic。Form 整体、第 3 轮与 M2 尚未完成。
+
+### 2026-11-28：第 3 轮 Form.readonly
+
+- **上下文与优先级**：新增内部 FORM_READONLY 注入契约及 useFormReadonly，通过最近的 TForm 提供动态只读信号，避免组件反向引用 Form。表单只读与控件本地只读取并集，显式 false 不会解除表单只读；表单 false 不会解除显式 true。程序写值、表单取值、提交、reset 和 Angular Control 的 enabled / disabled 状态不受只读改变。
+- **消费范围**：接入 Input、Textarea、InputNumber、RangeInput、TagInput、Checkbox / CheckboxGroup、Radio / RadioGroup、SelectInput、Select、AutoComplete、DateRangePicker 共 13 个现有 readonly 入口，包含直接投影、动态字段和复合控件内部原组件。锁定上游 Switch 使用 useDisabled、不消费 readonly，本库 Switch 保持独立行为；同样不为没有 readonly 语义的控件伪造禁用，也不自动改写原生或第三方 CVA。文档列明支持范围，后续新增只读组件可复用上下文。
+- **编辑与显示**：继承后的只读参与原生 readOnly、只读样式、勾选/键盘/全选、输入限制、步进、标签关闭/拖拽和清空判断；隐藏 Select 的不可用关闭图标。Input / Textarea 切到只读时取消组合草稿，RangeInput 恢复受保护侧的展示并清理组合状态，避免只读切换遗留未提交文本。
+- **弹层保护**：Select、AutoComplete、SelectInput、DateRangePicker 动态只读或禁用时关闭现有弹层；阻止重新打开、搜索、清空、标签移除与日期提交。SelectInput 的受控可见值也由只读状态约束，不能靠 popupVisible=true 打开只读面板。DateRangePicker 的日期、时间、确认、清空与输入提交均有只读守卫；自定义面板中的业务回调仍由调用方管理。
+- **进度与边界**：新增表单只读 demo，示例 332 → 333；对齐 1063 → 1064（67.5%）、真实债务 222 → 221、零债务目录 42 → 43。Form 已登记的 readonly 债务实际实现，保留前批记录的 errorMessage / statusIcon / scrollToFirstError / 富内容等实现边界；零债务不代表完整 Vue 运行语义或 SSR/水合验收完成。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有前批及新增交互回归、`pnpm check:progress` 与 `git diff --check` 通过，missing 0 / extra 0。新增覆盖 13 个入口的只读编辑保护、本地 true/false 优先级、动态字段、解除恢复、IME 草稿取消、CVA 保持 enabled、程序写值及提交/reset、表单外隔离、Switch 独立行为，以及四类弹层从打开到只读后的实际关闭；受控 popupVisible=true 也不能绕过只读。Form / SelectInput / Select / AutoComplete / DateRangePicker 页面探针 issues / badResources 均为空，Form 截图已检查。保留已有 footer slot、Browserslist、qrcode CommonJS 和首包预算告警（约 799.66 kB）。
+
+**接续任务**：第 3 轮 SelectInput → AutoComplete → Tabs.list → Breadcrumb / Steps / Statistic，第 3 轮整体与 M2 尚未完成。

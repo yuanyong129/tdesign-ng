@@ -1,7 +1,7 @@
 <t-popup
   trigger="focus"
   placement="bottom-left"
-  [disabled]="mergedDisabled() || readonly()"
+  [disabled]="mergedDisabled() || formReadonly()"
   [visible]="open()"
   (visibleChange)="handleVisibleChange($event)"
   overlayClassName="t-select__dropdown narrow-scrollbar"
@@ -21,7 +21,7 @@
         [borderless]="borderless()"
         [clearable]="clearable()"
         [disabled]="mergedDisabled()"
-        [readonly]="readonly()"
+        [readonly]="formReadonly()"
         [autofocus]="autofocus()"
         (change)="handleInputChange($event)"
         (focus)="handleFocus($event)"

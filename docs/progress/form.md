@@ -4,25 +4,25 @@
 
 - 目录：`packages/ng-components/src/components/form/`
 - 文档页：`/form`（`packages/docs/src/app/docs/form/form.component.ts`）
-- 状态：🚧 有深度债 1 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 34 |
-| 已对齐 | 29 |
-| 覆盖率 | 85.3% |
-| 深度债 | 1（D1 0 / D2 1 / D3 0） |
+| 已对齐 | 30 |
+| 覆盖率 | 88.2% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 4（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 7 个 |
+| 文档示例 | 8 个 |
 
 ## 组件明细
 
 ### `TForm`（`<t-form>`）
 
-上游接口 `TdFormProps`；上游属性 21、已对齐 16（76.2%）；深度债 1 项；未登记缺失 0 项。
+上游接口 `TdFormProps`；上游属性 21、已对齐 17（81.0%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -35,6 +35,7 @@
 | `colon` | boolean | false | 标签文字后是否显示冒号 |
 | `requiredMark` | boolean | true | 是否显示必填标记 |
 | `disabled` | boolean | false | 是否禁用整个表单 |
+| `readonly` | boolean | false | 表单级只读，与支持只读的控件自身配置取并集 |
 | `rules` | FormRules \| undefined | undefined | 表单级校验规则，按字段名匹配 |
 | `requiredMarkPosition` | 'left' \| 'right' | left | 必填标记的位置 |
 | `errorMessage` | string \| undefined | undefined | 统一的错误提示文案，设置后覆盖校验结果里的文案 |
@@ -61,7 +62,6 @@
 | `onReset` | Angular 惯用映射 | Angular 用 (reset) 输出 |
 | `onSubmit` | Angular 惯用映射 | Angular 用 (submit) 输出 |
 | `onValidate` | Angular 惯用映射 | Angular 用 (validate) 输出 |
-| `readonly` | D2 录入与反馈线 | 只读由各控件自身的 readonly 控制，表单级只提供 disabled |
 
 ### `TFormItem`（`<t-form-item>`）
 
@@ -92,5 +92,6 @@
 - `packages/docs/src/app/docs/form/demos/form-inline.ts`
 - `packages/docs/src/app/docs/form/demos/form-label.ts`
 - `packages/docs/src/app/docs/form/demos/form-lifecycle.ts`
+- `packages/docs/src/app/docs/form/demos/form-readonly.ts`
 - `packages/docs/src/app/docs/form/demos/form-rules.ts`
 - `packages/docs/src/app/docs/form/demos/form-validator.ts`

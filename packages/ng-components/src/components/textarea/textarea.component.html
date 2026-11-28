@@ -8,7 +8,7 @@
     [value]="displayText()"
     [placeholder]="placeholder() ?? ''"
     [disabled]="mergedDisabled()"
-    [readOnly]="readonly()"
+    [readOnly]="formReadonly()"
     (input)="handleInput($event)"
     (compositionstart)="handleCompositionStart()"
     (compositionend)="handleCompositionEnd($event)"

@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -127,6 +128,7 @@ export class TTagInput implements ControlValueAccessor {
 
   /** 是否只读。 @zh 是否只读 @en Whether the tag input is readonly @defaultValue false */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /** 是否可清空，悬浮时显示清空图标。 @zh 是否可清空 @en Whether the tag input is clearable @defaultValue false */
   readonly clearable = input(false, { transform: booleanAttribute });
@@ -256,7 +258,7 @@ export class TTagInput implements ControlValueAccessor {
 
   protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms() || !!this.inputProps()?.disabled);
 
-  protected readonly mergedReadonly = computed(() => this.readonly() || !!this.inputProps()?.readonly);
+  protected readonly mergedReadonly = computed(() => this.formReadonly() || !!this.inputProps()?.readonly);
 
   protected readonly hasTags = computed(() => this.mergedValue().length > 0);
 

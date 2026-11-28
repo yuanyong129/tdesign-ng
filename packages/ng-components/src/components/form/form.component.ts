@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  forwardRef,
   computed,
   contentChildren,
   effect,
@@ -14,6 +15,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { TFormItem, type FormItemContext } from './form-item.component';
+import { FORM_READONLY } from '../../_utils/form-readonly';
 import type {
   FormLabelAlign,
   FormLayout,
@@ -31,6 +33,7 @@ import type {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: { '[attr.id]': 'null' },
+  providers: [{ provide: FORM_READONLY, useExisting: forwardRef(() => TForm) }],
 })
 export class TForm {
   /** @zh 实际原生 form 元素的 id @en ID of the native form element @defaultValue undefined */
@@ -78,6 +81,9 @@ export class TForm {
    * @defaultValue false
    */
   readonly disabled = input(false, { transform: booleanAttribute });
+
+  /** @zh 表单级只读，与支持只读的控件自身配置取并集 @en Form readonly state, merged with controls that support readonly @defaultValue false */
+  readonly readonly = input(false, { transform: booleanAttribute });
 
   /**
    * @zh 表单级校验规则，按字段名匹配

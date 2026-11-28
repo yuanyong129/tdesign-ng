@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -122,6 +123,7 @@ export class TRadioGroup implements ControlValueAccessor {
    * @defaultValue false
    */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /**
    * @zh 原生 name 属性，会下发给组内的单选框
@@ -203,7 +205,7 @@ export class TRadioGroup implements ControlValueAccessor {
     // 下发禁用与只读
     effect(() => {
       const disabled = this.mergedDisabled();
-      const readonly = this.readonly();
+      const readonly = this.formReadonly();
       for (const radio of this.radios()) {
         radio.setGroupDisabled(disabled);
         radio.setGroupReadonly(readonly);
@@ -221,7 +223,7 @@ export class TRadioGroup implements ControlValueAccessor {
   }
 
   private handleRadioChange(radio: TRadio, event: RadioChangeEvent): void {
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     if (!event.checked) {
       // 允许取消选中
       this.apply(undefined, event.event);
@@ -239,7 +241,7 @@ export class TRadioGroup implements ControlValueAccessor {
   }
 
   protected handleGroupKeydown(event: KeyboardEvent): void {
-    if (this.mergedDisabled() || this.readonly() || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (this.mergedDisabled() || this.formReadonly() || event.altKey || event.ctrlKey || event.metaKey) return;
     const radios = this.radios().filter((radio) => radio.isEditable());
     const index = radios.findIndex((radio) => radio.containsTarget(event.target));
     if (index < 0 || !radios.length) return;

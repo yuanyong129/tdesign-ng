@@ -4302,6 +4302,15 @@
           "values": []
         },
         {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "表单级只读，与支持只读的控件自身配置取并集",
+          "en": "Form readonly state, merged with controls that support readonly",
+          "values": []
+        },
+        {
           "name": "rules",
           "type": "FormRules | undefined",
           "default": "undefined",

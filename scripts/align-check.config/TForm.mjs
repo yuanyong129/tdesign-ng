@@ -9,7 +9,6 @@ export default {
     ignoreUpstream: {
       ...ANGULAR_EVENT_IGNORES,
       'data': 'Angular 用 ngModel/FormGroup 承载表单数据，不需要 data 输入',
-      'readonly': '只读由各控件自身的 readonly 控制，表单级只提供 disabled',
       'onReset': 'Angular 用 (reset) 输出',
       'onSubmit': 'Angular 用 (submit) 输出',
       'onValidate': 'Angular 用 (validate) 输出',

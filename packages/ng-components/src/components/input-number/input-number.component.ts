@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -88,7 +89,7 @@ export class TInputNumber implements ControlValueAccessor {
   /** @zh 原生编辑区配置，支持 InputOptions 白名单，值与数值格式化由本组件管理 @en Supported native editor options; value and numeric formatting remain controlled by InputNumber @defaultValue undefined */
   readonly inputProps = input<InputOptions | undefined>(undefined);
 
-  protected readonly mergedReadonly = computed(() => this.readonly() || !!this.inputProps()?.readonly);
+  protected readonly mergedReadonly = computed(() => this.formReadonly() || !!this.inputProps()?.readonly);
   protected readonly mergedAutofocus = computed(() => this.autofocus() || !!this.inputProps()?.autofocus);
 
   /** 保留小数位数，数字表示位数，对象形式可指定是否四舍五入。 @zh 小数位数 @en decimalPlaces */
@@ -117,6 +118,7 @@ export class TInputNumber implements ControlValueAccessor {
 
   /** 是否只读。 @zh 只读 @en readonly @defaultValue false */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /** 输入框尺寸。 @zh 尺寸 @en size @defaultValue medium @values small,medium,large */
   readonly size = input<InputNumberSize>('medium');

@@ -1,4 +1,5 @@
-﻿import { NgTemplateOutlet } from '@angular/common';
+import { useFormReadonly } from '../../_utils/form-readonly';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -160,6 +161,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   /** 是否只读。 @zh 只读 @en readonly @defaultValue false */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /** 弹层收起后是否保留输入的关键字。 @zh 保留关键字 @en reserveKeyword @defaultValue false */
   readonly reserveKeyword = input(false, { transform: booleanAttribute });
@@ -235,6 +237,11 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   private onTouched: () => void = () => {};
 
   constructor() {
+    effect(() => {
+      if (this.formReadonly() || this.mergedDisabled()) untracked(() => {
+        this.innerPopupVisible.set(false);
+      });
+    });
     // 外部 `[value]` 变化时同步到内部状态；用户操作时不回写，避免打断交互。
     effect(() => {
       const next = this.value();
@@ -282,7 +289,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms());
 
-  protected readonly isPopupVisible = computed(() => this.popupVisible() ?? this.innerPopupVisible());
+  protected readonly isPopupVisible = computed(() => !this.formReadonly() && !this.mergedDisabled() && (this.popupVisible() ?? this.innerPopupVisible()));
 
   protected readonly hasPanel = computed(() => {
     const panel = this.panel();
@@ -328,7 +335,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
     if (this.autoWidth()) classes.push(`${PREFIX_CLS}--auto-width`);
     if (this.focused() || this.isPopupVisible()) classes.push(`${PREFIX_CLS}--focused`, 't-is-focused');
     if (this.mergedDisabled()) classes.push('t-is-disabled');
-    if (this.readonly()) classes.push('t-is-readonly');
+    if (this.formReadonly()) classes.push('t-is-readonly');
 
     return classes.join(' ');
   });
@@ -451,7 +458,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
     return '';
   });
 
-  protected readonly singleReadonly = computed(() => !this.allowInput() || this.readonly());
+  protected readonly singleReadonly = computed(() => !this.allowInput() || this.formReadonly());
 
   protected readonly multipleInputValue = computed(() =>
     this.isPopupVisible() && this.allowInput() ? this.innerInputValue() : '',
@@ -459,10 +466,10 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   protected readonly multiplePlaceholder = computed(() => (this.tags().length === 0 ? this.placeholder() : ''));
 
-  protected readonly multipleReadonly = computed(() => !this.allowInput() || this.readonly());
+  protected readonly multipleReadonly = computed(() => !this.allowInput() || this.formReadonly());
 
   protected readonly showClearIcon = computed(() => {
-    if (!this.clearable() || this.mergedDisabled() || this.readonly()) return false;
+    if (!this.clearable() || this.mergedDisabled() || this.formReadonly()) return false;
     if (this.multiple()) return this.tags().length > 0;
     return this.innerInputValue() !== '' || this.displayText() !== '';
   });
@@ -475,7 +482,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   }
 
   protected handleInput(event: Event): void {
-    if (!this.allowInput() || this.mergedDisabled() || this.readonly()) return;
+    if (!this.allowInput() || this.mergedDisabled() || this.formReadonly()) return;
     const text = (event.target as HTMLInputElement).value;
     this.commitInputValue(text, { trigger: 'input', e: event });
   }
@@ -527,6 +534,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   protected handleClear(event: MouseEvent): void {
     event.stopPropagation();
+    if (this.formReadonly() || this.mergedDisabled()) return;
     this.clear.emit({ e: event });
     this.commitInputValue('', { trigger: 'clear', e: event });
     if (this.multiple() && this.tags().length > 0) {
@@ -536,12 +544,13 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   }
 
   protected handlePopupVisibleChange(visible: boolean): void {
+    if (visible && (this.formReadonly() || this.mergedDisabled())) return;
     if (this.popupVisible() === undefined) this.innerPopupVisible.set(visible);
     this.popupVisibleChange.emit(visible);
   }
 
   protected handleBoxClick(event: MouseEvent): void {
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     const target = event.target;
     if (target instanceof Element && target.closest('.t-tag__icon-close, .t-input__suffix-clear, .t-tag-input__suffix-clear')) return;
     this.focusInput();
@@ -580,6 +589,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   /** 移除某个标签，并按上游上下文派发 `tagChange`。 */
   private removeTagAt(index: number, item?: SelectInputTagValue, event?: MouseEvent): void {
+    if (this.formReadonly() || this.mergedDisabled()) return;
     const items = this.valueItems();
     if (index < 0 || index >= items.length) return;
     const removed = items[index];
@@ -608,6 +618,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   }
 
   private emitValue(value: SelectInputValue): void {
+    if (this.formReadonly() || this.mergedDisabled()) return;
     this.innerValue.set(value);
     this.onChange(value);
     this.valueChange.emit(value);

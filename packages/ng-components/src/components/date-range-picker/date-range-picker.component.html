@@ -1,7 +1,7 @@
 <t-popup
   trigger="click"
   placement="bottom-left"
-  [disabled]="disabled() || readonly()"
+  [disabled]="disabled() || formReadonly()"
   [visible]="open()"
   [ignoreOutsideSelector]="'.t-select__dropdown'"
   (visibleChange)="handleVisibleChange($event)"
@@ -20,7 +20,7 @@
         >
           <input
             class="t-input__inner"
-            [readOnly]="!allowInput() || readonly()"
+            [readOnly]="!allowInput() || formReadonly()"
             [value]="startText()"
             [attr.placeholder]="startPlaceholder()"
             [disabled]="disabled()"
@@ -38,7 +38,7 @@
         >
           <input
             class="t-input__inner"
-            [readOnly]="!allowInput() || readonly()"
+            [readOnly]="!allowInput() || formReadonly()"
             [value]="endText()"
             [attr.placeholder]="endPlaceholder()"
             [disabled]="disabled()"
@@ -49,7 +49,7 @@
           />
         </div>
 
-        @if (clearable() && hasValue() && !disabled() && !readonly()) {
+        @if (clearable() && hasValue() && !disabled() && !formReadonly()) {
           <span class="t-range-input__suffix t-range-input__suffix-icon">
             <svg
               class="t-icon t-icon-close-circle-filled t-range-input__suffix-clear"

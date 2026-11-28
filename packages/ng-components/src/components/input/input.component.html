@@ -22,7 +22,7 @@
       [attr.aria-describedby]="tips() || showLimit() ? innerId + '-info' : null"
       [placeholder]="placeholder() ?? ''"
       [disabled]="mergedDisabled()"
-      [readOnly]="readonly()"
+      [readOnly]="formReadonly()"
       (input)="handleInput($event)"
       (focus)="handleFocus($event)"
       (blur)="handleBlur($event)"

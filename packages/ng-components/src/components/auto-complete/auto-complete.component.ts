@@ -1,3 +1,4 @@
+import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -174,6 +175,7 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
 
   /** 是否只读。 @zh 是否只读 @en readonly @defaultValue false */
   readonly readonly = input(false, { transform: booleanAttribute });
+  protected readonly formReadonly = useFormReadonly(this.readonly);
 
   /** 是否自动聚焦。 @zh 是否自动聚焦 @en autofocus @defaultValue false */
   readonly autofocus = input(false, { transform: booleanAttribute });
@@ -225,6 +227,9 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   private onTouched: () => void = () => {};
 
   constructor() {
+    effect(() => {
+      if (this.formReadonly() || this.mergedDisabled()) untracked(() => { this.open.set(false); this.active.set(''); });
+    });
     // 外部 `[value]` 变化时同步到内部状态；用户输入时不回写，避免打断正在输入的内容。
     effect(() => {
       const value = this.value();
@@ -310,6 +315,7 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   }
 
   protected handleInputChange(event: InputChangeEvent): void {
+    if (this.formReadonly() || this.mergedDisabled()) return;
     this.commit(String(event.value ?? ''), { trigger: event.trigger, e: event.event });
     this.showPanel();
   }
@@ -330,7 +336,7 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
-    if (this.mergedDisabled()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     if (this.inputComposing || event.isComposing || event.keyCode === 229) return;
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
@@ -363,7 +369,7 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
 
   protected handleVisibleChange(visible: boolean): void {
     if (visible) {
-      if (this.mergedDisabled() || this.readonly()) return;
+      if (this.mergedDisabled() || this.formReadonly()) return;
     }
     this.open.set(visible);
     if (!visible) this.active.set('');
@@ -375,7 +381,7 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   }
 
   protected selectOption(option: AutoCompleteOptionView, event?: Event): void {
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     this.active.set(option.text);
     this.commit(option.text, { e: event });
     this.open.set(false);
@@ -428,7 +434,7 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   }
 
   private showPanel(): void {
-    if (this.mergedDisabled() || this.readonly()) return;
+    if (this.mergedDisabled() || this.formReadonly()) return;
     this.open.set(true);
   }
 
