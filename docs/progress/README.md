@@ -6,9 +6,9 @@
 | --- | --- |
 | 组件目录 | 73 |
 | 上游属性 | 1576 |
-| 已对齐 | 1066 |
-| 覆盖率 | 67.6% |
-| 深度债 | 217 项 |
+| 已对齐 | 1068 |
+| 覆盖率 | 67.8% |
+| 深度债 | 215 项 |
 | 零债务组件 | 44 / 73 |
 
 状态图例：✅ 无债务；🚧 有深度债（D1 表格与选择线 / D2 录入与反馈 / D3 其余）；⚠️ 有未登记缺失。
@@ -28,7 +28,6 @@
 | [输入框 Input](input.md) | `input` | 46 | 26 | 56.5% | 0 | 0 | 0 | 0 | 10 | ✅ |
 | [上传 Upload](upload.md) | `upload` | 63 | 36 | 57.1% | 0 | 7 | 3 | 0 | 3 | 🚧 |
 | [抽屉 Drawer](drawer.md) | `drawer` | 31 | 18 | 58.1% | 0 | 8 | 0 | 0 | 3 | 🚧 |
-| [自动补全 AutoComplete](auto-complete.md) | `auto-complete` | 32 | 19 | 59.4% | 1 | 2 | 0 | 0 | 3 | 🚧 |
 | [对话框 Dialog](dialog.md) | `dialog` | 37 | 22 | 59.5% | 0 | 10 | 0 | 0 | 4 | 🚧 |
 | [树形控件 Tree](tree.md) | `tree` | 50 | 30 | 60.0% | 10 | 8 | 1 | 0 | 3 | 🚧 |
 | [链接 Link](link.md) | `link` | 13 | 8 | 61.5% | 0 | 0 | 0 | 0 | 6 | ✅ |
@@ -37,6 +36,7 @@
 | [全局提示 Message](message.md) | `message` | 8 | 5 | 62.5% | 0 | 0 | 1 | 0 | 3 | 🚧 |
 | [选项卡 Tabs](tabs.md) | `tabs` | 16 | 10 | 62.5% | 0 | 0 | 1 | 0 | 7 | 🚧 |
 | [通知 Notification](notification.md) | `notification` | 11 | 7 | 63.6% | 0 | 0 | 1 | 0 | 3 | 🚧 |
+| [自动补全 AutoComplete](auto-complete.md) | `auto-complete` | 32 | 21 | 65.6% | 1 | 0 | 0 | 0 | 4 | 🚧 |
 | [分割线 Divider](divider.md) | `divider` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [布局 Layout](layout.md) | `layout` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [标签输入框 TagInput](tag-input.md) | `tag-input` | 39 | 26 | 66.7% | 0 | 0 | 1 | 0 | 4 | 🚧 |

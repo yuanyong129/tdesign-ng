@@ -1,17 +1,17 @@
+import { createControllableState } from '../../_utils/controllable-state';
+import { mergePopupClassNames } from '../popup/popup.types';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  afterRenderEffect,
   Component,
-  DestroyRef,
   ElementRef,
-  OnInit,
   ViewEncapsulation,
   booleanAttribute,
   computed,
   effect,
   forwardRef,
-  inject,
   input,
   output,
   signal,
@@ -23,6 +23,8 @@ import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from '@angular/forms';
 import { TInput, type InputChangeEvent } from '../input';
 import { TPopup } from '../popup';
 import {
+  type AutoCompleteInputProps,
+  type AutoCompletePopupProps,
   type AutoCompleteBlurEvent,
   type AutoCompleteChangeEvent,
   type AutoCompleteClearEvent,
@@ -47,6 +49,7 @@ const SIZE_SUFFIX: Record<AutoCompleteSize, string> = {
 
 /** 上游从全局配置里取空态文案，这里用同一份默认文案。 */
 const DEFAULT_EMPTY_TEXT = '暂无数据';
+let autoCompleteUid = 0;
 
 /** 拆开富文本：字符串进 `text`，模板进 `template`。 */
 interface SplitContent {
@@ -121,7 +124,12 @@ function toOptionView(option: AutoCompleteOption): AutoCompleteOptionView {
     },
   ],
 })
-export class TAutoComplete implements ControlValueAccessor, OnInit {
+export class TAutoComplete implements ControlValueAccessor {
+  protected readonly listId = `t-auto-complete-list-${++autoCompleteUid}`;
+  /** @zh 内置输入区的受支持配置 @en Supported options for the built-in editor @defaultValue undefined */
+  readonly inputProps = input<AutoCompleteInputProps | undefined>(undefined);
+  /** @zh 弹层外观和生命周期配置，显隐由组件管理 @en Popup appearance and lifecycle options, visibility is managed by the component @defaultValue undefined */
+  readonly popupProps = input<AutoCompletePopupProps | undefined>(undefined);
   /** 值，受控用法。 @zh 值 @en value @defaultValue undefined */
   readonly value = input<string | undefined>(undefined);
 
@@ -207,15 +215,18 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   /** 组合输入结束。 @zh 组合输入结束 @en compositionend */
   readonly compositionend = output<AutoCompleteCompositionEvent>();
 
-  private readonly destroyRef = inject(DestroyRef);
-
   private readonly wrapRef = viewChild<ElementRef<HTMLElement>>('wrap');
 
-  protected readonly innerValue = signal('');
+  private readonly state = createControllableState(this.value, () => this.defaultValue() ?? '');
+  protected readonly innerValue = this.state.current;
 
   protected readonly open = signal(false);
 
-  private readonly active = signal('');
+  private readonly active = signal<string | null>(null);
+  protected readonly editorReadonly = computed(() => this.formReadonly() || !!this.inputProps()?.readonly);
+  protected readonly panelDisabled = computed(() => this.editorReadonly() || this.mergedDisabled() || !!this.popupProps()?.disabled);
+  protected readonly overlayClasses = computed(() => mergePopupClassNames('t-select__dropdown narrow-scrollbar', this.popupProps()?.overlayClassName));
+  private readonly popup = viewChild(TPopup);
 
   protected readonly hostWidth = signal(0);
 
@@ -227,32 +238,29 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   private onTouched: () => void = () => {};
 
   constructor() {
-    effect(() => {
-      if (this.formReadonly() || this.mergedDisabled()) untracked(() => { this.open.set(false); this.active.set(''); });
+    afterRenderEffect(() => {
+      const visible = this.open();
+      const option = this.activeOption();
+      const index = option ? this.filteredOptions().indexOf(option) : -1;
+      const input = this.wrapRef()?.nativeElement.querySelector('t-input input');
+      if (!input) return;
+      input.setAttribute('role', 'combobox'); input.setAttribute('aria-autocomplete', 'list');
+      input.setAttribute('aria-expanded', String(visible)); input.setAttribute('aria-controls', this.listId);
+      if (visible && index >= 0) input.setAttribute('aria-activedescendant', `${this.listId}-${index}`);
+      else input.removeAttribute('aria-activedescendant');
     });
-    // 外部 `[value]` 变化时同步到内部状态；用户输入时不回写，避免打断正在输入的内容。
     effect(() => {
-      const value = this.value();
-      if (value === undefined) return;
-      untracked(() => {
-        if (value !== this.innerValue()) this.innerValue.set(value);
-      });
+      if (this.panelDisabled()) untracked(() => { this.open.set(false); this.active.set(null); this.inputComposing = false; });
     });
-
     // 弹层最小宽度跟随触发器宽度，等价于上游的 overlayInnerStyle.width。
-    effect(() => {
+    effect((cleanup) => {
       const element = this.wrapRef()?.nativeElement;
       if (!element) return;
-      untracked(() => this.observeWidth(element));
+      untracked(() => cleanup(this.observeWidth(element)));
     });
   }
 
-  ngOnInit(): void {
-    if (this.value() !== undefined) return;
-    this.innerValue.set(this.defaultValue() ?? '');
-  }
-
-  protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms());
+  protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms() || !!this.inputProps()?.disabled);
 
   protected readonly sizeSuffix = computed(() => SIZE_SUFFIX[this.size()]);
 
@@ -299,7 +307,8 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   );
 
   writeValue(value: string | null | undefined): void {
-    this.innerValue.set(value ?? '');
+    this.state.write(value ?? '');
+    this.active.set(null); this.open.set(false); this.inputComposing = false;
   }
 
   registerOnChange(fn: (value: string) => void): void {
@@ -315,19 +324,26 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   }
 
   protected handleInputChange(event: InputChangeEvent): void {
-    if (this.formReadonly() || this.mergedDisabled()) return;
+    if (this.editorReadonly() || this.mergedDisabled()) return;
+    this.active.set(null);
     this.commit(String(event.value ?? ''), { trigger: event.trigger, e: event.event });
+    if (event.event) this.inputProps()?.onChange?.(String(event.value ?? ''), { e: event.event });
     this.showPanel();
   }
 
   protected handleFocus(event: FocusEvent): void {
+    if (this.mergedDisabled()) return;
+    this.inputProps()?.onFocus?.(this.innerValue(), { e: event });
     this.showPanel();
     this.focus.emit({ e: event, value: this.innerValue() });
   }
 
   protected handleBlur(event: FocusEvent): void {
+    if (this.popup()?.containsTarget(event.relatedTarget)) return;
     this.inputComposing = false;
     this.onTouched();
+    this.open.set(false); this.active.set(null);
+    this.inputProps()?.onBlur?.(this.innerValue(), { e: event });
     this.blur.emit({ e: event, value: this.innerValue() });
   }
 
@@ -336,15 +352,19 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
-    if (this.mergedDisabled() || this.formReadonly()) return;
+    if (this.mergedDisabled()) return;
+    this.inputProps()?.onKeydown?.(this.innerValue(), { e: event });
+    if (this.panelDisabled()) return;
     if (this.inputComposing || event.isComposing || event.keyCode === 229) return;
+    if (event.key === 'Enter' && this.triggerElement() !== undefined) this.handleEnter(event);
+    if (event.key === 'Escape') { event.preventDefault(); this.handleVisibleChange(false); return; }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       this.showPanel();
       this.moveActive(event.key === 'ArrowDown' ? 1 : -1);
       return;
     }
-    if (event.key !== 'Enter') return;
+    if (event.key !== 'Enter' || !this.open()) return;
     const target = this.activeOption();
     if (!target) return;
     event.preventDefault();
@@ -355,38 +375,40 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
     this.clear.emit({ e: event });
   }
 
-  protected handleCompositionStart(event: CompositionEvent): void {
+  protected handleCompositionStart(event: CompositionEvent, value: string): void {
     this.inputComposing = true;
-    this.compositionstart.emit({ e: event, value: this.innerValue() });
+    this.compositionstart.emit({ e: event, value });
+    this.inputProps()?.onCompositionstart?.(value, { e: event });
   }
 
-  protected handleCompositionEnd(event: CompositionEvent): void {
+  protected handleCompositionEnd(event: CompositionEvent, value: string): void {
     this.inputComposing = false;
-    this.compositionend.emit({ e: event, value: this.innerValue() });
+    this.compositionend.emit({ e: event, value });
+    this.inputProps()?.onCompositionend?.(value, { e: event });
   }
 
   private inputComposing = false;
 
   protected handleVisibleChange(visible: boolean): void {
     if (visible) {
-      if (this.mergedDisabled() || this.formReadonly()) return;
+      if (this.panelDisabled()) return;
     }
     this.open.set(visible);
-    if (!visible) this.active.set('');
+    if (!visible) this.active.set(null);
   }
 
   /** 面板按下鼠标时阻止默认行为，保住输入框焦点，否则点击选项会先触发 blur。 */
   protected handlePanelMouseDown(event: MouseEvent): void {
+    if ((event.target as HTMLElement).closest('button,input,textarea,select,a[href],[tabindex]')) return;
     event.preventDefault();
   }
 
   protected selectOption(option: AutoCompleteOptionView, event?: Event): void {
-    if (this.mergedDisabled() || this.formReadonly()) return;
-    this.active.set(option.text);
+    if (this.panelDisabled()) return;
+    this.active.set(null);
     this.commit(option.text, { e: event });
     this.open.set(false);
     this.select.emit({ value: option.text, e: event });
-    this.onTouched();
   }
 
   protected optionClasses(option: AutoCompleteOptionView): string {
@@ -434,14 +456,14 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
   }
 
   private showPanel(): void {
-    if (this.mergedDisabled() || this.formReadonly()) return;
+    if (this.panelDisabled()) return;
     this.open.set(true);
   }
 
   private moveActive(step: number): void {
     const options = this.filteredOptions();
     if (!options.length) {
-      this.active.set('');
+      this.active.set(null);
       return;
     }
     const index = options.findIndex((option) => option.text === this.active());
@@ -458,24 +480,29 @@ export class TAutoComplete implements ControlValueAccessor, OnInit {
 
   private commit(value: string, context: { trigger?: AutoCompleteChangeEvent['trigger']; e?: Event }): void {
     const changed = value !== this.innerValue();
-    this.innerValue.set(value);
+    this.state.set(value);
     if (!changed) return;
-    if (!value) this.active.set('');
+    if (!value) this.active.set(null);
     this.onChange(value);
     this.valueChange.emit(value);
     this.change.emit({ value, trigger: context.trigger, e: context.e });
   }
 
-  private observeWidth(element: HTMLElement): void {
+  private observeWidth(element: HTMLElement): () => void {
     this.hostWidth.set(Math.round(element.getBoundingClientRect().width));
-    if (typeof ResizeObserver === 'undefined') return;
+    if (typeof ResizeObserver === 'undefined') return () => {};
     const observer = new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width ?? 0;
       this.hostWidth.set(Math.round(width));
     });
     observer.observe(element);
-    this.destroyRef.onDestroy(() => observer.disconnect());
+    return () => observer.disconnect();
   }
+
+  protected handleKeyup(event: KeyboardEvent): void { if (!this.mergedDisabled()) this.inputProps()?.onKeyup?.(this.innerValue(), { e: event }); }
+  protected handleKeypress(event: KeyboardEvent): void { if (!this.mergedDisabled()) this.inputProps()?.onKeypress?.(this.innerValue(), { e: event }); }
+  protected handleCustomFocus(event: FocusEvent): void { if (this.triggerElement() !== undefined) this.handleFocus(event); }
+  protected handleCustomBlur(event: FocusEvent): void { if (this.triggerElement() !== undefined) this.handleBlur(event); }
 }
 
 /** 转义 HTML 特殊字符，供 innerHTML 高亮片段使用。 */

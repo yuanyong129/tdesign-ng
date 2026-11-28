@@ -1,16 +1,21 @@
 <t-popup
   trigger="focus"
-  placement="bottom-left"
-  [disabled]="mergedDisabled() || formReadonly()"
+  [placement]="popupProps()?.placement ?? 'bottom-left'"
+  [disabled]="panelDisabled()"
   [visible]="open()"
   (visibleChange)="handleVisibleChange($event)"
-  overlayClassName="t-select__dropdown narrow-scrollbar"
+  [overlayClassName]="overlayClasses()"
+  [overlayInnerClassName]="popupProps()?.overlayInnerClassName ?? null"
+  [showArrow]="popupProps()?.showArrow ?? false"
+  [destroyOnClose]="popupProps()?.destroyOnClose ?? false"
+  [hideEmptyPopup]="popupProps()?.hideEmptyPopup ?? false"
+  [zIndex]="popupProps()?.zIndex"
 >
-  <div #wrap class="t-auto-complete">
+  <div #wrap class="t-auto-complete" (keydown)="handleKeydown($event)" (focusin)="handleCustomFocus($event)" (focusout)="handleCustomBlur($event)">
     @if (triggerContent().template; as triggerTemplate) {
       <ng-container *ngTemplateOutlet="triggerTemplate" />
     } @else if (triggerContent().text !== null) {
-      <span>{{ triggerContent().text }}</span>
+      <span [attr.tabindex]="mergedDisabled() ? -1 : 0">{{ triggerContent().text }}</span>
     } @else {
       <t-input
         [value]="innerValue()"
@@ -21,21 +26,27 @@
         [borderless]="borderless()"
         [clearable]="clearable()"
         [disabled]="mergedDisabled()"
-        [readonly]="formReadonly()"
-        [autofocus]="autofocus()"
+        [readonly]="editorReadonly()"
+        [autofocus]="autofocus() || !!inputProps()?.autofocus"
+        [name]="inputProps()?.name" [autocomplete]="inputProps()?.autocomplete ?? 'off'"
+        [spellCheck]="inputProps()?.spellCheck ?? true"
+        [maxlength]="inputProps()?.maxlength" [maxcharacter]="inputProps()?.maxcharacter"
+        [allowInputOverMax]="inputProps()?.allowInputOverMax ?? false"
         (change)="handleInputChange($event)"
         (focus)="handleFocus($event)"
         (blur)="handleBlur($event)"
         (enter)="handleEnter($event)"
         (keydown)="handleKeydown($event)"
+        (keyup)="handleKeyup($event)"
+        (keypress)="handleKeypress($event)"
         (clear)="handleClear($event)"
-        (compositionstart)="handleCompositionStart($event.e)"
-        (compositionend)="handleCompositionEnd($event.e)"
+        (compositionstart)="handleCompositionStart($event.e, $event.value)"
+        (compositionend)="handleCompositionEnd($event.e, $event.value)"
       />
     }
   </div>
 
-  <div tPopupContent (mousedown)="handlePanelMouseDown($event)">
+  <div tPopupContent (mousedown)="handlePanelMouseDown($event)" (focusout)="handleBlur($event)">
     <div [class]="panelInnerClasses()" [style.minWidth.px]="hostWidth()">
       <div class="t-auto-complete__panel">
         <ng-container *ngTemplateOutlet="panelTop().template" />
@@ -44,11 +55,14 @@
         }
 
         @if (filteredOptions().length > 0) {
-          <ul class="t-select__list">
+          <ul class="t-select__list" role="listbox" [id]="listId">
             @for (option of filteredOptions(); track $index) {
               <li
                 [class]="optionClasses(option)"
                 [attr.title]="option.text"
+                role="option"
+                [id]="listId + '-' + $index"
+                [attr.aria-selected]="option === activeOption()"
                 (click)="selectOption(option, $event)"
               >
                 @if (option.template; as labelTemplate) {

@@ -309,6 +309,24 @@
       "file": "packages/ng-components/src/components/auto-complete/auto-complete.component.ts",
       "inputs": [
         {
+          "name": "inputProps",
+          "type": "AutoCompleteInputProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "内置输入区的受支持配置",
+          "en": "Supported options for the built-in editor",
+          "values": []
+        },
+        {
+          "name": "popupProps",
+          "type": "AutoCompletePopupProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层外观和生命周期配置，显隐由组件管理",
+          "en": "Popup appearance and lifecycle options, visibility is managed by the component",
+          "values": []
+        },
+        {
           "name": "value",
           "type": "string | undefined",
           "default": "undefined",

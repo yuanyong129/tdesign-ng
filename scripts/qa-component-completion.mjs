@@ -1378,6 +1378,67 @@ try {
   await evaluate(`(async()=>{${settle}})()`);
   const selectMouse=await evaluate(`(()=>{const demo=ng.getComponent(document.querySelector('demo-select-input-options'));return {enter:demo.mouseEnters(),leave:demo.mouseLeaves()};})()`);
   assert.deepEqual(selectMouse,{enter:1,leave:1});
+  await page('/auto-complete', 'demo-auto-complete-options input');
+  const autoOptions=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-auto-complete-options'),demo=ng.getComponent(root);
+    const host=root.querySelector('.options-controlled'),auto=ng.getComponent(host),input=host.querySelector('input');
+    const edit=async(el,text)=>{el.value=text;el.dispatchEvent(new Event('input',{bubbles:true}));${settle}};
+    const key=async(el,name)=>{el.dispatchEvent(new KeyboardEvent('keydown',{key:name,bubbles:true,cancelable:true}));${settle}};
+    const attrs={name:input.name,autocomplete:input.autocomplete,spellcheck:input.spellcheck,role:input.getAttribute('role')};
+    input.focus(); ${settle}
+    const overlay=document.querySelector('.auto-options-popup');
+    const popup={classes:overlay.classList.contains('t-select__dropdown'),inner:!!overlay.querySelector('.auto-options-inner'),arrow:!!overlay.querySelector('.t-popup__arrow'),zIndex:overlay.style.zIndex};
+    await edit(input,'a中😀x'); const limited={text:input.value,value:demo.value(),callbacks:demo.inputs()};
+    demo.value.set('');ng.applyChanges(demo);${settle}
+    input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));await edit(input,'中文测试');
+    await key(input,'Enter');const composing={value:demo.value(),text:input.value,enters:demo.enters()};
+    input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));input.dispatchEvent(new Event('input',{bubbles:true}));${settle}
+    const composed={value:demo.value(),callbacks:demo.inputs(),compositions:demo.compositions()};
+    demo.acceptChanges.set(false);ng.applyChanges(demo);${settle}await edit(input,'beta');const rejected=input.value===demo.value();
+    demo.value.set('');demo.filterable.set(false);ng.applyChanges(demo);${settle}
+    await key(input,'ArrowDown');const aria=input.getAttribute('aria-activedescendant')===document.querySelector('.auto-options-popup [role=option]').id;
+    await key(input,'Enter');const rejectedSelection={value:demo.value(),text:input.value,selects:demo.selects(),open:auto.open()};
+    await key(input,'Enter');const noRepeat=demo.selects()===1;
+    demo.acceptChanges.set(true);ng.applyChanges(demo);${settle}await key(input,'ArrowUp');await key(input,'Escape');
+    const escaped=!auto.open()&&!input.hasAttribute('aria-activedescendant')&&!document.querySelector('.auto-options-popup');
+    demo.options.set(['']);ng.applyChanges(demo);${settle}input.blur();input.focus();${settle}
+    await key(input,'Enter');const emptyNotImplicit=demo.selects()===1;
+    await key(input,'ArrowDown');await key(input,'Enter');const emptySelectable=demo.selects()===2;
+    demo.options.set(['old']);ng.applyChanges(demo);${settle}await key(input,'ArrowDown');
+    demo.options.set(['new']);ng.applyChanges(demo);${settle}await key(input,'Enter');const staleIgnored=demo.selects()===2;
+    await key(input,'ArrowDown');await key(input,'Enter');const dynamicSelection=demo.value()==='new';
+    demo.popupProps.set({...demo.popupProps(),disabled:true});ng.applyChanges(demo);${settle}await edit(input,'beta');
+    const panelDisabled=input.value==='beta'&&!input.disabled&&!auto.open();
+    demo.popupProps.set({...demo.popupProps(),disabled:false});demo.inputProps.set({...demo.inputProps(),readonly:true});ng.applyChanges(demo);${settle}
+    await key(input,'ArrowDown');const configReadonly=input.readOnly&&!auto.open();
+    demo.inputProps.set({...demo.inputProps(),readonly:false,disabled:false,maxlength:3,maxcharacter:undefined});demo.disabled.set(true);ng.applyChanges(demo);${settle}
+    const disabledUnion=input.disabled;demo.disabled.set(false);ng.applyChanges(demo);${settle}await edit(input,'a😀bc');const dynamicLimit=input.value;
+    const defaultHost=root.querySelector('.options-default'),defaultInput=defaultHost.querySelector('input');
+    await edit(defaultInput,'edited');demo.initial.set('changed');ng.applyChanges(demo);${settle}const defaultOnce=defaultInput.value;
+    const formHost=root.querySelector('.options-form'),form=ng.getComponent(formHost),formInput=formHost.querySelector('input');
+    formInput.focus();${settle}await edit(formInput,'n');await key(formInput,'ArrowDown');await key(formInput,'Enter');
+    const pending={model:demo.control.value,text:formInput.value,touched:demo.control.touched};
+    await key(formInput,'ArrowDown');const footer=document.querySelector('.auto-panel-button');footer.focus();${settle}
+    const ownUntouched=!demo.control.touched;footer.blur();${settle}const blurred={model:demo.control.value,touched:demo.control.touched};
+    demo.control.disable();ng.applyChanges(demo);${settle}const formDisabled=formInput.disabled&&!form.open();
+    demo.control.enable();demo.control.reset();ng.applyChanges(demo);${settle}const reset={text:formInput.value,touched:demo.control.touched};
+    const customHost=root.querySelector('.options-custom'),custom=ng.getComponent(customHost),button=customHost.querySelector('button');
+    button.focus();${settle}await key(button,'ArrowDown');await key(button,'Enter');const customSelected=demo.customValue();
+    button.blur();${settle}
+    return {attrs,popup,limited,composing,composed,rejected,aria,rejectedSelection,noRepeat,escaped,emptyNotImplicit,emptySelectable,staleIgnored,dynamicSelection,
+      panelDisabled,configReadonly,disabledUnion,dynamicLimit,defaultOnce,pending,ownUntouched,blurred,formDisabled,reset,customSelected};
+  })()`);
+  assert.deepEqual(autoOptions.attrs,{name:'auto-search',autocomplete:'off',spellcheck:false,role:'combobox'});
+  assert.deepEqual(autoOptions.popup,{classes:true,inner:true,arrow:true,zIndex:'2300'});
+  assert.deepEqual(autoOptions.limited,{text:'a中',value:'a中',callbacks:1});
+  assert.deepEqual(autoOptions.composing,{value:'',text:'中文测试',enters:0});
+  assert.deepEqual(autoOptions.composed,{value:'中文测',callbacks:2,compositions:1});
+  assert.deepEqual(autoOptions.rejectedSelection,{value:'',text:'',selects:1,open:false});
+  for(const key of ['rejected','aria','noRepeat','escaped','emptyNotImplicit','emptySelectable','staleIgnored','dynamicSelection','panelDisabled','configReadonly','disabledUnion','ownUntouched','formDisabled']) assert.equal(autoOptions[key],true,key);
+  assert.equal(autoOptions.dynamicLimit,'a😀b');assert.equal(autoOptions.defaultOnce,'edited');
+  assert.deepEqual(autoOptions.pending,{model:'form',text:'next',touched:false});assert.deepEqual(autoOptions.blurred,{model:'next',touched:true});
+  assert.deepEqual(autoOptions.reset,{text:'form',touched:false});assert.equal(autoOptions.customSelected,'custom-a');
+  console.log('PASS AutoComplete options/state: popup config, native attrs/Unicode/IME, controlled rejection/default once, keyboard/ARIA/dynamic options, readonly/disabled, CVA blur/reset, custom trigger');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

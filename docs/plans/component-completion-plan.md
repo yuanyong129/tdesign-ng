@@ -224,3 +224,13 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有前批及新增交互回归、`pnpm check:progress` 和 `git diff --check` 通过，missing 0 / extra 0。新增验证原生属性/动态配置、Unicode 与加权限制、IME 单次提交、paste/enter 单次回调、嵌套配置/禁用只读优先级、标签外观和关闭回调、受控删除/输入/显隐拒绝、关键字保留/清理、默认输入值仅初始化、CVA 禁用/恢复/reset/updateOn blur、本面板与其它浮层的焦点边界、真实鼠标 enter/leave 各一次。SelectInput / Form / Popup 页面探针 issues / badResources 为空，SelectInput 截图已检查。保留已有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 799.96 kB）。
 
 **接续任务**：第 3 轮 AutoComplete → Tabs.list → Breadcrumb / Steps / Statistic，第 3 轮整体与 M2 尚未完成。
+
+### 2026-11-28：第 3 轮 AutoComplete 配置与状态
+
+- **输入与弹层配置**：新增 AutoCompleteInputProps（InputOptions 白名单）及 AutoCompletePopupProps（PopupOptions 排除 trigger / delay），接入原生属性、长度限制、焦点/键盘/组合输入/onChange 回调，以及位置、语义类合并、内层类名、箭头、层级、禁用、关闭销毁和空内容隐藏。显隐与即时焦点反馈由组件管理；popupProps.disabled 仅关闭联想，仍允许编辑。禁用/只读与显式输入、Form.readonly 和 CVA 状态取并集，不接受任意 Vue InputProps / PopupProps 键。
+- **受控与表单**：复用 createControllableState，value 修改只发提案，拒绝输入或选择后恢复显示；defaultValue 仅初始化一次。CVA write/reset 清理活动候选、弹层和组合状态，disable / enable 可恢复；选择不提前触发 touched，焦点进入自己的辅助面板不提交 updateOn: 'blur'，离开整个组件才提交。
+- **键盘与生命周期**：活动项改用 null 哨兵，空字符串候选不再被默认选中；动态移除活动项后 Enter 不选择旧数据，选择后与关闭后的 Enter 不重复提交。Esc 清空活动项并关闭，自定义触发器支持方向键与 Enter。原生输入补 combobox / listbox / option 语义和展开、控制、活动后代关联；宽度观察器随触发器生命周期清理。受控组合输入事件使用 Input 携带的最终文本，避免父级信号尚未回传时输出旧值。
+- **边界与进度**：锁定上游声明但未消费 textareaProps，继续保留该项真实债务；filter 返回 Promise 仍按上游真值处理，不冒充异步过滤。远程请求通过 valueChange 更新 options，由调用方处理取消/乱序。新增 1 个 demo，总数 334 → 335；对齐 1066 → 1068（67.8%），真实债务 217 → 215，零债务目录仍为 44/73。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有前批及新增交互回归通过，missing 0 / extra 0。新增覆盖原生属性/Unicode 限制、IME 单次回调、受控输入及选择拒绝、默认值不重写、动态候选/空字符串、方向键/Enter/Esc/ARIA、自定义触发器、配置类名/箭头/层级/销毁、禁用只读、CVA 失焦提交/reset/禁用恢复。AutoComplete / Form / Input / Popup 页面探针 issues / badResources 均为空，AutoComplete 截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 799.96 kB）。API / demo / progress 已生成同步。
+
+**接续任务**：第 3 轮 Tabs.list → Breadcrumb / Steps / Statistic，第 3 轮整体与 M2 尚未完成。

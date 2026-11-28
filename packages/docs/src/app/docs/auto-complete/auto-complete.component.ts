@@ -5,6 +5,7 @@ import { PageNav } from '../page-nav';
 import { DemoAutoCompleteBasic } from './demos/auto-complete-basic';
 import { DemoAutoCompleteCustomOption } from './demos/auto-complete-custom-option';
 import { DemoAutoCompleteRemote } from './demos/auto-complete-remote';
+import { DemoAutoCompleteOptions } from './demos/auto-complete-options';
 
 @Component({
   selector: 'auto-complete-docs',
@@ -15,6 +16,7 @@ import { DemoAutoCompleteRemote } from './demos/auto-complete-remote';
     DemoAutoCompleteBasic,
     DemoAutoCompleteCustomOption,
     DemoAutoCompleteRemote,
+    DemoAutoCompleteOptions,
   ],
   template: `
     <div class="docs-page">
@@ -47,6 +49,11 @@ import { DemoAutoCompleteRemote } from './demos/auto-complete-remote';
       >
         <demo-auto-complete-remote />
       </docs-demo>
+
+      <docs-demo id="auto-complete-options" title="输入、弹层配置与状态" description="输入配置限制用户键入；选择候选项可写入完整文本。value 支持受控拒绝，defaultValue 仅初始化，表单支持失焦提交与 reset。自定义触发器支持方向键和 Enter，Esc 关闭面板。">
+        <demo-auto-complete-options />
+      </docs-demo>
+      <p class="demo-hint">inputProps 使用 InputOptions 白名单，支持原生属性、长度限制及焦点/键盘/组合输入/onChange 回调；只用于内置 Input，不接收完整 Vue InputProps。disabled / readonly 与显式及表单状态取并集。popupProps 支持当前 PopupOptions 的位置、类名、箭头、层级、禁用和销毁等字段，trigger、delay、visible 和任意挂载配置不接收；输入和焦点的即时反馈由组件管理。popupProps.disabled 只关闭联想，仍允许输入。filter 返回 Promise 时沿用上游按真值保留选项的行为，不是异步筛选；远程请求请在 valueChange 中取数并更新 options，自行处理取消和乱序。textareaProps 仍未实现；自定义触发器负责自己的内容和无障碍标签。</p>
 
       <h2 class="docs-section__title" id="auto-complete-api">API</h2>
       <div class="api-table__scroll">

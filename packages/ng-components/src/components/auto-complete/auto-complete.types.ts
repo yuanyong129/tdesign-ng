@@ -1,4 +1,11 @@
 import type { TemplateRef } from '@angular/core';
+import type { InputOptions } from '../input/input-options';
+import type { PopupOptions } from '../popup/popup.types';
+
+/** 内置输入框实际支持的原生编辑区配置。 */
+export type AutoCompleteInputProps = InputOptions;
+/** 显示状态、焦点触发与即时输入反馈由 AutoComplete 管理。 */
+export type AutoCompletePopupProps = Omit<PopupOptions, 'trigger' | 'delay'>;
 
 export const AUTO_COMPLETE_SIZES = ['small', 'medium', 'large'] as const;
 export type AutoCompleteSize = (typeof AUTO_COMPLETE_SIZES)[number];
