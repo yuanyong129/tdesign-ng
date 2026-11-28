@@ -376,3 +376,13 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全量既有及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。全量回归覆盖受控拒绝/实例提案/程序同步、生命周期与来源事件顺序、取消回调内先更新显隐、Enter/IME/重复/原生控件保护、lazy/保留/销毁及旧实例方法无效、模板与样式替换、原有自定义 footer 和投影保留、多层和不同 zIndex 的 Esc 单次归属、原焦点恢复/后台不抢焦点、原生 CDP Tab/Shift+Tab 环绕、共享/外部/动态模式滚动锁和销毁清理。补默认布局类后重新通过完整构建及 Dialog 专项回归，并检查真实 padding 与打开截图。Dialog / Drawer / Popup / Card 页面 issues / badResources 为空，最终 Dialog 页面再次检查通过。保留既有 Drawer footer slot、Browserslist、qrcode CommonJS 和首包预算告警（约 805.55 kB）；移除了 Dialog 自身的 unused footer slot 告警。
 
 **接续任务**：Dialog 富内容与按钮配置白名单 → 挂载/局部显示 → 拖动 → Drawer → ImageViewer，保持分批验收。
+
+### 2026-11-28：第 4 轮 Dialog 富内容、按钮配置与全屏布局
+
+- **富内容与优先级**：header 支持布尔值/文本/TemplateRef，false 隐藏标题但不连带隐藏关闭入口；closeBtn 支持默认/隐藏、文本或模板，默认/文本入口保留键盘语义，模板用自己的可访问控件，不额外嵌套 role=button。footer=true 使用既有 tDialogFooter 投影或默认操作，false/空串隐藏，显式文本/模板覆盖投影；切换覆盖内容时隐藏保留原投影。正文及其余文本继续转义。富内容模板提供 confirm / cancel / close 上下文函数，完整按钮模板替换整个控件，没有隐式按钮外壳；内容标签模板只填入默认 TButton 的内容区。自有模板由 lazy / destroyOnClose 管理，投影归调用方。
+- **按钮白名单与动作归属**：公开 DialogActionButton / DialogButtonOptions，接入 TButton 当前支持的 content、theme、variant、shape、size、block、ghost、disabled、loading、loadingProps 和 onClick；不暴露未接入的 icon / tag / href / type / form 等字段，也不宣称完整 Vue ButtonProps。默认确认主题对应 danger / warning / success，其余 primary，显式 theme 优先；confirmLoading 与配置 loading 取并集。禁用、加载、null 保护鼠标和 confirmOnEnter，取消加载也保护默认取消动作。onClick 以原始鼠标或键盘事件上下文接管默认 Dialog 动作，避免回调和内置事件重复；无回调时确认仅通知、取消通知后请求关闭，调用方对象不被改写。模板视觉禁用由调用方绑定，上下文函数仍校验状态。
+- **全屏布局与切换**：full-screen 不再受普通 width=480px 限制，补 vendor 的全屏头/体/尾及关闭区类，根容器保持 fixed 层级。组件局部使用列式弹性布局使头尾不收缩、正文填充剩余高度并滚动，避免不同标题/底部高度与隐藏头尾时依赖固定 calc 高度；显式 dialogStyle 仍可覆盖根布局默认值。返回普通模式移除全屏默认高度/弹性样式并恢复 width，不重建正文实例。视觉检查补一条 bridge 宿主等价选择器，恢复上游相邻按钮的 comp-margin-s 间距，不修改 vendor。
+- **生成进度与边界**：新增 TButton / TInput 演示，Dialog 示例 5 → 6，总数 349 → 350。对齐 1086/1576（68.9%）、深度债 188、零登记债务目录 51/73 均不变，本批补已有输入的联合类型和嵌套配置。仍保留 attach / showInAttachedElement / draggable 三项登记债务；跨弹层统一栈、完整 SSR / 水合、退出动画、全局配置合并和服务式 API 等不视为本批完成，第 4 轮及 M2 继续保留。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全量既有及新增交互回归通过，missing 0 / extra 0；补宿主间距后重新通过完整构建和 Dialog 专项回归。新增覆盖模板/布尔/文本优先级、标题隐藏后的独立关闭入口、字符串转义、投影底部覆盖/恢复和原节点保留、标签模板实时更新、冻结配置对象不改写、全部视觉配置与真实按钮间距、主题缺省/重置、鼠标与 Enter 回调接管且不重复、禁用/两种加载来源/null 保护、默认动作、整按钮模板及上下文、原生 Enter 激活自定义关闭按钮一次、保留/销毁/重建模板、全屏宽高与长正文滚动、隐藏头尾仍填满可用高度、返回普通模式样式清理与正文实例保留。原生 Enter 经 CDP 连同文本输入事件验证。Dialog / Drawer / Button / ImageViewer 页面 issues / badResources 为空，普通与全屏截图已检查；最终 Dialog 页面再次检查通过。`pnpm check:progress`、`git diff --check` 通过，保留既有 Drawer footer slot、Browserslist、qrcode CommonJS 和约 805.55 kB 首包预算告警。
+
+**接续任务**：Dialog 挂载/局部显示 → 拖动 → Drawer → ImageViewer，先明确普通与局部容器的坐标和所有权。

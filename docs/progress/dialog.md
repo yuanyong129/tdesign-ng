@@ -16,7 +16,7 @@
 | 深度债 | 3（D1 0 / D2 3 / D3 0） |
 | Angular 惯用映射 | 11（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 5 个 |
+| 文档示例 | 6 个 |
 
 ## 组件明细
 
@@ -29,12 +29,12 @@
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `visible` | boolean \| undefined | undefined | 受控显隐，未传时由实例方法管理，缺省关闭 |
-| `header` | string \| boolean | '' | 标题，传 false 隐藏头部 |
+| `header` | boolean \| DialogContent | '' | 标题文本或模板，false 隐藏标题但保留关闭入口 |
 | `body` | DialogContent | undefined | 正文字符串或模板，显式值优先于投影 |
-| `footer` | boolean | true | 是否显示底部操作区 |
-| `closeBtn` | boolean | true | 是否显示关闭按钮 |
-| `confirmBtn` | string \| null | '确定' | 确认按钮文案，null 隐藏 |
-| `cancelBtn` | string \| null | '取消' | 取消按钮文案，null 隐藏 |
+| `footer` | boolean \| DialogContent | true | 底部内容，true 使用默认/投影底部，false 隐藏，文本/模板覆盖投影 |
+| `closeBtn` | boolean \| DialogContent | true | 关闭入口，支持布尔值、文本或模板 |
+| `confirmBtn` | DialogActionButton | '确定' | 确认按钮文本、配置或替换模板，null 隐藏 |
+| `cancelBtn` | DialogActionButton | '取消' | 取消按钮文本、配置或替换模板，null 隐藏 |
 | `confirmLoading` | boolean | false | 确认按钮是否加载中 |
 | `confirmOnEnter` | boolean | false | 是否允许非编辑区域按 Enter 确认 |
 | `closeOnEscKeydown` | boolean | true | 是否允许按 Esc 关闭 |
@@ -90,6 +90,7 @@
 ## 文档示例
 
 - `packages/docs/src/app/docs/dialog/demos/dialog-basic.ts`
+- `packages/docs/src/app/docs/dialog/demos/dialog-content.ts`
 - `packages/docs/src/app/docs/dialog/demos/dialog-custom.ts`
 - `packages/docs/src/app/docs/dialog/demos/dialog-lifecycle.ts`
 - `packages/docs/src/app/docs/dialog/demos/dialog-placement.ts`

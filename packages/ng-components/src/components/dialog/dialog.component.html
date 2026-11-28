@@ -1,3 +1,6 @@
+<ng-template #renderNode let-value>
+  @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" [ngTemplateOutletContext]="templateContext" /> } @else { {{ value }} }
+</ng-template>
 @if (shouldRender()) {
   <div
     #ctx
@@ -7,7 +10,7 @@
     [style.display]="innerVisible() ? null : 'none'"
     tabindex="-1"
     role="dialog" [attr.aria-modal]="isModal() ? 'true' : null"
-    [attr.aria-labelledby]="showHeader() && headerText() ? titleId : null" [attr.aria-label]="showHeader() && headerText() ? null : '对话框'"
+    [attr.aria-labelledby]="showHeader() && headerContent() ? titleId : null" [attr.aria-label]="showHeader() && headerContent() ? null : '对话框'"
     [cdkTrapFocus]="trapFocus()"
   >
     @if (showMask()) {
@@ -17,8 +20,9 @@
       <div [class]="positionClasses()" [style]="positionStyle()">
         <div [class]="dialogClasses()" [ngStyle]="resolvedDialogStyle()">
           @if (showHeader()) {
-            <div class="t-dialog__header">
+            <div class="t-dialog__header" [class.t-dialog__header--fullscreen]="isFullScreen()" [style.flex-shrink]="isFullScreen() ? '0' : null">
               <div class="t-dialog__header-content">
+              @if (header() !== false) {
                 @if (theme() !== 'default') {
                   <svg
                     [class]="'t-icon t-is-' + (theme() === 'danger' ? 'error' : theme())"
@@ -62,12 +66,18 @@
                     }
                   </svg>
                 }
-                <span [id]="titleId">{{ headerText() }}</span>
+                <span [id]="titleId"><ng-container [ngTemplateOutlet]="renderNode" [ngTemplateOutletContext]="{ $implicit: headerContent() }" /></span>
+              }
               </div>
               @if (closeBtn()) {
-                <span class="t-dialog__close" role="button" tabindex="0" aria-label="关闭" (click)="handleCloseBtn($event)" (keydown)="handleCloseBtn($event)">
+                <span data-t-dialog-close [class]="customClose() !== undefined ? '' : isFullScreen() ? 't-dialog__close t-dialog__close--fullscreen' : 't-dialog__close'"
+                  [attr.role]="isTemplateContent(customClose()) ? null : 'button'" [attr.tabindex]="isTemplateContent(customClose()) ? null : 0" [attr.aria-label]="isTemplateContent(customClose()) ? null : '关闭'"
+                  (click)="handleCloseBtn($event)" (keydown)="handleCloseBtn($event)">
+                  @if (customClose(); as value) {
+                    <ng-container [ngTemplateOutlet]="renderNode" [ngTemplateOutletContext]="{ $implicit: value }" />
+                  } @else {
                   <svg
-                    class="t-icon"
+                    class="t-icon t-icon-close"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     width="1em"
@@ -82,29 +92,46 @@
                       d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
                     />
                   </svg>
+                  }
                 </span>
               }
             </div>
           }
 
-          <div class="t-dialog__body">
+          <div class="t-dialog__body" [class.t-dialog__body__icon]="theme() !== 'default'" [class.t-dialog__body--fullscreen]="isFullScreen() && hasFooter()" [class.t-dialog__body--fullscreen--without-footer]="isFullScreen() && !hasFooter()"
+            [style.flex]="isFullScreen() ? '1 1 auto' : null" [style.min-height]="isFullScreen() ? '0' : null" [style.height]="isFullScreen() ? 'auto' : null">
             @if (body(); as value) {
-              @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} }
+              @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" [ngTemplateOutletContext]="templateContext" /> } @else { {{ value }} }
             }
             <span [style.display]="body() === undefined ? 'contents' : 'none'"><ng-content /></span>
           </div>
 
-          @if (footer()) {
-            <div class="t-dialog__footer">
-              <ng-content select="[tDialogFooter]" />
+          @if (hasFooter()) {
+            <div class="t-dialog__footer" [class.t-dialog__footer--fullscreen]="isFullScreen()" [style.flex-shrink]="isFullScreen() ? '0' : null">
+              <span [style.display]="footer() === true ? 'contents' : 'none'"><ng-content select="[tDialogFooter]" /></span>
+              @if (customFooter(); as value) { <ng-container [ngTemplateOutlet]="renderNode" [ngTemplateOutletContext]="{ $implicit: value }" /> }
               @if (showDefaultButtons()) {
                 @if (showCancel()) {
-                  <t-button theme="default" (click)="handleCancel($event)">{{ cancelText() }}</t-button>
+                  @if (cancelTemplate(); as template) {
+                    <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="templateContext" />
+                  } @else {
+                    <t-button class="t-dialog__cancel" [theme]="cancelOptions().theme ?? 'default'" [variant]="cancelOptions().variant ?? 'base'" [size]="cancelOptions().size ?? 'medium'"
+                      [shape]="cancelOptions().shape ?? 'rectangle'" [block]="cancelOptions().block ?? false" [ghost]="cancelOptions().ghost ?? false"
+                      [disabled]="cancelOptions().disabled ?? false" [loading]="cancelOptions().loading ?? false" [loadingProps]="cancelOptions().loadingProps" (click)="handleCancel($event)">
+                      <ng-container [ngTemplateOutlet]="renderNode" [ngTemplateOutletContext]="{ $implicit: cancelText() }" />
+                    </t-button>
+                  }
                 }
                 @if (showConfirm()) {
-                  <t-button theme="primary" [loading]="confirmLoading()" (click)="handleConfirm($event)">
-                    {{ confirmText() }}
-                  </t-button>
+                  @if (confirmTemplate(); as template) {
+                    <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="templateContext" />
+                  } @else {
+                    <t-button class="t-dialog__confirm" [theme]="confirmTheme()" [variant]="confirmOptions().variant ?? 'base'" [size]="confirmOptions().size ?? 'medium'"
+                      [shape]="confirmOptions().shape ?? 'rectangle'" [block]="confirmOptions().block ?? false" [ghost]="confirmOptions().ghost ?? false"
+                      [disabled]="confirmOptions().disabled ?? false" [loading]="mergedConfirmLoading()" [loadingProps]="confirmOptions().loadingProps" (click)="handleConfirm($event)">
+                      <ng-container [ngTemplateOutlet]="renderNode" [ngTemplateOutletContext]="{ $implicit: confirmText() }" />
+                    </t-button>
+                  }
                 }
               }
             </div>

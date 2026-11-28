@@ -9,6 +9,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  TemplateRef,
   ViewEncapsulation,
   afterRenderEffect,
   booleanAttribute,
@@ -37,6 +38,8 @@ import {
   DialogPlacement,
   DialogTheme,
   DialogContent,
+  DialogActionButton,
+  DialogButtonOptions,
 } from './dialog.types';
 
 /** 可选布尔：不传时保持 undefined，便于区分「未设置」与 false。 */
@@ -74,23 +77,23 @@ export class TDialog {
   /** @zh 受控显隐，未传时由实例方法管理，缺省关闭 @en Controlled visibility, omitted for instance-managed visibility, initially closed @defaultValue undefined */
   readonly visible = input<boolean | undefined, unknown>(undefined, { transform: optionalBoolean });
 
-  /** @zh 标题，传 false 隐藏头部 @en Header text, false hides the header @defaultValue '' */
-  readonly header = input<string | boolean>('');
+  /** @zh 标题文本或模板，false 隐藏标题但保留关闭入口 @en Header text/template, false hides title while keeping the close control @defaultValue '' */
+  readonly header = input<boolean | DialogContent>('');
 
   /** @zh 正文字符串或模板，显式值优先于投影 @en Body text or template, explicit value takes precedence over projection @defaultValue undefined */
   readonly body = input<DialogContent>();
 
-  /** @zh 是否显示底部操作区 @en Whether to show the footer @defaultValue true */
-  readonly footer = input(true, { transform: booleanAttribute });
+  /** @zh 底部内容，true 使用默认/投影底部，false 隐藏，文本/模板覆盖投影 @en Footer: true for default/projection, false to hide, text/template overrides projection @defaultValue true */
+  readonly footer = input<boolean | DialogContent>(true);
 
-  /** @zh 是否显示关闭按钮 @en Whether to show the close button @defaultValue true */
-  readonly closeBtn = input(true, { transform: booleanAttribute });
+  /** @zh 关闭入口，支持布尔值、文本或模板 @en Close control toggle, text or template @defaultValue true */
+  readonly closeBtn = input<boolean | DialogContent>(true);
 
-  /** @zh 确认按钮文案，null 隐藏 @en Confirm button text, null hides it @defaultValue '确定' */
-  readonly confirmBtn = input<string | null>('确定');
+  /** @zh 确认按钮文本、配置或替换模板，null 隐藏 @en Confirm text/options/replacement template, null hides it @defaultValue '确定' */
+  readonly confirmBtn = input<DialogActionButton>('确定');
 
-  /** @zh 取消按钮文案，null 隐藏 @en Cancel button text, null hides it @defaultValue '取消' */
-  readonly cancelBtn = input<string | null>('取消');
+  /** @zh 取消按钮文本、配置或替换模板，null 隐藏 @en Cancel text/options/replacement template, null hides it @defaultValue '取消' */
+  readonly cancelBtn = input<DialogActionButton>('取消');
 
   /** @zh 确认按钮是否加载中 @en Whether the confirm button is loading @defaultValue false */
   readonly confirmLoading = input(false, { transform: booleanAttribute });
@@ -177,20 +180,33 @@ export class TDialog {
   protected readonly placements = DIALOG_PLACEMENTS;
   protected readonly modes = DIALOG_MODES;
 
-  protected readonly showHeader = computed(() => this.header() !== false);
-
-  protected readonly headerText = computed(() => (typeof this.header() === 'string' ? this.header() : ''));
+  protected readonly showHeader = computed(() => this.header() !== false || !!this.closeBtn());
+  protected readonly headerContent = computed(() => typeof this.header() === 'boolean' ? undefined : this.header() as DialogContent);
+  protected readonly customClose = computed(() => typeof this.closeBtn() === 'boolean' ? undefined : this.closeBtn() as DialogContent);
+  protected readonly customFooter = computed(() => typeof this.footer() === 'boolean' ? undefined : this.footer() as DialogContent);
+  protected readonly hasFooter = computed(() => !!this.footer());
+  protected readonly confirmOptions = computed(() => this.buttonOptions(this.confirmBtn()));
+  protected readonly cancelOptions = computed(() => this.buttonOptions(this.cancelBtn()));
+  protected readonly confirmTemplate = computed(() => isTemplateContent(this.confirmBtn()) ? this.confirmBtn() as TemplateRef<unknown> : null);
+  protected readonly cancelTemplate = computed(() => isTemplateContent(this.cancelBtn()) ? this.cancelBtn() as TemplateRef<unknown> : null);
+  protected readonly mergedConfirmLoading = computed(() => this.confirmLoading() || !!this.confirmOptions().loading);
+  protected readonly templateContext = {
+    confirm: (event: MouseEvent | KeyboardEvent) => this.handleConfirm(event),
+    cancel: (event: MouseEvent) => this.handleCancel(event),
+    close: (event: MouseEvent | KeyboardEvent) => this.handleCloseBtn(event),
+  };
 
   /** 有自定义底部内容时，不再渲染默认的取消/确定按钮。 */
-  protected readonly showDefaultButtons = computed(() => !this.footerSlot());
+  protected readonly showDefaultButtons = computed(() => this.footer() === true && !this.footerSlot());
 
   protected readonly showCancel = computed(() => this.cancelBtn() !== null);
 
   protected readonly showConfirm = computed(() => this.confirmBtn() !== null);
 
-  protected readonly cancelText = computed(() => this.cancelBtn() ?? '取消');
+  protected readonly cancelText = computed(() => typeof this.cancelBtn() === 'string' ? this.cancelBtn() as string : this.cancelOptions().content ?? '取消');
 
-  protected readonly confirmText = computed(() => this.confirmBtn() ?? '确定');
+  protected readonly confirmText = computed(() => typeof this.confirmBtn() === 'string' ? this.confirmBtn() as string : this.confirmOptions().content ?? '确定');
+  protected readonly confirmTheme = computed(() => this.confirmOptions().theme ?? (this.theme() === 'danger' ? 'danger' : this.theme() === 'warning' ? 'warning' : this.theme() === 'success' ? 'success' : 'primary'));
 
   /** 懒渲染：首次打开过之后才创建 DOM。 */
   protected readonly shouldRender = computed(() => (!this.lazy() || this.hasOpened() || this.innerVisible()) && (!this.destroyOnClose() || this.innerVisible()));
@@ -205,7 +221,7 @@ export class TDialog {
   protected readonly ctxClasses = computed(() =>
     [
       't-dialog__ctx',
-      this.mode() === 'normal' || this.isFullScreen() ? '' : 't-dialog__ctx--fixed',
+      this.mode() === 'normal' ? '' : 't-dialog__ctx--fixed',
       this.mode() === 'modeless' ? 't-dialog__ctx--modeless' : '',
       this.innerVisible() ? 't-is-visible' : 't-is-hidden',
     ]
@@ -229,7 +245,7 @@ export class TDialog {
     [
       't-dialog',
       this.isFullScreen() ? 't-dialog__fullscreen' : 't-dialog--default',
-      this.confirmLoading() ? 't-dialog--lock' : '',
+      this.mergedConfirmLoading() ? 't-dialog--lock' : '',
       ...this.classList(this.dialogClassName()),
     ]
       .filter(Boolean)
@@ -239,8 +255,9 @@ export class TDialog {
   protected readonly resolvedDialogStyle = computed(() => {
     const width = this.width();
     return {
+      ...(this.isFullScreen() ? { height: '100vh', display: 'flex', flexDirection: 'column' } : {}),
       ...(this.dialogStyle() ?? {}),
-      width: typeof width === 'number' ? `${width}px` : width,
+      ...(!this.isFullScreen() ? { width: typeof width === 'number' ? `${width}px` : width } : {}),
     };
   });
 
@@ -306,6 +323,7 @@ export class TDialog {
 
   protected handleCloseBtn(event: MouseEvent | KeyboardEvent): void {
     if (!this.canInteract()) return;
+    if (event instanceof KeyboardEvent && event.target !== event.currentTarget) return;
     if (event instanceof KeyboardEvent && (event.repeat || event.key !== 'Enter' && event.key !== ' ')) return;
     event.preventDefault(); event.stopPropagation();
     this.closeBtnClick.emit(event);
@@ -313,13 +331,17 @@ export class TDialog {
   }
 
   protected handleCancel(event: MouseEvent): void {
-    if (!this.canInteract()) return;
+    if (!this.canInteract() || this.cancelBtn() === null || this.cancelOptions().disabled || this.cancelOptions().loading) return;
+    const onClick = this.cancelOptions().onClick;
+    if (onClick) { onClick({ e: event }); return; }
     this.cancel.emit(event);
     if (!this.destroyed) this.requestClose('cancel', event);
   }
 
   protected handleConfirm(event: MouseEvent | KeyboardEvent): void {
-    if (!this.canInteract() || this.confirmLoading() || this.confirmBtn() === null) return;
+    if (!this.canInteract() || this.mergedConfirmLoading() || this.confirmOptions().disabled || this.confirmBtn() === null) return;
+    const onClick = this.confirmOptions().onClick;
+    if (onClick) { onClick({ e: event }); return; }
     this.confirm.emit(event);
   }
 
@@ -382,5 +404,9 @@ export class TDialog {
     if (typeof value === 'string') return value.split(/\s+/).filter(Boolean);
     if (Array.isArray(value)) return value.filter(Boolean);
     return Object.keys(value).filter((key) => value[key]);
+  }
+
+  private buttonOptions(value: DialogActionButton): DialogButtonOptions {
+    return value && typeof value === 'object' && !isTemplateContent(value) ? value : {};
   }
 }

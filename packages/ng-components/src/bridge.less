@@ -17,6 +17,11 @@ t-radio {
   display: contents;
 }
 
+// Dialog footer buttons are separated by Angular hosts; mirror the vendor adjacent-button spacing.
+.t-dialog__footer t-button + t-button > .t-button {
+  margin-left: var(--td-comp-margin-s);
+}
+
 // Radio 的可聚焦节点移到原生 input；把 vendor label:focus-visible 的轮廓等价映射回来。
 t-radio > label:has(> input:focus-visible) {
   outline: 2px solid var(--td-brand-color);

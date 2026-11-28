@@ -3439,11 +3439,11 @@
         },
         {
           "name": "header",
-          "type": "string | boolean",
+          "type": "boolean | DialogContent",
           "default": "''",
           "required": false,
-          "zh": "标题，传 false 隐藏头部",
-          "en": "Header text, false hides the header",
+          "zh": "标题文本或模板，false 隐藏标题但保留关闭入口",
+          "en": "Header text/template, false hides title while keeping the close control",
           "values": []
         },
         {
@@ -3457,38 +3457,38 @@
         },
         {
           "name": "footer",
-          "type": "boolean",
+          "type": "boolean | DialogContent",
           "default": "true",
           "required": false,
-          "zh": "是否显示底部操作区",
-          "en": "Whether to show the footer",
+          "zh": "底部内容，true 使用默认/投影底部，false 隐藏，文本/模板覆盖投影",
+          "en": "Footer: true for default/projection, false to hide, text/template overrides projection",
           "values": []
         },
         {
           "name": "closeBtn",
-          "type": "boolean",
+          "type": "boolean | DialogContent",
           "default": "true",
           "required": false,
-          "zh": "是否显示关闭按钮",
-          "en": "Whether to show the close button",
+          "zh": "关闭入口，支持布尔值、文本或模板",
+          "en": "Close control toggle, text or template",
           "values": []
         },
         {
           "name": "confirmBtn",
-          "type": "string | null",
+          "type": "DialogActionButton",
           "default": "'确定'",
           "required": false,
-          "zh": "确认按钮文案，null 隐藏",
-          "en": "Confirm button text, null hides it",
+          "zh": "确认按钮文本、配置或替换模板，null 隐藏",
+          "en": "Confirm text/options/replacement template, null hides it",
           "values": []
         },
         {
           "name": "cancelBtn",
-          "type": "string | null",
+          "type": "DialogActionButton",
           "default": "'取消'",
           "required": false,
-          "zh": "取消按钮文案，null 隐藏",
-          "en": "Cancel button text, null hides it",
+          "zh": "取消按钮文本、配置或替换模板，null 隐藏",
+          "en": "Cancel text/options/replacement template, null hides it",
           "values": []
         },
         {
