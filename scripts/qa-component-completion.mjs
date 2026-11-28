@@ -1652,6 +1652,68 @@ try {
   assert.deepEqual(stepsState.inserted,['4','3','2','1']);assert.deepEqual(stepsState.typed,['default','process','finish']);
   assert.deepEqual(stepsState.implicitReverse,{value:2,previous:1});
   console.log('PASS Steps: physical reverse/order/connectors, stable hosts/templates/focus, controlled rejection/default once, typed/implicit keys, change context, keyboard/readonly, theme/icon priority, dynamic insert/delete/fallback');
+  await page('/statistic', 'demo-statistic-animation .animation-manual');
+  const statisticState=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-statistic-animation'),demo=ng.getComponent(root),auto=demo.automatic(),manual=demo.manual();
+    const initialManual=manual.displayValue();
+    await new Promise(r=>setTimeout(r,1350));${settle}
+    const realAutomatic={value:auto.displayValue(),target:demo.value(),text:root.querySelector('.animation-auto .t-statistic-content-value').textContent.trim()};
+    demo.auto.set(false);ng.applyChanges(demo);${settle}
+    const originalRaf=window.requestAnimationFrame,originalCancel=window.cancelAnimationFrame,originalMatch=window.matchMedia;
+    let id=0;const queued=new Map();window.requestAnimationFrame=callback=>{
+      if(callback.name!=='tick')return originalRaf(callback);
+      queued.set(--id,callback);return id;
+    };window.cancelAnimationFrame=key=>{if(key<0)queued.delete(key);else originalCancel(key)};
+    window.matchMedia=()=>({matches:false});
+    const flush=async(time)=>{const callbacks=[...queued.values()];queued.clear();callbacks.forEach(callback=>callback(time));ng.applyChanges(auto);ng.applyChanges(manual);await Promise.resolve()};
+    const apply=async()=>{ng.applyChanges(demo);await Promise.resolve()};
+    try {
+      manual.start();const manualStart={value:manual.displayValue(),pending:queued.size};await flush(0);await flush(400);
+      const half=manual.displayValue();await flush(800);const final={value:manual.displayValue(),pending:queued.size};
+      manual.start();const stale=[...queued.values()][0];manual.start();const restart={value:manual.displayValue(),pending:queued.size};
+      stale(5000);const staleIgnored=manual.displayValue()===20&&queued.size===1;await flush(0);await flush(800);
+      demo.animation.set({valueFrom:100,duration:1000});demo.value.set(-100);demo.auto.set(true);await apply();
+      await flush(0);await flush(500);const decreasing=auto.displayValue();await flush(1000);const negativeFinal=auto.displayValue();
+      auto.start();await flush(0);await flush(300);const old=[...queued.values()][0];demo.value.set(200);await apply();
+      const retarget={value:auto.displayValue(),pending:queued.size};old(10000);const retargetSafe=auto.displayValue()===100&&queued.size===1;
+      await flush(0);await flush(1000);const retargetFinal=auto.displayValue();
+      auto.start();await flush(0);await flush(300);demo.auto.set(false);await apply();const stopped={value:auto.displayValue(),pending:queued.size};
+      demo.animation.set({valueFrom:-10,duration:200});demo.auto.set(true);await apply();const configRestart=auto.displayValue();await flush(0);await flush(200);
+      demo.loading.set(true);await apply();auto.start();await flush(0);await flush(200);demo.loading.set(false);await apply();const loaded=auto.displayValue();
+      demo.animation.set(undefined);await apply();auto.start();const withoutAnimation={value:auto.displayValue(),pending:queued.size};
+      const invalid=[];
+      for(const animation of [{valueFrom:0,duration:0},{valueFrom:0,duration:-1},{valueFrom:0,duration:NaN},{valueFrom:0,duration:Infinity},{valueFrom:NaN,duration:100},{valueFrom:Infinity,duration:100},{valueFrom:200,duration:100}]){
+        demo.animation.set(animation);await apply();auto.start();invalid.push(auto.displayValue()===200&&queued.size===0);
+      }
+      demo.animation.set({valueFrom:0,duration:100});demo.value.set(Infinity);await apply();const infinite=auto.displayValue()===Infinity&&queued.size===0;
+      demo.value.set(undefined);await apply();await flush(0);await flush(100);const empty=auto.displayValue();
+      demo.value.set(1e-7);demo.places.set(undefined);await apply();await flush(0);await flush(50);const scientificMid=auto.displayValue();await flush(100);const scientificFinal=auto.displayValue();
+      demo.places.set(-3);await apply();const negativePlaces=root.querySelector('.animation-auto .t-statistic-content-value').textContent.trim();
+      demo.places.set(100);await apply();const cappedPlaces=root.querySelector('.animation-auto .t-statistic-content-value').textContent.trim();
+      demo.places.set(NaN);await apply();const invalidPlaces=root.querySelector('.animation-auto .t-statistic-content-value').textContent.trim();
+      demo.value.set(1234.5);demo.animation.set({valueFrom:0,duration:100});demo.places.set(2);demo.separator.set('_');await apply();await flush(0);await flush(100);
+      const formatted=root.querySelector('.animation-auto .t-statistic-content-value').textContent.trim();
+      const samples=[];demo.format.set(value=>{samples.push(value);return Math.round(value*2)});await apply();auto.start();await flush(0);await flush(50);
+      const formatMid={raw:auto.displayValue(),text:root.querySelector('.animation-auto .t-statistic-content-value').textContent.trim()};await flush(100);
+      const customFormat=samples.includes(0)&&samples.includes(1234.5)&&root.querySelector('.animation-auto .t-statistic-content-value').textContent.trim()==='2469';
+      demo.format.set(undefined);await apply();
+      demo.showTemporary.set(true);await apply();const temporary=ng.getComponent(root.querySelector('.animation-temporary'));temporary.start();
+      const captured=[...queued.values()];demo.showTemporary.set(false);await apply();const remaining=queued.size;captured.forEach(callback=>callback(99999));temporary.start();const disposed=queued.size===remaining;
+      window.matchMedia=()=>({matches:true});auto.start();const reduced=auto.displayValue()===1234.5&&queued.size===0;
+      window.matchMedia=()=>({matches:false});window.requestAnimationFrame=undefined;auto.start();const unavailable=auto.displayValue()===1234.5&&queued.size===0;
+      return {initialManual,realAutomatic,manualStart,half,final,restart,staleIgnored,decreasing,negativeFinal,retarget,retargetSafe,retargetFinal,stopped,configRestart,loaded,withoutAnimation,invalid,infinite,empty,scientificMid,scientificFinal,negativePlaces,cappedPlaces,invalidPlaces,formatted,formatMid,customFormat,disposed,reduced,unavailable};
+    } finally {window.requestAnimationFrame=originalRaf;window.cancelAnimationFrame=originalCancel;window.matchMedia=originalMatch;}
+  })()`);
+  assert.equal(statisticState.initialManual,20);assert.deepEqual(statisticState.realAutomatic,{value:12345.67,target:12345.67,text:'12,345.67'});
+  assert.deepEqual(statisticState.manualStart,{value:20,pending:1});assert.equal(statisticState.half,95);assert.deepEqual(statisticState.final,{value:100,pending:0});
+  assert.deepEqual(statisticState.restart,{value:20,pending:1});assert.equal(statisticState.decreasing,-87.5);assert.equal(statisticState.negativeFinal,-100);
+  assert.deepEqual(statisticState.retarget,{value:100,pending:1});assert.equal(statisticState.retargetFinal,200);assert.deepEqual(statisticState.stopped,{value:200,pending:0});
+  assert.equal(statisticState.configRestart,-10);assert.equal(statisticState.loaded,200);assert.deepEqual(statisticState.withoutAnimation,{value:200,pending:0});
+  for(const key of ['staleIgnored','retargetSafe','infinite','customFormat','disposed','reduced','unavailable']) assert.equal(statisticState[key],true,key);
+  assert.ok(statisticState.invalid.every(Boolean));assert.equal(statisticState.empty,0);assert.equal(statisticState.scientificMid,1e-7);assert.equal(statisticState.scientificFinal,1e-7);
+  assert.equal(statisticState.negativePlaces,'0');assert.equal(statisticState.cappedPlaces,'0.00000010000000000000');assert.equal(statisticState.invalidPlaces,'0.0000001');assert.equal(statisticState.formatted,'1_234.50');
+  assert.deepEqual(statisticState.formatMid,{raw:1157.34,text:'2315'});
+  console.log('PASS Statistic: real automatic animation, manual/restart/quartic interpolation, stale cancellation/retarget/disable/dispose, loading, invalid/equal/nonfinite values, precision/scientific formatting, reduced motion/no rAF');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

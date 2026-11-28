@@ -2,13 +2,22 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  PLATFORM_ID,
   TemplateRef,
   ViewEncapsulation,
   booleanAttribute,
+  afterNextRender,
   computed,
+  effect,
+  inject,
   input,
   numberAttribute,
+  signal,
+  untracked,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { isTemplateContent } from '../../_utils/content';
 import { TSkeleton } from '../skeleton/skeleton.component';
 import type { Content } from '../../_utils/content';
 
@@ -22,6 +31,12 @@ export type StatisticTrendPlacement = (typeof STATISTIC_TREND_PLACEMENTS)[number
 
 /** 统计数值的富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
 export type StatisticContent = Content;
+
+/** 数值动画配置；duration 单位为毫秒。 */
+export interface StatisticAnimation {
+  duration: number;
+  valueFrom: number;
+}
 
 /**
  * 可缺省的数字输入转换：空值保持 `undefined`，其余交给 Angular 的 `numberAttribute`。
@@ -133,6 +148,10 @@ const COLOR_MAP: Record<string, string> = {
   },
 })
 export class TStatistic {
+  /** @zh 数值动画配置，duration 为毫秒，valueFrom 为起点 @en Animation duration in milliseconds and starting value @defaultValue undefined */
+  readonly animation = input<StatisticAnimation | undefined>(undefined);
+  /** @zh 是否自动启动动画，关闭时取消并显示目标值 @en Automatically start animation, turning off cancels and displays the target @defaultValue false */
+  readonly animationStart = input(false, { transform: booleanAttribute });
   /** @zh 颜色，可传预设值（black/blue/red/orange/green）或任意颜色值 @en Color, a preset value (black/blue/red/orange/green) or any color value @defaultValue '' @values black,blue,red,orange,green */
   readonly color = input<string>('');
 
@@ -174,6 +193,75 @@ export class TStatistic {
   /** @zh 数值 @en Value @defaultValue undefined */
   readonly value = input<number>();
 
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly rendered = signal(false);
+  private readonly innerValue = signal<number | undefined>(undefined);
+  private frame: number | undefined;
+  private generation = 0;
+  private destroyed = false;
+  private initialized = false;
+  protected readonly numberValue = computed(() => typeof this.value() === 'number' ? this.value()! : 0);
+  protected readonly displayValue = computed(() => this.innerValue() ?? this.animation()?.valueFrom ?? this.numberValue());
+
+  constructor() {
+    afterNextRender(() => this.rendered.set(true));
+    effect(() => {
+      const target = this.numberValue(), animation = this.animation(), auto = this.animationStart(), ready = auto ? this.rendered() : false;
+      untracked(() => {
+        this.cancelAnimation();
+        if (!this.initialized) {
+          this.innerValue.set(animation && Number.isFinite(animation.valueFrom) ? animation.valueFrom : target);
+          this.initialized = true;
+        } else {
+          this.innerValue.set(target);
+        }
+        if (animation && auto && ready) this.start();
+      });
+    });
+    inject(DestroyRef).onDestroy(() => { this.destroyed = true; this.cancelAnimation(); });
+  }
+
+  /** 从配置起点播放到当前 value；重复调用会取消上一轮，不改写输入值。 */
+  start(): void {
+    if (this.destroyed) return;
+    this.cancelAnimation();
+    const animation = this.animation(), target = this.numberValue();
+    const from = animation?.valueFrom ?? 0, duration = animation?.duration ?? 0;
+    if (!animation || !Number.isFinite(target) || !Number.isFinite(from) || !Number.isFinite(duration) || duration <= 0 || from === target
+      || !this.browser || typeof requestAnimationFrame !== 'function' || typeof cancelAnimationFrame !== 'function') {
+      this.innerValue.set(target); return;
+    }
+    const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) { this.innerValue.set(target); return; }
+    this.innerValue.set(from);
+    const generation = this.generation;
+    let started: number | undefined;
+    const tick = (time: number) => {
+      if (this.destroyed || generation !== this.generation) return;
+      started ??= time;
+      const progress = Math.min(1, Math.max(0, (time - started) / duration));
+      const eased = 1 - (1 - progress) ** 4;
+      const number = from * (1 - eased) + target * eased;
+      this.innerValue.set(progress === 1 ? target : Number(number.toFixed(this.animationPrecision(target))));
+      if (progress < 1) this.frame = requestAnimationFrame(tick);
+      else this.frame = undefined;
+    };
+    this.frame = requestAnimationFrame(tick);
+  }
+
+  private cancelAnimation(): void {
+    this.generation++;
+    if (this.frame !== undefined && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(this.frame);
+    this.frame = undefined;
+  }
+
+  private animationPrecision(value: number): number {
+    const explicit = this.decimalPlaces();
+    if (explicit !== undefined && Number.isFinite(explicit)) return Math.min(20, Math.max(0, Math.trunc(explicit)));
+    const [base, exponent = '0'] = String(value).toLowerCase().split('e');
+    return Math.min(20, Math.max(0, (base.split('.')[1]?.length ?? 0) - Number(exponent)));
+  }
+
   protected readonly classes = computed(() => 't-statistic');
 
   /** 预设颜色映射成主题变量，其余颜色原样用作 CSS `color`；空字符串时不写样式。 */
@@ -187,7 +275,7 @@ export class TStatistic {
 
   /** 格式化后的数值文案：`format` 优先，其次按 `decimalPlaces` + `separator` 格式化。 */
   protected readonly formatValue = computed<string | number>(() => {
-    const value = this.value();
+    const value = this.displayValue();
     const numberValue = typeof value === 'number' ? value : 0;
     const format = this.format();
     if (format) {
@@ -220,13 +308,13 @@ export class TStatistic {
 
   /** 判断一个取值是不是模板，模板用 `*ngTemplateOutlet` 渲染，其余按文本渲染。 */
   protected asTemplate(value: StatisticContent): TemplateRef<unknown> | null {
-    return value instanceof TemplateRef ? value : null;
+    return isTemplateContent(value) ? value : null;
   }
 
   /** 上游 `getFormatValue` 的等价实现。 */
   private getFormatValue(value: number): string {
     const decimalPlaces = this.decimalPlaces();
-    const places = typeof decimalPlaces === 'number' && Number.isFinite(decimalPlaces) ? decimalPlaces : undefined;
+    const places = typeof decimalPlaces === 'number' && Number.isFinite(decimalPlaces) ? Math.min(20, Math.max(0, Math.trunc(decimalPlaces))) : undefined;
     const separator = this.separator();
 
     return value

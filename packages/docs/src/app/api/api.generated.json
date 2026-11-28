@@ -8920,6 +8920,24 @@
       "file": "packages/ng-components/src/components/statistic/statistic.component.ts",
       "inputs": [
         {
+          "name": "animation",
+          "type": "StatisticAnimation | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "数值动画配置，duration 为毫秒，valueFrom 为起点",
+          "en": "Animation duration in milliseconds and starting value",
+          "values": []
+        },
+        {
+          "name": "animationStart",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否自动启动动画，关闭时取消并显示目标值",
+          "en": "Automatically start animation, turning off cancels and displays the target",
+          "values": []
+        },
+        {
           "name": "color",
           "type": "string",
           "default": "''",

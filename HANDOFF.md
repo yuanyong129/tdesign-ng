@@ -1,6 +1,6 @@
 # 交接文档 · TDesign Angular
 
-> 2026-11-28 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮已完成基础输入状态、Form、SelectInput、AutoComplete、Tabs.list、Breadcrumb 折叠及 Steps 逆序/状态批次。当前生成进度：已对齐 1074/1576，真实深度债 209，零债务目录 46/73，示例 338 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续 Statistic；Steps 逆序移动原宿主，保留流程取值与实例，非空 options 优先于投影。Breadcrumb 仍保留 to / replace / router 三项路由债务，AutoComplete.textareaProps 和 Checkbox 的 lazyLoad 两项仍保留；类型化配置白名单及实现边界详见计划记录，第 3 轮与 M2 尚未完成。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）。
+> 2026-11-28 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮顺序任务已推进至 Statistic 动画批次。当前生成进度：已对齐 1076/1576，真实深度债 207，零债务目录 47/73，示例 339 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续第 4 轮 Popup → Loading → Message / Notification；优先重新核实 Popup 显隐默认值、挂载点、样式及生命周期，再让反馈组件消费。Statistic 支持 animation / animationStart / start()，目标或配置更新、关闭及销毁会取消旧动画。Breadcrumb 路由三项、AutoComplete.textareaProps、Checkbox.lazyLoad 两项与 SSR / 水合等跨轮任务仍保留，不把顺序任务走完等同于 M2 达成。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）。
 >
 > 用户明确要求（2026-11-27）：后续每批验证完成后可自动 commit，不必询问；及时同步计划与交接文档，尤其 `docs/progress/`。progress 必须通过 `pnpm gen:progress` 生成，并用 `pnpm check:progress` 校验，不手改生成物。
 

@@ -267,3 +267,13 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增覆盖两种来源的实际 DOM 逆序/原序号、实例与计数/焦点保留、尾项 flex 和连接线、横向箭头旋转/纵向点状虚线、受控拒绝/默认值仅初始化、显式状态/FINISH/失效值、数值与字符串键/隐式下标、完整事件前值/触发上下文、键盘/只读/当前项保护、主题及图标优先级、动态插入/删除与 options 清空回退/恢复。Steps 页面 issues / badResources 为空，截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 800.20 kB）。
 
 **接续任务**：第 3 轮 Statistic；第 3 轮整体与 M2 尚未完成。
+
+### 2026-11-28：第 3 轮 Statistic 数值动画
+
+- **动画能力**：新增公开 StatisticAnimation（duration 毫秒 / valueFrom）、animation、animationStart 和实例 start()。使用 requestAnimationFrame 时间戳及四次缓出曲线，不引入通用 tween 依赖；动画只改变展示值，不改写 value。初次配置动画但不自动播放时显示 valueFrom，start() 从配置起点重播，结束精确落到目标。加载骨架仅控制显示，后台动画继续。
+- **生命周期与边界**：目标/配置/自动开关变化时取消旧帧，自动开启时播放新目标，关闭时显示目标；重复 start() 只保留最新一轮，generation 保护已排队旧回调，销毁取消帧且之后调用无效。未配置、起止相同、非正/非有限时长、非有限起点或目标、无浏览器 rAF 或系统减少动态效果时直接显示目标。关闭/动态配置取消语义属于本库明确的生命周期约定，不复制锁定上游的旧 tween 残留。未设置 value 回退 0，非有限目标只展示、不做插值。
+- **精度与格式**：中间值按显式小数位或目标精度舍入，科学计数法计算指数后的实际精度，最终值不因动画舍入改变。decimalPlaces 有限值统一限制在 0～20 并截为整数，避免负数或超大位数抛出 RangeError；非有限小数配置按缺省处理。format 接收每帧展示值，覆盖分组/小数格式，其他情况保持现有运行环境的区域格式。富内容模板检测复用共享工具。
+- **生成进度与轮次交接**：新增 1 个自动/手动/动态销毁 demo，示例 338 → 339；对齐 1074 → 1076（68.3%）、真实债务 209 → 207、零债务目录 46 → 47。Statistic 已登记债务为 0；第 3 轮顺序任务至此走完，但 Breadcrumb 路由整合、AutoComplete.textareaProps、Checkbox.lazyLoad 及 SSR / 水合、国际化等后续任务继续保留，M2 仍需第 4 轮弹层与反馈验收，不将生成零债务等同于完整发布验收。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归通过，missing 0 / extra 0。新增覆盖真实自动播放落点、手动起点/中间缓出值/精确结束、重复启动和已取消旧回调、负数下降、新目标/配置切换/自动关闭取消、加载切换、无配置/起止相同/非法时长与非有限值、销毁后回调和调用、科学计数精度、非法小数位保护、自定义分组及逐帧 format 优先、减少动态效果和无 rAF 环境。可控帧调度仅作用于独立测试页面中的动画回调，并保留 Angular 原有调度；真实播放另行验证。Statistic 页面 issues / badResources 为空，截图已检查；生成文件稳定后重跑最终回归通过。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 800.20 kB）。
+
+**接续任务**：第 4 轮 Popup → Loading → Message / Notification；先核实 Popup 受控/默认显隐、挂载、样式和生命周期的真实缺口，再推进上层反馈组件。

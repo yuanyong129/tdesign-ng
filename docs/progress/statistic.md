@@ -4,30 +4,32 @@
 
 - 目录：`packages/ng-components/src/components/statistic/`
 - 文档页：`/statistic`（`packages/docs/src/app/docs/statistic/statistic.component.ts`）
-- 状态：🚧 有深度债 2 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 15 |
-| 已对齐 | 13 |
-| 覆盖率 | 86.7% |
-| 深度债 | 2（D1 0 / D2 0 / D3 2） |
+| 已对齐 | 15 |
+| 覆盖率 | 100.0% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 0（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 3 个 |
+| 文档示例 | 4 个 |
 
 ## 组件明细
 
 ### `TStatistic`（`<t-statistic>`）
 
-上游接口 `TdStatisticProps`；上游属性 15、已对齐 13（86.7%）；深度债 2 项；未登记缺失 0 项。
+上游接口 `TdStatisticProps`；上游属性 15、已对齐 15（100.0%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
+| `animation` | StatisticAnimation \| undefined | undefined | 数值动画配置，duration 为毫秒，valueFrom 为起点 |
+| `animationStart` | boolean | false | 是否自动启动动画，关闭时取消并显示目标值 |
 | `color` | string | '' | 颜色，可传预设值（black/blue/red/orange/green）或任意颜色值 |
 | `decimalPlaces` | number \| undefined | undefined | 数值的小数位数，不传时至少 0 位、最多保留 20 位 |
 | `extra` | StatisticContent | undefined | 额外说明，显示在数值下方 |
@@ -42,15 +44,9 @@
 | `unit` | StatisticContent | undefined | 数值单位 |
 | `value` | number | undefined | 数值 |
 
-**未实现（深度债）**
-
-| 上游属性 | 类别 | 原因 |
-| --- | --- | --- |
-| `animation` | D3 其余组件与边角能力 | [D3] 数值滚动动画需要 rAF tween 基础设施 |
-| `animationStart` | D3 其余组件与边角能力 | [D3] 同上，并依赖组件实例方法 start() |
-
 ## 文档示例
 
+- `packages/docs/src/app/docs/statistic/demos/statistic-animation.ts`
 - `packages/docs/src/app/docs/statistic/demos/statistic-base.ts`
 - `packages/docs/src/app/docs/statistic/demos/statistic-precision.ts`
 - `packages/docs/src/app/docs/statistic/demos/statistic-trend.ts`
