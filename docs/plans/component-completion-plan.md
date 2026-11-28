@@ -256,3 +256,14 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增覆盖折叠阈值/前后数量/非法及小数参数、自定义上下文、混合来源顺序、原宿主/按钮/事件保留、动态文字和宽度、取消折叠恢复、投影删除与整组销毁、禁用链接与回调、target/rel、键盘进入/移动/Esc/焦点恢复；真实 CDP 鼠标验证省略触发、隐藏链接单次回调、取消导航及外部点击关闭。Breadcrumb 页面 issues / badResources 为空，截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 800.20 kB）。
 
 **接续任务**：第 3 轮 Steps → Statistic，第 3 轮整体与 M2 尚未完成。
+
+### 2026-11-28：第 3 轮 Steps 逆序与状态
+
+- **逆序与原实例**：新增 sequence（positive / reverse）及公开 StepSequence，区分原流程顺序和显示顺序；步骤取值、默认下标及序号保持原流程含义，完成状态不随显示反转。渲染后通过 Renderer2 移动原宿主，使真实 DOM、键盘焦点顺序和 vendor 的 :last-child / 连接线规则一致，不通过 CSS order 伪造逆序，不复制投影或重建模板。移动期间保留并恢复原焦点，无新增样式覆盖。动态增删或重排后重新读取最新逻辑查询，避免重排已移除的旧节点。
+- **数据来源与状态**：沿用上游非空 options 优先、空数组回退投影的规则；数据项按稳定 value 或原对象身份跟踪，不修改调用方数组。复用 createControllableState，defaultCurrent 只初始化一次，受控点击只发提案，父级拒绝时保留原状态。每次重新建立严格类型 Map，区分数值 0 / 字符串 0 并清理已删除项；显式 status 优先于 FINISH，FINISH 优先于自动下标/取值判断，失效 current 不自动跳首项。
+- **事件与只读**：保留 currentChange 值事件用于双向绑定，新增 change({ current, previous, e }) 完整上下文，覆盖鼠标及键盘；previous 在发送提案前捕获，受控拒绝仍报告实际前值。父容器和子项共同保护 readonly / process，重复选择不输出。程序设置 current 不被只读阻止，Steps 不作为 CVA 表单输入。
+- **图标与无障碍**：修复容器强制 default 主题后子项仍读取原 dot 主题的问题，统一读取 effectiveTheme；icon=true 显示默认图标、false 隐藏、文本或模板自定义，任一显式 icon 都按上游触发统一 default 主题。显式空 content 不回退到投影。增加 list / listitem、显示位置/总数、aria-current=step 和操作禁用语义；可操作项支持 Tab、Enter / 空格，按横纵显示方向的箭头及 Home / End 移动焦点，跳过 process 项，模板内部控件的键盘事件不冒充步骤操作。
+- **生成进度与边界**：新增 1 个含独立计数器的 demo，示例 337 → 338；对齐 1073 → 1074（68.1%）、真实债务 210 → 209、零债务目录 45 → 46。Steps 已登记债务为 0，仍保留模型/事件/投影映射，不代表完整 Vue 渲染函数或 SSR / 水合验收；渲染后的宿主移动尚未作为完整 SSR 支持发布。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增覆盖两种来源的实际 DOM 逆序/原序号、实例与计数/焦点保留、尾项 flex 和连接线、横向箭头旋转/纵向点状虚线、受控拒绝/默认值仅初始化、显式状态/FINISH/失效值、数值与字符串键/隐式下标、完整事件前值/触发上下文、键盘/只读/当前项保护、主题及图标优先级、动态插入/删除与 options 清空回退/恢复。Steps 页面 issues / badResources 为空，截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 800.20 kB）。
+
+**接续任务**：第 3 轮 Statistic；第 3 轮整体与 M2 尚未完成。

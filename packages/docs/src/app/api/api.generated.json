@@ -9185,6 +9185,18 @@
           ]
         },
         {
+          "name": "sequence",
+          "type": "StepSequence",
+          "default": "positive",
+          "required": false,
+          "zh": "步骤显示顺序，逆序不改变取值和步骤序号",
+          "en": "Visual sequence, reversing preserves step values and numbers",
+          "values": [
+            "positive",
+            "reverse"
+          ]
+        },
+        {
           "name": "theme",
           "type": "StepTheme",
           "default": "default",
@@ -9203,6 +9215,12 @@
           "type": "StepValue",
           "zh": "步骤变化",
           "en": "current change"
+        },
+        {
+          "name": "change",
+          "type": "StepsChangeEvent",
+          "zh": "步骤变化，包含前值和触发事件",
+          "en": "Step change with previous value and triggering event"
         }
       ]
     },

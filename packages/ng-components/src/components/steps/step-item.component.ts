@@ -2,6 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   InjectionToken,
   TemplateRef,
   ViewEncapsulation,
@@ -12,6 +13,7 @@ import {
   type Signal,
 } from '@angular/core';
 import type { Content } from '../../_utils/content';
+import { isTemplateContent } from '../../_utils/content';
 
 /** 步骤条节点的状态，与上游 `status` 的可选值一致。 */
 export const STEP_STATUSES = ['default', 'process', 'finish', 'error'] as const;
@@ -36,6 +38,9 @@ export interface StepItemState {
   index: number;
   /** 计算后的状态。 */
   status: StepStatus;
+  /** 显示位置与总项数，用于辅助技术。 */
+  position?: number;
+  count?: number;
 }
 
 /** 步骤条父容器通过 DI 下发给子项的量，对应上游的 `stepsState`。 */
@@ -44,8 +49,10 @@ export interface StepHost {
   readonly: Signal<boolean>;
   /** 实际生效的主题：任一项自定义图标时被父容器强制成 `default`。 */
   theme: Signal<StepTheme>;
+  effectiveTheme?: Signal<StepTheme>;
   /** 点击可点击的子项时回传给父容器。 */
-  select(value: StepValue | undefined, index: number): void;
+  select(value: StepValue | undefined, index: number, e?: MouseEvent | KeyboardEvent): void;
+  focusStep?(index: number, key: string): boolean;
 }
 
 /** 父容器 `TSteps` 的注入令牌，子项靠它读只读/主题并上报点击。 */
@@ -76,7 +83,10 @@ export const T_STEPS = new InjectionToken<StepHost>('TSteps');
       }
     </ng-template>
 
-    <div class="t-steps-item__inner" [class.t-steps-item--clickable]="clickable()" (click)="handleClick()">
+    <div #inner class="t-steps-item__inner" [class.t-steps-item--clickable]="clickable()"
+      [attr.role]="hasHost() ? 'button' : null" [attr.tabindex]="clickable() ? 0 : null"
+      [attr.aria-disabled]="hasHost() ? !clickable() : null" [attr.aria-current]="state().status === 'process' ? 'step' : null"
+      (click)="handleClick($event)" (keydown)="handleKeydown($event)">
       <div [class]="iconClasses()">
         @if (customIcon()) {
           <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: customIcon() }" />
@@ -117,7 +127,7 @@ export const T_STEPS = new InjectionToken<StepHost>('TSteps');
           <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: title() }" />
         </div>
         <div class="t-steps-item__description">
-          @if (content()) {
+          @if (content() !== undefined) {
             <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: content() }" />
           } @else {
             <ng-content />
@@ -133,9 +143,13 @@ export const T_STEPS = new InjectionToken<StepHost>('TSteps');
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'classes()',
+    'role': 'listitem',
+    '[attr.aria-posinset]': 'state().position ?? null',
+    '[attr.aria-setsize]': 'state().count ?? null',
   },
 })
 export class TStepItem {
+  readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   /** 步骤描述，未设置时使用投影内容。 @zh 步骤描述 @en content */
   readonly content = input<StepContent>(undefined);
 
@@ -156,6 +170,7 @@ export class TStepItem {
 
   /** 父容器；独立使用（没有 `t-steps`）时不渲染序号、也不可点击。 */
   private readonly host = inject(T_STEPS, { optional: true });
+  protected readonly hasHost = () => this.host !== null;
 
   /** 由父容器下发的渲染状态；模板里要读它，所以是 protected。 */
   protected readonly state = signal<StepItemState>({ index: 0, status: 'default' });
@@ -169,11 +184,11 @@ export class TStepItem {
   /** 是否自定义了图标；只有文本或模板算自定义，布尔值表示用/不用默认图标。 */
   protected readonly customIcon = computed<StepContent | null>(() => {
     const icon = this.icon();
-    return typeof icon === 'string' || icon instanceof TemplateRef ? icon : null;
+    return typeof icon === 'string' || isTemplateContent(icon) ? icon : null;
   });
 
   /** 是否渲染默认图标：没有自定义图标、且主题是 `default`（`dot` 主题不画序号）。 */
-  protected readonly defaultIconVisible = computed(() => this.icon() === undefined && this.theme() === 'default');
+  protected readonly defaultIconVisible = computed(() => this.host !== null && (this.icon() === undefined || this.icon() === true) && this.theme() === 'default');
 
   /** 是否可点击：非 `process` 状态且父容器不是只读。 */
   protected readonly clickable = computed(() => {
@@ -182,7 +197,11 @@ export class TStepItem {
   });
 
   /** 实际生效的主题，由父容器统一下发。 */
-  private readonly theme = computed<StepTheme>(() => this.host?.theme() ?? 'default');
+  private readonly theme = computed<StepTheme>(() => this.host?.effectiveTheme?.() ?? this.host?.theme() ?? 'default');
+
+  canSelect(): boolean { return this.clickable(); }
+  containsElement(element: HTMLElement): boolean { return this.hostElement.contains(element); }
+  focus(): void { this.hostElement.querySelector<HTMLElement>('.t-steps-item__inner')?.focus(); }
 
   /** 父容器用它把按下标算好的序号与状态推下来。 */
   setState(state: StepItemState): void {
@@ -190,13 +209,22 @@ export class TStepItem {
   }
 
   /** 点击时把取值（没设置取值时用下标）回传给父容器，当前步骤与只读时忽略，与上游 `canClick` 一致。 */
-  protected handleClick(): void {
+  protected handleClick(event: MouseEvent | KeyboardEvent): void {
     if (!this.clickable()) return;
-    this.host?.select(this.value(), this.state().index);
+    this.host?.select(this.value(), this.state().index, event);
+  }
+
+  protected handleKeydown(event: KeyboardEvent): void {
+    if (event.target !== event.currentTarget || event.isComposing || !this.clickable()) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault(); this.handleClick(event);
+    } else if (this.host?.focusStep?.(this.state().index, event.key)) {
+      event.preventDefault();
+    }
   }
 
   /** 判断一个取值是不是模板，模板用 `*ngTemplateOutlet` 渲染，其余按文本渲染。 */
   protected asTemplate(value: StepContent): TemplateRef<unknown> | null {
-    return value instanceof TemplateRef ? value : null;
+    return isTemplateContent(value) ? value : null;
   }
 }

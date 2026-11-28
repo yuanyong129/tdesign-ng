@@ -4,19 +4,19 @@
 
 - 目录：`packages/ng-components/src/components/steps/`
 - 文档页：`/steps`（`packages/docs/src/app/docs/steps/steps.component.ts`）
-- 状态：🚧 有深度债 1 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 17 |
-| 已对齐 | 13 |
-| 覆盖率 | 76.5% |
-| 深度债 | 1（D1 0 / D2 0 / D3 1） |
+| 已对齐 | 14 |
+| 覆盖率 | 82.4% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 3（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 3 个 |
+| 文档示例 | 4 个 |
 
 ## 组件明细
 
@@ -43,7 +43,7 @@
 
 ### `TSteps`（`<t-steps>`）
 
-上游接口 `TdStepsProps`；上游属性 10、已对齐 7（70.0%）；深度债 1 项；未登记缺失 0 项。
+上游接口 `TdStepsProps`；上游属性 10、已对齐 8（80.0%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -55,6 +55,7 @@
 | `options` | StepOption[] \| undefined | undefined | 选项列表 |
 | `readonly` | boolean | false | 是否只读 |
 | `separator` | StepSeparator | line | 连接线样式 |
+| `sequence` | StepSequence | positive | 步骤显示顺序，逆序不改变取值和步骤序号 |
 | `theme` | StepTheme | default | 主题 |
 
 **已实现事件**
@@ -62,17 +63,18 @@
 | 事件 | 参数 | 说明 |
 | --- | --- | --- |
 | `currentChange` | StepValue | 步骤变化 |
+| `change` | StepsChangeEvent | 步骤变化，包含前值和触发事件 |
 
 **未实现（深度债）**
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
 | `modelValue` | Angular 惯用映射 | Angular 用 [(current)] 双向绑定 |
-| `onChange` | Angular 惯用映射 | Angular 用 (currentChange) 输出，参数为新的 current |
-| `sequence` | D3 其余组件与边角能力 | [D3] 依赖反转渲染顺序，投影内容无法重排且会错位连接线伪元素 |
+| `onChange` | Angular 惯用映射 | Angular 用 (change) 输出 { current, previous, e }，currentChange 用于双向绑定 |
 
 ## 文档示例
 
 - `packages/docs/src/app/docs/steps/demos/steps-base.ts`
 - `packages/docs/src/app/docs/steps/demos/steps-dot.ts`
+- `packages/docs/src/app/docs/steps/demos/steps-sequence.ts`
 - `packages/docs/src/app/docs/steps/demos/steps-vertical.ts`

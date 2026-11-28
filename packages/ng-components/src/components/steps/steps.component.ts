@@ -1,15 +1,19 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  Injector,
+  Renderer2,
   ViewEncapsulation,
   booleanAttribute,
+  afterNextRender,
   computed,
   contentChildren,
   effect,
   forwardRef,
+  inject,
   input,
   output,
-  signal,
   untracked,
   viewChildren,
 } from '@angular/core';
@@ -22,6 +26,17 @@ import {
   type StepTheme,
   type StepValue,
 } from './step-item.component';
+import { createControllableState } from '../../_utils/controllable-state';
+
+export const STEP_SEQUENCES = ['positive', 'reverse'] as const;
+export type StepSequence = (typeof STEP_SEQUENCES)[number];
+
+/** 完整步骤切换通知；currentChange 继续只输出值供双向绑定使用。 */
+export interface StepsChangeEvent {
+  current: StepValue;
+  previous: StepValue | undefined;
+  e?: MouseEvent | KeyboardEvent;
+}
 
 /** 步骤条的排列方向。 */
 export const STEP_LAYOUTS = ['horizontal', 'vertical'] as const;
@@ -59,16 +74,15 @@ export interface StepOption {
  * `setState()` 推给子项（照 `radio-group` 的 `setGroupState` 写法）。只读与生效主题通过
  * DI 令牌 `T_STEPS` 下发，对应上游的 `stepsState`。
  *
- * `sequence` 反转顺序没实现：上游靠反转数组重排 DOM，Angular 的投影子项无法重排，
- * 用 `[style.order]` 又会让 `:last-child` 的连接线与 `flex: none` 落到错误的元素上。
+ * 逆序移动原宿主，保留组件实例，并使 vendor 的 :last-child 连接线规则匹配真实顺序。
  */
 @Component({
   selector: 't-steps',
   standalone: true,
   imports: [TStepItem],
   template: `
-    <ng-content />
-    @for (option of normalizedOptions(); track $index) {
+    @if (!normalizedOptions().length) { <ng-content /> }
+    @for (option of normalizedOptions(); track option.value ?? option) {
       <t-step-item
         [content]="option.content ?? option.default"
         [extra]="option.extra"
@@ -83,6 +97,7 @@ export interface StepOption {
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'classes()',
+    'role': 'list',
   },
   providers: [
     {
@@ -110,38 +125,49 @@ export class TSteps implements StepHost {
   /** 连接线样式。 @zh 连接线样式 @en separator @defaultValue line @values line,dashed,arrow */
   readonly separator = input<StepSeparator>('line');
 
+  /** @zh 步骤显示顺序，逆序不改变取值和步骤序号 @en Visual sequence, reversing preserves step values and numbers @defaultValue positive @values positive,reverse */
+  readonly sequence = input<StepSequence>('positive');
+
   /** 步骤条主题，任一项自定义图标时强制为 `default`。 @zh 主题 @en theme @defaultValue default @values default,dot */
   readonly theme = input<StepTheme>('default');
 
   /** 当前步骤变化时触发。 @zh 步骤变化 @en current change */
   readonly currentChange = output<StepValue>();
 
+  /** @zh 步骤变化，包含前值和触发事件 @en Step change with previous value and triggering event */
+  readonly change = output<StepsChangeEvent>();
+
   /** `options` 渲染的子项。 */
   private readonly optionItems = viewChildren(TStepItem);
 
   /** 投影进来的子项。 */
-  private readonly slotItems = contentChildren(TStepItem, { descendants: true });
+  private readonly slotItems = contentChildren(TStepItem);
 
-  /** 内部当前步骤，受控时由 `current` 覆盖。 */
-  private readonly innerCurrent = signal<StepValue | undefined>(undefined);
+  /** 受控值优先，默认值仅初始化一次。 */
+  private readonly state = createControllableState(this.current, () => this.defaultCurrent());
+  protected readonly activeCurrent = this.state.current;
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly injector = inject(Injector);
 
-  /** 全部子项，顺序与 DOM 一致：模板里投影在前、`options` 渲染在后。 */
-  private readonly items = computed(() => [...this.slotItems(), ...this.optionItems()]);
+  /** 原流程顺序；非空 options 优先，显示顺序单独计算。 */
+  private readonly items = computed(() => this.normalizedOptions().length ? this.optionItems() : this.slotItems());
+  private readonly displayItems = computed(() => this.sequence() === 'reverse' ? [...this.items()].reverse() : [...this.items()]);
 
-  /** 宿主类名，与上游 `baseClass` 一致（`sequence` 本期固定为默认值 `positive`）。 */
+  /** 宿主类名，与上游 baseClass 一致。 */
   protected readonly classes = computed(() => {
     const theme = this.effectiveTheme();
     return [
       't-steps',
       `t-steps--${this.layout()}`,
       `t-steps--${theme}-anchor`,
-      't-steps--positive',
+      `t-steps--${this.sequence()}`,
       `t-steps--${this.separator()}-separator`,
     ].join(' ');
   });
 
   /** 实际生效的主题：任一项设置了 `icon` 就回到 `default`，与上游 `handleTheme` 一致。 */
-  private readonly effectiveTheme = computed<StepTheme>(() =>
+  readonly effectiveTheme = computed<StepTheme>(() =>
     this.items().some((item) => item.icon() !== undefined) ? 'default' : this.theme(),
   );
 
@@ -149,26 +175,11 @@ export class TSteps implements StepHost {
   protected readonly normalizedOptions = computed<StepOption[]>(() => this.options() ?? []);
 
   constructor() {
-    // 受控用法：外部 current 变化时同步进来（对应上游 useVModel 的受控分支）。
-    effect(() => {
-      const current = this.current();
-      if (current !== undefined) {
-        untracked(() => this.innerCurrent.set(current));
-      }
-    });
-
-    // 非受控用法：defaultCurrent 作为初始值，只在没传 current 时生效。
-    effect(() => {
-      const defaultCurrent = this.defaultCurrent();
-      if (defaultCurrent !== undefined && this.current() === undefined) {
-        untracked(() => this.innerCurrent.set(defaultCurrent));
-      }
-    });
-
     // 按下标算好序号与状态推给每个子项，对应上游 renderContent 里的 handleStatus。
     effect(() => {
       const items = this.items();
-      const current = this.innerCurrent();
+      const current = this.activeCurrent();
+      const displayItems = this.displayItems();
       const positions = new Map<StepValue, number>();
       items.forEach((item, index) => {
         const value = item.value();
@@ -176,20 +187,48 @@ export class TSteps implements StepHost {
       });
       const matchIndex = current === undefined ? undefined : positions.get(current);
       items.forEach((item, index) => {
-        item.setState({ index, status: this.computeStatus(item, index, current, matchIndex) });
+        item.setState({ index, position: displayItems.indexOf(item) + 1, count: items.length, status: this.computeStatus(item, index, current, matchIndex) });
       });
+    });
+    effect(() => {
+      this.displayItems();
+      afterNextRender(() => untracked(() => {
+        // 原生宿主的重排不改变 Angular 逻辑查询、投影和组件生命周期。
+        const host = this.element.nativeElement;
+        const ordered = this.displayItems();
+        const focused = host.ownerDocument.activeElement as HTMLElement | null;
+        const restoreFocus = focused !== null && ordered.some((item) => item.containsElement(focused));
+        for (const item of ordered) this.renderer.appendChild(host, item.hostElement);
+        if (restoreFocus && focused?.isConnected && focused !== host.ownerDocument.activeElement) focused.focus({ preventScroll: true });
+      }), { injector: this.injector });
     });
   }
 
   /** 子项点击时更新当前步骤并抛事件，取值优先用子项的 `value`，没有时用下标。 */
-  select(value: StepValue | undefined, index: number): void {
+  select(value: StepValue | undefined, index: number, e?: MouseEvent | KeyboardEvent): void {
+    if (this.readonly() || !this.items()[index]?.canSelect()) return;
     const next = value === undefined ? index : value;
-    if (next === this.innerCurrent()) return;
-    this.innerCurrent.set(next);
+    const previous = this.activeCurrent();
+    if (next === previous) return;
+    this.state.set(next);
     this.currentChange.emit(next);
+    this.change.emit({ current: next, previous, e });
   }
 
-  /** 逐字复刻上游 `handleStatus`：显式 status > `FINISH` 魔法值 > 下标比较 > 取值比较。 */
+  focusStep(index: number, key: string): boolean {
+    if (this.readonly()) return false;
+    const previous = this.layout() === 'horizontal' ? 'ArrowLeft' : 'ArrowUp';
+    const next = this.layout() === 'horizontal' ? 'ArrowRight' : 'ArrowDown';
+    if (![previous, next, 'Home', 'End'].includes(key)) return false;
+    const available = this.displayItems().filter((item) => item.canSelect());
+    const current = available.indexOf(this.items()[index]);
+    const target = key === 'Home' ? available[0] : key === 'End' ? available[available.length - 1]
+      : available[(current + (key === next ? 1 : -1) + available.length) % available.length];
+    target?.focus();
+    return true;
+  }
+
+  /** 按原流程计算状态：显式 status > FINISH > 下标比较 > 取值比较；逆序仅改变显示。 */
   private computeStatus(
     item: TStepItem,
     index: number,

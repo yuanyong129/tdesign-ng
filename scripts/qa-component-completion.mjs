@@ -1588,6 +1588,70 @@ try {
     return {clicks:demo.clicks(),closed:!popup.isVisible()};
   })()`);
   assert.deepEqual(breadcrumbPointerResult,{clicks:2,closed:true});
+  await page('/steps', 'demo-steps-sequence .sequence-options t-step-item');
+  const stepsState=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-steps-sequence'),demo=ng.getComponent(root),host=root.querySelector('.sequence-options'),steps=ng.getComponent(host),projectHost=root.querySelector('.sequence-projected'),project=ng.getComponent(projectHost);
+    const nodes=(el=host)=>[...el.querySelectorAll(':scope > t-step-item')];
+    const item=(value)=>nodes().find(el=>ng.getComponent(el).value()===value);
+    const inner=(el)=>el.querySelector('.t-steps-item__inner');
+    const click=async(value)=>{inner(item(value)).click();${settle}};
+    const key=async(el,name)=>{el.focus();el.dispatchEvent(new KeyboardEvent('keydown',{key:name,bubbles:true,cancelable:true}));${settle}};
+    const states=(el=host)=>nodes(el).map(node=>ng.getComponent(node).state().status);
+    const initial={values:nodes().map(node=>ng.getComponent(node).value()),states:states(),project:states(projectHost),fallback:!!host.querySelector('.fallback-content')};
+    const original=item('one'),counter=host.querySelector('.option-counter'),button=counter.querySelector('button'),instance=ng.getComponent(counter).instance;
+    button.click();${settle}button.focus();demo.sequence.set('reverse');ng.applyChanges(demo);${settle}
+    const reversed={values:nodes().map(node=>ng.getComponent(node).value()),indices:nodes().map(node=>ng.getComponent(node).state().index),states:states(),project:nodes(projectHost).map(el=>el.dataset.key),focus:document.activeElement===button};
+    const retained=item('one')===original&&host.querySelector('.option-counter')===counter&&ng.getComponent(counter).instance===instance&&ng.getComponent(counter).count()===1;
+    const last=nodes().at(-1);const tail={flex:getComputedStyle(last).flexGrow,line:getComputedStyle(last.querySelector('.t-steps-item__title'),'::after').content};
+    const aria=inner(item('two')).getAttribute('aria-current')==='step'&&inner(item('two')).getAttribute('aria-disabled')==='true'&&item('three').getAttribute('aria-posinset')==='1'&&item('three').getAttribute('aria-setsize')==='3';
+    demo.acceptChanges.set(false);ng.applyChanges(demo);${settle}await click('one');
+    const rejected={active:steps.activeCurrent(),states:states(),previous:demo.previous(),proposed:demo.proposed(),event:demo.eventType(),changes:demo.changes()};
+    const beforeCurrent=demo.changes();await click('two');const currentIgnored=demo.changes()===beforeCurrent;
+    await key(inner(item('three')),'ArrowRight');const visualFocus=document.activeElement===inner(item('one'));
+    await key(inner(item('one')),' ');const keyboardRejected=steps.activeCurrent()==='two'&&demo.eventType()==='keydown'&&demo.changes()===2;
+    demo.acceptChanges.set(true);ng.applyChanges(demo);${settle}await key(inner(item('one')),'Enter');
+    const keyboardAccepted={active:steps.activeCurrent(),previous:demo.previous(),proposed:demo.proposed(),event:demo.eventType()};
+    demo.readonly.set(true);ng.applyChanges(demo);${settle}const beforeReadonly=demo.changes();await click('three');steps.select('three',2);await key(inner(item('three')),'Enter');
+    const readonly=demo.changes()===beforeReadonly&&steps.activeCurrent()==='one'&&nodes().every(el=>!inner(el).hasAttribute('tabindex'));
+    demo.readonly.set(false);demo.theme.set('dot');ng.applyChanges(demo);${settle}
+    const dots=host.classList.contains('t-steps--dot-anchor')&&!host.querySelector('.t-steps-item__icon--number');
+    demo.withIcon.set(true);ng.applyChanges(demo);${settle}const customTheme=host.classList.contains('t-steps--default-anchor')&&!!item('two').querySelector('.custom-step-icon')&&!!item('three').querySelector('.t-steps-item__icon--number');
+    const iconId=ng.getComponent(host.querySelector('.option-counter')).instance;demo.data.update(data=>data.map(option=>option.value==='three'?{...option,icon:true}:option));ng.applyChanges(demo);${settle}
+    const trueIcon=!!item('three').querySelector('.t-steps-item__icon--number')&&ng.getComponent(host.querySelector('.option-counter')).instance===iconId;
+    demo.data.update(data=>data.map(option=>option.value==='three'?{...option,icon:false}:option));ng.applyChanges(demo);${settle}const falseIcon=!item('three').querySelector('.t-steps-item__icon--number');
+    demo.withIcon.set(false);demo.theme.set('default');demo.separator.set('arrow');ng.applyChanges(demo);${settle}
+    const reverseArrow=getComputedStyle(nodes()[0],'::after').transform;demo.sequence.set('positive');ng.applyChanges(demo);${settle}
+    const positiveArrow=getComputedStyle(nodes()[0],'::after').transform;const arrows=reverseArrow!=='none'&&positiveArrow!=='none'&&reverseArrow!==positiveArrow;
+    demo.layout.set('vertical');demo.sequence.set('reverse');demo.separator.set('dashed');demo.theme.set('dot');demo.data.update(data=>data.map(({icon,...option})=>option));ng.applyChanges(demo);${settle}
+    const vertical=host.classList.contains('t-steps--vertical')&&host.classList.contains('t-steps--dot-anchor')&&getComputedStyle(nodes()[0],'::before').borderRightStyle==='dashed'&&getComputedStyle(nodes().at(-1),'::before').display==='none';
+    await key(inner(item('three')),'ArrowDown');const verticalFocus=document.activeElement===inner(item('two'));
+    demo.current.set('FINISH');demo.data.update(data=>data.map(option=>option.value==='two'?{...option,status:'error'}:option));ng.applyChanges(demo);${settle}
+    const finish=states();demo.current.set('missing');ng.applyChanges(demo);${settle}const invalid=states();
+    const defaultInitial=project.activeCurrent();demo.initial.set(2);ng.applyChanges(demo);${settle}const defaultStable=project.activeCurrent();
+    inner(nodes(projectHost)[0]).click();${settle}const implicitSelected=project.activeCurrent();demo.initial.set(0);ng.applyChanges(demo);${settle}const defaultOnce=project.activeCurrent();
+    const projectedOriginal=projectHost.querySelector('[data-key="1"]'),projectCounter=projectedOriginal.querySelector('demo-steps-sequence-counter');projectCounter.querySelector('button').click();${settle}
+    demo.projected.set([1,2,3,4]);ng.applyChanges(demo);${settle}const inserted=nodes(projectHost).map(el=>el.dataset.key);
+    demo.projected.set([1,3,4]);demo.titleText.set('Live extra');ng.applyChanges(demo);${settle}
+    const dynamic=nodes(projectHost).map(el=>el.dataset.key).join(',')==='4,3,1'&&projectedOriginal===projectHost.querySelector('[data-key="1"]')&&ng.getComponent(projectCounter).count()===1&&projectedOriginal.querySelector('.live-step-title').textContent==='Live extra';
+    demo.data.set([{value:0,title:'Number zero'},{value:'0',title:'String zero'},{value:'last',title:'Last'}]);demo.current.set('0');ng.applyChanges(demo);${settle}const typed=states();
+    demo.data.set([{title:'Index zero'},{title:'Index one'},{title:'Index two'}]);demo.current.set(1);ng.applyChanges(demo);${settle}
+    inner(nodes()[0]).click();${settle}const implicitReverse={value:steps.activeCurrent(),previous:demo.previous()};
+    demo.data.set([]);demo.current.set('fallback');ng.applyChanges(demo);${settle}const fallback=nodes().length===1&&!!host.querySelector('.fallback-content')&&states()[0]==='process';
+    demo.data.set([{value:'restored',title:'Restored',content:'<b>literal</b>'}]);demo.current.set('restored');ng.applyChanges(demo);${settle}
+    const restored=nodes().length===1&&!host.querySelector('.fallback-content')&&item('restored').textContent.includes('<b>literal</b>')&&!host.querySelector('b');
+    return {initial,reversed,retained,tail,aria,rejected,currentIgnored,visualFocus,keyboardRejected,keyboardAccepted,readonly,dots,customTheme,trueIcon,falseIcon,arrows,vertical,verticalFocus,finish,invalid,defaultInitial,defaultStable,implicitSelected,defaultOnce,inserted,dynamic,typed,implicitReverse,fallback,restored};
+  })()`);
+  assert.deepEqual(stepsState.initial,{values:['one','two','three'],states:['finish','process','default'],project:['finish','process','default'],fallback:false});
+  assert.deepEqual(stepsState.reversed,{values:['three','two','one'],indices:[2,1,0],states:['default','process','finish'],project:['3','2','1'],focus:true});
+  assert.deepEqual(stepsState.tail,{flex:'0',line:'none'});
+  assert.deepEqual(stepsState.rejected,{active:'two',states:['default','process','finish'],previous:'two',proposed:'one',event:'click',changes:1});
+  assert.deepEqual(stepsState.keyboardAccepted,{active:'one',previous:'two',proposed:'one',event:'keydown'});
+  for(const key of ['retained','aria','currentIgnored','visualFocus','keyboardRejected','readonly','dots','customTheme','trueIcon','falseIcon','arrows','vertical','verticalFocus','dynamic','fallback','restored']) assert.equal(stepsState[key],true,key);
+  assert.deepEqual(stepsState.finish,['finish','error','finish']);assert.deepEqual(stepsState.invalid,['default','error','default']);
+  assert.equal(stepsState.defaultInitial,1);assert.equal(stepsState.defaultStable,1);assert.equal(stepsState.implicitSelected,2);assert.equal(stepsState.defaultOnce,2);
+  assert.deepEqual(stepsState.inserted,['4','3','2','1']);assert.deepEqual(stepsState.typed,['default','process','finish']);
+  assert.deepEqual(stepsState.implicitReverse,{value:2,previous:1});
+  console.log('PASS Steps: physical reverse/order/connectors, stable hosts/templates/focus, controlled rejection/default once, typed/implicit keys, change context, keyboard/readonly, theme/icon priority, dynamic insert/delete/fallback');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {
