@@ -19,7 +19,8 @@
 }
 
 <div class="t-input__wrap">
-  <div [class]="inputClasses()">
+  <!-- 与 Input 一样在创建阶段声明基础类，避免重建时从默认边框启动过渡。 -->
+  <div class="t-input" [class]="inputClasses()">
     @if (label()) {
       <div class="t-input__prefix">
         <ng-container *ngTemplateOutlet="richText; context: { $implicit: label() }" />

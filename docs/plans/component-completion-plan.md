@@ -2,6 +2,8 @@
 
 制定日期：2026-11-27。范围：现有组件的功能、API、演示文档和质量完善。执行状态见第 7 节。
 
+> 2026-11-28 临时优先项：先修复 Input / InputNumber 文档站路由往返时的样式延迟；完成后恢复第 4 轮 Dialog 挂载批次。
+
 ## 1. 排序与完成口径
 
 以局部改动范围、状态复杂度、共享依赖和验证成本排序。D1/D2/D3 是债务分类，不是难度等级；债务少也可能涉及虚拟滚动、挂载容器等复杂能力。
@@ -386,3 +388,12 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全量既有及新增交互回归通过，missing 0 / extra 0；补宿主间距后重新通过完整构建和 Dialog 专项回归。新增覆盖模板/布尔/文本优先级、标题隐藏后的独立关闭入口、字符串转义、投影底部覆盖/恢复和原节点保留、标签模板实时更新、冻结配置对象不改写、全部视觉配置与真实按钮间距、主题缺省/重置、鼠标与 Enter 回调接管且不重复、禁用/两种加载来源/null 保护、默认动作、整按钮模板及上下文、原生 Enter 激活自定义关闭按钮一次、保留/销毁/重建模板、全屏宽高与长正文滚动、隐藏头尾仍填满可用高度、返回普通模式样式清理与正文实例保留。原生 Enter 经 CDP 连同文本输入事件验证。Dialog / Drawer / Button / ImageViewer 页面 issues / badResources 为空，普通与全屏截图已检查；最终 Dialog 页面再次检查通过。`pnpm check:progress`、`git diff --check` 通过，保留既有 Drawer footer slot、Browserslist、qrcode CommonJS 和约 805.55 kB 首包预算告警。
 
 **接续任务**：Dialog 挂载/局部显示 → 拖动 → Drawer → ImageViewer，先明确普通与局部容器的坐标和所有权。
+
+### 2026-11-28：优先修复 Input / InputNumber 路由重入样式延迟
+
+- **复现与原因**：文档站首次进入正常，RouterLink 往返后，编辑区出现约 200ms 的边框/背景过渡，边框由默认 3px 变为 1px。两者均仅在动态 class 绑定阶段添加 `.t-input`，创建阶段缺少基础类，重建时中间样式触发了 vendor 的正常过渡；并非组件 CSS 异步下载。
+- **修复范围**：两个编辑容器在模板中静态声明 `.t-input`，让创建阶段即具备基础样式；保留原动态 class、inputClass、尺寸/状态逻辑及正常聚焦动画，不修改 vendor、不全局关闭动画。
+- **回归**：新增 `scripts/qa-input-route-styles.mjs`，使用真实侧栏 RouterLink，覆盖首次 Input、首次 InputNumber、两者往返及经 Button 返回；记录 DOM 插入后的样式和后续 24 帧，检查 1px 边框、32px 高度、无入场样式过渡，并逐次验证聚焦仍产生边框动画。撤回修复时回归在第二次 Input 进入失败，恢复后通过；全量组件交互回归也通过，包含动态 inputClass、autoWidth、InputGroup 和 InputNumber 输入配置。
+- **验证与进度**：`pnpm verify:session`、完整 `pnpm build`、专项及全量交互回归、`pnpm gen:progress` / `pnpm check:progress` 和 `git diff --check` 通过。生成进度无变化：1086/1576（68.9%）、深度债 188、零登记债目录 51/73、示例 350。保留既有 Drawer footer slot、Browserslist、qrcode CommonJS 和首包预算告警。
+
+**接续任务**：恢复第 4 轮 Dialog 挂载/局部显示 → 拖动 → Drawer → ImageViewer。

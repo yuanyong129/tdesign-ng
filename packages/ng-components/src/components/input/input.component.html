@@ -2,7 +2,8 @@
   @if (label()) {
     <label class="t-input__label" [attr.for]="innerId">{{ label() }}</label>
   }
-  <div [class]="classes()" [ngClass]="inputClass()" (wheel)="handleWheel($event)">
+  <!-- 基础类必须在创建阶段存在，避免路由重建时动态类绑定触发未设样式到正常边框的过渡。 -->
+  <div class="t-input" [class]="classes()" [ngClass]="inputClass()" (wheel)="handleWheel($event)">
     <span class="t-input__prefix">
       <ng-content select="[tInputPrefixIcon]" />
     </span>
