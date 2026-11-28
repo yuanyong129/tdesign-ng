@@ -1,3 +1,6 @@
+import { NgTemplateOutlet } from '@angular/common';
+import { isTemplateContent } from '../../_utils/content';
+import type { Content } from '../../_utils/content';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -12,6 +15,8 @@ import {
 import { TTabs } from './tabs.component';
 import { TabValue } from './tabs.types';
 
+let tabPanelUid = 0;
+
 /**
  * 选项卡面板。放在 `t-tabs` 内部，标签与内容都由它提供。
  *
@@ -22,18 +27,25 @@ import { TabValue } from './tabs.types';
 @Component({
   selector: 't-tab-panel',
   standalone: true,
+  imports: [NgTemplateOutlet],
   templateUrl: './tab-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
 export class TTabPanel {
   private readonly tabs = inject(TTabs);
+  readonly panelId = `t-tab-panel-${++tabPanelUid}`;
+  readonly tabId = `${this.panelId}-tab`;
+  protected readonly isTemplateContent = isTemplateContent;
 
   /** @zh 选项卡值，未声明时使用所在位置的下标 @en Tab value, defaults to the panel index @defaultValue undefined */
   readonly value = input<TabValue | undefined>(undefined);
 
   /** @zh 选项卡标题 @en Tab label @defaultValue '' */
-  readonly label = input('');
+  readonly label = input<Content>('');
+
+  /** @zh 面板内容，显式内容优先于投影，支持字符串或模板 @en Panel content as text or a template, takes precedence over projection @defaultValue undefined */
+  readonly panel = input<Content>(undefined);
 
   /** @zh 是否禁用该选项卡 @en Whether the tab is disabled @defaultValue false */
   readonly disabled = input(false, { transform: booleanAttribute });

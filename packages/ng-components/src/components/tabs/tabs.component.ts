@@ -11,6 +11,7 @@ import {
   computed,
   contentChildren,
   effect,
+  forwardRef,
   inject,
   input,
   output,
@@ -20,6 +21,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { TTabPanel } from './tab-panel.component';
+import { createControllableState } from '../../_utils/controllable-state';
 import { isContentEmpty, isTemplateContent } from '../../_utils/content';
 import type { Content } from '../../_utils/content';
 import {
@@ -31,6 +33,7 @@ import {
   TabsScrollPosition,
   TabsSize,
   TabsTheme,
+  TabsListItem,
 } from './tabs.types';
 
 /**
@@ -46,7 +49,7 @@ import {
 @Component({
   selector: 't-tabs',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, forwardRef(() => TTabPanel)],
   templateUrl: './tabs.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -82,6 +85,9 @@ export class TTabs implements OnDestroy {
   /** @zh 导航栏右侧的操作内容，支持字符串或模板 @en Actions beside the tab navigation, as text or a template @defaultValue undefined */
   readonly action = input<Content>(undefined);
 
+  /** @zh 数据驱动面板，非空时优先于投影，空数组回退到投影 @en Data panels, a nonempty list takes precedence over projected panels @defaultValue [] */
+  readonly list = input<TabsListItem[]>([]);
+
   protected readonly isTemplateContent = isTemplateContent;
   protected readonly hasAction = computed(() => !isContentEmpty(this.action()));
 
@@ -97,16 +103,20 @@ export class TTabs implements OnDestroy {
   /** @zh 拖拽排序时触发，使用方按 payload 重排自己的面板数据 @en Emits when tabs are dropped at a new position */
   readonly dragSortChange = output<TabsDragSortEvent>();
 
-  /** 面板由内容投影提供，这里只读取它们的元信息用于渲染导航 */
-  protected readonly panels = contentChildren(TTabPanel);
+  /** 数据列表与投影复用面板元信息和导航逻辑。 */
+  private readonly projectedPanels = contentChildren(TTabPanel);
+  private readonly listPanels = viewChildren(TTabPanel);
+  protected readonly panels = computed(() => this.list().length ? this.listPanels() : this.projectedPanels());
 
-  private readonly innerValue = signal<TabValue | undefined>(undefined);
+  private readonly state = createControllableState(this.value, () => this.defaultValue());
   private readonly injector = inject(Injector);
 
-  /** 受控优先取 value，其次是内部值，最后回落到 defaultValue */
-  protected readonly activeValue = computed<TabValue | undefined>(
-    () => this.value() ?? this.innerValue() ?? this.defaultValue(),
-  );
+  /** 受控值优先，默认值仅初始化一次。 */
+  protected readonly activeValue = this.state.current;
+  protected readonly focusIndex = computed(() => {
+    const active = this.panels().findIndex((panel, i) => this.panelValue(panel, i) === this.activeValue() && !this.isDisabledAt(i));
+    return active >= 0 ? active : this.panels().findIndex((_, i) => !this.isDisabledAt(i));
+  });
 
   protected readonly vertical = computed(
     () => this.placement() === 'left' || this.placement() === 'right',
@@ -127,8 +137,8 @@ export class TTabs implements OnDestroy {
   private readonly scrollLeft = signal(0);
   private readonly maxScrollLeft = signal(0);
 
-  /** 正在拖拽的页签下标 */
-  private readonly dragIndex = signal<number | null>(null);
+  /** 保留源面板身份，防止数据更新后旧下标指向其它页签。 */
+  private readonly dragSource = signal<TTabPanel | null>(null);
 
   protected readonly canToLeft = computed(() => this.scrollLeft() > 0);
   protected readonly canToRight = computed(() => this.scrollLeft() < this.maxScrollLeft() - 1);
@@ -144,10 +154,14 @@ export class TTabs implements OnDestroy {
     effect(() => {
       this.activeValue();
       this.panels();
+      this.panels().forEach((panel) => { panel.label(); panel.value(); panel.removable(); panel.disabled(); });
       this.placement();
       this.isCard();
       this.scrollPosition();
       this.action();
+      this.navScrollRef();
+      this.operationsRef();
+      this.navItemRefs();
       untracked(() => this.scheduleNavUpdate());
     });
     afterNextRender(() => {
@@ -165,7 +179,7 @@ export class TTabs implements OnDestroy {
     return panel.value() ?? index;
   }
 
-  protected panelLabel(panel: TTabPanel, index: number): string {
+  protected panelLabel(panel: TTabPanel, index: number): Content {
     return panel.label() || `选项卡${index + 1}`;
   }
 
@@ -196,9 +210,7 @@ export class TTabs implements OnDestroy {
     if (next === this.activeValue()) {
       return;
     }
-    if (this.value() === undefined) {
-      this.innerValue.set(next);
-    }
+    this.state.set(next);
     this.change.emit(next);
   }
 
@@ -209,16 +221,52 @@ export class TTabs implements OnDestroy {
   }
 
   protected handleAdd(event: MouseEvent): void {
+    if (this.disabled() || !this.addable()) return;
     this.add.emit({ e: event });
   }
 
-  protected handleRemove(event: MouseEvent, index: number): void {
+  protected handleRemove(event: MouseEvent | KeyboardEvent, index: number): void {
     event.stopPropagation();
     const panel = this.panels()[index];
-    if (!panel) {
+    if (!panel || this.isDisabledAt(index) || !panel.removable()) {
       return;
     }
-    this.remove.emit({ value: this.panelValue(panel, index), index, e: event });
+    const value = this.panelValue(panel, index);
+    const callback = this.list().length ? this.list()[index]?.onRemove : undefined;
+    this.remove.emit({ value, index, e: event });
+    callback?.({ value, e: event });
+    if (event.type === 'keydown') {
+      afterNextRender(() => {
+        const remaining = this.panels();
+        const same = remaining.indexOf(panel);
+        const start = same >= 0 ? same : Math.min(index, remaining.length - 1);
+        const target = remaining.map((_, i) => i).filter((i) => !this.isDisabledAt(i))
+          .sort((a, b) => Math.abs(a - start) - Math.abs(b - start))[0];
+        if (target !== undefined) this.navItemRefs()[target]?.nativeElement.focus();
+      }, { injector: this.injector });
+    }
+  }
+
+  protected handleKeydown(event: KeyboardEvent, index: number): void {
+    if (event.target !== event.currentTarget || this.isDisabledAt(index) || event.isComposing) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault(); this.select(index); return;
+    }
+    if (event.key === 'Delete') {
+      if (this.panels()[index]?.removable()) { event.preventDefault(); this.handleRemove(event, index); }
+      return;
+    }
+    const previous = this.vertical() ? 'ArrowUp' : 'ArrowLeft';
+    const next = this.vertical() ? 'ArrowDown' : 'ArrowRight';
+    if (![previous, next, 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const enabled = this.panels().map((_, i) => i).filter((i) => !this.isDisabledAt(i));
+    const current = enabled.indexOf(index);
+    const target = event.key === 'Home' ? enabled[0] : event.key === 'End' ? enabled[enabled.length - 1]
+      : enabled[(current + (event.key === next ? 1 : -1) + enabled.length) % enabled.length];
+    if (target === undefined) return;
+    this.navItemRefs()[target]?.nativeElement.focus();
+    this.select(target);
   }
 
   protected handleWheel(event: WheelEvent): void {
@@ -240,11 +288,12 @@ export class TTabs implements OnDestroy {
   }
 
   protected onDragStart(event: DragEvent, index: number): void {
+    this.dragSource.set(null);
     if (!this.isDraggableAt(index)) {
       event.preventDefault();
       return;
     }
-    this.dragIndex.set(index);
+    this.dragSource.set(this.panels()[index]);
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', String(index));
@@ -252,7 +301,7 @@ export class TTabs implements OnDestroy {
   }
 
   protected onDragOver(event: DragEvent): void {
-    if (!this.dragSort() || this.dragIndex() === null) {
+    if (!this.dragSort() || this.disabled() || this.dragSource() === null) {
       return;
     }
     event.preventDefault();
@@ -262,13 +311,14 @@ export class TTabs implements OnDestroy {
   }
 
   protected onDrop(event: DragEvent, index: number): void {
-    if (!this.dragSort()) {
+    if (!this.dragSort() || this.disabled()) {
+      this.dragSource.set(null);
       return;
     }
     event.preventDefault();
-    const from = this.dragIndex();
-    this.dragIndex.set(null);
-    if (from === null || from === index) {
+    const from = this.panels().indexOf(this.dragSource()!);
+    this.dragSource.set(null);
+    if (from < 0 || from === index || !this.isDraggableAt(from) || this.isDisabledAt(index)) {
       return;
     }
     const source = this.panels()[from];
@@ -285,7 +335,7 @@ export class TTabs implements OnDestroy {
   }
 
   protected onDragEnd(): void {
-    this.dragIndex.set(null);
+    this.dragSource.set(null);
   }
 
   private setScrollLeft(value: number): void {
@@ -298,6 +348,8 @@ export class TTabs implements OnDestroy {
   }
 
   private refreshNav(): void {
+    this.setupNavObserver();
+    this.measureOperations();
     this.updateBar();
     this.measureNavScroll();
     this.scrollActiveIntoView();
@@ -315,6 +367,7 @@ export class TTabs implements OnDestroy {
       this.updateBar();
     });
     this.resizeObserver.observe(scroll);
+    for (const item of this.navItemRefs()) this.resizeObserver.observe(item.nativeElement);
     const operations = this.operationsRef()?.nativeElement;
     if (operations) this.resizeObserver.observe(operations);
   }

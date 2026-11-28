@@ -1,3 +1,20 @@
+import type { Content } from '../../_utils/content';
+
+/** 数据驱动面板；value 应保持唯一且稳定，缺省时使用下标。 */
+export interface TabsListItem {
+  value?: TabValue;
+  label?: Content;
+  panel?: Content;
+  /** 默认内容，优先于 panel；模板在面板的生命周期内创建。 */
+  default?: Content;
+  disabled?: boolean;
+  removable?: boolean;
+  draggable?: boolean;
+  lazy?: boolean;
+  destroyOnHide?: boolean;
+  onRemove?: (context: { value: TabValue; e: MouseEvent | KeyboardEvent }) => void;
+}
+
 /** 选项卡的值 */
 export type TabValue = string | number;
 
@@ -34,7 +51,7 @@ export interface TabsRemoveEvent {
   /** 被关闭页签的下标 */
   index: number;
   /** 触发事件的鼠标事件 */
-  e: MouseEvent;
+  e: MouseEvent | KeyboardEvent;
 }
 
 /** 拖拽排序事件 */

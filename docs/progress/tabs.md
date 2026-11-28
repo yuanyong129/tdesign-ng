@@ -4,25 +4,25 @@
 
 - 目录：`packages/ng-components/src/components/tabs/`
 - 文档页：`/tabs`（`packages/docs/src/app/docs/tabs/tabs.component.ts`）
-- 状态：🚧 有深度债 1 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 16 |
-| 已对齐 | 10 |
-| 覆盖率 | 62.5% |
-| 深度债 | 1（D1 0 / D2 0 / D3 1） |
+| 已对齐 | 11 |
+| 覆盖率 | 68.8% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 5（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 7 个 |
+| 文档示例 | 8 个 |
 
 ## 组件明细
 
 ### `TTabs`（`<t-tabs>`）
 
-上游接口 `TdTabsProps`；上游属性 16、已对齐 10（62.5%）；深度债 1 项；未登记缺失 0 项。
+上游接口 `TdTabsProps`；上游属性 16、已对齐 11（68.8%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -38,6 +38,7 @@
 | `value` | TabValue \| undefined | undefined | 当前激活的选项卡值，受控时以它为准 |
 | `defaultValue` | TabValue | '' | 默认激活的选项卡值 |
 | `action` | Content | undefined | 导航栏右侧的操作内容，支持字符串或模板 |
+| `list` | TabsListItem[] | [] | 数据驱动面板，非空时优先于投影，空数组回退到投影 |
 
 **已实现事件**
 
@@ -52,7 +53,6 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `list` | D3 其余组件与边角能力 | 数据驱动面板未实现，用 t-tab-panel 投影 |
 | `modelValue` | Angular 惯用映射 | Angular 用 value（受控）/ defaultValue |
 | `onAdd` | Angular 惯用映射 | Angular 用 (add) 输出，payload { e } |
 | `onChange` | Angular 惯用映射 | Angular 用 (change) 输出 |
@@ -67,4 +67,5 @@
 - `packages/docs/src/app/docs/tabs/demos/tabs-card.ts`
 - `packages/docs/src/app/docs/tabs/demos/tabs-drag-sort.ts`
 - `packages/docs/src/app/docs/tabs/demos/tabs-lazy.ts`
+- `packages/docs/src/app/docs/tabs/demos/tabs-list.ts`
 - `packages/docs/src/app/docs/tabs/demos/tabs-placement.ts`

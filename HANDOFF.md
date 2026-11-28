@@ -1,6 +1,6 @@
 # 交接文档 · TDesign Angular
 
-> 2026-11-28 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮已完成基础输入状态、Form、SelectInput 及 AutoComplete 配置/状态批次。当前生成进度：已对齐 1068/1576，真实深度债 215，零债务目录 44/73，示例 335 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续 Tabs.list → Breadcrumb / Steps / Statistic；AutoComplete 的 inputProps / popupProps 是实际支持字段白名单，textareaProps 仍保留债务，详见计划记录，第 3 轮与 M2 尚未完成。Checkbox 的 lazyLoad 两项仍保留。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）。
+> 2026-11-28 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮已完成基础输入状态、Form、SelectInput、AutoComplete 及 Tabs.list 批次。当前生成进度：已对齐 1069/1576，真实深度债 214，零债务目录 45/73，示例 336 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续 Breadcrumb → Steps → Statistic；Tabs.list 非空优先于投影，空数组回退，稳定唯一 value 用于保留重排后的实例。AutoComplete.textareaProps 和 Checkbox 的 lazyLoad 两项仍保留债务；类型化配置白名单及实现边界详见计划记录，第 3 轮与 M2 尚未完成。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）。
 >
 > 用户明确要求（2026-11-27）：后续每批验证完成后可自动 commit，不必询问；及时同步计划与交接文档，尤其 `docs/progress/`。progress 必须通过 `pnpm gen:progress` 生成，并用 `pnpm check:progress` 校验，不手改生成物。
 

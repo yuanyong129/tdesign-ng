@@ -10324,11 +10324,20 @@
         },
         {
           "name": "label",
-          "type": "string",
+          "type": "Content",
           "default": "''",
           "required": false,
           "zh": "选项卡标题",
           "en": "Tab label",
+          "values": []
+        },
+        {
+          "name": "panel",
+          "type": "Content",
+          "default": "undefined",
+          "required": false,
+          "zh": "面板内容，显式内容优先于投影，支持字符串或模板",
+          "en": "Panel content as text or a template, takes precedence over projection",
           "values": []
         },
         {
@@ -10488,6 +10497,15 @@
           "required": false,
           "zh": "导航栏右侧的操作内容，支持字符串或模板",
           "en": "Actions beside the tab navigation, as text or a template",
+          "values": []
+        },
+        {
+          "name": "list",
+          "type": "TabsListItem[]",
+          "default": "[]",
+          "required": false,
+          "zh": "数据驱动面板，非空时优先于投影，空数组回退到投影",
+          "en": "Data panels, a nonempty list takes precedence over projected panels",
           "values": []
         }
       ],

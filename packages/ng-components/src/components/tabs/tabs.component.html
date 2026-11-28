@@ -4,7 +4,15 @@
   }
 
   <div class="t-tabs__content">
-    <ng-content />
+    @if (list().length) {
+      @for (item of list(); track item.value ?? $index; let i = $index) {
+        <t-tab-panel [value]="item.value ?? i" [label]="item.label" [panel]="item.default ?? item.panel"
+          [disabled]="item.disabled ?? false" [removable]="item.removable ?? false"
+          [draggable]="item.draggable ?? true" [lazy]="item.lazy ?? false" [destroyOnHide]="item.destroyOnHide ?? false" />
+      }
+    } @else {
+      <ng-content />
+    }
   </div>
 
   @if (placement() === 'bottom') {
@@ -29,7 +37,7 @@
             [class.t-size-l]="size() === 'large'"
             (click)="scrollNav('prev')"
           >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg class="t-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
                 d="M14.5 17.5L9 12L14.5 6.5"
                 stroke="currentColor"
@@ -58,7 +66,7 @@
             [class.t-size-l]="size() === 'large'"
             (click)="scrollNav('next')"
           >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg class="t-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
                 d="M9.5 17.5L15 12L9.5 6.5"
                 stroke="currentColor"
@@ -70,12 +78,16 @@
         }
         @if (addable()) {
           <div
+            #addButton
             class="t-tabs__btn t-tabs__add-btn"
+            role="button" aria-label="新增选项卡" [attr.tabindex]="disabled() ? -1 : 0" [attr.aria-disabled]="disabled()"
             [class.t-size-m]="size() === 'medium'"
             [class.t-size-l]="size() === 'large'"
             (click)="handleAdd($event)"
+            (keydown.enter)="$event.preventDefault(); addButton.click()"
+            (keydown.space)="$event.preventDefault(); addButton.click()"
           >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg class="t-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 5L12 19M19 12L5 12" stroke="currentColor" stroke-linecap="square" stroke-width="2" />
             </svg>
           </div>
@@ -101,6 +113,7 @@
           <div
             #navWrap
             class="t-tabs__nav-wrap t-is-smooth"
+            role="tablist" [attr.aria-orientation]="vertical() ? 'vertical' : 'horizontal'"
             [class.t-is-vertical]="vertical()"
             [style.transform]="wrapTransform()"
           >
@@ -115,10 +128,13 @@
               ></div>
             }
 
-            @for (panel of panels(); track $index; let i = $index) {
+            @for (panel of panels(); track panel; let i = $index) {
               <div
                 #navItem
                 class="t-tabs__nav-item"
+                role="tab" [id]="panel.tabId" [attr.aria-controls]="panel.panelId"
+                [attr.aria-selected]="isActiveAt(i)" [attr.aria-disabled]="isDisabledAt(i)"
+                [attr.tabindex]="focusIndex() === i ? 0 : -1"
                 [class.t-tabs__nav--card]="isCard()"
                 [class.t-is-active]="isActiveAt(i)"
                 [class.t-is-disabled]="isDisabledAt(i)"
@@ -128,25 +144,26 @@
                 [class.t-size-l]="size() === 'large'"
                 [attr.draggable]="isDraggableAt(i)"
                 (click)="select(i)"
+                (keydown)="handleKeydown($event, i)"
                 (dragstart)="onDragStart($event, i)"
                 (dragover)="onDragOver($event)"
                 (drop)="onDrop($event, i)"
                 (dragend)="onDragEnd()"
               >
                 @if (isCard()) {
-                  <span class="t-tabs__nav-item-text-wrapper">{{ panelLabel(panel, i) }}</span>
+                  <span class="t-tabs__nav-item-text-wrapper"><ng-container [ngTemplateOutlet]="labelTemplate" [ngTemplateOutletContext]="{ content: panelLabel(panel, i) }" /></span>
                 } @else {
                   <div
                     class="t-tabs__nav-item-wrapper"
                     [class.t-is-active]="isActiveAt(i)"
                     [class.t-is-disabled]="isDisabledAt(i)"
                   >
-                    <span class="t-tabs__nav-item-text-wrapper">{{ panelLabel(panel, i) }}</span>
+                    <span class="t-tabs__nav-item-text-wrapper"><ng-container [ngTemplateOutlet]="labelTemplate" [ngTemplateOutletContext]="{ content: panelLabel(panel, i) }" /></span>
                   </div>
                 }
                 @if (panel.removable() && !isDisabledAt(i)) {
-                  <span class="remove-btn" (click)="handleRemove($event, i)">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <span class="remove-btn" role="button" tabindex="-1" aria-label="关闭选项卡" (click)="handleRemove($event, i)">
+                    <svg class="t-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path
                         d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
                         stroke="currentColor"
@@ -163,4 +180,12 @@
       </div>
     </div>
   </div>
+</ng-template>
+
+<ng-template #labelTemplate let-content="content">
+  @if (isTemplateContent(content)) {
+    <ng-container [ngTemplateOutlet]="content" />
+  } @else {
+    {{ content }}
+  }
 </ng-template>

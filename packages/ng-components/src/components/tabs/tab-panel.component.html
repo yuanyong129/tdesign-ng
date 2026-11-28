@@ -1,5 +1,15 @@
 ﻿@if (rendered()) {
-  <div class="t-tab-panel" [class.t-is-hidden]="!active()">
-    <ng-content />
+  <div class="t-tab-panel" [class.t-is-hidden]="!active()" role="tabpanel" [id]="panelId" [attr.aria-labelledby]="tabId" [attr.aria-hidden]="!active()">
+    @if (panel() !== undefined) {
+      @if (panel(); as content) {
+        @if (isTemplateContent(content)) {
+          <ng-container [ngTemplateOutlet]="content" />
+        } @else {
+          {{ content }}
+        }
+      }
+    } @else {
+      <ng-content />
+    }
   </div>
 }

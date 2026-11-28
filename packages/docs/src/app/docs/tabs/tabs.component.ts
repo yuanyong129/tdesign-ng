@@ -9,6 +9,7 @@ import { DemoTabsDragSort } from './demos/tabs-drag-sort';
 import { DemoTabsLazy } from './demos/tabs-lazy';
 import { DemoTabsPlacement } from './demos/tabs-placement';
 import { DemoTabsAction } from './demos/tabs-action';
+import { DemoTabsList } from './demos/tabs-list';
 
 @Component({
   selector: 'tabs-docs',
@@ -23,6 +24,7 @@ import { DemoTabsAction } from './demos/tabs-action';
     DemoTabsLazy,
     DemoTabsPlacement,
     DemoTabsAction,
+    DemoTabsList,
   ],
   template: `
     <div class="docs-page">
@@ -74,6 +76,11 @@ import { DemoTabsAction } from './demos/tabs-action';
       <docs-demo id="tabs-action" title="自定义操作区" description="action 支持字符串和模板，与新增按钮共存；操作区内容不会成为页签面板。">
         <demo-tabs-action />
       </docs-demo>
+
+      <docs-demo id="tabs-list" title="数据驱动面板" description="list 的标题与内容支持字符串或模板；切换后对比保留、首次激活和隐藏销毁的计数状态。新增、关闭和排序由页面维护数据，稳定 value 在重排后保留原实例。">
+        <demo-tabs-list />
+      </docs-demo>
+      <p class="demo-hint">非空 list 优先于 t-tab-panel 投影，空数组回退到投影；投影组件仍由 Angular 创建，不适合作为延迟构造机制。每项支持 value、label、panel、default、disabled、removable、draggable、lazy、destroyOnHide 和 onRemove；default 优先于 panel，字符串按文本显示，模板不接收 Vue 渲染函数。value 必须唯一且稳定，缺省使用下标，不适合可重排数据。组件只通知 change / add / remove / dragSortChange，删除当前项后的新激活值由调用方决定，失效值不自动跳到首项。defaultValue 只读取一次；受控 value 拒绝提案时保持原面板。方向键按导航方向切换并跳过禁用项，Home / End 定位，Enter / 空格激活，Delete 请求关闭。</p>
 
       <h2 class="docs-section__title" id="tabs-api">API</h2>
       <div class="api-table__scroll">

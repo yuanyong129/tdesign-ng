@@ -1439,6 +1439,75 @@ try {
   assert.deepEqual(autoOptions.pending,{model:'form',text:'next',touched:false});assert.deepEqual(autoOptions.blurred,{model:'next',touched:true});
   assert.deepEqual(autoOptions.reset,{text:'form',touched:false});assert.equal(autoOptions.customSelected,'custom-a');
   console.log('PASS AutoComplete options/state: popup config, native attrs/Unicode/IME, controlled rejection/default once, keyboard/ARIA/dynamic options, readonly/disabled, CVA blur/reset, custom trigger');
+  await page('/tabs', 'demo-tabs-list .list-controlled [role=tab]');
+  const tabsList=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-tabs-list'),demo=ng.getComponent(root),host=root.querySelector('.list-controlled'),tabs=ng.getComponent(host);
+    const nav=()=>[...host.querySelectorAll('[role=tab]')];
+    const index=(value)=>tabs.panels().findIndex((p,i)=>tabs.panelValue(p,i)===value);
+    const click=async(value)=>{nav()[index(value)].click();${settle}};
+    const key=async(value,name)=>{const el=nav()[index(value)];el.focus();el.dispatchEvent(new KeyboardEvent('keydown',{key:name,bubbles:true,cancelable:true}));${settle}};
+    const drag=async(from,to)=>{const source=nav()[index(from)],target=nav()[index(to)],dataTransfer=new DataTransfer();
+      source.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer}));target.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer}));${settle}};
+    const counter=(kind)=>ng.getComponent(host.querySelector('.data-'+kind));
+    const initial={nav:nav().length,panels:host.querySelectorAll('[role=tabpanel]').length,lazy:!!host.querySelector('.data-lazy'),destroy:!!host.querySelector('.data-destroy'),fallback:!!host.querySelector('.data-fallback')};
+    const keepId=counter('keep').instance;host.querySelector('.data-keep button').click();${settle}
+    await click('lazy');const lazyId=counter('lazy').instance;host.querySelector('.data-lazy button').click();${settle}
+    await click('keep');const retained=counter('keep').count()===1&&counter('lazy').instance===lazyId&&counter('lazy').count()===1;
+    await click('destroy');const destroyId=counter('destroy').instance;await click('keep');const destroyed=!host.querySelector('.data-destroy');
+    await click('destroy');const recreated=counter('destroy').instance!==destroyId;await click('keep');
+    const activeTab=nav()[index('keep')],panel=host.querySelector('#'+activeTab.getAttribute('aria-controls'));
+    const aria=activeTab.getAttribute('aria-selected')==='true'&&activeTab.tabIndex===0&&panel.getAttribute('aria-labelledby')===activeTab.id&&panel.getAttribute('aria-hidden')==='false';
+    demo.acceptChanges.set(false);ng.applyChanges(demo);${settle}const beforeReject=demo.changes();await click('lazy');
+    const rejected=demo.value()==='keep'&&tabs.activeValue()==='keep'&&demo.changes()===beforeReject+1;
+    demo.acceptChanges.set(true);ng.applyChanges(demo);${settle}const beforeDisabled=demo.changes();await click('disabled');const disabledIgnored=demo.changes()===beforeDisabled;
+    await key('keep','ArrowRight');const skipDisabled=demo.value()==='lazy'&&document.activeElement===nav()[index('lazy')];
+    await key('lazy','End');const end=demo.value()==='0';await key('0','Home');const home=demo.value()==='keep';
+    demo.placement.set('left');demo.theme.set('card');ng.applyChanges(demo);${settle}await key('keep','ArrowDown');
+    const vertical=demo.value()==='lazy'&&host.querySelector('[role=tablist]').getAttribute('aria-orientation')==='vertical';
+    await click(0);const numberKey=tabs.activeValue()===0;await click('0');const stringKey=tabs.activeValue()==='0';
+    demo.labelText.set('Updated label');demo.reverse();ng.applyChanges(demo);${settle}
+    const reorder=counter('keep').instance===keepId&&counter('keep').count()===1&&nav().at(-1).textContent.includes('Updated label')&&tabs.activeValue()==='0';
+    const closeRect=nav()[index('keep')].querySelector('.remove-btn svg').getBoundingClientRect();
+    const iconVisible=closeRect.width>=16&&closeRect.width<=24&&closeRect.height>=16&&closeRect.height<=24;
+    const removeIndex=index('keep');await key('keep','Delete');const removed={event:demo.lastRemove(),count:demo.removes(),callbacks:demo.itemRemoves(),absent:index('keep')===-1,index:removeIndex};
+    const add=host.querySelector('.t-tabs__add-btn');add.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));${settle}
+    const added=demo.adds()===1&&String(demo.value()).startsWith('added-')&&tabs.activeValue()===demo.value();
+    demo.restore();demo.theme.set('normal');demo.placement.set('top');ng.applyChanges(demo);${settle}
+    const beforeSortId=counter('keep').instance;await drag('keep','lazy');
+    const sorted={event:demo.lastSort(),count:demo.sorts(),order:demo.items().map(item=>item.value),retained:counter('keep').instance===beforeSortId};
+    await drag('keep','disabled');const disabledDrop=demo.sorts()===1;
+    demo.disabled.set(true);ng.applyChanges(demo);${settle}const frozenChanges=demo.changes();nav()[index('lazy')].click();host.querySelector('.t-tabs__add-btn').click();await drag('keep','lazy');
+    const allDisabled=demo.changes()===frozenChanges&&demo.adds()===1&&demo.sorts()===1&&nav().every(el=>el.tabIndex===-1)&&!host.querySelector('.remove-btn');
+    demo.disabled.set(false);ng.applyChanges(demo);${settle}
+    const source=nav()[index('keep')],dt=new DataTransfer();source.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:dt}));
+    demo.items.update(items=>items.filter(item=>item.value!=='keep'));ng.applyChanges(demo);${settle}
+    nav()[index('lazy')].dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:dt}));${settle}const staleDrag=demo.sorts()===1;
+    const defaultHost=root.querySelector('.list-default'),defaultTabs=ng.getComponent(defaultHost);demo.initial.set('second');ng.applyChanges(demo);${settle}
+    const defaultInitial=defaultTabs.activeValue();defaultHost.querySelectorAll('[role=tab]')[1].click();${settle}demo.initial.set('first');ng.applyChanges(demo);${settle}const defaultOnce=defaultTabs.activeValue();
+    demo.items.set([{label:'Index zero',panel:'<b>literal</b>',default:'Default wins'},{value:'',label:'Empty key',panel:'Empty content'}]);demo.value.set(0);ng.applyChanges(demo);${settle}
+    const content=host.querySelector('[role=tabpanel]').textContent.trim();await click('');const emptyKey=tabs.activeValue()==='';
+    demo.value.set('missing');ng.applyChanges(demo);${settle}const invalidValue=!host.querySelector('[role=tab][aria-selected=true]');
+    demo.items.set([]);demo.value.set('fallback');ng.applyChanges(demo);${settle}const fallback=nav().length===1&&nav()[0].textContent.includes('投影')&&host.querySelector('.data-fallback').closest('[role=tabpanel]').getAttribute('aria-hidden')==='false';
+    demo.items.set([{value:'literal',label:'<b>label</b>',panel:'<b>literal</b>'}]);demo.value.set('literal');ng.applyChanges(demo);${settle}
+    const escapedText=!host.querySelector('[role=tabpanel] b')&&host.querySelector('[role=tabpanel]').textContent.includes('<b>literal</b>')&&!nav()[0].querySelector('b');
+    return {initial,retained,destroyed,recreated,aria,rejected,disabledIgnored,skipDisabled,end,home,vertical,numberKey,stringKey,reorder,iconVisible,removed,added,sorted,disabledDrop,allDisabled,staleDrag,defaultInitial,defaultOnce,content,emptyKey,invalidValue,fallback,escapedText};
+  })()`);
+  assert.deepEqual(tabsList.initial,{nav:6,panels:4,lazy:false,destroy:false,fallback:false});
+  for(const key of ['retained','destroyed','recreated','aria','rejected','disabledIgnored','skipDisabled','end','home','vertical','numberKey','stringKey','reorder','iconVisible','added','disabledDrop','allDisabled','staleDrag','emptyKey','invalidValue','fallback','escapedText']) assert.equal(tabsList[key],true,key);
+  assert.deepEqual(tabsList.removed,{event:{value:'keep',index:5},count:1,callbacks:1,absent:true,index:5});
+  assert.deepEqual(tabsList.sorted,{event:{currentIndex:0,current:'keep',targetIndex:2,target:'lazy'},count:1,order:['disabled','lazy','keep','destroy',0,'0'],retained:true});
+  assert.equal(tabsList.defaultInitial,'first');assert.equal(tabsList.defaultOnce,'second');assert.equal(tabsList.content,'Default wins');
+  console.log('PASS Tabs.list: projection fallback, templates/lifecycle, stable instances on reorder, controlled/default state, typed keys, keyboard/ARIA, add/remove callbacks, dynamic drag guards');
+  const tabsClosePointer=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-tabs-list'),demo=ng.getComponent(root);demo.restore();ng.applyChanges(demo);${settle}
+    const close=root.querySelector('.list-controlled .remove-btn');close.scrollIntoView({block:'center',behavior:'instant'});${settle}
+    const rect=close.getBoundingClientRect();return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+  })()`);
+  await send('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...tabsClosePointer});
+  await send('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...tabsClosePointer});
+  await evaluate(`(async()=>{${settle}})()`);
+  const tabsPointerClose=await evaluate(`(()=>{const demo=ng.getComponent(document.querySelector('demo-tabs-list'));return {removes:demo.removes(),callbacks:demo.itemRemoves(),value:demo.lastRemove().value};})()`);
+  assert.deepEqual(tabsPointerClose,{removes:2,callbacks:2,value:'keep'});
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

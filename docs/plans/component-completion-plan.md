@@ -234,3 +234,14 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有前批及新增交互回归通过，missing 0 / extra 0。新增覆盖原生属性/Unicode 限制、IME 单次回调、受控输入及选择拒绝、默认值不重写、动态候选/空字符串、方向键/Enter/Esc/ARIA、自定义触发器、配置类名/箭头/层级/销毁、禁用只读、CVA 失焦提交/reset/禁用恢复。AutoComplete / Form / Input / Popup 页面探针 issues / badResources 均为空，AutoComplete 截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 799.96 kB）。API / demo / progress 已生成同步。
 
 **接续任务**：第 3 轮 Tabs.list → Breadcrumb / Steps / Statistic，第 3 轮整体与 M2 尚未完成。
+
+### 2026-11-28：第 3 轮 Tabs.list
+
+- **数据驱动**：新增公开 TabsListItem 和 list，沿用锁定上游规则：非空数据优先于投影，空数组回退到 t-tab-panel。列表生成真实 TTabPanel，复用选择、关闭、拖拽、导航滚动及面板生命周期；不复制内容 DOM。支持 value、label、panel、default、disabled、removable、draggable、lazy、destroyOnHide 和单项 onRemove；default 优先于 panel，标题和内容使用 Content 字符串/模板，字符串按文本插值，不执行 Vue 渲染函数。TabPanel 同时开放模板 label 和显式 panel 内容。
+- **状态与生命周期**：使用 createControllableState，defaultValue 只初始化一次，受控拒绝保持原面板。稳定且唯一的 value 用于跟踪数据，重排保留原面板实例与模板内部状态；省略 value 使用下标，文档明确不适合可重排数据。数据模板实际验证首次激活创建、隐藏保留和隐藏销毁/重建；投影子组件仍由 Angular 创建，不把投影的条件展示宣称为延迟构造。失效激活值不自动跳转；删除当前项后的替代值由调用方决定。
+- **交互与无障碍**：导航增加 tablist / tab / tabpanel、选中/禁用/方向及双向 id 关联、单一 Tab 入口；方向键按横纵方向切换并跳过禁用项，Home / End、Enter / 空格和 Delete 可操作。键盘关闭后将焦点移到保留项或邻近可用项；remove.e 因键盘关闭扩展为 MouseEvent | KeyboardEvent。add / remove / dragSortChange 仍只通知调用方维护数据，单项关闭回调各一次。拖拽保留源面板身份，动态删除源项、全局禁用、源不可拖拽或目标禁用时不发排序事件。
+- **导航关联修复**：动态导航和上下位置切换后重新绑定尺寸观察器，观察页签尺寸以响应模板标题变化，销毁时断开。截图检查发现原有内联 SVG 未使用 vendor 图标类，导致关闭图标压缩不可见及操作图标偏大；补 t-icon 使用原尺寸规则，无新增样式覆盖。
+- **生成进度**：新增 1 个含状态计数的 demo，示例 335 → 336；对齐 1068 → 1069（67.8%）、真实债务 215 → 214、零债务目录 44 → 45。Tabs 已登记债务为 0，仍保留 Angular 事件/模型映射与上述模板/投影边界，不代表完整 Vue 行为、SSR 或水合验收完成。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。覆盖投影回退、模板标题/内容及文本转义、三种生命周期、重排保留实例、受控拒绝/默认值仅初始化、数值/字符串/空字符串/下标取值、失效值、横纵方向键与 ARIA、增删和单项回调、排序载荷与动态失效保护；真实 CDP 鼠标点击验证可见关闭图标仅通知一次。Tabs 页面 issues / badResources 为空，最终截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 和首包预算告警（约 799.96 kB）。
+
+**接续任务**：第 3 轮 Breadcrumb → Steps → Statistic，第 3 轮整体与 M2 尚未完成。
