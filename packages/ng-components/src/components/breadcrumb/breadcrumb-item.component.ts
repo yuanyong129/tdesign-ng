@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { NgTemplateOutlet } from '@angular/common';
 import { DomPortal } from '@angular/cdk/portal';
 import { TTooltip } from '../tooltip/tooltip.component';
@@ -61,6 +62,7 @@ function toCssLength(value: string | undefined): string | null {
  */
 @Component({
   selector: 't-breadcrumb-item',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, TTooltip],
   template: `

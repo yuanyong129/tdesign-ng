@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
@@ -70,6 +71,7 @@ function toNumber(value: unknown): number | undefined {
  */
 @Component({
   selector: 't-tag-input',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, TTag, InputOptionsDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,

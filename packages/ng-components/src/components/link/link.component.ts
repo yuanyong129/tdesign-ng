@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -28,6 +29,7 @@ export type LinkHover = (typeof LINK_HOVERS)[number];
  */
 @Component({
   selector: 't-link',
+  hostDirectives: [InitialRender],
   standalone: true,
   template: `
     @if (hasPrefixIcon()) {

@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import {
   ChangeDetectionStrategy,
@@ -55,6 +56,7 @@ function toAutosize(value: boolean | TextareaAutosize | string): boolean | Texta
  */
 @Component({
   selector: 't-textarea',
+  hostDirectives: [InitialRender],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,

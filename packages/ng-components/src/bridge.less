@@ -10,6 +10,17 @@
  *   在脱离表单单独使用时需要补上等价的定位方式。
  */
 
+// 初始渲染输入与状态类落定后，由 InitialRender 移除标记并恢复正常过渡。
+// 保留 animation，Loading / Skeleton 等关键帧不受影响；伪元素也不能从初始样式过渡。
+[data-t-initial-render],
+[data-t-initial-render]::before,
+[data-t-initial-render]::after,
+[data-t-initial-render] *,
+[data-t-initial-render] *::before,
+[data-t-initial-render] *::after {
+  transition: none !important;
+}
+
 // Button、Checkbox、Radio：宿主不产生盒子，避免破坏布局与相邻选择器
 t-button,
 t-checkbox,

@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -24,6 +25,7 @@ import type { MenuContent, MenuHost, MenuNode, MenuValue, SubmenuHost } from './
  */
 @Component({
   selector: 't-submenu',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, TPopup],
   templateUrl: './submenu.component.html',

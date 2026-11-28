@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,6 +21,7 @@ export type LayoutDirection = (typeof LAYOUT_DIRECTIONS)[number];
  */
 @Component({
   selector: 't-layout',
+  hostDirectives: [InitialRender],
   standalone: true,
   template: `<ng-content />`,
   changeDetection: ChangeDetectionStrategy.OnPush,

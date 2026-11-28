@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -38,6 +39,7 @@ const SIZE_CLASS: Record<TagSize, string> = {
  */
 @Component({
   selector: 't-tag',
+  hostDirectives: [InitialRender],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,

@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
@@ -40,6 +41,7 @@ const COMPONENT_CLS = 't-range-input';
  */
 @Component({
   selector: 't-range-input',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, InputOptionsDirective],
   templateUrl: './range-input.component.html',

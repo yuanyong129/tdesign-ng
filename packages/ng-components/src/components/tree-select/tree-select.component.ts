@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -54,6 +55,7 @@ interface FilterState {
  */
 @Component({
   selector: 't-tree-select',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, TPopup, TTag],
   templateUrl: './tree-select.component.html',

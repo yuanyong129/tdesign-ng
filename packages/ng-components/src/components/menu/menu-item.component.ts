@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -19,6 +20,7 @@ import type { MenuClickEvent, MenuContent, MenuNode, MenuTarget, MenuValue } fro
  */
 @Component({
   selector: 't-menu-item',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet],
   templateUrl: './menu-item.component.html',

@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -33,6 +34,7 @@ import type { SwitchChangeEvent, SwitchSize, SwitchValue } from './switch.types'
  */
 @Component({
   selector: 't-switch',
+  hostDirectives: [InitialRender],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,

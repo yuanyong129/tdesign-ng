@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import {
   booleanAttribute,
@@ -41,6 +42,7 @@ const SIZE_CLASS: Record<RadioSize, string> = {
 
 @Component({
   selector: 't-radio-group',
+  hostDirectives: [InitialRender],
   templateUrl: './radio-group.component.html',
   standalone: true,
   imports: [TRadio],
@@ -153,6 +155,7 @@ export class TRadioGroup implements ControlValueAccessor {
   private readonly state = createControllableState<RadioValue | undefined>(this.value, () => this.defaultValue());
   private readonly disabledByForms = signal(false);
   private bgFrame: number | undefined;
+  private initializedBgBlock: HTMLElement | undefined;
 
   private onChange: (value: RadioValue | undefined) => void = () => {};
   private onTouched: () => void = () => {};
@@ -270,10 +273,19 @@ export class TRadioGroup implements ControlValueAccessor {
     const block = this.bgBlock()?.nativeElement;
     if (!block) return;
 
+    // 首次定位直接落在选中项，之后的选择变化仍使用 vendor 的滑动过渡。
+    const initial = this.initializedBgBlock !== block;
+    if (initial) block.style.transition = 'none';
+
     const host = this.host.nativeElement;
     const checked = host.querySelector<HTMLElement>('.t-radio-button.t-is-checked');
     if (!checked) {
       block.style.width = '0px';
+      if (initial) {
+        block.getBoundingClientRect();
+        block.style.removeProperty('transition');
+        this.initializedBgBlock = block;
+      }
       return;
     }
 
@@ -282,6 +294,11 @@ export class TRadioGroup implements ControlValueAccessor {
     const checkedRect = checked.getBoundingClientRect();
     block.style.width = `${checkedRect.width}px`;
     block.style.transform = `translateX(${checkedRect.left - hostRect.left - paddingLeft}px)`;
+    if (initial) {
+      block.getBoundingClientRect();
+      block.style.removeProperty('transition');
+      this.initializedBgBlock = block;
+    }
   }
 
   writeValue(value: RadioValue | null): void {

@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import {
   booleanAttribute,
@@ -20,6 +21,7 @@ import type { CheckboxChangeEvent, CheckboxValue } from './checkbox.types';
 
 @Component({
   selector: 't-checkbox',
+  hostDirectives: [InitialRender],
   templateUrl: './checkbox.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,

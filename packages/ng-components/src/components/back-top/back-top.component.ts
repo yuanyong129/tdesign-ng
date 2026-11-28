@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -66,6 +67,7 @@ function easeOutCubic(progress: number): number {
  */
 @Component({
   selector: 't-back-top',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet],
   template: `

@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -50,6 +51,7 @@ const SIZE_CLASS: Record<'small' | 'medium' | 'large', string> = {
  */
 @Component({
   selector: 't-time-picker',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, TButton, TPopup],
   templateUrl: './time-picker.component.html',

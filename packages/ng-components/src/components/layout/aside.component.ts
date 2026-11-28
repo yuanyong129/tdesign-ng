@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, input } from '@angular/core';
 
 /**
@@ -7,6 +8,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, input 
  */
 @Component({
   selector: 't-aside',
+  hostDirectives: [InitialRender],
   standalone: true,
   template: `<ng-content />`,
   changeDetection: ChangeDetectionStrategy.OnPush,

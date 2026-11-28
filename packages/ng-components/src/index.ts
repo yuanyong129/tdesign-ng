@@ -80,3 +80,5 @@ export * from './components/typography';
 // Core
 export * from './types';
 export * from './_utils';
+// Angular partial compilation needs host directives reachable from the entrypoint.
+export { InitialRender as ɵInitialRender } from './_utils/initial-render';

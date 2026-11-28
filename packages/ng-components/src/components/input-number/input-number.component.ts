@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
@@ -49,6 +50,7 @@ const PREFIX_CLS = 't-input-number';
  */
 @Component({
   selector: 't-input-number',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, InputOptionsDirective],
   templateUrl: './input-number.component.html',

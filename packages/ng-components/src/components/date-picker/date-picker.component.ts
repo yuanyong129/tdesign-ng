@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -69,6 +70,7 @@ const SIZE_CLASS: Record<'small' | 'medium' | 'large', string> = {
  */
 @Component({
   selector: 't-date-picker',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, TPopup, TSelect, TTag],
   templateUrl: './date-picker.component.html',

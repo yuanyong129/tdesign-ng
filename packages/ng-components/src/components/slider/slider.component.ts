@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { booleanAttribute, ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, Injector, input, OnDestroy, output, signal, untracked, ViewEncapsulation, afterNextRender } from '@angular/core';
 import { TTooltip } from '../tooltip';
 import { TInputNumber, type InputNumberChangeEvent } from '../input-number';
@@ -23,6 +24,7 @@ function precisionOf(value: number): number {
 
 @Component({
   selector: 't-slider',
+  hostDirectives: [InitialRender],
   imports: [TTooltip, TInputNumber],
   templateUrl: './slider.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

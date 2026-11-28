@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgClass } from '@angular/common';
 import {
@@ -70,6 +71,7 @@ function buildClasses(options: {
  */
 @Component({
   selector: 't-input',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,

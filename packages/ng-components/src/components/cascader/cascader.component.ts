@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -49,6 +50,7 @@ const SIZE_SUFFIX: Record<'small' | 'medium' | 'large', string> = {
  */
 @Component({
   selector: 't-cascader',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, TPopup, TTag],
   templateUrl: './cascader.component.html',

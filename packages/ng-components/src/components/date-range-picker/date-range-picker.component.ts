@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
@@ -58,6 +59,7 @@ type PanelSide = 'left' | 'right';
  */
 @Component({
   selector: 't-date-range-picker',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet, TPopup, TSelect],
   templateUrl: './date-range-picker.component.html',

@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import {
   booleanAttribute,
@@ -21,6 +22,7 @@ import type { RadioChangeEvent, RadioValue } from './radio.types';
 
 @Component({
   selector: 't-radio',
+  hostDirectives: [InitialRender],
   templateUrl: './radio.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,

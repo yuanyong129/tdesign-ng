@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
@@ -89,6 +90,7 @@ function readLabel(value: unknown, keys: Required<SelectInputKeys>): string | nu
  */
 @Component({
   selector: 't-select-input',
+  hostDirectives: [InitialRender],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,

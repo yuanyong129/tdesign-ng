@@ -2,7 +2,7 @@
 
 制定日期：2026-11-27。范围：现有组件的功能、API、演示文档和质量完善。执行状态见第 7 节。
 
-> 2026-11-28 临时优先项：先修复 Input / InputNumber 文档站路由往返时的样式延迟；完成后恢复第 4 轮 Dialog 挂载批次。
+> 2026-11-28 临时优先项：Input / InputNumber 首修后，已统一处理 Radio / Select / TagInput / RangeInput 等组件的初始样式过渡，覆盖见第 7 节最新记录；之后恢复第 4 轮 Dialog 挂载批次。
 
 ## 1. 排序与完成口径
 
@@ -395,5 +395,15 @@ node scripts/qa-component-completion.mjs
 - **修复范围**：两个编辑容器在模板中静态声明 `.t-input`，让创建阶段即具备基础样式；保留原动态 class、inputClass、尺寸/状态逻辑及正常聚焦动画，不修改 vendor、不全局关闭动画。
 - **回归**：新增 `scripts/qa-input-route-styles.mjs`，使用真实侧栏 RouterLink，覆盖首次 Input、首次 InputNumber、两者往返及经 Button 返回；记录 DOM 插入后的样式和后续 24 帧，检查 1px 边框、32px 高度、无入场样式过渡，并逐次验证聚焦仍产生边框动画。撤回修复时回归在第二次 Input 进入失败，恢复后通过；全量组件交互回归也通过，包含动态 inputClass、autoWidth、InputGroup 和 InputNumber 输入配置。
 - **验证与进度**：`pnpm verify:session`、完整 `pnpm build`、专项及全量交互回归、`pnpm gen:progress` / `pnpm check:progress` 和 `git diff --check` 通过。生成进度无变化：1086/1576（68.9%）、深度债 188、零登记债目录 51/73、示例 350。保留既有 Drawer footer slot、Browserslist、qrcode CommonJS 和首包预算告警。
+
+**接续任务**：恢复第 4 轮 Dialog 挂载/局部显示 → 拖动 → Drawer → ImageViewer。
+
+### 2026-11-28：共享初始渲染时序，统一修复输入与相关展示组件
+
+- **扩大复现范围**：用户反馈 Radio、Select、TagInput、RangeInput 同样存在重入延迟。逐帧巡检确认，静态基础类只能解决默认输入边框；首次绑定的状态、尺寸与选中态仍会启动 vendor transition。既有 Input / InputNumber 的状态示例也纳入本批，避免仅检查基础示例。
+- **共享修复**：新增 `InitialRender` host directive，创建阶段静态添加初始化标记；bridge 将 transition 暂缓范围限定在该宿主、后代及其伪元素。首次渲染后 earlyRead 刷新初始布局、write 同步释放标记，不添加额外等待帧、不改写调用方 style、不影响 animation 关键帧。27 个组件类接入：Input、InputNumber、Textarea、Radio/RadioGroup、Checkbox、Switch、Select/SelectInput、TagInput、RangeInput、Cascader、TreeSelect、DatePicker、DateRangePicker、TimePicker，以及巡检中发现同类现象的 Link、BackTop、Slider、Tag/CheckTag、Menu/MenuItem/Submenu、Layout/Aside、BreadcrumbItem。AutoComplete 与 Form 内嵌输入复用上述组件。内部指令以 `ɵInitialRender` 从包入口可达，满足 Angular 部分编译要求，无新增组件输入或债务。
+- **Radio 首次定位**：填充背景块依赖下一帧测量，首次写入 width / transform 时直接定位，之后的选择切换保留滑动；重建背景块按新节点重新初始化，普通、描边及填充形态不混用基础类。
+- **回归范围**：新增 `scripts/qa-initial-render.mjs`，真实侧栏导航 26 个路由各两轮，覆盖冷懒加载与缓存重建，检查全部 docs-demo 中的 transition（包括禁用、校验、选中、大小与复合输入），每次采样至少 24 帧并确认初始化标记清空；验证真实 Radio 填充滑块、Switch 切换、TagInput 聚焦及 Loading 旋转动画。在独立测试页临时移除初始化样式规则时，第二轮 Radio 的边框宽度/颜色过渡断言失败，恢复后通过。保留原 `qa-input-route-styles.mjs` 的首帧边框/高度与聚焦断言。全量既有交互回归覆盖状态更新、输入/组合事件、控件销毁重建及弹层交互。
+- **验证与进度**：`pnpm verify:session`、完整 `pnpm build`、共享专项、原 Input 专项、全量组件交互回归、`pnpm gen:progress` / `pnpm check:progress` 和 `git diff --check` 通过；仍为 1086/1576（68.9%）、深度债 188、零登记债目录 51/73、示例 350。本批只处理首次样式时序，布局测量指示器后续新增时需核对首次定位；Drawer footer slot、Browserslist、qrcode CommonJS 和首包预算告警保留。
 
 **接续任务**：恢复第 4 轮 Dialog 挂载/局部显示 → 拖动 → Drawer → ImageViewer。

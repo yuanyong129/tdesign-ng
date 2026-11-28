@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { useFormReadonly } from '../../_utils/form-readonly';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
@@ -53,6 +54,7 @@ const CHECK_PATH = 'M19.5708 7.37842L10.3785 16.5708L5.42871 11.6211';
  */
 @Component({
   selector: 't-select',
+  hostDirectives: [InitialRender],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,

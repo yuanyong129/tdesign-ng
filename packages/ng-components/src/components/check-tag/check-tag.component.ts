@@ -1,3 +1,4 @@
+import { InitialRender } from '../../_utils/initial-render';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -41,6 +42,7 @@ const SIZE_CLASS: Record<CheckTagSize, string> = {
  */
 @Component({
   selector: 't-check-tag',
+  hostDirectives: [InitialRender],
   standalone: true,
   imports: [NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
