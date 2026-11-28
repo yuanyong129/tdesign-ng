@@ -188,6 +188,9 @@ export class TPopup {
     this.open({ trigger: 'api' });
   }
 
+  /** 读取浮层实际展开状态，供受控复合组件在父级拒绝变更后恢复显示。 */
+  isVisible(): boolean { return this.innerVisible(); }
+
   /** 收起弹层。 */
   hide(): void {
     this.close({ trigger: 'api' });
@@ -225,6 +228,12 @@ export class TPopup {
   protected handleHostFocusIn(event: FocusEvent): void {
     if (this.trigger() !== 'focus') return;
     this.scheduleShow({ e: event, trigger: 'focus' });
+  }
+
+  /** 判断目标是否在本弹层触发区或浮层内，供复合输入统一焦点边界。 */
+  containsTarget(target: EventTarget | null): boolean {
+    if (typeof Node === 'undefined' || !(target instanceof Node)) return false;
+    return this.hostRef.nativeElement.contains(target) || !!this.overlayRef?.overlayElement.contains(target);
   }
 
   protected handleHostFocusOut(event: FocusEvent): void {

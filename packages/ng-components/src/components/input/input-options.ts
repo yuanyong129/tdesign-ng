@@ -44,9 +44,12 @@ export interface InputOptions {
 export class InputOptionsDirective {
   readonly tInputOptions = input<InputOptions | undefined>();
   readonly optionsAutofocus = input(false);
+  /** 由拥有 Unicode/IME 限制流程的组件关闭原生提前截断。 */
+  readonly optionsNativeMaxlength = input(true);
   private readonly element = inject<ElementRef<HTMLInputElement>>(ElementRef);
 
   protected nativeMaxlength(): number | null {
+    if (!this.optionsNativeMaxlength()) return null;
     const options = this.tInputOptions();
     if (options?.allowInputOverMax || options?.maxlength === undefined || options.maxlength === '') return null;
     const value = Number(options.maxlength);

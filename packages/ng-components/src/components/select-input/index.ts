@@ -21,6 +21,7 @@ export type {
   SelectInputTagChangeTrigger,
   SelectInputTagContext,
   SelectInputTagProps,
+  SelectInputTagInputProps,
   SelectInputTagValue,
   SelectInputValue,
   SelectInputValueChangeContext,

@@ -1275,6 +1275,109 @@ try {
   assert.deepEqual(formReadonly.released,{input:false,explicit:true,textarea:false,number:false,dynamic:false});
   assert.deepEqual(formReadonly.popupCases,['select','select-input','auto','dates'].map(kind=>({kind,before:true,after:false,closed:true})));
   console.log('PASS Form readonly: inherited union, 13 control entries, editable recovery, dynamic fields, clear/removal guards, popup close, IME cancel, CVA enabled, reset/submit');
+  await page('/select-input', 'demo-select-input-options input');
+  const selectInputState = await evaluate(`(async () => {
+    const root=document.querySelector('demo-select-input-options'), demo=ng.getComponent(root);
+    const singleHost=root.querySelector('.options-single'), single=ng.getComponent(singleHost), input=singleHost.querySelector('input');
+    const multiHost=root.querySelector('.options-multiple'), multi=ng.getComponent(multiHost), multiInput=multiHost.querySelector('input');
+    const edit=async(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));${settle}};
+    single.handlePopupVisibleChange(true); ${settle}
+    const attrs={name:input.name,autocomplete:input.autocomplete,spellcheck:input.spellcheck};
+    await edit(input,'a中😀z'); const limited={text:input.value,value:demo.keyword(),callbacks:demo.inputs()};
+    input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));
+    input.value='中文测试'; input.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true}));
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true})); ${settle}
+    const composing={text:input.value,value:demo.keyword(),enters:demo.enters()};
+    input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true})); input.dispatchEvent(new InputEvent('input',{bubbles:true})); ${settle}
+    const composed={text:input.value,value:demo.keyword(),callbacks:demo.inputs()};
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); ${settle}
+    const clipboard=new DataTransfer(); clipboard.setData('text','fixture');
+    input.dispatchEvent(new ClipboardEvent('paste',{bubbles:true,clipboardData:clipboard})); ${settle}
+    const events={enters:demo.enters(),paste:demo.pastes()};
+    demo.acceptChanges.set(false); ng.applyChanges(demo); ${settle} await edit(input,'拒绝');
+    const rejected=input.value===demo.keyword() && demo.keyword()==='中文测';
+    demo.acceptChanges.set(true); demo.inputProps.set({...demo.inputProps(),name:'updated-name',maxlength:3,maxcharacter:undefined}); ng.applyChanges(demo); ${settle}
+    await edit(input,'中😀文x'); const dynamic={name:input.name,text:input.value};
+    demo.disabled.set(true); ng.applyChanges(demo); ${settle} const disabled={native:input.disabled,visible:single.isPopupVisible()};
+    const beforeDisabled=demo.inputs(); await edit(input,'blocked'); const disabledStable=demo.inputs()===beforeDisabled;
+    demo.disabled.set(false); demo.readonly.set(true); ng.applyChanges(demo); ${settle}
+    const readonly=input.readOnly && !singleHost.querySelector('.t-input__suffix-clear');
+    demo.readonly.set(false); ng.applyChanges(demo); ${settle}
+    const multiAttributes={name:multiInput.name,max:multiInput.getAttribute('maxlength')};
+    const tag=multiHost.querySelector('.t-tag');
+    const tagStyle={primary:tag.classList.contains('t-tag--primary'),round:tag.classList.contains('t-tag--round')};
+    multi.handlePopupVisibleChange(true); ${settle} const defaultInput=multiInput.value;
+    await edit(multiInput,'中文测试'); const nestedLimit={text:multiInput.value,events:demo.multiInputs(),callbacks:demo.multiCallbacks()};
+    demo.initialKeyword.set('默认值变化'); ng.applyChanges(demo); ${settle} const defaultOnce=multiInput.value;
+    multi.handlePopupVisibleChange(false); ${settle} multi.handlePopupVisibleChange(true); ${settle}
+    const clearedKeyword=multiInput.value;
+    demo.reserve.set(true); ng.applyChanges(demo); ${settle} await edit(multiInput,'保留');
+    multi.handlePopupVisibleChange(false); ${settle} multi.handlePopupVisibleChange(true); ${settle}
+    const reserved=multiInput.value;
+    multiHost.querySelector('.t-tag__icon-close').dispatchEvent(new MouseEvent('click',{bubbles:true})); ${settle}
+    const removed={value:[...demo.tags()],changes:demo.tagChanges(),callbacks:demo.tagCallbacks(),closes:demo.closes()};
+    demo.acceptChanges.set(false); ng.applyChanges(demo); ${settle}
+    multiHost.querySelector('.t-tag__icon-close').dispatchEvent(new MouseEvent('click',{bubbles:true})); ${settle}
+    const rejectionPreserved=multiHost.querySelectorAll('t-tag').length===2 && demo.tags().length===2;
+    demo.acceptChanges.set(true); demo.tagInputProps.set({...demo.tagInputProps(),inputProps:{readonly:true,disabled:false}}); ng.applyChanges(demo); ${settle}
+    const nestedReadonly=multiInput.readOnly && !multi.isPopupVisible() && !multiHost.querySelector('.t-tag__icon-close');
+    demo.sharedProps.set({disabled:true}); demo.tagInputProps.set({...demo.tagInputProps(),inputProps:{readonly:false,disabled:false}}); ng.applyChanges(demo); ${settle}
+    const disabledUnion=multiInput.disabled;
+    demo.sharedProps.set({}); demo.tagInputProps.set({...demo.tagInputProps(),inputProps:{},tagProps:{closable:false,theme:'danger'}}); ng.applyChanges(demo); ${settle}
+    const noClose=!multiHost.querySelector('.t-tag__icon-close');
+    demo.tagProps.set({closable:true,theme:'success'}); ng.applyChanges(demo); ${settle}
+    const explicitTag=!!multiHost.querySelector('.t-tag--success .t-tag__icon-close');
+    multi.handleClear(new MouseEvent('click')); ${settle} const cleared=demo.tags();
+    const formHost=root.querySelector('.options-form'), form=ng.getComponent(formHost), formInput=formHost.querySelector('input');
+    form.handlePopupVisibleChange(true); ${settle} formInput.focus();
+    form.removeTagAt(0); ${settle} const pending={value:[...demo.control.value],count:formHost.querySelectorAll('t-tag').length,touched:demo.control.touched};
+    const ownPanel=document.querySelector('.form-panel-button'); ownPanel.focus(); ${settle}
+    const ownUntouched=!demo.control.touched; ownPanel.blur(); ${settle}
+    const blurred={value:[...demo.control.value],touched:demo.control.touched};
+    demo.control.disable(); ng.applyChanges(demo); ${settle} const formDisabled=formInput.disabled && !form.isPopupVisible();
+    demo.control.enable(); demo.control.reset(); ng.applyChanges(demo); ${settle}
+    const reset={value:[...demo.control.value],count:formHost.querySelectorAll('t-tag').length,touched:demo.control.touched};
+    single.handlePopupVisibleChange(true); ${settle} input.focus(); const otherPanel=document.querySelector('.multiple-panel-button');
+    multi.handlePopupVisibleChange(true); ${settle} document.querySelector('.multiple-panel-button').focus(); ${settle}
+    const unrelatedBlur=!single.focused();
+    const popup=ng.getComponent(singleHost.querySelector('t-popup'));
+    demo.visible.set(true); ng.applyChanges(demo); ${settle} popup.hide(); ${settle}
+    const rejectedClose=popup.isVisible();
+    demo.visible.set(false); ng.applyChanges(demo); ${settle} popup.show(); ${settle}
+    const rejectedOpen=!popup.isVisible();
+    demo.visible.set(undefined); ng.applyChanges(demo); ${settle}
+    return {attrs,limited,composing,composed,events,rejected,dynamic,disabled,disabledStable,readonly,multiAttributes,tagStyle,defaultInput,nestedLimit,
+      defaultOnce,clearedKeyword,reserved,removed,rejectionPreserved,nestedReadonly,disabledUnion,noClose,explicitTag,cleared,pending,ownUntouched,blurred,formDisabled,reset,unrelatedBlur,rejectedClose,rejectedOpen};
+  })()`);
+  assert.deepEqual(selectInputState.attrs,{name:'single-search',autocomplete:'off',spellcheck:false});
+  assert.deepEqual(selectInputState.limited,{text:'a中',value:'a中',callbacks:1});
+  assert.deepEqual(selectInputState.composing,{text:'中文测试',value:'a中',enters:0});
+  assert.deepEqual(selectInputState.composed,{text:'中文测',value:'中文测',callbacks:2}); assert.deepEqual(selectInputState.events,{enters:1,paste:1});
+  assert.equal(selectInputState.rejected,true); assert.deepEqual(selectInputState.dynamic,{name:'updated-name',text:'中😀文'});
+  assert.deepEqual(selectInputState.disabled,{native:true,visible:false}); assert.equal(selectInputState.disabledStable,true); assert.equal(selectInputState.readonly,true);
+  assert.deepEqual(selectInputState.multiAttributes,{name:'nested-search',max:null}); assert.deepEqual(selectInputState.tagStyle,{primary:true,round:true});
+  assert.equal(selectInputState.defaultInput,'初始'); assert.deepEqual(selectInputState.nestedLimit,{text:'中文',events:1,callbacks:1});
+  assert.equal(selectInputState.defaultOnce,'中文'); assert.equal(selectInputState.clearedKeyword,''); assert.equal(selectInputState.reserved,'保留');
+  assert.deepEqual(selectInputState.removed,{value:['第二个','第三个'],changes:1,callbacks:1,closes:1}); assert.equal(selectInputState.rejectionPreserved,true);
+  for(const key of ['nestedReadonly','disabledUnion','noClose','explicitTag','ownUntouched','formDisabled','unrelatedBlur','rejectedClose','rejectedOpen']) assert.equal(selectInputState[key],true,key);
+  assert.deepEqual(selectInputState.cleared,[]); assert.deepEqual(selectInputState.pending,{value:['表单','可删除'],count:1,touched:false});
+  assert.deepEqual(selectInputState.blurred,{value:['可删除'],touched:true}); assert.deepEqual(selectInputState.reset,{value:['表单','可删除'],count:2,touched:false});
+  console.log('PASS SelectInput options/state: attrs/limits, IME once, callbacks, nested precedence, tag removal/rejection, keyword retention, CVA focus/reset, paste once');
+  const selectInputPointer=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-select-input-options'),demo=ng.getComponent(root),host=root.querySelector('.options-single');
+    ng.getComponent(host).handlePopupVisibleChange(false); ${settle}
+    host.scrollIntoView({block:'center',behavior:'instant'}); ${settle}
+    demo.mouseEnters.set(0);demo.mouseLeaves.set(0);
+    const rect=host.querySelector('input').getBoundingClientRect();return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+  })()`);
+  await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:5,y:5});
+  await evaluate(`(async()=>{${settle}})()`);
+  await send('Input.dispatchMouseEvent',{type:'mouseMoved',...selectInputPointer});
+  await evaluate(`(async()=>{${settle}})()`);
+  await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:5,y:5});
+  await evaluate(`(async()=>{${settle}})()`);
+  const selectMouse=await evaluate(`(()=>{const demo=ng.getComponent(document.querySelector('demo-select-input-options'));return {enter:demo.mouseEnters(),leave:demo.mouseLeaves()};})()`);
+  assert.deepEqual(selectMouse,{enter:1,leave:1});
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

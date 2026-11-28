@@ -5,7 +5,7 @@
 <t-popup
   [trigger]="popupTrigger()"
   [placement]="popupPlacement()"
-  [disabled]="mergedDisabled() || formReadonly() || !hasPanel()"
+  [disabled]="mergedDisabled() || editorReadonly() || !hasPanel()"
   [showArrow]="popupShowArrow()"
   [overlayClassName]="popupOverlayClassName()"
   [visible]="isPopupVisible()"
@@ -38,7 +38,11 @@
                       [theme]="tagTheme()"
                       [variant]="tagVariant()"
                       [maxWidth]="tagMaxWidth()"
-                      [closable]="!mergedDisabled() && !formReadonly()"
+                      [closable]="!mergedDisabled() && !editorReadonly() && !effectiveTagProps().disabled && effectiveTagProps().closable !== false"
+                      [shape]="effectiveTagProps().shape ?? 'square'"
+                      [color]="effectiveTagProps().color"
+                      [disabled]="effectiveTagProps().disabled ?? false"
+                      [title]="effectiveTagProps().title"
                       (close)="removeTag($index, $event)"
                     >
                       {{ tag }}
@@ -56,11 +60,15 @@
           <input
             #multipleInput
             class="t-input__inner"
-            [value]="multipleInputValue()"
+            [value]="compositionDraft() ?? multipleInputValue()"
             [readOnly]="multipleReadonly()"
             [attr.placeholder]="multiplePlaceholder()"
             [disabled]="mergedDisabled()"
-            autocomplete="off"
+            [tInputOptions]="editorOptions()"
+            [optionsNativeMaxlength]="false"
+            [optionsAutofocus]="autofocus() || !!editorOptions()?.autofocus"
+            (compositionstart)="handleCompositionStart()"
+            (compositionend)="handleCompositionEnd($event)"
             (input)="handleInput($event)"
             (focus)="handleFocus($event)"
             (blur)="handleBlur($event)"
@@ -117,11 +125,15 @@
         <input
           #singleInput
           class="t-input__inner"
-          [value]="singleInputValue()"
+          [value]="compositionDraft() ?? singleInputValue()"
           [readOnly]="singleReadonly()"
           [attr.placeholder]="singlePlaceholder()"
           [disabled]="mergedDisabled()"
-          autocomplete="off"
+          [tInputOptions]="editorOptions()"
+          [optionsNativeMaxlength]="false"
+            [optionsAutofocus]="autofocus() || !!editorOptions()?.autofocus"
+            (compositionstart)="handleCompositionStart()"
+            (compositionend)="handleCompositionEnd($event)"
           (input)="handleInput($event)"
           (focus)="handleFocus($event)"
           (blur)="handleBlur($event)"
@@ -160,11 +172,11 @@
   }
 
   @if (panelTemplate(); as panelTpl) {
-    <div tPopupContent>
+    <div tPopupContent (focusout)="handleBlur($event)">
       <ng-container [ngTemplateOutlet]="panelTpl" />
     </div>
   } @else if (panelText()) {
-    <div tPopupContent>{{ panelText() }}</div>
+    <div tPopupContent (focusout)="handleBlur($event)">{{ panelText() }}</div>
   }
 </t-popup>
 

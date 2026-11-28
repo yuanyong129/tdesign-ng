@@ -6,10 +6,10 @@
 | --- | --- |
 | 组件目录 | 73 |
 | 上游属性 | 1576 |
-| 已对齐 | 1064 |
-| 覆盖率 | 67.5% |
-| 深度债 | 221 项 |
-| 零债务组件 | 43 / 73 |
+| 已对齐 | 1066 |
+| 覆盖率 | 67.6% |
+| 深度债 | 217 项 |
+| 零债务组件 | 44 / 73 |
 
 状态图例：✅ 无债务；🚧 有深度债（D1 表格与选择线 / D2 录入与反馈 / D3 其余）；⚠️ 有未登记缺失。
 
@@ -40,7 +40,6 @@
 | [分割线 Divider](divider.md) | `divider` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [布局 Layout](layout.md) | `layout` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [标签输入框 TagInput](tag-input.md) | `tag-input` | 39 | 26 | 66.7% | 0 | 0 | 1 | 0 | 4 | 🚧 |
-| [选择器输入 SelectInput](select-input.md) | `select-input` | 43 | 29 | 67.4% | 0 | 2 | 2 | 0 | 3 | 🚧 |
 | [范围输入框 RangeInput](range-input.md) | `range-input` | 28 | 19 | 67.9% | 0 | 0 | 2 | 0 | 4 | 🚧 |
 | [加载 Loading](loading.md) | `loading` | 13 | 9 | 69.2% | 0 | 0 | 3 | 0 | 2 | 🚧 |
 | [可选标签 CheckTag](check-tag.md) | `check-tag` | 20 | 14 | 70.0% | 0 | 0 | 1 | 0 | 4 | 🚧 |
@@ -52,6 +51,7 @@
 | [引导 Guide](guide.md) | `guide` | 21 | 15 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [骨架屏 Skeleton](skeleton.md) | `skeleton` | 7 | 5 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [标签 Tag](tag.md) | `tag` | 14 | 10 | 71.4% | 0 | 0 | 0 | 0 | 5 | ✅ |
+| [选择器输入 SelectInput](select-input.md) | `select-input` | 43 | 31 | 72.1% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [按钮 Button](button.md) | `button` | 18 | 13 | 72.2% | 0 | 0 | 0 | 0 | 11 | ✅ |
 | [表格 Table](table.md) | `table` | 62 | 45 | 72.6% | 1 | 1 | 0 | 0 | 23 | 🚧 |
 | [警告提示 Alert](alert.md) | `alert` | 11 | 8 | 72.7% | 0 | 0 | 0 | 0 | 3 | ✅ |

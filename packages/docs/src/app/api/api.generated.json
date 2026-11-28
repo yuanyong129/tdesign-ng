@@ -8308,6 +8308,24 @@
           "values": []
         },
         {
+          "name": "inputProps",
+          "type": "InputOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "原生输入区的受支持配置",
+          "en": "Supported native editor options",
+          "values": []
+        },
+        {
+          "name": "tagInputProps",
+          "type": "SelectInputTagInputProps | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "多选标签区的受支持配置，仅 multiple 时生效",
+          "en": "Supported tag editor options, used in multiple mode",
+          "values": []
+        },
+        {
           "name": "inputValue",
           "type": "string | number | undefined",
           "default": "undefined",

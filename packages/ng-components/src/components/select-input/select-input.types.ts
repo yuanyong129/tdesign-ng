@@ -1,3 +1,6 @@
+import type { InputOptions } from '../input/input-options';
+import type { TagInputTagProps } from '../tag-input/tag-input.types';
+
 /**
  * 选择器尺寸。
  */
@@ -189,13 +192,23 @@ export interface SelectInputValueDisplayContext {
 /**
  * 标签属性，`tagProps` 当前支持的字段子集。
  */
-export interface SelectInputTagProps {
+export interface SelectInputTagProps extends TagInputTagProps {
   /** 标签主题，默认 `default` */
   theme?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
   /** 标签变体，默认 `light` */
   variant?: 'dark' | 'light' | 'outline' | 'light-outline';
   /** 标签最大宽度，超出省略 */
   maxWidth?: string | number;
+}
+
+/** 多选标签区支持的配置；选择值、输入文本和交互流程由 SelectInput 管理。 */
+export interface SelectInputTagInputProps {
+  inputProps?: InputOptions;
+  tagProps?: SelectInputTagProps;
+  disabled?: boolean;
+  readonly?: boolean;
+  onInputChange?: (value: string, context: SelectInputValueChangeContext) => void;
+  onChange?: (value: SelectInputTagValue[], context: SelectInputTagChangeContext) => void;
 }
 
 /**

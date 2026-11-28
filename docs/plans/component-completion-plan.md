@@ -212,3 +212,15 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有前批及新增交互回归、`pnpm check:progress` 与 `git diff --check` 通过，missing 0 / extra 0。新增覆盖 13 个入口的只读编辑保护、本地 true/false 优先级、动态字段、解除恢复、IME 草稿取消、CVA 保持 enabled、程序写值及提交/reset、表单外隔离、Switch 独立行为，以及四类弹层从打开到只读后的实际关闭；受控 popupVisible=true 也不能绕过只读。Form / SelectInput / Select / AutoComplete / DateRangePicker 页面探针 issues / badResources 均为空，Form 截图已检查。保留已有 footer slot、Browserslist、qrcode CommonJS 和首包预算告警（约 799.66 kB）。
 
 **接续任务**：第 3 轮 SelectInput → AutoComplete → Tabs.list → Breadcrumb / Steps / Statistic，第 3 轮整体与 M2 尚未完成。
+
+### 2026-11-28：第 3 轮 SelectInput 配置与状态
+
+- **inputProps**：复用 InputOptions / InputOptionsDirective，将 name、autocomplete、spellCheck、autofocus、长度限制及焦点/键盘/组合输入/onChange 回调接入两种原生编辑区。长度限制由组件处理，不使用原生 maxlength 提前拦截 emoji/IME；maxlength 按码点、maxcharacter 按加权长度，多个限制共同约束，allowInputOverMax 可放行。新增 directive 内部开关默认保留其他消费方原行为。
+- **tagInputProps / tagProps**：新增 SelectInputTagInputProps 白名单，支持 inputProps、tagProps、disabled、readonly、onInputChange、onChange，仅 multiple 生效；多选嵌套 inputProps 覆盖共享配置同名键，禁用和只读取所有来源并集。顶层 tagProps 覆盖嵌套默认值，扩展实际接入的 shape、color、title、closable、disabled、onClose；关闭回调、tagChange 与配置回调各按一次编辑通知。选择值、输入文本、显隐、模板和创建流程仍由 SelectInput 管理，不宣称完整 Vue InputProps / TagInputProps 透传。
+- **受控与表单**：选择值复用 createControllableState，修复受控 value 被内部修改及 CVA 初次写值被 value 同步覆盖的问题；父级拒绝删除后保留原标签。inputValue 受控值优先，编辑被拒绝时恢复原生文本。CVA reset 清理内部关键字/组合草稿并恢复表单标签，disable/enable 沿用表单禁用并集。单选 clear 仍只清输入文本，多选 clear 同时提案清空标签。
+- **IME 与事件**：组合输入期间保留草稿、忽略 IME Enter，结束时统一限制，去重紧接着的同值 input；输入/标签配置回调保留原上下文。paste 阻止同名原生事件冒泡，外部只收到一次 { e, pasteValue }；禁用不发 paste/enter/输入修改。mouseenter / mouseleave 保留宿主原生 MouseEvent（范围包含提示区域），经真实 CDP 鼠标验证各一次，两项旧 D3 记录修正为映射，不计新功能产出。
+- **面板与焦点**：Popup 新增 containsTarget / isVisible 查询辅助方法，SelectInput 用本浮层边界判断失焦，不再把任意其它 Popup 当作自身面板。焦点从输入进入自己的面板不触发 touched，离开面板后通知，验证 updateOn: 'blur'。受控 popupVisible 被父级拒绝时恢复实际浮层显示；多选仅在面板确实关闭后按 reserveKeyword 清理关键字，拒绝关闭不误清。disabled / readonly / Form.readonly 继续阻止打开、清空和删除。
+- **进度与限制**：新增 1 个 demo，总数 333 → 334；对齐 1064 → 1066（67.6%），真实债务 221 → 217，零债务目录 43 → 44。债务减少包括两项属性实际实现及两项原生鼠标映射校准。保留现有 popupProps 四字段白名单、模板/框架差异和 autoWidth 等既有能力边界；没有引入完整 TagInput 自动创建、排序或上游所有透传键，不把零债务等同于完整 Vue 行为或 SSR/水合验收。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、所有前批及新增交互回归、`pnpm check:progress` 和 `git diff --check` 通过，missing 0 / extra 0。新增验证原生属性/动态配置、Unicode 与加权限制、IME 单次提交、paste/enter 单次回调、嵌套配置/禁用只读优先级、标签外观和关闭回调、受控删除/输入/显隐拒绝、关键字保留/清理、默认输入值仅初始化、CVA 禁用/恢复/reset/updateOn blur、本面板与其它浮层的焦点边界、真实鼠标 enter/leave 各一次。SelectInput / Form / Popup 页面探针 issues / badResources 为空，SelectInput 截图已检查。保留已有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 799.96 kB）。
+
+**接续任务**：第 3 轮 AutoComplete → Tabs.list → Breadcrumb / Steps / Statistic，第 3 轮整体与 M2 尚未完成。

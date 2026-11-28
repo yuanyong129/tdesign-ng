@@ -2,6 +2,7 @@ import { useFormReadonly } from '../../_utils/form-readonly';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   AfterViewInit,
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -19,6 +20,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { createControllableState } from '../../_utils/controllable-state';
+import { InputOptionsDirective, limitInputText, type InputOptions } from '../input/input-options';
 import type { PopupPlacement, PopupTrigger } from '../popup/popup.types';
 import { TLoading } from '../loading/loading.component';
 import { TPopup } from '../popup/popup.component';
@@ -39,6 +42,7 @@ import {
   SelectInputTagChangeEvent,
   SelectInputTagContext,
   SelectInputTagProps,
+  SelectInputTagInputProps,
   SelectInputTagValue,
   SelectInputValue,
   SelectInputValueChangeContext,
@@ -73,7 +77,7 @@ function readLabel(value: unknown, keys: Required<SelectInputKeys>): string | nu
  * 选择器输入框。
  *
  * 既是可编辑输入框，也是标签回显容器与下拉面板的插槽底座：
- * `t-select` / `t-tree-select` / `t-cascader` 都以它为视觉与交互基座。
+ * 可用于构建带自定义面板的选择器。
  *
  * ```html
  * <t-select-input [(value)]="value" [allowInput]="true" placeholder="请输入" />
@@ -89,7 +93,7 @@ function readLabel(value: unknown, keys: Required<SelectInputKeys>): string | nu
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './select-input.component.html',
-  imports: [NgTemplateOutlet, TLoading, TPopup, TTag],
+  imports: [NgTemplateOutlet, TLoading, TPopup, TTag, InputOptionsDirective],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -122,6 +126,16 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   /** 是否禁用。 @zh 禁用 @en disabled @defaultValue false */
   readonly disabled = input(false, { transform: booleanAttribute });
+
+  /** @zh 原生输入区的受支持配置 @en Supported native editor options @defaultValue undefined */
+  readonly inputProps = input<InputOptions | undefined>(undefined);
+  /** @zh 多选标签区的受支持配置，仅 multiple 时生效 @en Supported tag editor options, used in multiple mode @defaultValue undefined */
+  readonly tagInputProps = input<SelectInputTagInputProps | undefined>(undefined);
+  protected readonly editorOptions = computed<InputOptions | undefined>(() => this.multiple()
+    ? { ...this.inputProps(), ...this.tagInputProps()?.inputProps } : this.inputProps());
+  protected readonly editorReadonly = computed(() => this.formReadonly() || !!this.inputProps()?.readonly
+    || (this.multiple() && (!!this.tagInputProps()?.readonly || !!this.tagInputProps()?.inputProps?.readonly)));
+  protected readonly effectiveTagProps = computed(() => ({ ...(this.multiple() ? this.tagInputProps()?.tagProps : {}), ...this.tagProps() }));
 
   /** 受控的输入框文本。 @zh 输入框文本 @en inputValue @defaultValue undefined */
   readonly inputValue = input<string | number | undefined>(undefined);
@@ -178,7 +192,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   /** 自定义标签模板。 @zh 自定义标签 @en tag @defaultValue undefined */
   readonly tag = input<TemplateRef<SelectInputTagContext> | string | undefined>(undefined);
 
-  /** 标签属性，当前支持 theme / variant / maxWidth。 @zh 标签属性 @en tagProps @defaultValue undefined */
+  /** 标签外观与关闭配置，选择值由父组件管理。 @zh 标签属性 @en tagProps @defaultValue undefined */
   readonly tagProps = input<SelectInputTagProps | undefined>(undefined);
 
   /** 输入框下方的提示文字。 @zh 提示文字 @en tips @defaultValue undefined */
@@ -226,9 +240,16 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   private readonly focused = signal(false);
 
-  private readonly innerValue = signal<SelectInputValue | undefined>(undefined);
+  private readonly selection = createControllableState<SelectInputValue | undefined>(this.value, () => undefined);
+  private readonly innerValue = this.selection.current;
 
   private readonly innerInputValue = signal('');
+  private readonly currentInputValue = computed(() => String(this.inputValue() ?? this.innerInputValue()));
+  protected readonly compositionDraft = signal<string | null>(null);
+  private readonly popup = viewChild(TPopup);
+  private composing = false;
+  private compositionInput: string | undefined;
+  private readonly editRevision = signal(0);
 
   private readonly innerPopupVisible = signal(false);
 
@@ -237,26 +258,27 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   private onTouched: () => void = () => {};
 
   constructor() {
+    afterRenderEffect(() => {
+      this.editRevision();
+      const input = (this.multiple() ? this.multipleInputRef() : this.singleInputRef())?.nativeElement;
+      const text = this.compositionDraft() ?? (this.multiple() ? this.multipleInputValue() : this.singleInputValue());
+      if (input && input.value !== text) input.value = text;
+      const popup = this.popup();
+      const visible = this.hasPanel() && this.isPopupVisible();
+      if (popup && popup.isVisible() !== visible) untracked(() => visible ? popup.show() : popup.hide());
+    });
+    let previousVisible = false;
     effect(() => {
-      if (this.formReadonly() || this.mergedDisabled()) untracked(() => {
+      const visible = this.isPopupVisible();
+      if (previousVisible && !visible) untracked(() => {
+        if (this.multiple() && !this.reserveKeyword() && this.currentInputValue() !== '') this.commitInputValue('', { trigger: 'change' });
+      });
+      previousVisible = visible;
+    });
+    effect(() => {
+      if (this.editorReadonly() || this.mergedDisabled()) untracked(() => {
         this.innerPopupVisible.set(false);
-      });
-    });
-    // 外部 `[value]` 变化时同步到内部状态；用户操作时不回写，避免打断交互。
-    effect(() => {
-      const next = this.value();
-      untracked(() => {
-        if (!this.sameValue(next, this.innerValue())) this.innerValue.set(next);
-      });
-    });
-
-    // 受控的 `inputValue`：父组件改了才回写输入框。
-    effect(() => {
-      const next = this.inputValue();
-      untracked(() => {
-        if (next === undefined) return;
-        const text = String(next);
-        if (text !== this.innerInputValue()) this.innerInputValue.set(text);
+        this.composing = false; this.compositionInput = undefined; this.compositionDraft.set(null);
       });
     });
 
@@ -271,9 +293,6 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   }
 
   ngOnInit(): void {
-    if (this.innerValue() === undefined && this.value() !== undefined) {
-      this.innerValue.set(this.value());
-    }
     const controlled = this.inputValue();
     if (controlled !== undefined) {
       this.innerInputValue.set(String(controlled));
@@ -284,12 +303,13 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   }
 
   ngAfterViewInit(): void {
-    if (this.autofocus()) this.focusInput();
+    if ((this.autofocus() || this.editorOptions()?.autofocus) && !this.mergedDisabled()) this.focusInput();
   }
 
-  protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms());
+  protected readonly mergedDisabled = computed(() => this.disabled() || this.disabledByForms() || !!this.inputProps()?.disabled
+    || (this.multiple() && (!!this.tagInputProps()?.disabled || !!this.tagInputProps()?.inputProps?.disabled)));
 
-  protected readonly isPopupVisible = computed(() => !this.formReadonly() && !this.mergedDisabled() && (this.popupVisible() ?? this.innerPopupVisible()));
+  protected readonly isPopupVisible = computed(() => !this.editorReadonly() && !this.mergedDisabled() && (this.popupVisible() ?? this.innerPopupVisible()));
 
   protected readonly hasPanel = computed(() => {
     const panel = this.panel();
@@ -335,7 +355,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
     if (this.autoWidth()) classes.push(`${PREFIX_CLS}--auto-width`);
     if (this.focused() || this.isPopupVisible()) classes.push(`${PREFIX_CLS}--focused`, 't-is-focused');
     if (this.mergedDisabled()) classes.push('t-is-disabled');
-    if (this.formReadonly()) classes.push('t-is-readonly');
+    if (this.editorReadonly()) classes.push('t-is-readonly');
 
     return classes.join(' ');
   });
@@ -426,11 +446,11 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   protected readonly collapsedTitle = computed(() => this.tags().slice(this.minCollapsedNum()).join(', '));
 
-  protected readonly tagTheme = computed<TagTheme>(() => this.tagProps()?.theme ?? 'default');
+  protected readonly tagTheme = computed<TagTheme>(() => this.effectiveTagProps().theme ?? 'default');
 
-  protected readonly tagVariant = computed<TagVariant>(() => this.tagProps()?.variant ?? 'light');
+  protected readonly tagVariant = computed<TagVariant>(() => this.effectiveTagProps().variant ?? 'light');
 
-  protected readonly tagMaxWidth = computed(() => this.tagProps()?.maxWidth ?? 300);
+  protected readonly tagMaxWidth = computed(() => this.effectiveTagProps().maxWidth ?? 300);
 
   protected readonly popupTrigger = computed<PopupTrigger>(() => this.popupProps()?.trigger ?? 'click');
 
@@ -442,7 +462,7 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   /** 单选模式下输入框里真实展示的文本。 */
   protected readonly singleInputValue = computed(() => {
-    if (this.isPopupVisible() && this.allowInput()) return this.innerInputValue();
+    if (this.isPopupVisible() && this.allowInput()) return this.currentInputValue();
     return this.hasValueDisplay() ? '' : this.displayText();
   });
 
@@ -458,20 +478,20 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
     return '';
   });
 
-  protected readonly singleReadonly = computed(() => !this.allowInput() || this.formReadonly());
+  protected readonly singleReadonly = computed(() => !this.allowInput() || this.editorReadonly());
 
   protected readonly multipleInputValue = computed(() =>
-    this.isPopupVisible() && this.allowInput() ? this.innerInputValue() : '',
+    this.isPopupVisible() && this.allowInput() ? this.currentInputValue() : '',
   );
 
   protected readonly multiplePlaceholder = computed(() => (this.tags().length === 0 ? this.placeholder() : ''));
 
-  protected readonly multipleReadonly = computed(() => !this.allowInput() || this.formReadonly());
+  protected readonly multipleReadonly = computed(() => !this.allowInput() || this.editorReadonly());
 
   protected readonly showClearIcon = computed(() => {
-    if (!this.clearable() || this.mergedDisabled() || this.formReadonly()) return false;
+    if (!this.clearable() || this.mergedDisabled() || this.editorReadonly()) return false;
     if (this.multiple()) return this.tags().length > 0;
-    return this.innerInputValue() !== '' || this.displayText() !== '';
+    return this.currentInputValue() !== '' || this.displayText() !== '';
   });
 
   protected readonly loadingIcon = computed(() => this.loading() && !this.mergedDisabled());
@@ -482,9 +502,30 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   }
 
   protected handleInput(event: Event): void {
-    if (!this.allowInput() || this.mergedDisabled() || this.formReadonly()) return;
-    const text = (event.target as HTMLInputElement).value;
+    const element = event.target as HTMLInputElement;
+    if (!this.allowInput() || this.mergedDisabled() || this.editorReadonly()) { this.editRevision.update((n) => n + 1); return; }
+    if (this.composing || (event as InputEvent).isComposing) { this.compositionDraft.set(element.value); return; }
+    if (this.compositionInput !== undefined) {
+      const duplicate = element.value === this.compositionInput || element.value === this.currentInputValue();
+      this.compositionInput = undefined;
+      if (duplicate) return;
+    }
+    const text = limitInputText(element.value, this.editorOptions());
+    element.value = text;
     this.commitInputValue(text, { trigger: 'input', e: event });
+    this.editorOptions()?.onChange?.(text, { e: event });
+  }
+
+  protected handleCompositionStart(): void {
+    if (this.mergedDisabled() || this.editorReadonly() || !this.allowInput()) return;
+    this.composing = true; this.compositionInput = undefined;
+  }
+
+  protected handleCompositionEnd(event: CompositionEvent): void {
+    if (!this.composing) return;
+    this.composing = false; this.compositionDraft.set(null);
+    this.handleInput(event);
+    this.compositionInput = (event.target as HTMLInputElement).value;
   }
 
   protected handleFocus(event: FocusEvent): void {
@@ -492,26 +533,28 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
     this.focus.emit({
       value: this.innerValue(),
       e: event,
-      inputValue: this.innerInputValue(),
+      inputValue: this.currentInputValue(),
       ...(this.multiple() ? { tagInputValue: this.tags() } : {}),
     });
   }
 
   protected handleBlur(event: FocusEvent): void {
-    this.focused.set(false);
-    this.onTouched();
     // 点在弹层面板上不算失焦（弹层挂在 CDK overlay 上，DOM 里不在宿主内）。
     const related = event.relatedTarget;
-    if (related instanceof Element && related.closest('.t-popup')) return;
+    if (this.popup()?.containsTarget(related)) return;
+    this.focused.set(false);
+    this.composing = false; this.compositionInput = undefined; this.compositionDraft.set(null);
+    this.onTouched();
     this.blur.emit({
       value: this.innerValue(),
       e: event,
-      inputValue: this.innerInputValue(),
+      inputValue: this.currentInputValue(),
       ...(this.multiple() ? { tagInputValue: this.tags() } : {}),
     });
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
+    if (this.mergedDisabled() || this.composing || event.isComposing || event.keyCode === 229) return;
     const isArrow = event.key === 'ArrowDown' || event.key === 'ArrowUp';
     if (isArrow && !this.isPopupVisible() && this.hasPanel() && !this.mergedDisabled()) {
       event.preventDefault();
@@ -522,35 +565,39 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
       this.enter.emit({
         value: this.innerValue(),
         e: event,
-        inputValue: this.innerInputValue(),
+        inputValue: this.currentInputValue(),
         ...(this.multiple() ? { tagInputValue: this.tags() } : {}),
       });
     }
   }
 
   protected handlePaste(event: ClipboardEvent): void {
+    event.stopPropagation();
+    if (this.mergedDisabled()) return;
     this.paste.emit({ e: event, pasteValue: event.clipboardData?.getData('text') ?? '' });
   }
 
   protected handleClear(event: MouseEvent): void {
     event.stopPropagation();
-    if (this.formReadonly() || this.mergedDisabled()) return;
+    if (this.editorReadonly() || this.mergedDisabled()) return;
     this.clear.emit({ e: event });
     this.commitInputValue('', { trigger: 'clear', e: event });
     if (this.multiple() && this.tags().length > 0) {
       this.emitValue([]);
-      this.tagChange.emit({ value: [], trigger: 'clear', e: event });
+      this.emitTagChange({ value: [], trigger: 'clear', e: event });
     }
   }
 
   protected handlePopupVisibleChange(visible: boolean): void {
-    if (visible && (this.formReadonly() || this.mergedDisabled())) return;
+    if (visible && (this.editorReadonly() || this.mergedDisabled())) return;
+    const previous = this.isPopupVisible();
+    if (previous === visible) return;
     if (this.popupVisible() === undefined) this.innerPopupVisible.set(visible);
     this.popupVisibleChange.emit(visible);
   }
 
   protected handleBoxClick(event: MouseEvent): void {
-    if (this.mergedDisabled() || this.formReadonly()) return;
+    if (this.mergedDisabled() || this.editorReadonly()) return;
     const target = event.target;
     if (target instanceof Element && target.closest('.t-tag__icon-close, .t-input__suffix-clear, .t-tag-input__suffix-clear')) return;
     this.focusInput();
@@ -568,7 +615,9 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   }
 
   writeValue(value: SelectInputValue | null | undefined): void {
-    this.innerValue.set(value ?? undefined);
+    this.selection.write(value ?? undefined);
+    this.composing = false; this.compositionInput = undefined; this.compositionDraft.set(null);
+    this.innerInputValue.set('');
   }
 
   registerOnChange(fn: (value: SelectInputValue) => void): void {
@@ -589,20 +638,27 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   /** 移除某个标签，并按上游上下文派发 `tagChange`。 */
   private removeTagAt(index: number, item?: SelectInputTagValue, event?: MouseEvent): void {
-    if (this.formReadonly() || this.mergedDisabled()) return;
+    if (this.editorReadonly() || this.mergedDisabled() || this.effectiveTagProps().disabled || this.effectiveTagProps().closable === false) return;
     const items = this.valueItems();
     if (index < 0 || index >= items.length) return;
     const removed = items[index];
     const next = items.filter((_, current) => current !== index);
     const label = readLabel(removed, this.mergedKeys());
     this.emitValue(next);
-    this.tagChange.emit({
+    this.emitTagChange({
       value: this.tagsOf(next),
       trigger: 'tag-remove',
       index,
       item: item ?? label,
       e: event,
     });
+    if (event) this.effectiveTagProps().onClose?.({ e: event });
+  }
+
+  private emitTagChange(event: SelectInputTagChangeEvent): void {
+    this.tagChange.emit(event);
+    const { value, ...context } = event;
+    if (this.multiple()) this.tagInputProps()?.onChange?.(value, context);
   }
 
   private tagsOf(items: SelectInputValue[]): SelectInputTagValue[] {
@@ -615,11 +671,13 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
   private commitInputValue(text: string, context: SelectInputValueChangeContext): void {
     if (this.inputValue() === undefined) this.innerInputValue.set(text);
     this.inputChange.emit({ value: text, trigger: context.trigger, e: context.e });
+    if (this.multiple()) this.tagInputProps()?.onInputChange?.(text, context);
+    this.editRevision.update((n) => n + 1);
   }
 
   private emitValue(value: SelectInputValue): void {
-    if (this.formReadonly() || this.mergedDisabled()) return;
-    this.innerValue.set(value);
+    if (this.editorReadonly() || this.mergedDisabled()) return;
+    this.selection.set(value);
     this.onChange(value);
     this.valueChange.emit(value);
   }
@@ -632,13 +690,6 @@ export class TSelectInput implements OnInit, AfterViewInit, ControlValueAccessor
 
   private isEmptyValue(): boolean {
     return !this.hasValue();
-  }
-
-  private sameValue(left: SelectInputValue | undefined, right: SelectInputValue | undefined): boolean {
-    if (Array.isArray(left) && Array.isArray(right)) {
-      return left.length === right.length && left.every((item, index) => item === right[index]);
-    }
-    return left === right;
   }
 
   private asTemplate(value: SelectInputContent | string | TemplateRef<unknown> | undefined): TemplateRef<unknown> | null {

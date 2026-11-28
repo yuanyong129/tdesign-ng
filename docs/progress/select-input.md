@@ -4,25 +4,25 @@
 
 - 目录：`packages/ng-components/src/components/select-input/`
 - 文档页：`/select-input`（`packages/docs/src/app/docs/select-input/select-input.component.ts`）
-- 状态：🚧 有深度债 4 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 43 |
-| 已对齐 | 29 |
-| 覆盖率 | 67.4% |
-| 深度债 | 4（D1 0 / D2 2 / D3 2） |
-| Angular 惯用映射 | 10（插槽 / 双向绑定 / 事件名，不计债） |
+| 已对齐 | 31 |
+| 覆盖率 | 72.1% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
+| Angular 惯用映射 | 12（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 3 个 |
+| 文档示例 | 4 个 |
 
 ## 组件明细
 
 ### `TSelectInput`（`<t-select-input>`）
 
-上游接口 `TdSelectInputProps`；上游属性 43、已对齐 29（67.4%）；深度债 4 项；未登记缺失 0 项。
+上游接口 `TdSelectInputProps`；上游属性 43、已对齐 31（72.1%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -35,6 +35,8 @@
 | `clearable` | boolean | false | 可清空 |
 | `collapsedItems` | TemplateRef<SelectInputCollapsedItemsContext> \| undefined | undefined | 折叠标签模板 |
 | `disabled` | boolean | false | 禁用 |
+| `inputProps` | InputOptions \| undefined | undefined | 原生输入区的受支持配置 |
+| `tagInputProps` | SelectInputTagInputProps \| undefined | undefined | 多选标签区的受支持配置，仅 multiple 时生效 |
 | `inputValue` | string \| number \| undefined | undefined | 输入框文本 |
 | `defaultInputValue` | string \| number \| undefined | undefined | 默认输入框文本 |
 | `keys` | SelectInputKeys \| undefined | undefined | 字段映射 |
@@ -76,23 +78,22 @@
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `inputProps` | D2 录入与反馈线 | [D2] 把任意 TInput 属性透传到内部输入框，需要重构输入框渲染；当前按 t-input 结构复刻 |
 | `onBlur` | Angular 惯用映射 | Angular 用 (blur) 输出 |
 | `onClear` | Angular 惯用映射 | Angular 用 (clear) 输出 |
 | `onEnter` | Angular 惯用映射 | Angular 用 (enter) 输出 |
 | `onFocus` | Angular 惯用映射 | Angular 用 (focus) 输出 |
 | `onInputChange` | Angular 惯用映射 | Angular 用 (inputChange) 输出 |
-| `onMouseenter` | D3 其余组件与边角能力 | [D3] 宿主是原生元素，直接监听 (mouseenter) |
-| `onMouseleave` | D3 其余组件与边角能力 | [D3] 宿主是原生元素，直接监听 (mouseleave) |
+| `onMouseenter` | Angular 惯用映射 | Angular 用宿主原生 (mouseenter)，参数 MouseEvent，包含提示区 |
+| `onMouseleave` | Angular 惯用映射 | Angular 用宿主原生 (mouseleave)，参数 MouseEvent，包含提示区 |
 | `onPaste` | Angular 惯用映射 | Angular 用 (paste) 输出 |
 | `onPopupVisibleChange` | Angular 惯用映射 | Angular 用 (popupVisibleChange) 输出，支持 [(popupVisible)] |
 | `onTagChange` | Angular 惯用映射 | Angular 用 (tagChange) 输出 |
 | `prefixIcon` | Angular 惯用映射 | Angular 用内容投影指令 [tSelectInputPrefixIcon] 传入模板，避免与字符串类 input 冲突 |
 | `suffixIcon` | Angular 惯用映射 | Angular 用内容投影指令 [tSelectInputSuffixIcon] 传入模板，同上 |
-| `tagInputProps` | D2 录入与反馈线 | [D2] 同上，多选标签区用 t-tag-input 类结构手写，标签能力已由 tagProps/minCollapsedNum/collapsedItems/tag 覆盖 |
 
 ## 文档示例
 
 - `packages/docs/src/app/docs/select-input/demos/select-input-basic.ts`
+- `packages/docs/src/app/docs/select-input/demos/select-input-options.ts`
 - `packages/docs/src/app/docs/select-input/demos/select-input-panel.ts`
 - `packages/docs/src/app/docs/select-input/demos/select-input-tag.ts`
