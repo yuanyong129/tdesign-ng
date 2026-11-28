@@ -16,7 +16,7 @@
 | 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 4（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 4 个 |
+| 文档示例 | 5 个 |
 
 ## 组件明细
 
@@ -55,6 +55,7 @@
 
 ## 文档示例
 
+- `packages/docs/src/app/docs/notification/demos/notification-attachment.ts`
 - `packages/docs/src/app/docs/notification/demos/notification-basic.ts`
 - `packages/docs/src/app/docs/notification/demos/notification-content.ts`
 - `packages/docs/src/app/docs/notification/demos/notification-custom.ts`

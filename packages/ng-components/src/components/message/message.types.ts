@@ -1,5 +1,8 @@
 import type { Content } from '../../_utils/content';
+import type { FeedbackAttachNode, FeedbackStyle } from '../../_utils/feedback-container';
 export type MessageContent = Content;
+export type MessageAttachNode = FeedbackAttachNode;
+export type MessageStyle = FeedbackStyle;
 /** 消息主题。 */
 export const MESSAGE_THEMES = ['info', 'success', 'warning', 'error', 'question', 'loading'] as const;
 
@@ -32,6 +35,10 @@ export interface MessageCloseEvent {
 
 /** 创建一条消息的配置。 */
 export interface MessageOptions {
+  /** 挂载元素、选择器或函数；无效目标回退 body，仅创建时解析 */
+  attach?: MessageAttachNode;
+  /** 每条消息的样式；长度需 CSS 单位，数值用于 opacity 等无单位属性 */
+  style?: MessageStyle;
   /** 消息文字 */
   content?: Content;
   /** 主题，默认 info */

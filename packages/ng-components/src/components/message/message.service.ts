@@ -1,4 +1,5 @@
 import { DOCUMENT } from '@angular/common';
+import { FeedbackContainers, applyFeedbackStyle } from '../../_utils/feedback-container';
 import {
   ApplicationRef,
   DestroyRef,
@@ -68,7 +69,7 @@ export class TMessageService {
 
   private readonly config = inject(MESSAGE_CONFIG, { optional: true }) ?? {};
 
-  private readonly containers = new Map<MessagePlacement, HTMLElement>();
+  private readonly containers = new FeedbackContainers(this.document, 'message');
 
   private readonly entries = new Set<MessageEntry>();
 
@@ -107,7 +108,7 @@ export class TMessageService {
     if (this.destroyed || !this.document.body) return { close: () => {} };
     const options = this.normalize(theme, message, duration);
     const container = this.getContainer(options);
-    const rendered = renderComponent(TMessage, container, this.envInjector, this.appRef, 't-message');
+    const rendered = renderComponent(TMessage, container.element, this.envInjector, this.appRef, 't-message');
     const { ref, host } = rendered;
 
     ref.setInput('content', options.content ?? '');
@@ -127,6 +128,7 @@ export class TMessageService {
       if (x !== undefined && x !== '') messageElement.style.left = this.toLength(x);
       if (y !== undefined && y !== '') messageElement.style.top = this.toLength(y);
     }
+    if (messageElement) applyFeedbackStyle(messageElement, options.style);
 
     let closed = false;
     const subscriptions: { unsubscribe(): void }[] = [];
@@ -136,7 +138,7 @@ export class TMessageService {
       for (const subscription of subscriptions) subscription.unsubscribe();
       this.entries.delete(entry);
       rendered.destroy();
-      this.releaseContainer(options.placement);
+      container.release();
       options.onClose?.(context);
     };
     const entry: MessageEntry = { placement: options.placement, destroy: () => finish() };
@@ -171,31 +173,11 @@ export class TMessageService {
     };
   }
 
-  private getContainer(options: MessageOptions): HTMLElement {
+  private getContainer(options: MessageOptions) {
     const placement = options.placement ?? 'top';
-    const existing = this.containers.get(placement);
-    if (existing) return existing;
-
-    const container = this.document.createElement('div');
-    container.className = 't-message__list';
-    container.dataset['placement'] = placement;
-    Object.assign(container.style, PLACEMENT_STYLE[placement]);
-    container.style.zIndex = String(options.zIndex ?? this.config.zIndex ?? DEFAULT_Z_INDEX);
-    if (placement.startsWith('bottom')) {
-      container.style.display = 'flex';
-      container.style.flexDirection = 'column-reverse';
-    }
-    this.document.body.appendChild(container);
-    this.containers.set(placement, container);
-    return container;
-  }
-
-  private releaseContainer(placement: MessagePlacement): void {
-    const container = this.containers.get(placement);
-    if (!container) return;
-    if (container.children.length > 0) return;
-    container.remove();
-    this.containers.delete(placement);
+    const position = { ...PLACEMENT_STYLE[placement] };
+    const zIndex = Number.isFinite(options.zIndex) ? options.zIndex! : DEFAULT_Z_INDEX;
+    return this.containers.acquire(options.attach, placement, zIndex, position);
   }
 
   private toLength(value: string | number): string {

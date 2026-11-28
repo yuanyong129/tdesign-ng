@@ -1,5 +1,8 @@
 import type { Content } from '../../_utils/content';
+import type { FeedbackAttachNode, FeedbackStyle } from '../../_utils/feedback-container';
 export type NotificationContent = Content;
+export type NotificationAttachNode = FeedbackAttachNode;
+export type NotificationStyle = FeedbackStyle | string;
 /** 通知主题。 */
 export const NOTIFICATION_THEMES = ['info', 'success', 'warning', 'error'] as const;
 
@@ -19,6 +22,10 @@ export interface NotificationCloseEvent {
 
 /** 创建一条通知的配置。 */
 export interface NotificationOptions {
+  /** 挂载元素、选择器或函数；无效目标回退 body，仅创建时解析 */
+  attach?: NotificationAttachNode;
+  /** 每条通知的样式；支持 CSS 文本或对象，长度需 CSS 单位 */
+  style?: NotificationStyle;
   /** 标题 */
   title?: Content;
   /** 内容 */
@@ -40,7 +47,7 @@ export interface NotificationOptions {
   className?: string;
   /** 出现位置，默认 top-right */
   placement?: NotificationPlacement;
-  /** 相对默认位置的偏移，[x, y] */
+  /** 容器相对 placement 对应边缘的距离，[x, y]，数字按像素处理 */
   offset?: Array<string | number>;
   /** 层级 */
   zIndex?: number;

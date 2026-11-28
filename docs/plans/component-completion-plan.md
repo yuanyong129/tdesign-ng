@@ -35,13 +35,27 @@
 | 1 | 易：局部模板与事件 | Textarea → Tabs（action）→ Rate → Typography（Text）→ DescriptionItem | Textarea 校验事件与载荷；Tabs 自定义操作区；Rate 自定义图标；Text 复制行为；DescriptionItem 富内容投影 | 复用 Content；复制需有成功/失败反馈与浏览器环境守卫；不把 keydown 冒充 keypress |
 | 2 | 易到中：属性组合 | CheckTag/Group → Button/Card → StickyTool/Submenu → Avatar/Group → InputNumber/RangeInput/TagInput → Slider | 选中/未选中样式配置、loadingProps、popupProps、头像折叠面板与 imageProps；输入/标签属性透传；Slider 数字输入联动与提示配置 | 白名单类型先从实际接收组件提取；显式输入与透传对象优先级写清；涉及挂载能力的属性留到第 4 轮 |
 | 3 | 中：基础录入状态 | Input → Textarea/Checkbox/Radio/Switch → Form → SelectInput → AutoComplete → Tabs（list）→ Breadcrumb/Steps/Statistic | 事件与输入限制；受控/非受控和 CVA；表单校验联动；组合输入能力；数据驱动页签；折叠、逆序、数值动画 | 已实现内容只回归；默认值仅初始化，不覆盖后续编辑；IME、清空、禁用、动态输入、reset/touched 都要验证；路由整合单独评估 |
-| 4 | 中到难：弹层基础与反馈 | Popup → Loading → Message/Notification → Dialog → Drawer → ImageViewer | 挂载点与生命周期契约；内容模板化；开关前钩子、焦点恢复、滚动锁定；自定义容器；最后补 Dialog 拖动、Drawer 尺寸拖动 | 先完成 Popup/Loading 基础再让其他组件消费；处理嵌套弹层、多实例与销毁；钩子是否可阻止/异步须按上游核实 |
+| 4 | 中到难：弹层基础与反馈 | Popup → Loading → Message/Notification → Card 共享 Loading 复核 → Dialog → Drawer → ImageViewer | 挂载点与生命周期契约；内容模板化；Card 加载模板、动态主体及遮罩组合复核；开关前钩子、焦点恢复、滚动锁定；自定义容器；最后补 Dialog 拖动、Drawer 尺寸拖动 | Card 第 2 轮完成的是既定 loadingProps 白名单；共享 Loading 完善后复核实际组合，不把零登记债务视为完整行为验收；处理嵌套弹层、多实例与销毁 |
 | 5 | 中到难：选择组件 | SelectInput 回归 → Select → Cascader → Tree 基础过滤/勾选 → TreeSelect | 先 label/tips/status/readonly 等外观输入与事件，再受控显隐、搜索、keys、折叠回显与类型化透传，最后补异步与树选择联动 | 依赖第 2～4 轮；Cascader 仅在实际共享树逻辑时等待 Tree；TreeSelect 需验证祖先/后代、半选、禁用、过滤与取值模式组合；虚拟滚动后置 |
 | 6 | 难：日期与时间状态 | TimePicker → DatePicker → DateRangePicker → Calendar 回归 | 先常规属性/事件和 popupProps，再时间禁用与 timePickerProps；模板化单元格/回显；最后范围面板、确认/取消和模式组合 | 日期工具同一轮串行维护；覆盖格式解析、闰年、月末、跨年周、空值、非法输入与范围边界；范围时间能力在当前 API 契约范围内验收 |
 | 7 | 难：文件与复合数据 | Upload → Transfer → Menu | Upload 模板/按钮配置、图片缩略图/预览、批量及取消/失败重试；Transfer 先 keys/分页，再树形与目标列表拖拽；Menu 路由和嵌套交互 | Upload 依赖 ImageViewer；Transfer 树形依赖 Tree；Menu 路由与 Breadcrumb 统一决定可选 peer/集成方式，保留无 router 消费场景 |
 | 8 | 很难：大数据与重型交互 | 公共虚拟滚动最小能力 → Select/List → Tree → Tree 拖拽 → Table | 先固定行高窗口、滚动定位，再树展开与过滤联动；树落点校验与事件；最后完善 Table 剩余高级能力及其组合 | 每项先核实已有实现；Table 按当前缺口拆分，优先单功能再组合排序/筛选/选择/分页/固定列/多级表头/合并/虚拟滚动/列宽拖拽，不重写已完成部分 |
 
 第 8 轮中可视窗口、树拖拽、表格能力分别交付，避免一次引入多个复杂状态机。若 Table 的残余项只是模板或事件，移到相应早期轮次完成，不因组件名而全部后置。
+
+### Card 的补完位置（2026-11-28 复核）
+
+Card 属于第 2 轮 Button/Card 的 loadingProps 批次，已完成当时的配置白名单、投影常驻和加载状态保留回归；当前生成进度为 23/25 属性对齐，content / default 映射 ng-content，登记债务为 0。这是属性名层面的统计，不代表 loading 的联合类型与所有组合场景都已验收。
+
+本次对照锁定上游类型与实现，明确在第 4 轮 Message / Notification 挂载批次后、Dialog 前安排一次 Card 复核：
+
+1. 补 loading 的自定义模板分支；当前只有 boolean，上游还支持 TNode，Angular 使用 TemplateRef 对应。
+2. 主体投影动态创建、删除、文本变化时重新判断空态；当前 afterNextRender 只检测一次，hasContent 只会置 true。
+3. 对齐共享 Loading 的包裹/遮罩和延迟行为；当前加载时隐藏主体并单独显示图标，上游通过 Loading 包裹主体。验证主体实例、输入草稿和焦点，不为了遮罩重建业务内容。
+4. 核实 Card.loadingProps 中 indicator 等共享能力的实际接入范围，定义 Card 专属白名单与显式 loading 优先级；不盲目透传会替换业务内容的 content 等字段。
+5. 增加使用 TButton / TInput 的演示，并回归自定义 header/footer/actions、poster 主题、空内容及动态样式组合。SSR / 水合仍按贯穿任务单独验收。
+
+以上为行为复核清单，尚未实施；其缺口未被现有按属性名统计的 progress 表表达，实施时同步源码、类型、生成文档与验证记录，不以新增这段计划计作功能完成。
 
 ## 4. 贯穿各轮的质量任务
 
@@ -330,3 +344,14 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。回归包括换用 TButton 后的真实焦点/定位/业务计数、模板内容实时更新及按钮身份保留、自定义图标/关闭/标题/底部、字符串转义与通知投影优先级、键盘和鼠标关闭、不同来源回调顺序/次数、hover 暂停/完整重计时、改时长/0/非有限值/关闭和销毁取消计时、旧句柄和重复 closeAll、关闭回调创建新消息及回调内 closeAll、全局配置合并/显式 false、两种 offset 单位、loading 显式时长、服务作用域销毁/销毁后空句柄与 ApplicationRef 视图数量恢复。Loading / Popup / Steps / Breadcrumb / Slider / SelectInput / AutoComplete / Message / Notification 页面 issues / badResources 均为空，Loading / Message / Notification 截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.55 kB）。
 
 **接续任务**：Message / Notification 自定义挂载与容器隔离 → Dialog → Drawer → ImageViewer；先完善反馈服务的挂载和多容器所有权，再进入对话框。
+
+### 2026-11-28：第 4 轮 Message / Notification 挂载与容器隔离，复核 Card 后续位置
+
+- **挂载与容器**：MessageOptions / NotificationOptions 新增 attach 与 style，公开各自 AttachNode / Style 类型。attach 支持选择器、HTMLElement 或函数，每次创建解析为真实节点；非法/缺失/未连接/跨文档目标、反馈容器内部目标、html 及抛错函数回退 body。列表保持锁定上游的 vendor fixed 定位，挂载本身不设置目标 position 或修改样式，transform / overflow / 层叠上下文仍遵循浏览器规则。不同服务分别管理容器，同一服务按实际目标、位置、zIndex 分组；Notification 的边缘距离也参与分组。保留显式 zIndex=0，非有限层级回退 6000。
+- **精确释放**：提炼仅供两个真实服务消费的 FeedbackContainers，每次获取保存容器记录并计数，关闭只释放原记录，最后一条关闭后移除自有容器。容器被外部移除或同选择器对应元素被替换时，后续创建使用新记录，旧句柄不删除新记录；相同目标上的另一服务不受 closeAll / 销毁影响。已有实例不自动迁移，调用方移除目标也不自动销毁实例，仍需手动关闭或销毁服务作用域。动态组件宿主通过目标 ownerDocument 创建，未宣称完整 SSR 支持。
+- **样式与偏移校准**：style 作用在每条消息/通知上，Message 接受对象，Notification 还接受 CSS 文本；对象支持 camelCase、CSS 属性名及变量，长度需带单位字符串，数字用于无单位属性，空值/非有限数字忽略，不修改调用方对象。Message.offset 继续是每条消息的 left/top 位移，显式 style 优先。依据锁定上游 NotificationList 修正前批 offset：现在是容器到 placement 对应边缘的距离，top-right 使用 right/top，bottom-left 使用 left/bottom，数字转像素；不再按每条通知 left/top 位移处理，文档和回归已同步。
+- **Card 位置答复与补验计划**：第 2 轮既定 loadingProps 批次已完成；现有 Card 23/25 属性加两项 ng-content 映射，登记债务为 0。本次只核实源码与锁定上游并记录缺口，不计作 Card 功能完成；loading 模板联合类型、动态主体空态、共享 Loading 包裹/遮罩及明确白名单需在当前挂载批次后、Dialog 前补验，详见第 3 节 Card 清单。Card 文档增加当前限制，后续按此清单实施。
+- **生成进度与余项**：新增两个使用 TCard / TInput / TButton 的可操作演示，示例 345 → 347。组件接口统计仍为 1085/1576（68.8%）、深度债 195、零登记债务目录 51/73；本批完善服务选项，不将组件属性统计冒充服务能力覆盖率。运行时 config()、上游 Promise 返回值、退出动画、完整 SSR / 水合和嵌套焦点验收继续保留，第 4 轮及 M2 尚未完成。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、最终文档站生产构建、全部既有与新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增覆盖选择器/元素/函数解析后同目标复用、默认配置挂载/样式、不同目标/placement/zIndex（含 0 与非有限值）分组、Notification 四角边距隔离、Message 位移及 style 优先级、CSS 文本/对象/变量、模板中 TButton/TInput 的事件/原节点/草稿保留、非法/跨文档/内部目标/抛错函数回退、函数每次创建解析、其他服务所有权、作用域销毁释放挂载容器、外部移除容器及替换目标后旧记录精确释放、全部视图恢复。真实计时重启测试扩大时长余量，避免并行构建负载让短计时器先于断言到期，稳定后的最终回归通过。Message / Notification / Card / Loading 页面 issues / badResources 为空，新增演示截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.55 kB）。
+
+**接续任务**：Card 共享 Loading 复核 → Dialog → Drawer → ImageViewer；先按第 3 节清单补 Card，再进入对话框生命周期与焦点。

@@ -44,6 +44,7 @@ import { DemoCardLoadingProps } from './demos/card-loading-props';
       <docs-demo id="card-loading-props" title="自定义加载配置" description="loadingProps 配置当前 LoadingOptions 支持的文字、尺寸、延迟和全屏等属性；加载时保留主体实例与状态。attach 和自定义 indicator 等能力暂不支持。">
         <demo-card-loading-props />
       </docs-demo>
+      <p class="demo-hint">当前 loading 仅支持布尔值，加载时隐藏主体但保留实例；自定义加载模板、动态空主体识别及共享 Loading 遮罩组合已列入第 4 轮反馈服务挂载之后的 Card 复核任务。属性表中的 content / default 使用 ng-content 映射，生成零债务不代表上述行为已全部完成。</p>
 
       <h2 class="docs-section__title" id="card-api">API</h2>
       <div class="api-table__scroll">

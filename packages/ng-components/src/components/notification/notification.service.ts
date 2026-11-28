@@ -1,4 +1,5 @@
 import { DOCUMENT } from '@angular/common';
+import { FeedbackContainers, applyFeedbackStyle } from '../../_utils/feedback-container';
 import {
   ApplicationRef,
   DestroyRef,
@@ -61,7 +62,7 @@ export class TNotificationService {
 
   private readonly config = inject(NOTIFICATION_CONFIG, { optional: true }) ?? {};
 
-  private readonly containers = new Map<NotificationPlacement, HTMLElement>();
+  private readonly containers = new FeedbackContainers(this.document, 'notification');
 
   private readonly entries = new Set<NotificationEntry>();
 
@@ -90,7 +91,7 @@ export class TNotificationService {
     if (this.destroyed || !this.document.body) return { close: () => {} };
     const normalized = this.normalize(theme, options);
     const container = this.getContainer(normalized);
-    const rendered = renderComponent(TNotification, container, this.envInjector, this.appRef, 't-notification');
+    const rendered = renderComponent(TNotification, container.element, this.envInjector, this.appRef, 't-notification');
     const { ref, host } = rendered;
 
     ref.setInput('title', normalized.title ?? '');
@@ -107,12 +108,7 @@ export class TNotificationService {
       element.classList.add(...normalized.className.split(/\s+/).filter(Boolean));
     }
 
-    if (element && normalized.offset) {
-      element.style.position = 'relative';
-      const [x, y] = normalized.offset;
-      if (x !== undefined && x !== '') element.style.left = typeof x === 'number' ? x + 'px' : x;
-      if (y !== undefined && y !== '') element.style.top = typeof y === 'number' ? y + 'px' : y;
-    }
+    if (element) applyFeedbackStyle(element, normalized.style);
 
     let closed = false;
     const subscriptions: { unsubscribe(): void }[] = [];
@@ -122,7 +118,7 @@ export class TNotificationService {
       for (const subscription of subscriptions) subscription.unsubscribe();
       this.entries.delete(entry);
       rendered.destroy();
-      this.releaseContainer(normalized.placement);
+      container.release();
       normalized.onClose?.();
     };
     const entry: NotificationEntry = { placement: normalized.placement, destroy: () => finish() };
@@ -156,32 +152,19 @@ export class TNotificationService {
     };
   }
 
-  private getContainer(options: NotificationOptions): HTMLElement {
+  private getContainer(options: NotificationOptions) {
     const placement = options.placement ?? 'top-right';
-    const existing = this.containers.get(placement);
-    if (existing) return existing;
-
-    const container = this.document.createElement('div');
-    container.className = `t-notification__show--${placement}`;
-    container.dataset['placement'] = placement;
-    Object.assign(container.style, PLACEMENT_STYLE[placement]);
-    container.style.zIndex = String(options.zIndex ?? this.config.zIndex ?? DEFAULT_Z_INDEX);
-    if (placement.startsWith('bottom')) {
-      container.style.display = 'flex';
-      container.style.flexDirection = 'column-reverse';
+    const position = { ...PLACEMENT_STYLE[placement] };
+    if (options.offset) {
+      const [x, y] = options.offset;
+      if (x !== undefined && x !== '') position[placement.includes('left') ? 'left' : 'right'] = typeof x === 'number' ? x + 'px' : x;
+      if (y !== undefined && y !== '') position[placement.startsWith('top') ? 'top' : 'bottom'] = typeof y === 'number' ? y + 'px' : y;
     }
-    this.document.body.appendChild(container);
-    this.containers.set(placement, container);
-    return container;
+    const zIndex = Number.isFinite(options.zIndex) ? options.zIndex! : DEFAULT_Z_INDEX;
+    return this.containers.acquire(options.attach, placement, zIndex, position);
   }
 
-  private releaseContainer(placement: NotificationPlacement): void {
-    const container = this.containers.get(placement);
-    if (!container) return;
-    if (container.children.length > 0) return;
-    container.remove();
-    this.containers.delete(placement);
-  }
+
 }
 
 /**

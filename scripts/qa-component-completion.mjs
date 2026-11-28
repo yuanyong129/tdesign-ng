@@ -1917,7 +1917,8 @@ try {
       const keyboard=key.defaultPrevented&&!panel.isConnected&&demo.closes()===1&&demo.clicks()===1&&demo.expired()===0&&service.appRef.viewCount===baseViews;
       const events=[];const options=(extra={})=>({content:'test',duration:0,closeBtn:true,onClose:c=>events.push(['close',c?.trigger??'api']),onCloseBtnClick:({e})=>events.push(['button',e.type]),onDurationEnd:()=>events.push(['duration']),...extra});
       const manual=service.info(options({icon:false,className:'feedback-manual',offset:[12,'1rem']}));await apply();panel=document.querySelector('.feedback-manual');
-      const appearance=!panel.querySelector('.t-icon:not(.t-icon-close)')&&panel.style.left==='12px'&&panel.style.top==='1rem'&&panel.getAttribute('role')==='status';
+      const offsetElement=kind==='message'?panel:panel.closest('[data-t-feedback-container]');
+      const appearance=!panel.querySelector('.t-icon:not(.t-icon-close)')&&(kind==='message'?offsetElement.style.left:offsetElement.style.right)==='12px'&&offsetElement.style.top==='1rem'&&panel.getAttribute('role')==='status';
       manual.close();manual.close();await apply();const idempotent=events.length===1&&events[0][1]==='api'&&service.appRef.viewCount===baseViews;
       events.length=0;const auto=service.info(options({duration:100,className:'feedback-auto'}));await apply();panel=document.querySelector('.feedback-auto');panel.dispatchEvent(new MouseEvent('mouseenter'));await wait(150);
       const paused=panel.isConnected&&events.length===0;panel.dispatchEvent(new MouseEvent('mouseleave'));await wait(45);const fullRestart=panel.isConnected;await wait(100);auto.close();
@@ -1940,7 +1941,7 @@ try {
         const projected=root.querySelector('.notification-projected button');projected.click();await apply();demo.contentValue.set('');await apply();const hidden=getComputedStyle(projected.closest('.t-notification__content > span')).display==='none';demo.contentValue.set(undefined);await apply();projection=hidden&&root.querySelector('.notification-projected button')===projected&&demo.count()===2;
       }
       demo.contentValue.set('<b>escaped</b>');await apply();const escaped=root.querySelector('.'+kind+'-static').textContent.includes('<b>escaped</b>')&&!root.querySelector('.'+kind+'-static b');
-      demo.duration.set(100);await apply();await wait(40);demo.duration.set(180);await apply();await wait(100);const restarted=!!root.querySelector('.'+kind+'-static .t-'+kind);demo.duration.set(0);await apply();await wait(210);const cancelled=demo.events.length===0&&!!root.querySelector('.'+kind+'-static .t-'+kind);
+      demo.duration.set(400);await apply();await wait(60);demo.duration.set(600);await apply();await wait(150);const restarted=!!root.querySelector('.'+kind+'-static .t-'+kind);demo.duration.set(0);await apply();await wait(650);const cancelled=demo.events.length===0&&!!root.querySelector('.'+kind+'-static .t-'+kind);
       demo.duration.set(Infinity);await apply();await wait(30);const finiteOnly=demo.events.length===0;demo.duration.set(60);await apply();await wait(110);const staticClose=demo.events.length===1&&demo.events[0].trigger==='duration-end'&&!root.querySelector('.'+kind+'-static .t-'+kind);
       demo.staticShown.set(false);await apply();demo.duration.set(100);demo.staticShown.set(true);await apply();demo.staticShown.set(false);await apply();await wait(140);const destroyedTimer=demo.events.length===1;
       const scope=ng.getComponent(root.querySelector('demo-'+kind+'-scope')),scoped=scope.service;let scopeCloses=0;
@@ -1950,6 +1951,60 @@ try {
     })()`);
     for(const [key,value] of Object.entries(feedback))assert.equal(value,true,kind+' '+key);
     console.log('PASS '+kind+': live templates/internal buttons, close keyboard/callbacks once, hover/restart/cancel/invalid timer, idempotent handles/closeAll/reentrancy, defaults/offset, static projection/escaping, scoped destruction and view cleanup');
+  }
+  for(const kind of ['message','notification']){
+    await page('/'+kind,'demo-'+kind+'-attachment .feedback-target-a');
+    const attachment=await evaluate(`(async()=>{
+      const kind=${JSON.stringify(kind)},root=document.querySelector('demo-'+kind+'-attachment'),demo=ng.getComponent(root),service=demo.service;
+      const apply=async()=>{ng.applyChanges(demo);${settle}},baseViews=service.appRef.viewCount;
+      let a=root.querySelector('.feedback-target-a');const b=root.querySelector('.feedback-target-b'),aStyle=a.getAttribute('style'),bStyle=b.getAttribute('style');
+      const container=element=>element.closest('[data-t-feedback-container]'),panel=name=>document.querySelector('.'+name),ids='#'+kind+'-attach-a';
+      const options=(name,attach=a,extra={})=>({content:demo.content(),...(kind==='notification'?{footer:demo.footer(),title:'test'}:{}),attach,placement:'top-right',zIndex:7000,duration:0,closeBtn:true,className:name,...extra});
+      const style={backgroundColor:'rgb(1, 2, 3)','border-radius':'7px','--feedback-test':'ready',opacity:0.75,margin:null,padding:undefined};const beforeStyle=JSON.stringify(style);
+      const first=service.info(options('feedback-mounted-one',ids,{style}));const second=service.info(options('feedback-mounted-two',a));const third=service.info(options('feedback-mounted-three',()=>ids));await apply();
+      const one=panel('feedback-mounted-one'),sharedContainer=container(one);
+      const shared=sharedContainer===container(panel('feedback-mounted-two'))&&sharedContainer===container(panel('feedback-mounted-three'))&&sharedContainer.parentElement===a&&sharedContainer.children.length===3&&sharedContainer.style.zIndex==='7000';
+      const styled=one.style.backgroundColor==='rgb(1, 2, 3)'&&one.style.borderRadius==='7px'&&one.style.getPropertyValue('--feedback-test')==='ready'&&one.style.opacity==='0.75'&&JSON.stringify(style)===beforeStyle;
+      const action=one.querySelector('.attached-'+kind+'-action button'),draft=one.querySelector('input');draft.value='draft';draft.dispatchEvent(new Event('input',{bubbles:true}));action.click();await apply();demo.label.set('Live attached');await apply();
+      const live=one.querySelector('.attached-'+kind+'-label').textContent==='Live attached'&&one.querySelector('input')===draft&&draft.value==='draft'&&one.querySelector('.attached-'+kind+'-action button')===action&&demo.count()===1;
+      const otherTarget=service.info(options('feedback-mounted-b',b)),otherPlacement=service.info(options('feedback-mounted-bottom',a,{placement:'bottom-left'})),zero=service.info(options('feedback-mounted-zero',a,{zIndex:0}));await apply();
+      const isolated=container(panel('feedback-mounted-b')).parentElement===b&&container(panel('feedback-mounted-bottom'))!==sharedContainer&&container(panel('feedback-mounted-zero'))!==sharedContainer&&container(panel('feedback-mounted-zero')).style.zIndex==='0';
+      first.close();await apply();const retained=sharedContainer.isConnected&&sharedContainer.children.length===2&&!!panel('feedback-mounted-two');
+      const defaults=service.info({content:'default target',className:'feedback-defaults'});await apply();const defaultsPanel=panel('feedback-defaults');const merged=container(defaultsPanel).parentElement===a&&container(defaultsPanel).style.zIndex==='7000'&&defaultsPanel.style.getPropertyValue('--feedback-default')==='ready';defaults.close();
+      const nonfinite=service.info(options('feedback-nonfinite',a,{zIndex:NaN}));await apply();const finite=container(panel('feedback-nonfinite')).style.zIndex==='6000';nonfinite.close();
+      const externalDocument=document.implementation.createHTMLDocument('other'),external=externalDocument.createElement('div');externalDocument.body.append(external);
+      let fallbacks=true;for(const target of [null,'[','#missing-feedback-target',document.createElement('div'),external,document.documentElement,sharedContainer,()=>{throw new Error('fixture resolver');}]){
+        const instance=service.info(options('feedback-fallback',target));await apply();fallbacks&&=container(panel('feedback-fallback')).parentElement===document.body;instance.close();
+      }
+      let current=a;const resolve=()=>current;const existing=service.info(options('feedback-resolved-old',resolve));await apply();current=b;const fresh=service.info(options('feedback-resolved-new',resolve));await apply();const resolveEach=container(panel('feedback-resolved-old')).parentElement===a&&container(panel('feedback-resolved-new')).parentElement===b;existing.close();fresh.close();
+      let offsets=true,cssText=true;
+      if(kind==='notification'){
+        for(const placement of ['top-left','top-right','bottom-left','bottom-right']){
+          const oneOffset=service.info(options('feedback-offset-one',a,{placement,offset:[23,'2rem']})),twoOffset=service.info(options('feedback-offset-two',a,{placement,offset:[24,'2rem']}));await apply();
+          const c=container(panel('feedback-offset-one')),d=container(panel('feedback-offset-two'));offsets&&=c!==d&&c.style[placement.includes('left')?'left':'right']==='23px'&&c.style[placement.startsWith('top')?'top':'bottom']==='2rem'&&!panel('feedback-offset-one').style.left;
+          oneOffset.close();twoOffset.close();
+        }
+        const text=service.info(options('feedback-css-text',a,{style:'border-radius: 9px; --text-style: ready; width: 250px'}));await apply();cssText=panel('feedback-css-text').style.borderRadius==='9px'&&panel('feedback-css-text').style.width==='250px';text.close();
+      }else{
+        const offset=service.info(options('feedback-offset',a,{offset:[11,12],style:{top:'9px'}}));await apply();offsets=container(panel('feedback-offset'))===sharedContainer&&panel('feedback-offset').style.left==='11px'&&panel('feedback-offset').style.top==='9px';offset.close();
+      }
+      const otherService=ng.getComponent(document.querySelector('demo-'+kind+'-scope')).service;
+      const otherOwner=otherService.info(options('feedback-other-owner',a));await apply();const otherContainer=container(panel('feedback-other-owner'));service.closeAll();first.close();second.close();third.close();otherTarget.close();otherPlacement.close();zero.close();await apply();
+      const owned=otherContainer.isConnected&&otherContainer.parentElement===a&&!sharedContainer.isConnected&&!document.querySelector('.feedback-mounted-b')&&a.getAttribute('style')===aStyle&&b.getAttribute('style')===bStyle;
+      const ownerDemo=ng.getComponent(document.querySelector('demo-'+kind+'-content'));ownerDemo.mounted.set(false);ng.applyChanges(ownerDemo);await apply();otherOwner.close();
+      const scopeReleased=!otherContainer.isConnected&&service.appRef.viewCount===baseViews;
+      // If external code removes a generated container, a new record must survive release of the stale one.
+      const stale=service.info(options('feedback-stale',a));await apply();const staleContainer=container(panel('feedback-stale'));staleContainer.remove();
+      const replacement=service.info(options('feedback-replacement',a));await apply();const replacementContainer=container(panel('feedback-replacement'));stale.close();await apply();const staleSafe=replacementContainer!==staleContainer&&replacementContainer.isConnected&&replacementContainer.children.length===1;replacement.close();
+      // A replaced selector resolves to a new element; old handles retain their original lease.
+      const removed=service.info(options('feedback-removed',ids));await apply();const originalTarget=a;demo.showA.set(false);await apply();demo.showA.set(true);await apply();a=root.querySelector('.feedback-target-a');
+      const recreated=service.info(options('feedback-recreated',ids));await apply();const recreatedContainer=container(panel('feedback-recreated'));removed.close();await apply();const replacementTarget=a!==originalTarget&&!originalTarget.isConnected&&recreatedContainer.parentElement===a&&recreatedContainer.isConnected;recreated.close();
+      const nested=service.info(options('feedback-nested-owner',a));await apply();const nestedTarget=panel('feedback-nested-owner');const nestedFallback=service.info(options('feedback-nested-fallback',nestedTarget));await apply();const noNested=container(panel('feedback-nested-fallback')).parentElement===document.body;nested.close();nestedFallback.close();
+      service.closeAll();await apply();const cleaned=service.appRef.viewCount===baseViews&&!root.querySelector('[data-t-feedback-container]')&&a.isConnected&&b.isConnected;
+      return {shared,styled,live,isolated,retained,merged,finite,fallbacks,resolveEach,offsets,cssText,owned,scopeReleased,staleSafe,replacementTarget,noNested,cleaned};
+    })()`);
+    for(const [key,value] of Object.entries(attachment))assert.equal(value,true,kind+' attachment '+key);
+    console.log('PASS '+kind+' attachment: resolved-node grouping, placement/zIndex/edge-distance isolation, style/defaults, live internal controls, invalid targets, service ownership, exact lease release after external removal/replacement, full view cleanup');
   }
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');

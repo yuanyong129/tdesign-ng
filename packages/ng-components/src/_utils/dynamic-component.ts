@@ -23,7 +23,7 @@ export function renderComponent<C>(
   appRef: ApplicationRef,
   hostTag = 'div',
 ): RenderedComponent<C> {
-  const host = document.createElement(hostTag);
+  const host = container.ownerDocument.createElement(hostTag);
   container.appendChild(host);
 
   const ref = createComponent(component, { environmentInjector: injector, hostElement: host });
