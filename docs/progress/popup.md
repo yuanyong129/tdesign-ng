@@ -4,25 +4,25 @@
 
 - 目录：`packages/ng-components/src/components/popup/`
 - 文档页：`/popup`（`packages/docs/src/app/docs/popup/popup.component.ts`）
-- 状态：🚧 有深度债 1 项
+- 状态：✅ 已对齐上游全部属性
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 24 |
-| 已对齐 | 17 |
-| 覆盖率 | 70.8% |
-| 深度债 | 1（D1 0 / D2 1 / D3 0） |
+| 已对齐 | 18 |
+| 覆盖率 | 75.0% |
+| 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 6（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 7 个 |
+| 文档示例 | 8 个 |
 
 ## 组件明细
 
 ### `TPopup`（`<t-popup>`）
 
-上游接口 `TdPopupProps`；上游属性 24、已对齐 17（70.8%）；深度债 1 项；未登记缺失 0 项。
+上游接口 `TdPopupProps`；上游属性 24、已对齐 18（75.0%）；深度债 0 项；未登记缺失 0 项。
 
 **已实现输入**
 
@@ -31,6 +31,7 @@
 | `content` | string \| undefined | undefined | 弹层内容（纯文本） |
 | `attach` | PopupAttachNode | undefined | 挂载节点、选择器或返回节点的函数，缺省挂到 body 的 CDK 容器 |
 | `triggerElement` | PopupTriggerElement \| undefined | undefined | 外部触发元素选择器或替换默认触发区的模板 |
+| `popperOptions` | PopupPopperOptions \| undefined | undefined | CDK 支持的位置覆盖、偏移、翻转和视口保护配置白名单 |
 | `placement` | PopupPlacement | 'top' | 弹层位置 |
 | `trigger` | PopupTrigger | 'hover' | 触发方式 |
 | `delay` | number \| number[] | 0 | 显示/隐藏的延迟毫秒数，数组形式为 [显示延迟, 隐藏延迟] |
@@ -67,7 +68,6 @@
 | `onScroll` | Angular 惯用映射 | Angular 用 (scroll) 输出 { e: Event }，对应运行时原生 scroll 而非类型声明的 WheelEvent |
 | `onScrollToBottom` | Angular 惯用映射 | Angular 用 (scrollToBottom) 输出 { e: Event }，100ms 去抖 |
 | `onVisibleChange` | Angular 惯用映射 | Angular 用 (visibleChange) 输出 |
-| `popperOptions` | D2 录入与反馈线 | 定位由 CDK Overlay 负责，不透传 popper 配置 |
 
 ## 文档示例
 
@@ -77,4 +77,5 @@
 - `packages/docs/src/app/docs/popup/demos/popup-content.ts`
 - `packages/docs/src/app/docs/popup/demos/popup-lifecycle.ts`
 - `packages/docs/src/app/docs/popup/demos/popup-placement.ts`
+- `packages/docs/src/app/docs/popup/demos/popup-position-options.ts`
 - `packages/docs/src/app/docs/popup/demos/popup-trigger.ts`

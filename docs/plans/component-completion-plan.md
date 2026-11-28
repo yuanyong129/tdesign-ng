@@ -299,3 +299,13 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及本批交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增覆盖选择器/元素/函数挂载、缺失/非法/未连接回退、平移缩放与滚动实测坐标、实例隔离、动态挂载保留原节点/草稿/计数/焦点、关闭保留及销毁重建、外部触发器切换与旧节点解绑、focus 面板边界/context-menu、模板更新/投影回退、缺失节点恢复/同选择器替换、原目标样式和节点所有权、销毁后独立容器/外部监听清理及实例方法无效。Popup / SelectInput / AutoComplete / Breadcrumb 页面 issues / badResources 均为空，Popup 截图已检查；页面探针在交互回归后串行执行。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.67 kB）。
 
 **接续任务**：Popup 定位配置评估 → Loading → Message / Notification；先决定 CDK 下可兑现的定位配置契约，再推进上层组件。
+
+### 2026-11-28：第 4 轮 Popup 定位配置白名单
+
+- **实际配置**：新增公开 PopupPopperOptions / PopupPopperModifier / PopupPopperPlacement 和 popperOptions。沿用锁定上游位置覆盖优先级，placement 支持 Popper 的 start / end 拼写；offset 支持数字 [skidding, distance]，四侧按方向计算正负距离；flip 支持 enabled 和 fallbackPlacements，默认镜像候选，空数组/false 只保留首选；preventOverflow 映射 CDK 视口推移与统一 padding，启用缺省边距 4px。同名 modifier 最后一项生效，不修改传入数组，数值非有限时使用缺省，padding 不能为负。
+- **共享定位与实例**：connectPopup 增加可选配置，未传时 Tooltip 和既有 Popup 消费方保持原默认定位；传配置后关闭弹层尺寸自动收缩，保持偏移/溢出行为可预期。位置和配置动态变化会重建定位策略，实际生效方向通过 data-popper-placement 反馈，内容宿主及计数保留；移除配置恢复默认位置和偏移。未伪造 Popper 实例，不提供 getPopper()。
+- **明确限制**：这是 CDK 下可兑现的类型白名单，不是完整 Popper 配置。仍不支持 auto、strategy、任意 modifier/phase/fn、偏移函数、自定义 boundary、分侧 padding、tether、mainAxis/altAxis、arrow 插件及生命周期回调；preventOverflow 遵循 CDK 推移算法，不承诺与 Popper 像素相同。未给复合组件 PopupOptions 扩散新配置。沿用前批挂载变换、模板与完整 SSR / 水合边界。
+- **生成进度**：新增 1 个可操作 demo，总数 341 → 342；对齐 1081 → 1082（68.7%）、真实债务 201 → 200、零债务目录 48/73。Popup 已登记属性债务为 0，仅表示顶层属性及上述有限子集已接入，不能解读为支持所有 Popper 嵌套字段。第 4 轮及 M2 仍待反馈组件和跨组件验收。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部既有及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。实测四侧偏移和位置覆盖误差小于 2px，验证同名覆盖/disabled/非法数值恢复、视口边缘翻转/禁止翻转/空候选、16px 视口推移与关闭保护允许溢出、移除配置恢复默认并保留原内容和计数。打包检出 Array.at 超出库目标后改兼容写法，最终完整构建和回归重新通过。Popup / Tooltip / SelectInput / AutoComplete 页面 issues / badResources 为空，Popup 截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.67 kB）。
+
+**接续任务**：第 4 轮 Loading → Message / Notification → Dialog → Drawer → ImageViewer，先核实已有实现，再分批完善。

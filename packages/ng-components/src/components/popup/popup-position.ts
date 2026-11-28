@@ -1,5 +1,11 @@
 import { ConnectedPosition, FlexibleConnectedPositionStrategy, Overlay } from '@angular/cdk/overlay';
-import { PopupPlacement, flipPlacement } from './popup.types';
+import { PopupPlacement, PopupPopperOptions, PopupPopperPlacement, flipPlacement, toPopperPlacement } from './popup.types';
+
+function fromPopperPlacement(placement: PopupPopperPlacement): PopupPlacement {
+  const [side, align] = placement.split('-');
+  if (!align) return side as PopupPlacement;
+  return `${side}-${side === 'top' || side === 'bottom' ? align === 'start' ? 'left' : 'right' : align === 'start' ? 'top' : 'bottom'}` as PopupPlacement;
+}
 
 /**
  * 把 TDesign 的 placement 翻译成 CDK 的锚点组合。
@@ -61,6 +67,7 @@ function popperPlacementOf(placement: PopupPlacement): string {
 
 export interface PopupConnector {
   strategy: FlexibleConnectedPositionStrategy;
+  initialPlacement: string;
   /** 订阅实际生效的位置；CDK 在空间不足时会自动翻到备用位置。 */
   watch(listener: (popperPlacement: string) => void): void;
 }
@@ -87,19 +94,35 @@ export function resolveAnchor(element: HTMLElement): HTMLElement {
  * 除了首选位置，还会给一个镜像位置作为备用（下方放不下时翻到上方），
  * 并把最终生效的 placement 上报给调用方，用于写 `data-popper-placement`。
  */
-export function connectPopup(overlay: Overlay, host: HTMLElement, placement: PopupPlacement): PopupConnector {
-  const candidates: PopupPlacement[] = [placement, flipPlacement(placement)];
-  const pairs = candidates.map((item) => connectPosition(item));
+export function connectPopup(overlay: Overlay, host: HTMLElement, placement: PopupPlacement, options?: PopupPopperOptions): PopupConnector {
+  const modifiers = [...(options?.modifiers ?? [])].reverse();
+  // 与 Popper 同名 modifier 覆盖规则一致，最后一个配置生效。
+  const offset = modifiers.find((item) => item.name === 'offset');
+  const flip = modifiers.find((item) => item.name === 'flip');
+  const overflow = modifiers.find((item) => item.name === 'preventOverflow');
+  const preferred = options?.placement ? fromPopperPlacement(options.placement) : placement;
+  const fallbacks = flip?.enabled === false ? [] : flip?.options?.fallbackPlacements?.map(fromPopperPlacement) ?? [flipPlacement(preferred)];
+  const candidates = [...new Set([preferred, ...fallbacks])];
+  const finite = (value: number | undefined, fallback = 0) => value !== undefined && Number.isFinite(value) ? value : fallback;
+  const [skid, distance] = offset?.enabled === false ? [0, 0] : offset?.options?.offset?.map((value) => finite(value)) ?? [0, 0];
+  const pairs = candidates.map((item) => {
+    const position = connectPosition(item), side = item.split('-')[0];
+    position.offsetX = side === 'left' ? -distance : side === 'right' ? distance : skid;
+    position.offsetY = side === 'top' ? -distance : side === 'bottom' ? distance : skid;
+    return position;
+  });
 
   const strategy = overlay
     .position()
     .flexibleConnectedTo(host)
     .withPositions(pairs)
-    .withPush(false)
-    .withViewportMargin(4);
+    .withPush(!!overflow && overflow.enabled !== false)
+    .withViewportMargin(Math.max(0, finite(overflow?.options?.padding, 4)));
+  if (options) strategy.withFlexibleDimensions(false);
 
   return {
     strategy,
+    initialPlacement: toPopperPlacement(preferred),
     watch(listener) {
       strategy.positionChanges.subscribe((change) => {
         const index = pairs.findIndex(

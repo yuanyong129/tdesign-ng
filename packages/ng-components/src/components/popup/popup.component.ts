@@ -37,6 +37,7 @@ import {
   PopupVisibleChangeEvent,
   PopupAttachNode,
   PopupTriggerElement,
+  PopupPopperOptions,
 } from './popup.types';
 
 function classList(value: string | string[] | Record<string, boolean> | null | undefined): string[] {
@@ -92,6 +93,8 @@ export class TPopup {
   readonly attach = input<PopupAttachNode>(undefined);
   /** @zh 外部触发元素选择器或替换默认触发区的模板 @en External trigger selector or a template replacing the default trigger @defaultValue undefined */
   readonly triggerElement = input<PopupTriggerElement | undefined>(undefined);
+  /** @zh CDK 支持的位置覆盖、偏移、翻转和视口保护配置白名单 @en Supported placement, offset, flip and viewport overflow options @defaultValue undefined */
+  readonly popperOptions = input<PopupPopperOptions | undefined>(undefined);
 
   /** @zh 弹层位置 @en The placement of the popup @defaultValue 'top' @values top, left, right, bottom, top-left, top-right, bottom-left, bottom-right, left-top, left-bottom, right-top, right-bottom */
   readonly placement = input<PopupPlacement>('top');
@@ -242,6 +245,7 @@ export class TPopup {
     effect(() => {
       // 位置变化后同步更新定位策略，否则弹层还贴在旧位置
       this.placement();
+      this.popperOptions();
       untracked(() => {
         if (!this.overlayRef) return;
         this.applyPosition();
@@ -514,16 +518,10 @@ export class TPopup {
   private applyPosition(): void {
     const anchor = this.getTriggerNode();
     if (!anchor) return;
-    this.connector = connectPopup(this.overlay, anchor, this.placement());
+    this.connector = connectPopup(this.overlay, anchor, this.placement(), this.popperOptions());
     this.overlayRef?.updatePositionStrategy(this.connector.strategy);
-    this.popperPlacement.set(this.popperPlacementOf(this.placement()));
+    this.popperPlacement.set(this.connector.initialPlacement);
     this.connector.watch((value) => this.popperPlacement.set(value));
-  }
-
-  private popperPlacementOf(placement: PopupPlacement): string {
-    const [side, align] = placement.split('-');
-    if (!align) return side;
-    return `${side}-${align === 'left' || align === 'top' ? 'start' : 'end'}`;
   }
 
   private bindOutsideListeners(): void {

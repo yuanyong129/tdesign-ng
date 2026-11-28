@@ -5,6 +5,20 @@ export type PopupAttachNode = string | HTMLElement | null | undefined | (() => s
 /** 字符串是外部触发器选择器，模板替换默认触发内容。 */
 export type PopupTriggerElement = string | TemplateRef<unknown>;
 
+/** Popper 的方向拼写，使用 start / end 对齐，不包含 auto。 */
+export type PopupPopperPlacement = 'top' | 'bottom' | 'left' | 'right'
+  | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'
+  | 'left-start' | 'left-end' | 'right-start' | 'right-end';
+export type PopupPopperModifier =
+  | { name: 'offset'; enabled?: boolean; options?: { offset?: [number, number] } }
+  | { name: 'flip'; enabled?: boolean; options?: { fallbackPlacements?: PopupPopperPlacement[] } }
+  | { name: 'preventOverflow'; enabled?: boolean; options?: { padding?: number } };
+/** CDK 可实现的 Popper 配置白名单；不接受任意 modifier、strategy 或 Popper 实例回调。 */
+export interface PopupPopperOptions {
+  placement?: PopupPopperPlacement;
+  modifiers?: PopupPopperModifier[];
+}
+
 /** 弹窗位置，与 TDesign 的 `placement` 取值一致。 */
 export const POPUP_PLACEMENTS = [
   'top',
@@ -78,7 +92,7 @@ export interface PopupVisibleChangeEvent extends PopupVisibleChangeContext { vis
  * 弹层透传选项：组件把上游的 `popupProps` 收敛成这个形状，再交给 `t-popup`。
  *
  * 只收录复合组件已经接入的字段——`attach` / `overlayStyle` / `overlayInnerStyle` /
- * `triggerElement` 尚未在复合组件接入；`popperOptions` 在 `TPopup` 侧仍是欠账，
+ * `triggerElement` / `popperOptions` 尚未在复合组件接入，
  * 与其收下一个被静默忽略的键，不如让 TypeScript 直接报错。
  *
  * 优先级：调用方显式写的 input **永远** 优先于 `popupProps` 里的同名键

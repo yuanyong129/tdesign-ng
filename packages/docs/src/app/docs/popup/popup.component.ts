@@ -9,6 +9,7 @@ import { DemoPopupPlacement } from './demos/popup-placement';
 import { DemoPopupTrigger } from './demos/popup-trigger';
 import { DemoPopupLifecycle } from './demos/popup-lifecycle';
 import { DemoPopupAttachment } from './demos/popup-attachment';
+import { DemoPopupPositionOptions } from './demos/popup-position-options';
 
 @Component({
   selector: 'popup-docs',
@@ -23,6 +24,7 @@ import { DemoPopupAttachment } from './demos/popup-attachment';
     DemoPopupContent,
     DemoPopupLifecycle,
     DemoPopupAttachment,
+    DemoPopupPositionOptions,
   ],
   template: `
     <div class="docs-page">
@@ -62,7 +64,13 @@ import { DemoPopupAttachment } from './demos/popup-attachment';
         <demo-popup-attachment />
       </docs-demo>
       <p class="demo-hint">attach 使用实例独立容器，不移动全局 CDK 容器、不修改挂载目标样式；动态切换保留原浮层和组件状态。无效选择器、未连接/跨文档目标回退到默认 body 容器。滚动和窗口缩放会更新位置，支持祖先平移与正向轴对齐缩放；旋转、倾斜、负缩放及透视变换尚未支持。挂载目标的裁剪和层叠上下文继续生效。函数目标每次打开或 update() 重新解析。</p>
-      <p class="demo-hint">triggerElement 的字符串是 CSS 选择器；找不到时实际浮层保持关闭，后续节点创建后调用 update() 或 show() 重新解析。切换会解绑旧节点事件，外部节点不会被移动或删除；模板支持动态绑定，未配置时用默认投影。手动改变外部节点布局或替换同选择器节点后可调用 update()。getOverlay() 仍返回实际 .t-popup。popperOptions 与 getPopper() 尚不提供，复合组件 PopupOptions 仍维持现有白名单。</p>
+      <p class="demo-hint">triggerElement 的字符串是 CSS 选择器；找不到时实际浮层保持关闭，后续节点创建后调用 update() 或 show() 重新解析。切换会解绑旧节点事件，外部节点不会被移动或删除；模板支持动态绑定，未配置时用默认投影。手动改变外部节点布局或替换同选择器节点后可调用 update()。getOverlay() 仍返回实际 .t-popup；getPopper() 尚不提供，复合组件 PopupOptions 仍维持现有白名单。</p>
+
+      <docs-demo id="popup-position-options" title="定位配置白名单" description="popperOptions 通过 CDK 实现部分 Popper 配置：位置覆盖、offset 偏移、flip 翻转和 preventOverflow 视口保护，不接受任意 Popper 插件。">
+        <demo-popup-position-options />
+      </docs-demo>
+      <p class="demo-hint">PopupPopperOptions.placement 使用 top-start / bottom-end 等 Popper 拼写，设置时覆盖 placement。modifiers 支持 offset 的 [skidding, distance] 数字元组，正 distance 向远离触发器方向移动；flip 支持 enabled 与 fallbackPlacements，默认镜像翻转，空候选或 enabled=false 禁用翻转；preventOverflow 启用后使用 CDK 视口推移，padding 是非负统一边距，缺省 4px。重复同名配置最后一项生效，非法数值按缺省处理。配置变化会重新定位并保留内容，update() 可手动更新。</p>
+      <p class="demo-hint">这是类型化的有限适配，不是完整 Popper。暂不支持 auto 方向、strategy、任意 modifier / phase / fn、偏移函数、非视口 boundary、分侧 padding、tether、mainAxis / altAxis、arrow 插件及实例生命周期回调；视口推移语义遵循 CDK，不保证与 Popper 像素一致。箭头和 data-popper-placement 沿用实际生效方向，getPopper() 不返回伪造实例。生成零债务仅表示当前属性契约已提供，以上嵌套配置能力仍有限制。</p>
 
       <h2 class="docs-section__title" id="popup-api">API</h2>
       <div class="api-table__scroll">

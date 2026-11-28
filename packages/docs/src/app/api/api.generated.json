@@ -7063,6 +7063,15 @@
           "values": []
         },
         {
+          "name": "popperOptions",
+          "type": "PopupPopperOptions | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "CDK 支持的位置覆盖、偏移、翻转和视口保护配置白名单",
+          "en": "Supported placement, offset, flip and viewport overflow options",
+          "values": []
+        },
+        {
           "name": "placement",
           "type": "PopupPlacement",
           "default": "'top'",

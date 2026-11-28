@@ -6,10 +6,10 @@
 | --- | --- |
 | 组件目录 | 73 |
 | 上游属性 | 1576 |
-| 已对齐 | 1081 |
-| 覆盖率 | 68.6% |
-| 深度债 | 201 项 |
-| 零债务组件 | 47 / 73 |
+| 已对齐 | 1082 |
+| 覆盖率 | 68.7% |
+| 深度债 | 200 项 |
+| 零债务组件 | 48 / 73 |
 
 状态图例：✅ 无债务；🚧 有深度债（D1 表格与选择线 / D2 录入与反馈 / D3 其余）；⚠️ 有未登记缺失。
 
@@ -44,7 +44,6 @@
 | [列表 List](list.md) | `list` | 10 | 7 | 70.0% | 0 | 0 | 1 | 0 | 4 | 🚧 |
 | [导航菜单 Menu](menu.md) | `menu` | 34 | 24 | 70.6% | 0 | 4 | 0 | 0 | 4 | 🚧 |
 | [多选框 Checkbox](checkbox.md) | `checkbox` | 24 | 17 | 70.8% | 0 | 0 | 2 | 0 | 7 | 🚧 |
-| [弹出层 Popup](popup.md) | `popup` | 24 | 17 | 70.8% | 0 | 1 | 0 | 0 | 7 | 🚧 |
 | [数字输入框 InputNumber](input-number.md) | `input-number` | 31 | 22 | 71.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [固钉 Affix](affix.md) | `affix` | 7 | 5 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [引导 Guide](guide.md) | `guide` | 21 | 15 | 71.4% | 0 | 0 | 0 | 0 | 3 | ✅ |
@@ -57,6 +56,7 @@
 | [面包屑 Breadcrumb](breadcrumb.md) | `breadcrumb` | 19 | 14 | 73.7% | 0 | 0 | 3 | 0 | 4 | 🚧 |
 | [图片预览 ImageViewer](image-viewer.md) | `image-viewer` | 23 | 17 | 73.9% | 0 | 1 | 1 | 0 | 3 | 🚧 |
 | [气泡确认 Popconfirm](popconfirm.md) | `popconfirm` | 16 | 12 | 75.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [弹出层 Popup](popup.md) | `popup` | 24 | 18 | 75.0% | 0 | 0 | 0 | 0 | 8 | ✅ |
 | [单选框 Radio](radio.md) | `radio` | 25 | 19 | 76.0% | 0 | 0 | 0 | 0 | 8 | ✅ |
 | [日历 Calendar](calendar.md) | `calendar` | 22 | 17 | 77.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [侧边悬浮 StickyTool](sticky-tool.md) | `sticky-tool` | 9 | 7 | 77.8% | 0 | 0 | 0 | 0 | 4 | ✅ |

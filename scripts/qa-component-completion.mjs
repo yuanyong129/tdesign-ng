@@ -1818,6 +1818,46 @@ try {
   assert.deepEqual(popupAttach.moved,{same:true,button:true,input:'draft',target:true,other:true,count:1,focus:true});
   for(const key of ['direct','callback','fallback','invalidSelector','disconnectedFallback','retained','reopened','oldDetached','newBound','focusOpen','ownFocus','externalBlur','contextMenu','template','templateLive','projected','missing','recovered','removedOldDetached','replacementBound','invalidTrigger','untouched','destroyedContent','newContent','disposed'])assert.equal(popupAttach[key],true,key);
   console.log('PASS Popup attachment/trigger: selector/node/resolver/fallback, instance isolation, transformed/scroll alignment, original content preservation, external listener replacement/focus/context-menu, template/projection, missing-node recovery');
+  await page('/popup', 'demo-popup-position-options .position-options-trigger');
+  const popupPosition=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-popup-position-options'),demo=ng.getComponent(root),popup=demo.popup(),trigger=root.querySelector('.position-options-trigger');
+    const apply=async()=>{ng.applyChanges(demo);${settle}};
+    root.scrollIntoView({block:'center',behavior:'instant'});${settle}popup.show();${settle}
+    const overlay=popup.getOverlay(),counter=overlay.querySelector('.position-options-counter');counter.click();${settle}
+    const rect=()=>popup.getOverlay().closest('.cdk-overlay-pane').getBoundingClientRect();
+    const measure=()=>{const anchor=trigger.getBoundingClientRect(),panel=rect();return {dx:panel.left-anchor.left,dy:panel.top-anchor.bottom,placement:popup.getOverlay().dataset.popperPlacement}};
+    const initial=measure();
+    demo.options.set({placement:'top-end',modifiers:[{name:'offset',options:{offset:[-10,15]}},{name:'flip',enabled:false}]});await apply();
+    let anchor=trigger.getBoundingClientRect(),panel=rect();const top={dx:panel.right-anchor.right,gap:anchor.top-panel.bottom,placement:overlay.dataset.popperPlacement};
+    demo.options.set({placement:'right-start',modifiers:[{name:'offset',options:{offset:[7,18]}},{name:'flip',enabled:false}]});await apply();
+    anchor=trigger.getBoundingClientRect();panel=rect();const right={gap:panel.left-anchor.right,dy:panel.top-anchor.top,placement:overlay.dataset.popperPlacement};
+    demo.options.set({placement:'left-end',modifiers:[{name:'offset',options:{offset:[5,12]}},{name:'flip',enabled:false}]});await apply();
+    anchor=trigger.getBoundingClientRect();panel=rect();const left={gap:anchor.left-panel.right,dy:panel.bottom-anchor.bottom,placement:overlay.dataset.popperPlacement};
+    demo.options.set({placement:'bottom-start',modifiers:[{name:'offset',options:{offset:[100,100]}},{name:'offset',options:{offset:[4,9]}},{name:'flip',enabled:false}]});await apply();const duplicate=measure();
+    demo.options.set({placement:'bottom-start',modifiers:[{name:'offset',enabled:false,options:{offset:[100,100]}},{name:'flip',enabled:false}]});await apply();const disabledOffset=measure();
+    demo.options.set({placement:'bottom-start',modifiers:[{name:'offset',options:{offset:[NaN,Infinity]}},{name:'flip',enabled:false}]});await apply();const invalid=measure();
+    Object.assign(trigger.style,{position:'fixed',bottom:'2px',left:'400px',zIndex:'2000'});demo.options.set({placement:'bottom-start',modifiers:[{name:'flip',options:{fallbackPlacements:['top-start']}}]});await apply();
+    const flipped=overlay.dataset.popperPlacement;demo.options.set({placement:'bottom-start',modifiers:[{name:'flip',enabled:false}]});await apply();const noFlip=overlay.dataset.popperPlacement;
+    demo.options.set({placement:'bottom-start',modifiers:[{name:'flip',options:{fallbackPlacements:[]}}]});await apply();const emptyFallback=overlay.dataset.popperPlacement;
+    Object.assign(trigger.style,{bottom:'auto',top:'300px',left:'auto',right:'2px'});
+    demo.options.set({placement:'bottom-start',modifiers:[{name:'flip',enabled:false},{name:'preventOverflow',options:{padding:16}}]});await apply();
+    panel=rect();const protectedViewport=panel.right<=document.documentElement.clientWidth-15&&panel.left>=15;
+    demo.options.set({placement:'bottom-start',modifiers:[{name:'flip',enabled:false},{name:'preventOverflow',enabled:false,options:{padding:16}}]});await apply();
+    const overflowAllowed=rect().right>document.documentElement.clientWidth;
+    trigger.removeAttribute('style');demo.options.set(undefined);demo.placement.set('bottom-left');await apply();popup.update();${settle}const restored=measure();
+    const retained=popup.getOverlay()===overlay&&overlay.querySelector('.position-options-counter')===counter&&demo.count()===1;
+    popup.hide();${settle}return {initial,top,right,left,duplicate,disabledOffset,invalid,flipped,noFlip,emptyFallback,protectedViewport,overflowAllowed,restored,retained};
+  })()`);
+  const closeTo=(actual,expected,label)=>assert.ok(Math.abs(actual-expected)<2,label+': '+actual);
+  closeTo(popupPosition.initial.dx,20,'offset skid');closeTo(popupPosition.initial.dy,12,'offset distance');assert.equal(popupPosition.initial.placement,'bottom-start');
+  closeTo(popupPosition.top.dx,-10,'top skid');closeTo(popupPosition.top.gap,15,'top distance');assert.equal(popupPosition.top.placement,'top-end');
+  closeTo(popupPosition.right.gap,18,'right distance');closeTo(popupPosition.right.dy,7,'right skid');assert.equal(popupPosition.right.placement,'right-start');
+  closeTo(popupPosition.left.gap,12,'left distance');closeTo(popupPosition.left.dy,5,'left skid');assert.equal(popupPosition.left.placement,'left-end');
+  closeTo(popupPosition.duplicate.dx,4,'duplicate offset');closeTo(popupPosition.duplicate.dy,9,'duplicate distance');
+  for(const key of ['disabledOffset','invalid','restored']){closeTo(popupPosition[key].dx,0,key+' skid');closeTo(popupPosition[key].dy,0,key+' distance');}
+  assert.equal(popupPosition.flipped,'top-start');assert.equal(popupPosition.noFlip,'bottom-start');assert.equal(popupPosition.emptyFallback,'bottom-start');
+  assert.equal(popupPosition.protectedViewport,true);assert.equal(popupPosition.overflowAllowed,true);assert.equal(popupPosition.retained,true);
+  console.log('PASS Popup positioning: four-side signed offset, placement override, last modifier wins, disabled/invalid reset, fallback/flip disable, viewport push/padding, dynamic reset with original content');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {
