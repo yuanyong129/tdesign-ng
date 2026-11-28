@@ -8,8 +8,8 @@ import { TPopup, TButton, type PopupPopperOptions, type PopupPlacement } from '@
     <div style="min-height:100px;display:flex;align-items:center;justify-content:center">
       <t-popup #popup class="position-options-popup" [placement]="placement()" [popperOptions]="options()" trigger="click"
         overlayClassName="position-options-panel" [overlayInnerStyle]="{ width: '180px' }" [showArrow]="false">
-        <button type="button" class="position-options-trigger">定位配置触发器</button>
-        <div tPopupContent><button type="button" class="position-options-counter" (click)="count.set(count() + 1)">保留原计数 {{ count() }}</button></div>
+        <t-button size="small" variant="outline" type="button" class="position-options-trigger">定位配置触发器</t-button>
+        <div tPopupContent><t-button size="small" variant="outline" type="button" class="position-options-counter" (click)="count.set(count() + 1)">保留原计数 {{ count() }}</t-button></div>
       </t-popup>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">

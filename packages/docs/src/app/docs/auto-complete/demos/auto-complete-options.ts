@@ -12,10 +12,10 @@ import { TAutoComplete, TButton, type AutoCompleteInputProps, type AutoCompleteP
         (valueChange)="accept($event)" (select)="selects.set(selects() + 1)" (enter)="enters.set(enters() + 1)" />
       <t-auto-complete class="options-default" [defaultValue]="initial()" [options]="['first', 'second', 'third']" clearable />
       <t-auto-complete class="options-form" [formControl]="control" [options]="['form', 'next']" [panelBottomContent]="footer" />
-      <ng-template #footer><button type="button" class="auto-panel-button">面板辅助操作</button></ng-template>
+      <ng-template #footer><t-button size="small" variant="outline" type="button" class="auto-panel-button">面板辅助操作</t-button></ng-template>
       <t-auto-complete class="options-custom" [triggerElement]="trigger" [options]="['custom-a', 'custom-b']" [filterable]="false"
         (select)="customValue.set($event.value)" />
-      <ng-template #trigger><button type="button">聚焦后用方向键选择</button></ng-template>
+      <ng-template #trigger><t-button size="small" variant="outline" type="button">聚焦后用方向键选择</t-button></ng-template>
     </div>
     <p class="demo-hint">当前 {{ value() }}；select {{ selects() }} 次，Enter {{ enters() }} 次；输入配置回调 {{ inputs() }} 次。自定义触发器选择：{{ customValue() }}</p>
     <t-button size="small" (click)="acceptChanges.set(!acceptChanges())">切换接收修改</t-button>

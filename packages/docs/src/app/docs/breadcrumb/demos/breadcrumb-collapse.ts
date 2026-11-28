@@ -15,7 +15,7 @@ import { TBreadcrumb, TBreadcrumbItem, TButton, type BreadcrumbOption } from '@t
           @for (item of projected(); track item) {
             <t-breadcrumb-item [attr.data-key]="item" [disabled]="item === 2" (click)="projectClick($event)">
               <span class="project-label">{{ label() }} {{ item }}</span>
-              <button type="button" class="project-counter" [disabled]="item === 2" (click)="increment($event)">计数 {{ count() }}</button>
+              <t-button size="small" variant="outline" type="button" class="project-counter" [disabled]="item === 2" (click)="increment($event)">计数 {{ count() }}</t-button>
             </t-breadcrumb-item>
           }
           <t-breadcrumb-item>当前页面</t-breadcrumb-item>

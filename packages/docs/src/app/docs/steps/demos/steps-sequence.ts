@@ -5,7 +5,8 @@ let stepCounterId = 0;
 
 @Component({
   selector: 'demo-steps-sequence-counter',
-  template: `<button type="button" (click)="increment($event)">实例 {{ instance }}，计数 {{ count() }}</button>`,
+  imports: [TButton],
+  template: `<t-button size="small" variant="outline" type="button" (click)="increment($event)">实例 {{ instance }}，计数 {{ count() }}</t-button>`,
 })
 export class DemoStepsSequenceCounter {
   readonly instance = ++stepCounterId;

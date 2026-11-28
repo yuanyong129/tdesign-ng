@@ -1,3 +1,5 @@
+import type { Content } from '../../_utils/content';
+export type MessageContent = Content;
 /** 消息主题。 */
 export const MESSAGE_THEMES = ['info', 'success', 'warning', 'error', 'question', 'loading'] as const;
 
@@ -25,21 +27,27 @@ export interface MessageCloseEvent {
   /** 触发关闭的来源 */
   trigger: MessageCloseTrigger;
   /** 原始事件（只有点击关闭时才有） */
-  event?: MouseEvent;
+  event?: MouseEvent | KeyboardEvent;
 }
 
 /** 创建一条消息的配置。 */
 export interface MessageOptions {
   /** 消息文字 */
-  content?: string;
+  content?: Content;
   /** 主题，默认 info */
   theme?: MessageTheme;
   /** 自动关闭的毫秒数，0 表示不自动关闭 */
   duration?: number;
   /** 是否显示图标 */
-  icon?: boolean;
+  icon?: boolean | Content;
   /** 是否显示关闭按钮 */
-  closeBtn?: boolean;
+  closeBtn?: boolean | Content;
+  /** 点击关闭时调用；程序关闭不调用 */
+  onCloseBtnClick?: (context: { e: MouseEvent | KeyboardEvent }) => void;
+  /** 自动计时结束时调用 */
+  onDurationEnd?: () => void;
+  /** 关闭时调用；程序关闭的 context 为 undefined */
+  onClose?: (context?: MessageCloseEvent) => void;
   /** 附加类名 */
   className?: string;
   /** 出现位置，默认 top */
@@ -58,9 +66,9 @@ export interface MessageInstance {
 
 /** 消息组件的输入，供服务式调用时逐项赋值。 */
 export interface MessageProps {
-  content: string;
+  content: Content;
   theme: MessageTheme;
   duration: number;
-  icon: boolean;
-  closeBtn: boolean;
+  icon: boolean | Content;
+  closeBtn: boolean | Content;
 }

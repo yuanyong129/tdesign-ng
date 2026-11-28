@@ -1,8 +1,10 @@
 # 交接文档 · TDesign Angular
 
-> 2026-11-28 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮顺序任务已走完，第 4 轮 Popup 已完成生命周期、挂载/独立触发器及定位配置白名单批次，Loading 已补内容包裹、自定义图标、挂载及服务实例清理。当前生成进度：已对齐 1085/1576（68.8%），真实深度债 197，零债务目录 49/73，示例 343 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续 Message / Notification → Dialog → Drawer → ImageViewer。LoadingServiceOptions 接收 attach / content / indicator，Button / Card 的 LoadingOptions 仍保持原白名单；hideAll 只销毁本服务创建的实例。Popup.popperOptions 只支持 placement、offset、flip、preventOverflow 的类型化子集，尚非完整 Popper，getPopper() 不提供；挂载旋转/倾斜/透视等不支持，新字段未扩散到复合组件 PopupOptions 白名单。Breadcrumb 路由、AutoComplete.textareaProps、Checkbox.lazyLoad 和 SSR / 水合等跨轮任务继续保留，M2 尚未达成。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）；生成文件和 HMR 稳定后运行，页面探针复用已有 CDP 页面，必须在交互回归结束后串行运行。
+> 2026-11-28 执行补充：按 [由易到难完善计划](docs/plans/component-completion-plan.md) 推进，第 1～2 轮达到 M1，第 3 轮顺序任务已走完，第 4 轮 Popup / Loading 既定批次及 Message / Notification 模板和生命周期首批已完成。当前生成进度：已对齐 1085/1576（68.8%），真实深度债 195，零债务目录 51/73，示例 345 个；下文旧统计保留为历史记录，现状以 `docs/progress/README.md` 和计划第 7 节为准。接续 Message / Notification 自定义挂载与容器隔离 → Dialog → Drawer → ImageViewer。反馈服务已支持模板、独立 durationEnd、hover 重新计时、幂等关闭、回调重入及作用域销毁；服务 attach / style 等尚未纳入组件属性统计，不能将生成零债务解读为完整服务 API。LoadingServiceOptions 接收 attach / content / indicator，Button / Card 的 LoadingOptions 仍保持原白名单。Popup.popperOptions 只支持 placement、offset、flip、preventOverflow 的类型化子集，尚非完整 Popper，getPopper() 不提供；挂载旋转/倾斜/透视等不支持，新字段未扩散到复合组件 PopupOptions 白名单。Breadcrumb 路由、AutoComplete.textareaProps、Checkbox.lazyLoad 和 SSR / 水合等跨轮任务继续保留，M2 尚未达成。交互回归：`PORT=4307 CDP_PORT=9477 node scripts/qa-component-completion.mjs`（需先启动独立开发服务与 Edge）；生成文件和 HMR 稳定后运行，页面探针复用已有 CDP 页面，必须在交互回归结束后串行运行。
 >
 > 用户明确要求（2026-11-27）：后续每批验证完成后可自动 commit，不必询问；及时同步计划与交接文档，尤其 `docs/progress/`。progress 必须通过 `pnpm gen:progress` 生成，并用 `pnpm check:progress` 校验，不手改生成物。
+
+> 用户明确要求（2026-11-28）：文档演示和交互测试优先使用库内组件，尤其按钮使用 TButton，输入使用 TInput；不要为便于回归写成浏览器默认按钮。当前 demos 下原生 button 已统一替换，焦点/坐标测试操作 TButton 内部的真实按钮。文档站搜索和示例框自身已有专门样式的原生控制不属于组件示例。
 
 > 面向「下一个接手这个仓库的会话」。读完这份文档，应该能直接继续开发，而不需要重新调研环境。
 > 更新日期：2026-11-23，对应路线：**广度已完成（B0~B4 100%）→ 深度阶段 D0 横切工程**（见 §7）。

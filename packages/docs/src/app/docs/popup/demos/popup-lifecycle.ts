@@ -14,26 +14,26 @@ import { TButton, TPopup, type PopupStyleInput, type PopupVisibleChangeEvent, ty
         <t-button size="small">受控弹层</t-button>
         <div tPopupContent class="lifecycle-list">
           @for (item of items; track item) { <div style="height:32px">路径 {{ item }}</div> }
-          <button type="button" class="lifecycle-inner" (click)="counter.set(counter() + 1)">计数 {{ counter() }}</button>
+          <t-button size="small" variant="outline" type="button" class="lifecycle-inner" (click)="counter.set(counter() + 1)">计数 {{ counter() }}</t-button>
         </div>
       </t-popup>
       <t-popup #defaults class="lifecycle-default" [defaultVisible]="initial()" [trigger]="trigger()" content="仅首次读取 defaultVisible"
         [delay]="delay()" [disabled]="disabled()" overlayClassName="lifecycle-default-popup" (visibleChange)="defaultEvents.set(defaultEvents() + 1)">
-        <button type="button" class="default-trigger">默认/非受控</button>
+        <t-button size="small" variant="outline" type="button" class="default-trigger">默认/非受控</t-button>
       </t-popup>
       <t-popup #focus class="lifecycle-focus" trigger="focus" overlayClassName="lifecycle-focus-popup" destroyOnClose>
         <input class="focus-trigger" aria-label="聚焦打开弹层" placeholder="聚焦后 Tab 进入面板" />
-        <div tPopupContent><button class="focus-panel" type="button">面板焦点</button></div>
+        <div tPopupContent><t-button size="small" variant="outline" class="focus-panel" type="button">面板焦点</t-button></div>
       </t-popup>
       <t-popup #empty class="lifecycle-empty" trigger="click" hideEmptyPopup [content]="emptyContent()" overlayClassName="lifecycle-empty-popup">
-        <button type="button">异步空内容</button>
+        <t-button size="small" variant="outline" type="button">异步空内容</t-button>
       </t-popup>
       @if (temporary()) {
         <t-popup class="lifecycle-temporary" trigger="hover" [delay]="[80,80]" content="销毁清理" defaultVisible overlayClassName="lifecycle-temporary-popup">
-          <button type="button">可销毁弹层</button>
+          <t-button size="small" variant="outline" type="button">可销毁弹层</t-button>
         </t-popup>
       }
-      <button type="button" class="lifecycle-outside">外部焦点</button>
+      <t-button size="small" variant="outline" type="button" class="lifecycle-outside">外部焦点</t-button>
     </div>
     <p class="demo-hint">visible {{ visible() }}；提案 {{ proposals() }} 次，来源 {{ source() }}；内容点击 {{ overlayClicks() }} 次，滚动 {{ scrolls() }} 次，到底 {{ bottoms() }} 次。</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">

@@ -1,5 +1,8 @@
-<div [class]="classes()">
-  @if (icon()) {
+@if (!lifecycle.closed()) {
+<div [class]="classes()" role="status" aria-live="polite" (mouseenter)="lifecycle.pause()" (mouseleave)="lifecycle.resume()">
+  @if (customIcon(); as value) {
+    @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} }
+  } @else if (icon() !== false) {
     <div class="t-notification__icon">
       @if (theme() === 'success') {
         <svg [class]="iconClasses()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
@@ -40,8 +43,12 @@
 
   <div class="t-notification__main">
     <div class="t-notification__title__wrap">
-      <span class="t-notification__title">{{ title() }}</span>
+      <span class="t-notification__title">@if (title(); as value) { @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} } }</span>
       @if (closeBtn()) {
+        <span class="t-message__close" role="button" tabindex="0" aria-label="Close" (click)="handleCloseBtn($event)" (keydown)="handleCloseBtn($event)">
+        @if (customClose(); as value) {
+          @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} }
+        } @else {
         <svg
           class="t-icon t-icon-close"
           xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +56,6 @@
           width="1em"
           height="1em"
           aria-hidden="true"
-          (click)="handleCloseBtn($event)"
         >
           <path
             fill="none"
@@ -59,11 +65,15 @@
             d="M16.9503 7.05029L12.0005 12M12.0005 12L7.05078 16.9498M12.0005 12L16.9503 16.9498M12.0005 12L7.05078 7.05029"
           />
         </svg>
+        }
+        </span>
       }
     </div>
-    <div class="t-notification__content">{{ content() }}</div>
+    <div class="t-notification__content"><span [style.display]="content() === undefined ? 'contents' : 'none'"><ng-content /></span>@if (content(); as value) { @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} } }</div>
     @if (footer()) {
-      <div class="t-notification__footer">{{ footer() }}</div>
+      <div class="t-notification__footer">@if (footer(); as value) { @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} } }</div>
     }
   </div>
 </div>
+
+}

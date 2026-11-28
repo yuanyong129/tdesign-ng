@@ -6517,11 +6517,11 @@
       "inputs": [
         {
           "name": "content",
-          "type": "string",
+          "type": "MessageContent",
           "default": "''",
           "required": false,
-          "zh": "消息文字",
-          "en": "Message content",
+          "zh": "消息内容，支持字符串或模板",
+          "en": "Message text or template",
           "values": []
         },
         {
@@ -6551,20 +6551,20 @@
         },
         {
           "name": "icon",
-          "type": "boolean",
+          "type": "boolean | MessageContent",
           "default": "true",
           "required": false,
-          "zh": "是否显示图标",
-          "en": "Whether to show the icon",
+          "zh": "图标，布尔值控制默认图标，也支持字符串或模板",
+          "en": "Default icon toggle, text or template",
           "values": []
         },
         {
           "name": "closeBtn",
-          "type": "boolean",
+          "type": "boolean | MessageContent",
           "default": "false",
           "required": false,
-          "zh": "是否显示关闭按钮",
-          "en": "Whether to show the close button",
+          "zh": "关闭入口，布尔值控制默认按钮，也支持字符串或模板",
+          "en": "Default close toggle, text or template",
           "values": []
         }
       ],
@@ -6577,9 +6577,15 @@
         },
         {
           "name": "closeBtnClick",
-          "type": "MouseEvent",
+          "type": "MouseEvent | KeyboardEvent",
           "zh": "点击关闭按钮",
           "en": "Emitted when the close button is clicked"
+        },
+        {
+          "name": "durationEnd",
+          "type": "void",
+          "zh": "自动关闭倒计时结束",
+          "en": "Emitted when auto close expires"
         }
       ]
     },
@@ -6590,29 +6596,29 @@
       "inputs": [
         {
           "name": "title",
-          "type": "string",
+          "type": "NotificationContent",
           "default": "''",
           "required": false,
-          "zh": "标题",
-          "en": "Title",
+          "zh": "标题，支持字符串或模板",
+          "en": "Title text or template",
           "values": []
         },
         {
           "name": "content",
-          "type": "string",
-          "default": "''",
+          "type": "NotificationContent",
+          "default": "undefined",
           "required": false,
-          "zh": "内容",
-          "en": "Content",
+          "zh": "内容，支持字符串或模板；未设置时显示投影",
+          "en": "Content text or template, falls back to projection when omitted",
           "values": []
         },
         {
           "name": "footer",
-          "type": "string | undefined",
+          "type": "NotificationContent",
           "default": "undefined",
           "required": false,
-          "zh": "底部补充内容",
-          "en": "Footer content",
+          "zh": "底部补充内容，支持字符串或模板",
+          "en": "Footer text or template",
           "values": []
         },
         {
@@ -6640,20 +6646,20 @@
         },
         {
           "name": "icon",
-          "type": "boolean",
+          "type": "boolean | NotificationContent",
           "default": "true",
           "required": false,
-          "zh": "是否显示图标",
-          "en": "Whether to show the icon",
+          "zh": "图标，布尔值控制默认图标，也支持字符串或模板",
+          "en": "Default icon toggle, text or template",
           "values": []
         },
         {
           "name": "closeBtn",
-          "type": "boolean",
+          "type": "boolean | NotificationContent",
           "default": "true",
           "required": false,
-          "zh": "是否显示关闭按钮",
-          "en": "Whether to show the close button",
+          "zh": "关闭入口，布尔值控制默认按钮，也支持字符串或模板",
+          "en": "Default close toggle, text or template",
           "values": []
         }
       ],
@@ -6666,9 +6672,15 @@
         },
         {
           "name": "closeBtnClick",
-          "type": "MouseEvent",
+          "type": "MouseEvent | KeyboardEvent",
           "zh": "点击关闭按钮",
           "en": "Emitted when the close button is clicked"
+        },
+        {
+          "name": "durationEnd",
+          "type": "void",
+          "zh": "自动关闭倒计时结束",
+          "en": "Emitted when auto close expires"
         }
       ]
     },

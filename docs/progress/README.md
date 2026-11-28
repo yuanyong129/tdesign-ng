@@ -8,8 +8,8 @@
 | 上游属性 | 1576 |
 | 已对齐 | 1085 |
 | 覆盖率 | 68.8% |
-| 深度债 | 197 项 |
-| 零债务组件 | 49 / 73 |
+| 深度债 | 195 项 |
+| 零债务组件 | 51 / 73 |
 
 状态图例：✅ 无债务；🚧 有深度债（D1 表格与选择线 / D2 录入与反馈 / D3 其余）；⚠️ 有未登记缺失。
 
@@ -31,8 +31,8 @@
 | [Link 链接](link.md) | `link` | 13 | 8 | 61.5% | 0 | 0 | 0 | 0 | 6 | ✅ |
 | [Transfer 穿梭框](transfer.md) | `transfer` | 26 | 16 | 61.5% | 4 | 4 | 2 | 0 | 3 | 🚧 |
 | [Textarea 多行文本框](textarea.md) | `textarea` | 21 | 13 | 61.9% | 0 | 0 | 0 | 0 | 7 | ✅ |
-| [Message 全局提示](message.md) | `message` | 8 | 5 | 62.5% | 0 | 0 | 1 | 0 | 3 | 🚧 |
-| [Notification 消息通知](notification.md) | `notification` | 11 | 7 | 63.6% | 0 | 0 | 1 | 0 | 3 | 🚧 |
+| [Message 全局提示](message.md) | `message` | 8 | 5 | 62.5% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Notification 消息通知](notification.md) | `notification` | 11 | 7 | 63.6% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [AutoComplete 自动填充](auto-complete.md) | `auto-complete` | 32 | 21 | 65.6% | 1 | 0 | 0 | 0 | 4 | 🚧 |
 | [Divider 分割线](divider.md) | `divider` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [Layout 布局](layout.md) | `layout` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 3 | ✅ |

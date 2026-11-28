@@ -1,5 +1,7 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ApplicationRef,
+  DestroyRef,
   EnvironmentInjector,
   EnvironmentProviders,
   Injectable,
@@ -12,6 +14,7 @@ import { TNotification } from './notification.component';
 import {
   NOTIFICATION_PLACEMENTS,
   NotificationInstance,
+  NotificationCloseEvent,
   NotificationOptions,
   NotificationPlacement,
   NotificationTheme,
@@ -49,6 +52,9 @@ interface NotificationEntry {
  */
 @Injectable({ providedIn: 'root' })
 export class TNotificationService {
+  private readonly document = inject(DOCUMENT);
+  private destroyed = false;
+  constructor() { inject(DestroyRef).onDestroy(() => { this.destroyed = true; this.closeAll(); }); }
   private readonly appRef = inject(ApplicationRef);
 
   private readonly envInjector = inject(EnvironmentInjector);
@@ -81,13 +87,14 @@ export class TNotificationService {
 
   /** 按主题创建通知。 */
   show(theme: NotificationTheme, options: string | NotificationOptions): NotificationInstance {
+    if (this.destroyed || !this.document.body) return { close: () => {} };
     const normalized = this.normalize(theme, options);
     const container = this.getContainer(normalized);
     const rendered = renderComponent(TNotification, container, this.envInjector, this.appRef, 't-notification');
     const { ref, host } = rendered;
 
     ref.setInput('title', normalized.title ?? '');
-    ref.setInput('content', normalized.content ?? '');
+    ref.setInput('content', normalized.content);
     ref.setInput('footer', normalized.footer);
     ref.setInput('theme', normalized.theme);
     ref.setInput('duration', normalized.duration);
@@ -95,29 +102,36 @@ export class TNotificationService {
     ref.setInput('closeBtn', normalized.closeBtn ?? true);
     ref.changeDetectorRef.detectChanges();
 
-    const element = host.querySelector('.t-notification');
+    const element = host.querySelector<HTMLElement>('.t-notification');
     if (element && normalized.className) {
       element.classList.add(...normalized.className.split(/\s+/).filter(Boolean));
     }
 
-    const entry: NotificationEntry = {
-      placement: normalized.placement,
-      destroy: () => {
-        rendered.destroy();
-        this.entries.delete(entry);
-        this.releaseContainer(normalized.placement);
-      },
-    };
-    this.entries.add(entry);
+    if (element && normalized.offset) {
+      element.style.position = 'relative';
+      const [x, y] = normalized.offset;
+      if (x !== undefined && x !== '') element.style.left = typeof x === 'number' ? x + 'px' : x;
+      if (y !== undefined && y !== '') element.style.top = typeof y === 'number' ? y + 'px' : y;
+    }
 
     let closed = false;
-    const finish = () => {
+    const subscriptions: { unsubscribe(): void }[] = [];
+    const finish = (context?: NotificationCloseEvent) => {
       if (closed) return;
       closed = true;
-      subscription.unsubscribe();
-      entry.destroy();
+      for (const subscription of subscriptions) subscription.unsubscribe();
+      this.entries.delete(entry);
+      rendered.destroy();
+      this.releaseContainer(normalized.placement);
+      normalized.onClose?.();
     };
-    const subscription = ref.instance.close.subscribe(finish);
+    const entry: NotificationEntry = { placement: normalized.placement, destroy: () => finish() };
+    this.entries.add(entry);
+    subscriptions.push(
+      ref.instance.close.subscribe(finish),
+      ref.instance.closeBtnClick.subscribe(e => normalized.onCloseBtnClick?.({ e })),
+      ref.instance.durationEnd.subscribe(() => normalized.onDurationEnd?.()),
+    );
 
     return { close: finish };
   }
@@ -125,9 +139,6 @@ export class TNotificationService {
   /** 关闭所有通知。 */
   closeAll(): void {
     for (const entry of [...this.entries]) entry.destroy();
-    this.entries.clear();
-    for (const container of this.containers.values()) container.remove();
-    this.containers.clear();
   }
 
   private normalize(
@@ -137,6 +148,7 @@ export class TNotificationService {
     const config = this.config;
     const input: NotificationOptions = typeof options === 'string' ? { content: options } : { ...options };
     return {
+      ...config,
       ...input,
       theme: input.theme ?? theme,
       duration: input.duration ?? config.duration ?? DEFAULT_DURATION,
@@ -149,7 +161,7 @@ export class TNotificationService {
     const existing = this.containers.get(placement);
     if (existing) return existing;
 
-    const container = document.createElement('div');
+    const container = this.document.createElement('div');
     container.className = `t-notification__show--${placement}`;
     container.dataset['placement'] = placement;
     Object.assign(container.style, PLACEMENT_STYLE[placement]);
@@ -158,7 +170,7 @@ export class TNotificationService {
       container.style.display = 'flex';
       container.style.flexDirection = 'column-reverse';
     }
-    document.body.appendChild(container);
+    this.document.body.appendChild(container);
     this.containers.set(placement, container);
     return container;
   }

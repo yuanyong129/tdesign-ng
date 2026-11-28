@@ -1331,14 +1331,14 @@ try {
     const formHost=root.querySelector('.options-form'), form=ng.getComponent(formHost), formInput=formHost.querySelector('input');
     form.handlePopupVisibleChange(true); ${settle} formInput.focus();
     form.removeTagAt(0); ${settle} const pending={value:[...demo.control.value],count:formHost.querySelectorAll('t-tag').length,touched:demo.control.touched};
-    const ownPanel=document.querySelector('.form-panel-button'); ownPanel.focus(); ${settle}
+    const ownPanel=document.querySelector('.form-panel-button button'); ownPanel.focus(); ${settle}
     const ownUntouched=!demo.control.touched; ownPanel.blur(); ${settle}
     const blurred={value:[...demo.control.value],touched:demo.control.touched};
     demo.control.disable(); ng.applyChanges(demo); ${settle} const formDisabled=formInput.disabled && !form.isPopupVisible();
     demo.control.enable(); demo.control.reset(); ng.applyChanges(demo); ${settle}
     const reset={value:[...demo.control.value],count:formHost.querySelectorAll('t-tag').length,touched:demo.control.touched};
-    single.handlePopupVisibleChange(true); ${settle} input.focus(); const otherPanel=document.querySelector('.multiple-panel-button');
-    multi.handlePopupVisibleChange(true); ${settle} document.querySelector('.multiple-panel-button').focus(); ${settle}
+    single.handlePopupVisibleChange(true); ${settle} input.focus(); const otherPanel=document.querySelector('.multiple-panel-button button');
+    multi.handlePopupVisibleChange(true); ${settle} document.querySelector('.multiple-panel-button button').focus(); ${settle}
     const unrelatedBlur=!single.focused();
     const popup=ng.getComponent(singleHost.querySelector('t-popup'));
     demo.visible.set(true); ng.applyChanges(demo); ${settle} popup.hide(); ${settle}
@@ -1418,7 +1418,7 @@ try {
     const formHost=root.querySelector('.options-form'),form=ng.getComponent(formHost),formInput=formHost.querySelector('input');
     formInput.focus();${settle}await edit(formInput,'n');await key(formInput,'ArrowDown');await key(formInput,'Enter');
     const pending={model:demo.control.value,text:formInput.value,touched:demo.control.touched};
-    await key(formInput,'ArrowDown');const footer=document.querySelector('.auto-panel-button');footer.focus();${settle}
+    await key(formInput,'ArrowDown');const footer=document.querySelector('.auto-panel-button button');footer.focus();${settle}
     const ownUntouched=!demo.control.touched;footer.blur();${settle}const blurred={model:demo.control.value,touched:demo.control.touched};
     demo.control.disable();ng.applyChanges(demo);${settle}const formDisabled=formInput.disabled&&!form.open();
     demo.control.enable();demo.control.reset();ng.applyChanges(demo);${settle}const reset={text:formInput.value,touched:demo.control.touched};
@@ -1749,8 +1749,8 @@ try {
     demo.disabled.set(false);await apply();defaultHost.dispatchEvent(new MouseEvent('mouseenter'));await pause(100);${settle}const delayedShow=defaults.isVisible();
     defaultHost.dispatchEvent(new MouseEvent('mouseleave'));demo.trigger.set('click');await apply();await pause(100);const triggerCancelsHide=defaults.isVisible();defaults.hide();${settle}
     demo.delay.set(0);await apply();const focusInput=root.querySelector('.focus-trigger');focusInput.focus();${settle}
-    const focusButton=document.querySelector('.lifecycle-focus-popup .focus-panel');focusButton.focus();${settle}const ownFocus=focus.isVisible();
-    root.querySelector('.lifecycle-outside').focus();${settle}const leftFocus=!focus.isVisible();
+    const focusButton=document.querySelector('.lifecycle-focus-popup .focus-panel button');focusButton.focus();${settle}const ownFocus=focus.isVisible();
+    root.querySelector('.lifecycle-outside button').focus();${settle}const leftFocus=!focus.isVisible();
     const empty=demo.empty();empty.show();${settle}const emptyHidden=!empty.isVisible();demo.emptyContent.set('Loaded');await apply();
     const loadedContent=empty.isVisible()&&empty.getOverlay().textContent.includes('Loaded');demo.emptyContent.set('');await apply();
     const emptied=!empty.isVisible();empty.hide();${settle}
@@ -1775,10 +1775,10 @@ try {
   assert.equal(popupState.scrolled.scrolls,popupState.scrolled.native);assert.ok(popupState.scrolled.scrolls>=3);assert.equal(popupState.scrolled.bottoms,1);
   for(const key of ['closedDebounce','retained','detached','recreated','disabled','reenabled','cancelledShow','delayedShow','triggerCancelsHide','ownFocus','leftFocus','emptyHidden','loadedContent','emptied','disposed','listeners']) assert.equal(popupState[key],true,key);
   console.log('PASS Popup: default once/controlled proposals, context/no duplicate notifications, style functions/replacement, scroll/debounce, destroy/retain, disable/delay cancellation, own focus, listener/disposal cleanup');
-  await page('/popup', 'demo-popup-attachment .attach-trigger-a');
+  await page('/popup', 'demo-popup-attachment .attach-trigger-a button');
   const popupAttach=await evaluate(`(async()=>{
     const root=document.querySelector('demo-popup-attachment'),demo=ng.getComponent(root),popup=demo.popup(),other=demo.other();
-    const apply=async()=>{ng.applyChanges(demo);${settle}};const triggerA=root.querySelector('.attach-trigger-a'),triggerB=root.querySelector('.attach-trigger-b');
+    const apply=async()=>{ng.applyChanges(demo);${settle}};const triggerA=root.querySelector('.attach-trigger-a button'),triggerB=root.querySelector('.attach-trigger-b button');
     const position=(trigger)=>{const anchor=trigger.getBoundingClientRect(),panel=popup.getOverlay().closest('.cdk-overlay-pane').getBoundingClientRect();return {dx:Math.abs(panel.left-anchor.left),dy:Math.min(Math.abs(panel.top-anchor.bottom),Math.abs(panel.bottom-anchor.top))}};
     root.scrollIntoView({block:'center',behavior:'instant'});${settle}triggerA.click();${settle}
     const overlay=popup.getOverlay(),content=overlay.querySelector('.attach-content'),button=content.querySelector('.attach-counter'),input=content.querySelector('input');
@@ -1794,17 +1794,17 @@ try {
     const disconnected=document.createElement('div');demo.attach.set(disconnected);await apply();const disconnectedFallback=!disconnected.querySelector('.attachment-panel')&&popup.isVisible();
     demo.attach.set('#popup-attach-a');await apply();popup.hide();${settle}const retained=popup.getOverlay()===overlay;
     demo.attach.set('#popup-attach-b');await apply();popup.show();${settle}const reopened=popup.getOverlay()===overlay&&input.value==='draft';
-    demo.selectedTrigger.set('#popup-external-b');await apply();const retargeted=position(triggerB);const beforeOld=demo.changes();triggerA.click();${settle}
+    demo.selectedTrigger.set('#popup-external-b button');await apply();const retargeted=position(triggerB);const beforeOld=demo.changes();triggerA.click();${settle}
     const oldDetached=demo.changes()===beforeOld&&popup.isVisible();triggerB.click();${settle}const newBound=!popup.isVisible()&&demo.changes()===beforeOld+1;
     demo.trigger.set('focus');await apply();triggerB.focus();${settle}const focusOpen=popup.isVisible();input.focus();${settle}const ownFocus=popup.isVisible();root.querySelector('.attachment-other button').focus();${settle}const externalBlur=!popup.isVisible();
     demo.trigger.set('context-menu');await apply();const contextEvent=new MouseEvent('contextmenu',{bubbles:true,cancelable:true});triggerB.dispatchEvent(contextEvent);${settle}const contextMenu=contextEvent.defaultPrevented&&popup.isVisible();popup.hide();${settle}
-    demo.trigger.set('click');demo.useTemplate();await apply();const custom=root.querySelector('.attach-template-trigger');custom.click();${settle}const template=popup.isVisible()&&popup.containsTarget(custom);demo.label.set('Live');await apply();const templateLive=custom.textContent.includes('Live');
-    demo.selectedTrigger.set(undefined);await apply();popup.hide();${settle}root.querySelector('.attach-default-trigger').click();${settle}const projected=popup.isVisible()&&!root.querySelector('.attach-template-trigger');
-    demo.selectedTrigger.set('#popup-external-b');demo.showB.set(false);await apply();popup.update();${settle}const missing=!popup.isVisible();
-    demo.showB.set(true);await apply();popup.update();${settle}const recovered=popup.isVisible();const replacement=root.querySelector('.attach-trigger-b');
+    demo.trigger.set('click');demo.useTemplate();await apply();const custom=root.querySelector('.attach-template-trigger button');custom.click();${settle}const template=popup.isVisible()&&popup.containsTarget(custom);demo.label.set('Live');await apply();const templateLive=custom.textContent.includes('Live');
+    demo.selectedTrigger.set(undefined);await apply();popup.hide();${settle}root.querySelector('.attach-default-trigger').click();${settle}const projected=popup.isVisible()&&!root.querySelector('.attach-template-trigger button');
+    demo.selectedTrigger.set('#popup-external-b button');demo.showB.set(false);await apply();popup.update();${settle}const missing=!popup.isVisible();
+    demo.showB.set(true);await apply();popup.update();${settle}const recovered=popup.isVisible();const replacement=root.querySelector('.attach-trigger-b button');
     const beforeReplacement=demo.changes();triggerB.click();${settle}const removedOldDetached=demo.changes()===beforeReplacement;replacement.click();${settle}const replacementBound=!popup.isVisible();
     demo.selectedTrigger.set('[');await apply();popup.show();${settle}const invalidTrigger=!popup.isVisible();
-    demo.selectedTrigger.set('#popup-external-a');await apply();popup.show();${settle}
+    demo.selectedTrigger.set('#popup-external-a button');await apply();popup.show();${settle}
     const target=root.querySelector('.attach-target-b'),targetStyle=target.getAttribute('style');demo.attach.set(target);await apply();const untouched=target.getAttribute('style')===targetStyle;
     demo.destroy.set(true);await apply();popup.hide();${settle}const destroyedContent=popup.getOverlay()===null;popup.show();${settle}const newContent=popup.getOverlay()!==overlay;
     popup.hide();other.hide();${settle}
@@ -1818,9 +1818,9 @@ try {
   assert.deepEqual(popupAttach.moved,{same:true,button:true,input:'draft',target:true,other:true,count:1,focus:true});
   for(const key of ['direct','callback','fallback','invalidSelector','disconnectedFallback','retained','reopened','oldDetached','newBound','focusOpen','ownFocus','externalBlur','contextMenu','template','templateLive','projected','missing','recovered','removedOldDetached','replacementBound','invalidTrigger','untouched','destroyedContent','newContent','disposed'])assert.equal(popupAttach[key],true,key);
   console.log('PASS Popup attachment/trigger: selector/node/resolver/fallback, instance isolation, transformed/scroll alignment, original content preservation, external listener replacement/focus/context-menu, template/projection, missing-node recovery');
-  await page('/popup', 'demo-popup-position-options .position-options-trigger');
+  await page('/popup', 'demo-popup-position-options .position-options-trigger button');
   const popupPosition=await evaluate(`(async()=>{
-    const root=document.querySelector('demo-popup-position-options'),demo=ng.getComponent(root),popup=demo.popup(),trigger=root.querySelector('.position-options-trigger');
+    const root=document.querySelector('demo-popup-position-options'),demo=ng.getComponent(root),popup=demo.popup(),trigger=root.querySelector('.position-options-trigger button');
     const apply=async()=>{ng.applyChanges(demo);${settle}};
     root.scrollIntoView({block:'center',behavior:'instant'});${settle}popup.show();${settle}
     const overlay=popup.getOverlay(),counter=overlay.querySelector('.position-options-counter');counter.click();${settle}
@@ -1858,11 +1858,11 @@ try {
   assert.equal(popupPosition.flipped,'top-start');assert.equal(popupPosition.noFlip,'bottom-start');assert.equal(popupPosition.emptyFallback,'bottom-start');
   assert.equal(popupPosition.protectedViewport,true);assert.equal(popupPosition.overflowAllowed,true);assert.equal(popupPosition.retained,true);
   console.log('PASS Popup positioning: four-side signed offset, placement override, last modifier wins, disabled/invalid reset, fallback/flip disable, viewport push/padding, dynamic reset with original content');
-  await page('/loading', 'demo-loading-content .business-draft');
+  await page('/loading', 'demo-loading-content .business-draft input');
   const loadingContent=await evaluate(`(async()=>{
     const root=document.querySelector('demo-loading-content'),demo=ng.getComponent(root),wrapped=root.querySelector('.loading-wrapped');
     const apply=async()=>{ng.applyChanges(demo);${settle}};
-    const input=root.querySelector('.business-draft'),button=root.querySelector('.projected-business'),a=root.querySelector('.loading-target-a'),b=root.querySelector('.loading-target-b');
+    const input=root.querySelector('.business-draft input'),button=root.querySelector('.projected-business'),a=root.querySelector('.loading-target-a'),b=root.querySelector('.loading-target-b');
     input.value='draft';button.click();${settle}demo.loading.set(true);await apply();
     const panel=wrapped.querySelector('.t-loading'),parent=panel.parentElement,panelRect=panel.getBoundingClientRect(),parentRect=parent.getBoundingClientRect();
     const initial={full:panel.classList.contains('t-loading--full'),mask:panel.classList.contains('t-loading__overlay'),busy:parent.getAttribute('aria-busy'),sized:Math.abs(panelRect.width-parentRect.width)<2&&Math.abs(panelRect.height-parentRect.height)<2};
@@ -1875,7 +1875,7 @@ try {
     demo.content.set('');await apply();const empty=!root.querySelector('.explicit-business')&&getComputedStyle(button.parentElement.parentElement).display==='none';
     demo.content.set('<b>plain</b>');await apply();const escaped=wrapped.textContent.includes('<b>plain</b>')&&!wrapped.querySelector('b');
     demo.content.set(undefined);demo.loading.set(false);await apply();
-    const preserved=root.querySelector('.business-draft')===input&&input.value==='draft'&&root.querySelector('.projected-business')===button&&demo.count()===1&&!wrapped.querySelector('.t-loading')&&parent.getAttribute('aria-busy')==='false';
+    const preserved=root.querySelector('.business-draft input')===input&&input.value==='draft'&&root.querySelector('.projected-business')===button&&demo.count()===1&&!wrapped.querySelector('.t-loading')&&parent.getAttribute('aria-busy')==='false';
     demo.delay.set(120);demo.loading.set(true);await apply();const delayed=!wrapped.querySelector('.t-loading');demo.loading.set(false);await apply();await new Promise(r=>setTimeout(r,150));${settle}const cancelled=!wrapped.querySelector('.t-loading');
     demo.delay.set(NaN);demo.loading.set(true);demo.indicatorValue.set(true);await apply();const immediate=!!wrapped.querySelector('svg');
     demo.loading.set(false);demo.delay.set(0);demo.overlay.set(true);demo.attachedLoading.set(true);await apply();
@@ -1905,6 +1905,52 @@ try {
   assert.deepEqual(loadingContent.initial,{full:true,mask:true,busy:'true',sized:true});
   for(const [key,value] of Object.entries(loadingContent))if(key!=='initial')assert.equal(value,true,'Loading '+key);
   console.log('PASS Loading: wrapped content identity/priority, live templates/indicator/size/mask, delay cancellation, attachment resolver/fallback/update, shared parent ownership, service view destruction/idempotence/hideAll isolation, scroll-lock ownership');
+  for(const kind of ['message','notification']){
+    await page('/'+kind,'demo-'+kind+'-content');
+    const feedback=await evaluate(`(async()=>{
+      const kind=${JSON.stringify(kind)},root=document.querySelector('demo-'+kind+'-content'),demo=ng.getComponent(root),service=demo.service,baseViews=service.appRef.viewCount;
+      const apply=async()=>{ng.applyChanges(demo);${settle}},wait=async(ms)=>{await new Promise(r=>setTimeout(r,ms));${settle}};
+      demo.open();await apply();let panel=document.querySelector('.'+kind+'-configured'),action=panel.querySelector('.'+kind+'-action button');action.click();await apply();
+      const templates=demo.count()===1&&!!panel.querySelector('.'+kind+'-custom-icon')&&!!panel.querySelector('.'+kind+'-custom-close')&&(kind==='message'||panel.querySelector('.notification-custom-title').textContent.includes('1'));
+      demo.label.set('Live template');await apply();const live=panel.querySelector('.'+kind+'-live').textContent==='Live template'&&panel.querySelector('.'+kind+'-action button')===action;
+      const closeButton=panel.querySelector('.t-message__close'),key=new KeyboardEvent('keydown',{key:' ',bubbles:true,cancelable:true});closeButton.dispatchEvent(key);await apply();closeButton.click();await apply();
+      const keyboard=key.defaultPrevented&&!panel.isConnected&&demo.closes()===1&&demo.clicks()===1&&demo.expired()===0&&service.appRef.viewCount===baseViews;
+      const events=[];const options=(extra={})=>({content:'test',duration:0,closeBtn:true,onClose:c=>events.push(['close',c?.trigger??'api']),onCloseBtnClick:({e})=>events.push(['button',e.type]),onDurationEnd:()=>events.push(['duration']),...extra});
+      const manual=service.info(options({icon:false,className:'feedback-manual',offset:[12,'1rem']}));await apply();panel=document.querySelector('.feedback-manual');
+      const appearance=!panel.querySelector('.t-icon:not(.t-icon-close)')&&panel.style.left==='12px'&&panel.style.top==='1rem'&&panel.getAttribute('role')==='status';
+      manual.close();manual.close();await apply();const idempotent=events.length===1&&events[0][1]==='api'&&service.appRef.viewCount===baseViews;
+      events.length=0;const auto=service.info(options({duration:100,className:'feedback-auto'}));await apply();panel=document.querySelector('.feedback-auto');panel.dispatchEvent(new MouseEvent('mouseenter'));await wait(150);
+      const paused=panel.isConnected&&events.length===0;panel.dispatchEvent(new MouseEvent('mouseleave'));await wait(45);const fullRestart=panel.isConnected;await wait(100);auto.close();
+      const timed=!panel.isConnected&&JSON.stringify(events)===JSON.stringify([['duration'],['close',kind==='message'?'duration-end':'api']]);
+      events.length=0;const clicked=service.info(options({duration:100,className:'feedback-click'}));await apply();panel=document.querySelector('.feedback-click');panel.querySelector('.t-message__close').click();await apply();await wait(140);clicked.close();
+      const clickOnce=JSON.stringify(events)===JSON.stringify([['button','click'],['close',kind==='message'?'close-click':'api']]);
+      events.length=0;const first=service.info(options()),second=service.info(options());await apply();service.closeAll();first.close();second.close();service.closeAll();await wait(120);
+      const allIdempotent=events.length===2&&service.appRef.viewCount===baseViews&&!document.querySelector('.feedback-click,.feedback-auto');
+      // A close callback may open another entry; closeAll operates on its initial snapshot.
+      const reentrant=service.info({content:'old',duration:0,onClose:()=>service.info({content:'new',duration:0,className:'feedback-new'})});await apply();service.closeAll();await apply();
+      const snapshot=!!document.querySelector('.feedback-new')&&service.appRef.viewCount===baseViews+1;reentrant.close();service.closeAll();await apply();
+      let reentrantCloses=0;const reentrantClick=service.info({content:'reentrant',duration:100,className:'feedback-reentrant',closeBtn:true,onCloseBtnClick:()=>service.closeAll(),onClose:()=>reentrantCloses++});await apply();document.querySelector('.feedback-reentrant .t-message__close').click();await wait(130);reentrantClick.close();const reentrantSafe=reentrantCloses===1&&service.appRef.viewCount===baseViews;
+      const defaults=service.info('defaults');await apply();panel=document.querySelector('.'+kind+'-configured');const merged=!!panel&&(kind==='message'?!!panel.querySelector('.t-message__close'):!panel.querySelector('.t-notification__icon'));defaults.close();
+      const empty=service.info({content:'',className:'feedback-empty',closeBtn:false,icon:false});await apply();panel=document.querySelector('.feedback-empty');const explicitFalse=!!panel&&!panel.querySelector('.t-message__close,.t-icon')&&!panel.textContent.trim();empty.close();
+      let loadingDuration=true;
+      if(kind==='message') { const loading=service.loading({content:'loading',duration:80,className:'feedback-loading',onDurationEnd:()=>events.push(['loading-expired'])});await wait(130);loading.close();loadingDuration=!document.querySelector('.feedback-loading')&&events.some(e=>e[0]==='loading-expired'); }
+      // Component inputs restart pending timers, and explicit content temporarily hides projection.
+      let projection=true;
+      if(kind==='notification'){
+        const projected=root.querySelector('.notification-projected button');projected.click();await apply();demo.contentValue.set('');await apply();const hidden=getComputedStyle(projected.closest('.t-notification__content > span')).display==='none';demo.contentValue.set(undefined);await apply();projection=hidden&&root.querySelector('.notification-projected button')===projected&&demo.count()===2;
+      }
+      demo.contentValue.set('<b>escaped</b>');await apply();const escaped=root.querySelector('.'+kind+'-static').textContent.includes('<b>escaped</b>')&&!root.querySelector('.'+kind+'-static b');
+      demo.duration.set(100);await apply();await wait(40);demo.duration.set(180);await apply();await wait(100);const restarted=!!root.querySelector('.'+kind+'-static .t-'+kind);demo.duration.set(0);await apply();await wait(210);const cancelled=demo.events.length===0&&!!root.querySelector('.'+kind+'-static .t-'+kind);
+      demo.duration.set(Infinity);await apply();await wait(30);const finiteOnly=demo.events.length===0;demo.duration.set(60);await apply();await wait(110);const staticClose=demo.events.length===1&&demo.events[0].trigger==='duration-end'&&!root.querySelector('.'+kind+'-static .t-'+kind);
+      demo.staticShown.set(false);await apply();demo.duration.set(100);demo.staticShown.set(true);await apply();demo.staticShown.set(false);await apply();await wait(140);const destroyedTimer=demo.events.length===1;
+      const scope=ng.getComponent(root.querySelector('demo-'+kind+'-scope')),scoped=scope.service;let scopeCloses=0;
+      const scopedHandle=scoped.info({content:'scope',duration:100,onClose:()=>scopeCloses++});const independent=service.info({content:'independent',duration:0,className:'feedback-independent'});await apply();demo.mounted.set(false);await apply();await wait(140);scopedHandle.close();scoped.info('after destroy').close();const scopeClean=scopeCloses===1&&!!document.querySelector('.feedback-independent')&&service.appRef.viewCount===baseViews+1;
+      independent.close();service.closeAll();await apply();const cleaned=service.appRef.viewCount===baseViews;
+      return {templates,live,keyboard,appearance,idempotent,paused,fullRestart,timed,clickOnce,allIdempotent,snapshot,reentrantSafe,merged,explicitFalse,loadingDuration,projection,escaped,restarted,cancelled,finiteOnly,staticClose,destroyedTimer,scopeClean,cleaned};
+    })()`);
+    for(const [key,value] of Object.entries(feedback))assert.equal(value,true,kind+' '+key);
+    console.log('PASS '+kind+': live templates/internal buttons, close keyboard/callbacks once, hover/restart/cancel/invalid timer, idempotent handles/closeAll/reentrancy, defaults/offset, static projection/escaping, scoped destruction and view cleanup');
+  }
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
-import { TSlider } from '@tdesign-ng/components';
+import { TSlider, TButton } from '@tdesign-ng/components';
 import type { SliderInputNumberProps, SliderTooltipProps, SliderValue } from '@tdesign-ng/components';
 
 @Component({
   selector: 'demo-slider-options',
-  imports: [TSlider],
+  imports: [TSlider, TButton],
   template: `
     <div class="demo-slider-list">
       <t-slider class="configured-single" [value]="value()" [min]="1" [max]="21" [step]="2"
@@ -18,9 +18,9 @@ import type { SliderInputNumberProps, SliderTooltipProps, SliderValue } from '@t
       </div>
     </div>
     <p class="demo-hint">当前 {{ value() }}；change {{ changes() }} 次，changeEnd {{ ends() }} 次；数字框回调 {{ callbacks() }} 次。</p>
-    <button type="button" (click)="disabled.set(!disabled())">切换禁用</button>
-    <button type="button" (click)="toggleReadonly()">切换数字框只读</button>
-    <button type="button" (click)="numberProps.set(numberProps() === false ? true : false)">切换数字框显示</button>
+    <t-button size="small" variant="outline" type="button" (click)="disabled.set(!disabled())">切换禁用</t-button>
+    <t-button size="small" variant="outline" type="button" (click)="toggleReadonly()">切换数字框只读</t-button>
+    <t-button size="small" variant="outline" type="button" (click)="numberProps.set(numberProps() === false ? true : false)">切换数字框显示</t-button>
   `,
 })
 export class DemoSliderOptions {

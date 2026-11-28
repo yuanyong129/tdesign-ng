@@ -1,18 +1,18 @@
 import { Component, inject, signal, viewChild, type TemplateRef } from '@angular/core';
-import { TLoading, TLoadingService, TButton, type LoadingAttachNode, type LoadingContent, type LoadingInstance } from '@tdesign-ng/components';
+import { TLoading, TLoadingService, TButton, TInput, type LoadingAttachNode, type LoadingContent, type LoadingInstance } from '@tdesign-ng/components';
 
 @Component({
   selector: 'demo-loading-content',
-  imports: [TLoading, TButton],
+  imports: [TLoading, TButton, TInput],
   template: `
     <ng-template #indicator><span class="custom-loading-indicator">◌</span></ng-template>
     <ng-template #text><span class="custom-loading-text">{{ label() }}</span></ng-template>
-    <ng-template #business><button type="button" class="explicit-business" (click)="explicitCount.set(explicitCount() + 1)">模板业务 {{ explicitCount() }}</button></ng-template>
+    <ng-template #business><t-button size="small" variant="outline" type="button" class="explicit-business" (click)="explicitCount.set(explicitCount() + 1)">模板业务 {{ explicitCount() }}</t-button></ng-template>
     <div style="display:grid;gap:24px">
       <t-loading class="loading-wrapped" [loading]="loading()" [delay]="delay()" [content]="content()" [indicator]="indicatorValue()" [text]="text" [showOverlay]="overlay()" [size]="size()" [attach]="attach()">
         <div style="height:100px;padding:16px;border:1px solid var(--td-component-border)">
-          <button type="button" class="projected-business" (click)="count.set(count() + 1)">投影业务 {{ count() }}</button>
-          <input class="business-draft" aria-label="业务草稿" placeholder="加载切换后保留内容" />
+          <t-button size="small" variant="outline" type="button" class="projected-business" (click)="count.set(count() + 1)">投影业务 {{ count() }}</t-button>
+          <label style="display:inline-flex;align-items:center;gap:8px;margin-left:8px">业务草稿<t-input class="business-draft" placeholder="加载切换后保留内容" style="width:240px" /></label>
         </div>
       </t-loading>
       <div id="loading-target-a" class="loading-target-a" style="height:100px;border:1px solid var(--td-component-border);padding:16px">挂载区域 A</div>

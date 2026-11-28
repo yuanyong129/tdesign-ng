@@ -319,3 +319,14 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。覆盖业务节点/草稿/计数保留、显式模板/空串/转义优先、动态图标/文字/CSS 尺寸/遮罩、延迟取消与非法值、选择器/节点/函数/无效及自身目标回退、update 重解析、内容优先、共享挂载定位类及原类所有权、服务视图数量恢复/重复 hide/hideAll 隔离、多个全屏/外部滚动锁与销毁后无延迟残留。Button/Card 既有加载回归通过；Loading / Button / Card 页面 issues / badResources 为空，Loading 截图已检查。构建生成 API 触发 HMR 后，待稳定重新跑最终交互回归通过；最终重新生成 progress 并校验。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.51 kB）。
 
 **接续任务**：第 4 轮 Message / Notification → Dialog → Drawer → ImageViewer，先核实服务实例、计时器、挂载和关闭回调的生命周期。
+
+### 2026-11-28：示例控件统一与 Message / Notification 内容和生命周期
+
+- **用户反馈与演示约定**：后续文档演示优先使用库内组件。本批把 Loading / Popup / Steps / Breadcrumb / Slider / SelectInput / AutoComplete 的示例原生按钮统一换为 TButton，Loading 草稿框换为带 label 的 TInput；保留业务计数、事件与禁用输入。焦点和定位回归改为操作内部真实按钮，外部触发器选择器同步指向实际按钮，不通过给未样式化 HTML 控件补颜色冒充组件。
+- **模板能力**：Message.content / icon / closeBtn、Notification.title / content / footer / icon / closeBtn 支持字符串或 TemplateRef，公开 MessageContent / NotificationContent；图标/关闭的布尔值继续控制内置内容。补 Notification.ng-content 默认内容，显式空串抑制投影，切换时隐藏保留投影；内容按 Angular 文本转义，不注入 HTML。新增两个包含 TButton 的可操作 demo，覆盖实时绑定、独立计数与局部服务销毁。
+- **计时和组件关闭**：共享反馈生命周期处理，正且有限的 duration 才计时；hover 暂停，离开后按完整时长重新计时，改时长重启，关闭与销毁清理计时任务。组件关闭只生效一次并隐藏自身，重新显示需重建；到时输出独立 durationEnd 后输出 close，点击/键盘关闭输出 closeBtnClick 后输出 close，回调内销毁则停止后续组件输出。关闭入口有 role / tabindex 并支持 Enter / 空格，消息区域提供 status 语义。
+- **服务清理和配置**：手动、按钮、到时、closeAll、服务销毁共用幂等结束路径；先解除订阅和销毁 Angular 视图，再释放空容器并调用 onClose，旧句柄不重复销毁。closeAll 仅处理调用时快照，关闭回调创建的新消息保留，销毁后的服务不再创建实例；各服务只清理自有容器。单次配置与注入默认配置全字段合并，显式 false / 空串保留；Message.loading 不再用默认参数 0 覆盖调用方 duration 配置；补 Notification.offset 实际样式。Message 服务 onClose 保留可选上下文，Notification 服务 onClose 按上游不带参数；两个组件继续保留本库 close 上下文。
+- **生成进度和边界**：示例 343 → 345；对齐仍为 1085/1576（68.8%），深度债 197 → 195，零债务目录 49 → 51。两个 onDurationEnd 原登记为到时 close 替代，本批改为独立事件的 Angular 映射，所以债务减少而对齐属性数不变。生成零债务只覆盖所登记组件接口，不代表完整服务 API；attach / style、容器不同 zIndex 隔离、运行时 config()、上游 Promise 返回值、退出动画、完整 SSR / 水合与嵌套焦点管理仍待后续。第 4 轮及 M2 未完成。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。回归包括换用 TButton 后的真实焦点/定位/业务计数、模板内容实时更新及按钮身份保留、自定义图标/关闭/标题/底部、字符串转义与通知投影优先级、键盘和鼠标关闭、不同来源回调顺序/次数、hover 暂停/完整重计时、改时长/0/非有限值/关闭和销毁取消计时、旧句柄和重复 closeAll、关闭回调创建新消息及回调内 closeAll、全局配置合并/显式 false、两种 offset 单位、loading 显式时长、服务作用域销毁/销毁后空句柄与 ApplicationRef 视图数量恢复。Loading / Popup / Steps / Breadcrumb / Slider / SelectInput / AutoComplete / Message / Notification 页面 issues / badResources 均为空，Loading / Message / Notification 截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.55 kB）。
+
+**接续任务**：Message / Notification 自定义挂载与容器隔离 → Dialog → Drawer → ImageViewer；先完善反馈服务的挂载和多容器所有权，再进入对话框。

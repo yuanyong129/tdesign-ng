@@ -1,5 +1,7 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ApplicationRef,
+  DestroyRef,
   EnvironmentInjector,
   EnvironmentProviders,
   Injectable,
@@ -12,6 +14,7 @@ import { TMessage } from './message.component';
 import {
   MESSAGE_PLACEMENTS,
   MessageInstance,
+  MessageCloseEvent,
   MessageOptions,
   MessagePlacement,
   MessageTheme,
@@ -56,6 +59,9 @@ interface MessageEntry {
  */
 @Injectable({ providedIn: 'root' })
 export class TMessageService {
+  private readonly document = inject(DOCUMENT);
+  private destroyed = false;
+  constructor() { inject(DestroyRef).onDestroy(() => { this.destroyed = true; this.closeAll(); }); }
   private readonly appRef = inject(ApplicationRef);
 
   private readonly envInjector = inject(EnvironmentInjector);
@@ -92,12 +98,13 @@ export class TMessageService {
   }
 
   /** 加载中消息，默认不自动关闭。 */
-  loading(message: string | MessageOptions, duration = 0): MessageInstance {
+  loading(message: string | MessageOptions, duration?: number): MessageInstance {
     return this.show('loading', message, duration);
   }
 
   /** 按主题创建消息。 */
   show(theme: MessageTheme, message: string | MessageOptions, duration?: number): MessageInstance {
+    if (this.destroyed || !this.document.body) return { close: () => {} };
     const options = this.normalize(theme, message, duration);
     const container = this.getContainer(options);
     const rendered = renderComponent(TMessage, container, this.envInjector, this.appRef, 't-message');
@@ -121,25 +128,24 @@ export class TMessageService {
       if (y !== undefined && y !== '') messageElement.style.top = this.toLength(y);
     }
 
-    const entry: MessageEntry = {
-      placement: options.placement,
-      destroy: () => {
-        rendered.destroy();
-        this.entries.delete(entry);
-        this.releaseContainer(options.placement);
-      },
-    };
-    this.entries.add(entry);
-
     let closed = false;
-    const finish = () => {
+    const subscriptions: { unsubscribe(): void }[] = [];
+    const finish = (context?: MessageCloseEvent) => {
       if (closed) return;
       closed = true;
-      subscription.unsubscribe();
-      entry.destroy();
+      for (const subscription of subscriptions) subscription.unsubscribe();
+      this.entries.delete(entry);
+      rendered.destroy();
+      this.releaseContainer(options.placement);
+      options.onClose?.(context);
     };
-
-    const subscription = ref.instance.close.subscribe(finish);
+    const entry: MessageEntry = { placement: options.placement, destroy: () => finish() };
+    this.entries.add(entry);
+    subscriptions.push(
+      ref.instance.close.subscribe(finish),
+      ref.instance.closeBtnClick.subscribe(e => options.onCloseBtnClick?.({ e })),
+      ref.instance.durationEnd.subscribe(() => options.onDurationEnd?.()),
+    );
 
     return { close: finish };
   }
@@ -147,9 +153,6 @@ export class TMessageService {
   /** 关闭所有消息。 */
   closeAll(): void {
     for (const entry of [...this.entries]) entry.destroy();
-    this.entries.clear();
-    for (const container of this.containers.values()) container.remove();
-    this.containers.clear();
   }
 
   private normalize(
@@ -160,9 +163,10 @@ export class TMessageService {
     const config = this.config;
     const options: MessageOptions = typeof message === 'string' ? { content: message } : { ...message };
     return {
+      ...config,
       ...options,
       theme: options.theme ?? theme,
-      duration: duration ?? options.duration ?? config.duration ?? DEFAULT_DURATION,
+      duration: duration ?? options.duration ?? (theme === 'loading' ? 0 : config.duration ?? DEFAULT_DURATION),
       placement: options.placement ?? config.placement ?? 'top',
     };
   }
@@ -172,7 +176,7 @@ export class TMessageService {
     const existing = this.containers.get(placement);
     if (existing) return existing;
 
-    const container = document.createElement('div');
+    const container = this.document.createElement('div');
     container.className = 't-message__list';
     container.dataset['placement'] = placement;
     Object.assign(container.style, PLACEMENT_STYLE[placement]);
@@ -181,7 +185,7 @@ export class TMessageService {
       container.style.display = 'flex';
       container.style.flexDirection = 'column-reverse';
     }
-    document.body.appendChild(container);
+    this.document.body.appendChild(container);
     this.containers.set(placement, container);
     return container;
   }

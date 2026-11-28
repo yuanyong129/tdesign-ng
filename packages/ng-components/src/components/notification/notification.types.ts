@@ -1,3 +1,5 @@
+import type { Content } from '../../_utils/content';
+export type NotificationContent = Content;
 /** 通知主题。 */
 export const NOTIFICATION_THEMES = ['info', 'success', 'warning', 'error'] as const;
 
@@ -12,25 +14,28 @@ export type NotificationCloseTrigger = 'close-click' | 'duration-end';
 
 export interface NotificationCloseEvent {
   trigger: NotificationCloseTrigger;
-  event?: MouseEvent;
+  event?: MouseEvent | KeyboardEvent;
 }
 
 /** 创建一条通知的配置。 */
 export interface NotificationOptions {
   /** 标题 */
-  title?: string;
+  title?: Content;
   /** 内容 */
-  content?: string;
+  content?: Content;
   /** 底部补充内容 */
-  footer?: string;
+  footer?: Content;
   /** 主题，默认 info */
   theme?: NotificationTheme;
   /** 自动关闭的毫秒数，0 表示不自动关闭 */
   duration?: number;
   /** 是否显示图标 */
-  icon?: boolean;
+  icon?: boolean | Content;
   /** 是否显示关闭按钮 */
-  closeBtn?: boolean;
+  closeBtn?: boolean | Content;
+  onCloseBtnClick?: (context: { e: MouseEvent | KeyboardEvent }) => void;
+  onDurationEnd?: () => void;
+  onClose?: () => void;
   /** 附加类名 */
   className?: string;
   /** 出现位置，默认 top-right */

@@ -10,13 +10,13 @@ import { TButton, TSelectInput, type InputOptions, type SelectInputTagInputProps
       <t-select-input class="options-single" allowInput clearable value="单选回显" [inputValue]="keyword()" [inputProps]="inputProps()" [panel]="singlePanel"
         [disabled]="disabled()" [readonly]="readonly()" [popupVisible]="visible()" (inputChange)="acceptInput($event.value)" (enter)="enters.set(enters() + 1)" (paste)="pastes.set(pastes() + 1)"
         (mouseenter)="mouseEnters.set(mouseEnters() + 1)" (mouseleave)="mouseLeaves.set(mouseLeaves() + 1)" />
-      <ng-template #singlePanel><button type="button" class="single-panel-button">面板内可聚焦按钮</button></ng-template>
+      <ng-template #singlePanel><t-button size="small" variant="outline" type="button" class="single-panel-button">面板内可聚焦按钮</t-button></ng-template>
       <t-select-input class="options-multiple" multiple allowInput clearable [value]="tags()" [panel]="multiplePanel" [inputProps]="sharedProps()"
         [tagInputProps]="tagInputProps()" [tagProps]="tagProps()" [defaultInputValue]="initialKeyword()" [reserveKeyword]="reserve()"
         (valueChange)="acceptTags($event)" (tagChange)="tagChanges.set(tagChanges() + 1)" (inputChange)="multiInputs.set(multiInputs() + 1)" />
-      <ng-template #multiplePanel><button type="button" class="multiple-panel-button">多选面板按钮</button></ng-template>
+      <ng-template #multiplePanel><t-button size="small" variant="outline" type="button" class="multiple-panel-button">多选面板按钮</t-button></ng-template>
       <t-select-input class="options-form" multiple allowInput clearable [formControl]="control" [panel]="formPanel" />
-      <ng-template #formPanel><button type="button" class="form-panel-button">表单面板按钮</button></ng-template>
+      <ng-template #formPanel><t-button size="small" variant="outline" type="button" class="form-panel-button">表单面板按钮</t-button></ng-template>
     </div>
     <p class="demo-hint">单选关键字 {{ keyword() }}；inputProps 回调 {{ inputs() }} 次；Enter {{ enters() }} 次；paste {{ pastes() }} 次。多选 tagChange {{ tagChanges() }} 次，配置回调 {{ tagCallbacks() }} 次；关闭回调 {{ closes() }} 次。</p>
     <t-button size="small" (click)="acceptChanges.set(!acceptChanges())">切换接收修改</t-button>
