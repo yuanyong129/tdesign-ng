@@ -4,38 +4,39 @@
 
 - 目录：`packages/ng-components/src/components/dialog/`
 - 文档页：`/dialog`（`packages/docs/src/app/docs/dialog/dialog.component.ts`）
-- 状态：🚧 有深度债 10 项
+- 状态：🚧 有深度债 3 项
 
 ## 概览
 
 | 指标 | 数值 |
 | --- | --- |
 | 上游属性 | 37 |
-| 已对齐 | 22 |
-| 覆盖率 | 59.5% |
-| 深度债 | 10（D1 0 / D2 10 / D3 0） |
-| Angular 惯用映射 | 5（插槽 / 双向绑定 / 事件名，不计债） |
+| 已对齐 | 23 |
+| 覆盖率 | 62.2% |
+| 深度债 | 3（D1 0 / D2 3 / D3 0） |
+| Angular 惯用映射 | 11（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 4 个 |
+| 文档示例 | 5 个 |
 
 ## 组件明细
 
 ### `TDialog`（`<t-dialog>`）
 
-上游接口 `TdDialogProps`；上游属性 37、已对齐 22（59.5%）；深度债 10 项；未登记缺失 0 项。
+上游接口 `TdDialogProps`；上游属性 37、已对齐 23（62.2%）；深度债 3 项；未登记缺失 0 项。
 
 **已实现输入**
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `visible` | boolean | false | 是否显示对话框，用于双向绑定 |
+| `visible` | boolean \| undefined | undefined | 受控显隐，未传时由实例方法管理，缺省关闭 |
 | `header` | string \| boolean | '' | 标题，传 false 隐藏头部 |
-| `body` | string \| undefined | undefined | 内容文本 |
+| `body` | DialogContent | undefined | 正文字符串或模板，显式值优先于投影 |
 | `footer` | boolean | true | 是否显示底部操作区 |
 | `closeBtn` | boolean | true | 是否显示关闭按钮 |
 | `confirmBtn` | string \| null | '确定' | 确认按钮文案，null 隐藏 |
 | `cancelBtn` | string \| null | '取消' | 取消按钮文案，null 隐藏 |
 | `confirmLoading` | boolean | false | 确认按钮是否加载中 |
+| `confirmOnEnter` | boolean | false | 是否允许非编辑区域按 Enter 确认 |
 | `closeOnEscKeydown` | boolean | true | 是否允许按 Esc 关闭 |
 | `closeOnOverlayClick` | boolean | true | 是否允许点击遮罩关闭 |
 | `showOverlay` | boolean | true | 是否显示遮罩 |
@@ -57,33 +58,39 @@
 | --- | --- | --- |
 | `visibleChange` | boolean | 显示状态变化，用于双向绑定 |
 | `close` | DialogCloseEvent | 关闭事件，携带关闭来源 |
-| `confirm` | MouseEvent | 点击确认 |
+| `confirm` | MouseEvent \| KeyboardEvent | 点击确认 |
 | `cancel` | MouseEvent | 点击取消 |
 | `overlayClick` | MouseEvent | 点击遮罩 |
+| `closeBtnClick` | MouseEvent \| KeyboardEvent | 点击或键盘激活关闭入口 |
+| `escKeydown` | KeyboardEvent | 顶层对话框收到 Esc |
+| `beforeOpen` | void | 实际打开前通知，不用于拦截 |
+| `beforeClose` | void | 实际关闭前通知，不用于拦截 |
+| `opened` | void | 打开状态渲染完成 |
+| `closed` | void | 关闭状态渲染完成 |
 
 **未实现（深度债）**
 
 | 上游属性 | 类别 | 原因 |
 | --- | --- | --- |
-| `attach` | D2 录入与反馈线 | 对话框固定挂到 body 层级的 fixed 容器，暂不支持自定义挂载点 |
-| `confirmOnEnter` | D2 录入与反馈线 | 回车确认尚未实现 |
+| `attach` | D2 录入与反馈线 | [D2] 当前在原模板位置渲染，尚未接入自定义挂载点 |
 | `default` | Angular 惯用映射 | 内容通过 ng-content 投影，不需要 default 插槽属性 |
-| `draggable` | D2 录入与反馈线 | 拖拽尚未实现，需要时可在外层自行实现 |
-| `onBeforeClose` | D2 录入与反馈线 | 暂未暴露关闭前钩子 |
-| `onBeforeOpen` | D2 录入与反馈线 | 暂未暴露打开前钩子 |
+| `draggable` | D2 录入与反馈线 | [D2] 对话框拖动尚未实现，留到挂载和内容配置之后 |
+| `onBeforeClose` | Angular 惯用映射 | Angular 用 (beforeClose) 输出，通知实际状态变化，不是拦截器 |
+| `onBeforeOpen` | Angular 惯用映射 | Angular 用 (beforeOpen) 输出，通知实际状态变化，不是拦截器 |
 | `onCancel` | Angular 惯用映射 | Angular 用 (cancel) 输出 |
 | `onClose` | Angular 惯用映射 | Angular 用 (close) 输出，携带 trigger 与原始事件 |
-| `onCloseBtnClick` | D2 录入与反馈线 | 关闭按钮会触发 (close)，trigger 为 close-btn |
-| `onClosed` | D2 录入与反馈线 | 暂未暴露关闭后回调，可用 (visibleChange) 判断 |
+| `onCloseBtnClick` | Angular 惯用映射 | Angular 用独立 (closeBtnClick) 输出，键盘激活也携带原事件 |
+| `onClosed` | Angular 惯用映射 | Angular 用 (closed) 输出，表示关闭状态渲染完成，不承诺退出动画时长 |
 | `onConfirm` | Angular 惯用映射 | Angular 用 (confirm) 输出 |
-| `onEscKeydown` | D2 录入与反馈线 | Esc 关闭会触发 (close)，trigger 为 esc |
-| `onOpened` | D2 录入与反馈线 | 暂未暴露打开后回调，可用 (visibleChange) 判断 |
+| `onEscKeydown` | Angular 惯用映射 | Angular 用独立 (escKeydown) 输出，禁用 Esc 关闭时仍通知 |
+| `onOpened` | Angular 惯用映射 | Angular 用 (opened) 输出，表示打开状态渲染完成，不承诺退出动画时长 |
 | `onOverlayClick` | Angular 惯用映射 | Angular 用 (overlayClick) 输出 |
-| `showInAttachedElement` | D2 录入与反馈线 | 同 attach，暂不支持挂到指定元素内 |
+| `showInAttachedElement` | D2 录入与反馈线 | [D2] 依赖 attach 的局部显示与定位，后续挂载批次实现 |
 
 ## 文档示例
 
 - `packages/docs/src/app/docs/dialog/demos/dialog-basic.ts`
 - `packages/docs/src/app/docs/dialog/demos/dialog-custom.ts`
+- `packages/docs/src/app/docs/dialog/demos/dialog-lifecycle.ts`
 - `packages/docs/src/app/docs/dialog/demos/dialog-placement.ts`
 - `packages/docs/src/app/docs/dialog/demos/dialog-theme.ts`

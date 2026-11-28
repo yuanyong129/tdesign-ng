@@ -3,16 +3,19 @@
     #ctx
     [class]="ctxClasses()"
     [style.z-index]="zIndex() ?? null"
+    [attr.aria-hidden]="innerVisible() ? null : 'true'"
+    [style.display]="innerVisible() ? null : 'none'"
     tabindex="-1"
-    [cdkTrapFocus]="innerVisible()"
-    (keydown)="handleKeydown($event)"
+    role="dialog" [attr.aria-modal]="isModal() ? 'true' : null"
+    [attr.aria-labelledby]="showHeader() && headerText() ? titleId : null" [attr.aria-label]="showHeader() && headerText() ? null : '对话框'"
+    [cdkTrapFocus]="trapFocus()"
   >
     @if (showMask()) {
       <div class="t-dialog__mask" (click)="handleMaskClick($event)"></div>
     }
     <div class="t-dialog__wrap">
       <div [class]="positionClasses()" [style]="positionStyle()">
-        <div [class]="dialogClasses()" [style]="resolvedDialogStyle()" role="dialog" aria-modal="true">
+        <div [class]="dialogClasses()" [ngStyle]="resolvedDialogStyle()">
           @if (showHeader()) {
             <div class="t-dialog__header">
               <div class="t-dialog__header-content">
@@ -59,10 +62,10 @@
                     }
                   </svg>
                 }
-                <span>{{ headerText() }}</span>
+                <span [id]="titleId">{{ headerText() }}</span>
               </div>
               @if (closeBtn()) {
-                <span class="t-dialog__close" (click)="handleCloseBtn($event)">
+                <span class="t-dialog__close" role="button" tabindex="0" aria-label="关闭" (click)="handleCloseBtn($event)" (keydown)="handleCloseBtn($event)">
                   <svg
                     class="t-icon"
                     xmlns="http://www.w3.org/2000/svg"
@@ -85,10 +88,10 @@
           }
 
           <div class="t-dialog__body">
-            @if (body()) {
-              {{ body() }}
+            @if (body(); as value) {
+              @if (isTemplateContent(value)) { <ng-container [ngTemplateOutlet]="value" /> } @else { {{ value }} }
             }
-            <ng-content />
+            <span [style.display]="body() === undefined ? 'contents' : 'none'"><ng-content /></span>
           </div>
 
           @if (footer()) {

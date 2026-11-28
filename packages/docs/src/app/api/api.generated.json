@@ -3430,11 +3430,11 @@
       "inputs": [
         {
           "name": "visible",
-          "type": "boolean",
-          "default": "false",
+          "type": "boolean | undefined",
+          "default": "undefined",
           "required": false,
-          "zh": "是否显示对话框，用于双向绑定",
-          "en": "Whether the dialog is visible, used for two-way binding",
+          "zh": "受控显隐，未传时由实例方法管理，缺省关闭",
+          "en": "Controlled visibility, omitted for instance-managed visibility, initially closed",
           "values": []
         },
         {
@@ -3448,11 +3448,11 @@
         },
         {
           "name": "body",
-          "type": "string | undefined",
+          "type": "DialogContent",
           "default": "undefined",
           "required": false,
-          "zh": "内容文本",
-          "en": "Body text",
+          "zh": "正文字符串或模板，显式值优先于投影",
+          "en": "Body text or template, explicit value takes precedence over projection",
           "values": []
         },
         {
@@ -3498,6 +3498,15 @@
           "required": false,
           "zh": "确认按钮是否加载中",
           "en": "Whether the confirm button is loading",
+          "values": []
+        },
+        {
+          "name": "confirmOnEnter",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "是否允许非编辑区域按 Enter 确认",
+          "en": "Whether Enter confirms outside editable and native activation controls",
           "values": []
         },
         {
@@ -3656,7 +3665,7 @@
         },
         {
           "name": "confirm",
-          "type": "MouseEvent",
+          "type": "MouseEvent | KeyboardEvent",
           "zh": "点击确认",
           "en": "Confirm event"
         },
@@ -3671,6 +3680,42 @@
           "type": "MouseEvent",
           "zh": "点击遮罩",
           "en": "Overlay click event"
+        },
+        {
+          "name": "closeBtnClick",
+          "type": "MouseEvent | KeyboardEvent",
+          "zh": "点击或键盘激活关闭入口",
+          "en": "Close control activated"
+        },
+        {
+          "name": "escKeydown",
+          "type": "KeyboardEvent",
+          "zh": "顶层对话框收到 Esc",
+          "en": "Escape received by the top dialog"
+        },
+        {
+          "name": "beforeOpen",
+          "type": "void",
+          "zh": "实际打开前通知，不用于拦截",
+          "en": "Notification before actual opening, not a guard"
+        },
+        {
+          "name": "beforeClose",
+          "type": "void",
+          "zh": "实际关闭前通知，不用于拦截",
+          "en": "Notification before actual closing, not a guard"
+        },
+        {
+          "name": "opened",
+          "type": "void",
+          "zh": "打开状态渲染完成",
+          "en": "Open state rendered"
+        },
+        {
+          "name": "closed",
+          "type": "void",
+          "zh": "关闭状态渲染完成",
+          "en": "Closed state rendered"
         }
       ]
     },

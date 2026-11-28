@@ -2044,6 +2044,58 @@ try {
   })()`);
   for(const [key,value] of Object.entries(cardContent))assert.equal(value,true,'Card '+key);
   console.log('PASS Card: wrapped overlay/geometry, business identity/draft/focus, custom loading replacement/lifecycle, indicator/text/size, whitelist/explicit state, delay/fullscreen cleanup, dynamic empty/text content, header/footer/poster themes and style replacement');
+  await page('/dialog','demo-dialog-lifecycle .dialog-open button');
+  const dialogLifecycle=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-dialog-lifecycle'),demo=ng.getComponent(root),dialog=demo.controlled(),defaults=demo.defaults(),second=demo.second();
+    const apply=async()=>{ng.applyChanges(demo);${settle}},ctx=()=>root.querySelector('.dialog-lifecycle-controlled .t-dialog__ctx'),other=()=>root.querySelector('.dialog-lifecycle-second .t-dialog__ctx'),locked=()=>document.documentElement.classList.contains('cdk-global-scrollblock');
+    const key=(target,key,extra={})=>target.dispatchEvent(new KeyboardEvent('keydown',{key,code:key,bubbles:true,cancelable:true,...extra}));
+    const initial=!ctx()&&root.querySelector('.dialog-lifecycle-default .t-dialog__ctx').style.display==='none'&&demo.events.length===0;
+    const opener=root.querySelector('.dialog-open button');opener.focus();demo.visible.set(true);await apply();const container=ctx(),panel=container.querySelector('.t-dialog'),input=container.querySelector('.dialog-input input');
+    const opened=JSON.stringify(demo.events)===JSON.stringify(['beforeOpen','opened'])&&document.activeElement===container&&locked()&&demo.proposals()===0&&container.getAttribute('aria-modal')==='true'&&!!document.getElementById(container.getAttribute('aria-labelledby'));
+    input.value='draft';input.dispatchEvent(new Event('input',{bubbles:true}));container.querySelector('.dialog-counter button').click();await apply();input.focus();demo.accept.set(false);await apply();container.querySelector('.t-dialog__close').click();await apply();
+    const rejected=demo.visible()&&dialog.innerVisible()&&demo.proposals()===1&&demo.events.slice(-2).join(',')==='button,close:close-btn'&&locked();dialog.hide();await apply();const rejectedApi=dialog.innerVisible()&&demo.proposals()===2;
+    demo.visible.set(false);await apply();const programClose=!dialog.innerVisible()&&demo.proposals()===2&&demo.events.slice(-2).join(',')==='beforeClose,closed'&&document.activeElement===opener&&!locked()&&ctx()===container;
+    demo.accept.set(true);demo.visible.set(true);await apply();const retained=ctx()===container&&container.querySelector('.dialog-input input')===input&&input.value==='draft'&&demo.count()===1;
+    demo.label.set('Live dialog');demo.style.set({borderRadius:'8px'});demo.className.set({'new-dialog-class':true,'ignored-class':false});await apply();const appearance=container.querySelector('.dialog-live').textContent==='Live dialog'&&panel.style.backgroundColor===''&&panel.style.borderRadius==='8px'&&panel.style.width==='480px'&&panel.classList.contains('new-dialog-class')&&!panel.classList.contains('dialog-demo-panel')&&panel.classList.contains('t-dialog--default')&&parseFloat(getComputedStyle(panel).paddingTop)>0;
+    key(container,'Enter');await apply();const enter=demo.confirms()===1&&demo.visible();
+    key(input,'Enter');key(container.querySelector('textarea'),'Enter');key(container.querySelector('.dialog-counter button'),'Enter');key(container,'Enter',{isComposing:true});key(container,'Enter',{repeat:true});await apply();const protectedEnter=demo.confirms()===1;
+    demo.confirmLoading.set(true);await apply();key(container,'Enter');container.querySelector('.t-dialog__footer t-button:last-child button').click();await apply();const confirmGuard=demo.confirms()===1;demo.confirmLoading.set(false);demo.enter.set(false);await apply();key(container,'Enter');await apply();const enterDisabled=demo.confirms()===1;demo.enter.set(true);
+    demo.escape.set(false);await apply();const beforeEsc=demo.events.length;key(container,'Escape');await apply();const escapeNotice=demo.visible()&&demo.events.length===beforeEsc+1&&demo.events.at(-1)==='esc';
+    key(container,'Escape',{isComposing:true});key(container,'Escape',{repeat:true});await apply();const compositionIgnored=demo.events.length===beforeEsc+1;
+    demo.mask.set(false);await apply();container.querySelector('.t-dialog__mask').click();await apply();const maskNotice=demo.visible()&&demo.events.at(-1)==='overlay';
+    demo.escape.set(true);await apply();key(container,'Escape');await apply();const escaped=!demo.visible()&&demo.events.slice(-4).join(',')==='esc,close:esc,beforeClose,closed';
+    demo.visible.set(true);await apply();input.focus();second.show();await apply();const twoLocks=locked()&&document.activeElement===other();
+    second.hide();await apply();const oneLock=locked()&&demo.visible()&&document.activeElement===input;
+    second.show();await apply();const childInput=other().querySelector('button');childInput.focus();demo.visible.set(false);await apply();const backgroundClose=locked()&&second.innerVisible()&&document.activeElement===childInput;second.hide();await apply();const unlocked=!locked();
+    // The last opened layer only wins at the same z-index; a higher parent keeps keyboard ownership.
+    demo.visible.set(true);demo.secondZ.set(2500);await apply();second.show();await apply();key(document,'Escape');await apply();const zOrder=!demo.visible()&&second.innerVisible();second.hide();await apply();
+    demo.visible.set(true);demo.secondZ.set(2600);await apply();second.show();await apply();key(document,'Escape');await apply();const oneEscape=demo.visible()&&!second.innerVisible()&&locked();demo.visible.set(false);await apply();
+    demo.mode.set('modeless');demo.visible.set(true);await apply();const modeless=!locked()&&!ctx().querySelector('.t-dialog__mask')&&ctx().getAttribute('aria-modal')===null;
+    demo.mode.set('modal');await apply();const modalLock=locked();demo.prevent.set(false);await apply();const dynamicUnlock=!locked();demo.prevent.set(true);await apply();const relocked=locked();demo.mode.set('normal');await apply();const normal=!locked()&&!ctx().classList.contains('t-dialog__ctx--fixed')&&!ctx().querySelector('.t-dialog__mask');demo.visible.set(false);demo.mode.set('modal');await apply();
+    document.documentElement.classList.add('cdk-global-scrollblock');demo.visible.set(true);await apply();demo.visible.set(false);await apply();const externalLock=locked();document.documentElement.classList.remove('cdk-global-scrollblock');
+    const beforeDefaults=demo.defaultProposals();defaults.show();defaults.show();await apply();defaults.hide();defaults.hide();await apply();const uncontrolled=demo.defaultProposals()===beforeDefaults+2&&!defaults.innerVisible();
+    demo.destroy.set(true);demo.visible.set(true);await apply();const oldInput=ctx().querySelector('input');demo.visible.set(false);await apply();const destroyed=!ctx()&&!oldInput.isConnected;demo.visible.set(true);await apply();const recreated=ctx().querySelector('input')!==oldInput;
+    const cancelSubscription=dialog.cancel.subscribe(()=>demo.visible.set(false));const cancelStart=demo.events.length;ctx().querySelector('.t-dialog__footer t-button:first-child button').click();await apply();cancelSubscription.unsubscribe();const cancelReentrant=demo.events.slice(cancelStart).join(',')==='cancel,close:cancel,beforeClose,closed';demo.visible.set(true);await apply();
+    const beforeDestroy=demo.events.length;demo.mounted.set(false);await apply();dialog.show();dialog.hide();dialog.toggle();await apply();const disposed=!root.querySelector('.dialog-lifecycle-controlled')&&!locked()&&demo.events.length===beforeDestroy;
+    demo.visible.set(false);demo.mounted.set(true);await apply();const replacement=demo.controlled();demo.visible.set(true);demo.visible.set(false);await apply();const noStaleOpen=!replacement.innerVisible()&&!ctx();
+    return {initial,opened,rejected,rejectedApi,programClose,retained,appearance,enter,protectedEnter,confirmGuard,enterDisabled,escapeNotice,compositionIgnored,maskNotice,escaped,twoLocks,oneLock,backgroundClose,unlocked,zOrder,oneEscape,modeless,modalLock,dynamicUnlock,relocked,normal,externalLock,uncontrolled,destroyed,recreated,cancelReentrant,disposed,noStaleOpen};
+  })()`);
+  for(const [key,value] of Object.entries(dialogLifecycle))assert.equal(value,true,'Dialog '+key);
+  const projectedDialog=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-dialog-custom'),demo=ng.getComponent(root);demo.visible=true;ng.applyChanges(demo);${settle}
+    const ctx=root.querySelector('.t-dialog__ctx'),input=ctx.querySelector('input');input.value='projected draft';input.dispatchEvent(new Event('input',{bubbles:true}));${settle}
+    const customFooter=ctx.querySelector('.t-dialog__footer [tDialogFooter]'),onlyCustom=ctx.querySelectorAll('.t-dialog__footer button').length===2&&!!customFooter;
+    demo.visible=false;ng.applyChanges(demo);${settle}demo.visible=true;ng.applyChanges(demo);${settle}
+    const retained=ctx.querySelector('input')===input&&input.value==='projected draft'&&ctx.querySelector('[tDialogFooter]')===customFooter;demo.visible=false;ng.applyChanges(demo);${settle}return onlyCustom&&retained;
+  })()`);assert.equal(projectedDialog,true,'Dialog original projection/footer regression');
+  // Native Tab navigation validates the CDK trap, instead of dispatching a synthetic Tab event.
+  await evaluate(`(async()=>{const demo=ng.getComponent(document.querySelector('demo-dialog-lifecycle'));demo.destroy.set(false);demo.visible.set(true);ng.applyChanges(demo);${settle}const ctx=document.querySelector('.dialog-lifecycle-controlled .t-dialog__ctx');ctx.querySelector('.t-dialog__footer t-button:last-child button').focus();})()`);
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  assert.equal(await evaluate(`document.activeElement===document.querySelector('.dialog-lifecycle-controlled .t-dialog__close')`),true,'Dialog forward Tab wraps');
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9,modifiers:8});await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9,modifiers:8});
+  assert.equal(await evaluate(`document.activeElement===document.querySelector('.dialog-lifecycle-controlled .t-dialog__footer t-button:last-child button')`),true,'Dialog reverse Tab wraps');
+  await evaluate(`(async()=>{const demo=ng.getComponent(document.querySelector('demo-dialog-lifecycle'));demo.visible.set(false);ng.applyChanges(demo);${settle}})()`);
+  console.log('PASS Dialog: controlled proposals/program sync, lifecycle/source events, lazy/retain/destroy, template/style updates, Enter/IME guards, nested z-index/Escape/focus restoration, native Tab trap, shared/external/dynamic scroll locks, modeless/normal, destroyed methods');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

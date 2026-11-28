@@ -365,3 +365,14 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、最终文档站生产构建、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增实测遮罩与主体含 padding 的矩形误差小于 2px、加载切换不改变卡片高度、业务节点/草稿/焦点保留、头尾可操作、自定义模板动态事件及销毁/恢复原实例、模板模式释放默认全屏锁、图标/文字模板及 CSS 尺寸、showOverlay=false、配置白名单与显式状态优先级、延迟关闭/销毁取消、动态插入/删除元素及文本/空白、空主体加载、自定义 header 与 poster1/poster2 操作区、动态 class/style 替换和旧样式删除。Card / Loading / Button / Message / Notification 页面 issues / badResources 为空，Card 截图已检查；旧加载演示文案同步改为内容保持可见。生成文件触发开发服务重载后，待稳定运行最终回归通过。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.55 kB）。
 
 **接续任务**：Dialog → Drawer → ImageViewer，先核实 Dialog 显隐、关闭钩子、挂载、焦点与滚动锁的真实缺口，再分批实施。
+
+### 2026-11-28：第 4 轮 Dialog 受控显隐与生命周期首批
+
+- **显隐和通知语义**：visible 未设置时使用实例管理的非受控状态，显式绑定后 show / hide / toggle 与用户关闭只发提案，父组件拒绝后保持实际显示；程序输入同步与重复同值操作不输出 visibleChange。confirm 只通知、不自动关闭。按锁定上游 void 类型及 Transition 回调实现 beforeOpen / beforeClose 通知，不伪造可取消或异步关闭前钩子；opened / closed 表示实际状态渲染完成，快速反转取消过期完成通知，不承诺上游动画时长。关闭来源保留本库 trigger / event，新增独立 closeBtnClick / escKeydown，禁用 Esc 关闭仍通知；取消回调先修改状态时仍输出对应 close 来源，组件销毁后方法不再产生作用。
+- **模板与创建/销毁**：body 支持 DialogContent 字符串或 TemplateRef，显式值优先，空串覆盖默认投影。lazy 控制 Dialog 自有 DOM / 正文模板的首次创建；destroyOnClose 真正销毁这些自有视图，缺省关闭保留节点和草稿。ng-content 子组件仍由调用方拥有，不声称这些输入能延迟构造或销毁外部投影组件。移除无用的 FooterSlot 模板导入，保留 contentChild 识别和原自定义底部投影，默认按钮不重复渲染。dialogStyle 使用 NgStyle，动态替换会移除旧属性，width 仍由显式 width 决定。
+- **视觉复核**：打开后的截图检出既有默认 Dialog 未使用 vendor 的 t-dialog--default 类、内容没有内边距，补该真实布局类并验证 computed padding；不新增覆盖样式。full-screen 的头部/主体/底部布局与富内容一起留到下一批继续核实，本批验证的是模态状态和锁的生命周期。
+- **键盘、层级与滚动锁**：新增 confirmOnEnter，仅 Dialog 内非输入/多行/选择/按钮/链接/contenteditable 区域生效，IME、按键重复、confirmLoading 与隐藏确认按钮均保护。Dialog 之间按 zIndex、同层按打开顺序确定键盘和模态焦点陷阱归属，一个 Escape 不连续关闭多层。实际打开后聚焦带 dialog 语义和标题关联的上下文，关闭/销毁尽量返回原触发器或剩余顶层；后台关闭不抢外部已接管的焦点。modal / full-screen 共享按 Document 计数的单个 CDK BlockScrollStrategy，保留外部原有锁；动态 preventScrollThrough / mode 更新释放锁，modeless / normal 不设模态陷阱或滚动锁，normal 不再误用 fixed 类。
+- **生成进度和剩余边界**：新增 TButton / TInput / TTextarea 演示，示例 348 → 349；对齐 1085 → 1086（68.9%），深度债 195 → 188，零登记债务目录仍为 51/73。Dialog 债务 10 → 3，保留 attach、showInAttachedElement、draggable；这些统计仍未表达 header/footer/closeBtn/confirmBtn/cancelBtn 完整联合类型的内容/按钮配置缺口，下一批继续补。当前仍原位渲染，跨 Drawer / Popup / 原生弹层统一栈、完整 SSR / 水合、退出动画与服务式 API 未完成，第 4 轮及 M2 仍未达成。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全量既有及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。全量回归覆盖受控拒绝/实例提案/程序同步、生命周期与来源事件顺序、取消回调内先更新显隐、Enter/IME/重复/原生控件保护、lazy/保留/销毁及旧实例方法无效、模板与样式替换、原有自定义 footer 和投影保留、多层和不同 zIndex 的 Esc 单次归属、原焦点恢复/后台不抢焦点、原生 CDP Tab/Shift+Tab 环绕、共享/外部/动态模式滚动锁和销毁清理。补默认布局类后重新通过完整构建及 Dialog 专项回归，并检查真实 padding 与打开截图。Dialog / Drawer / Popup / Card 页面 issues / badResources 为空，最终 Dialog 页面再次检查通过。保留既有 Drawer footer slot、Browserslist、qrcode CommonJS 和首包预算告警（约 805.55 kB）；移除了 Dialog 自身的 unused footer slot 告警。
+
+**接续任务**：Dialog 富内容与按钮配置白名单 → 挂载/局部显示 → 拖动 → Drawer → ImageViewer，保持分批验收。

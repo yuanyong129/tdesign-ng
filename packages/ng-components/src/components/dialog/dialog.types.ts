@@ -1,3 +1,5 @@
+import type { Content } from '../../_utils/content';
+export type DialogContent = Content;
 /** 对话框主题。 */
 export const DIALOG_THEMES = ['default', 'info', 'warning', 'danger', 'success'] as const;
 
