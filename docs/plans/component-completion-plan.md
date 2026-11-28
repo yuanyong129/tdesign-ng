@@ -245,3 +245,14 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。覆盖投影回退、模板标题/内容及文本转义、三种生命周期、重排保留实例、受控拒绝/默认值仅初始化、数值/字符串/空字符串/下标取值、失效值、横纵方向键与 ARIA、增删和单项回调、排序载荷与动态失效保护；真实 CDP 鼠标点击验证可见关闭图标仅通知一次。Tabs 页面 issues / badResources 为空，最终截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 和首包预算告警（约 799.96 kB）。
 
 **接续任务**：第 3 轮 Breadcrumb → Steps → Statistic，第 3 轮整体与 M2 尚未完成。
+
+### 2026-11-28：第 3 轮 Breadcrumb 折叠与提示
+
+- **折叠契约**：新增 maxItems、itemsBeforeCollapse、itemsAfterCollapse、ellipsis；阈值和前后保留数均为正数、总项数超过阈值且前后总数小于总项数时才折叠。对小数向下取整，未设置、0、负数和非有限值不折叠；maxItems 是触发阈值，不保证最终含省略号的数量不超过阈值。options 排在投影项之前，共同参与计算，校准此前两者顺序不一致的问题。
+- **原组件与访问入口**：默认省略号使用 Popup 打开隐藏路径，DomPortal 移动原面包屑宿主，保留链接、投影、宿主事件与内部按钮状态，关闭后不复制/销毁原组件；取消折叠恢复原位，动态删除与父级销毁时清理 Portal。仅通过 bridge 补原宿主在导航内隐藏和弹层内纵向布局规则。锁定上游默认只显示省略图标，本库弹层属于补充的可访问入口，不宣称完全复刻该版本运行行为。
+- **模板与点击**：ellipsis 支持字符串或模板，模板上下文为 items / separator；数据项描述保留配置回调，投影文字使用实时测量文本描述，原交互内容仍通过默认弹层访问。options 新增 onClick(MouseEvent)，可 preventDefault 取消导航；禁用项阻止原生链接与宿主回调，投影内业务控件的禁用仍由调用方管理。链接 target 保留，_blank 添加 rel；显式空 content 不再错误回退到投影。
+- **提示与无障碍**：对实际溢出文本启用 Tooltip，ResizeObserver / MutationObserver 跟踪宽度和文字变化，销毁时断开；提示使用纯文本，不复制交互模板，折叠弹层关闭时同步关闭子项提示。面包屑增加 navigation 语义，最后一项 aria-current；省略触发器支持 Enter / 空格、方向下键进入，弹层方向键及 Home / End 移动焦点，Esc 关闭并返回触发器，焦点离开本弹层时关闭。实例使用独立 id 和自己的 Popup 边界。
+- **进度与边界**：新增 1 个 demo，示例 336 → 337；对齐 1069 → 1073（68.1%）、真实债务 214 → 210，零债务目录仍为 45/73。保留 to / replace / router 三项路由整合债务，不以 href 或原生点击映射冒充 Router 实现；SSR / 水合仍待后续验收。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增覆盖折叠阈值/前后数量/非法及小数参数、自定义上下文、混合来源顺序、原宿主/按钮/事件保留、动态文字和宽度、取消折叠恢复、投影删除与整组销毁、禁用链接与回调、target/rel、键盘进入/移动/Esc/焦点恢复；真实 CDP 鼠标验证省略触发、隐藏链接单次回调、取消导航及外部点击关闭。Breadcrumb 页面 issues / badResources 为空，截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 800.20 kB）。
+
+**接续任务**：第 3 轮 Steps → Statistic，第 3 轮整体与 M2 尚未完成。

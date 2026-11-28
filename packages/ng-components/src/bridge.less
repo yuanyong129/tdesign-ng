@@ -466,3 +466,11 @@ t-input-group.t-input-group {
     > t-input > .t-input__wrap:only-child > .t-input { margin-left: 0; border-radius: var(--td-radius-default); }
   }
 }
+
+// Breadcrumb 折叠：原宿主在导航中隐藏，通过 DomPortal 移入弹层后恢复布局。
+t-breadcrumb > t-breadcrumb-item.t-breadcrumb__item--collapsed { display: none; }
+.t-breadcrumb[data-t-breadcrumb-overflow] {
+  flex-direction: column;
+  align-items: stretch;
+  .t-breadcrumb__separator { display: none; }
+}

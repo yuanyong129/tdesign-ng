@@ -5,10 +5,11 @@ import { PageNav } from '../page-nav';
 import { DemoBreadcrumbBase } from './demos/breadcrumb-base';
 import { DemoBreadcrumbOptions } from './demos/breadcrumb-options';
 import { DemoBreadcrumbSeparator } from './demos/breadcrumb-separator';
+import { DemoBreadcrumbCollapse } from './demos/breadcrumb-collapse';
 
 @Component({
   selector: 'breadcrumb-docs',
-  imports: [ApiTable, DemoBlock, PageNav, DemoBreadcrumbBase, DemoBreadcrumbOptions, DemoBreadcrumbSeparator],
+  imports: [ApiTable, DemoBlock, PageNav, DemoBreadcrumbBase, DemoBreadcrumbOptions, DemoBreadcrumbSeparator, DemoBreadcrumbCollapse],
   template: `
     <article class="docs-page">
       <h1 class="docs-page__title">面包屑 Breadcrumb</h1>
@@ -39,6 +40,12 @@ import { DemoBreadcrumbSeparator } from './demos/breadcrumb-separator';
       >
         <demo-breadcrumb-options />
       </docs-demo>
+
+      <docs-demo id="breadcrumb-collapse" title="折叠路径与完整提示" description="总项数超过 maxItems 时保留前后指定项，点击省略号访问隐藏路径。投影项移动原宿主，保留事件和组件状态；内容超宽时显示文字提示。">
+        <demo-breadcrumb-collapse />
+      </docs-demo>
+      <p class="demo-hint">maxItems、itemsBeforeCollapse、itemsAfterCollapse 必须同时为正数，前后保留总数小于实际总数时才折叠；maxItems 是触发阈值，不是含省略号的最终数量上限。未设置、0、负数和非有限数不折叠，小数向下取整。options 排在投影项之前，两者共同计算。ellipsis 接收文本或模板，模板通过 let-items="items"、let-separator="separator" 读取隐藏项描述和分隔符配置；投影文字描述为实时测量文本，原交互内容仍在默认弹层中。默认弹层是本库补充的访问入口，锁定上游默认仅显示省略图标。Enter / 空格开关，方向下键进入弹层，弹层内方向键及 Home / End 移动焦点，Esc 关闭并返回触发器。修改路径或折叠参数时关闭弹层。</p>
+      <p class="demo-hint">options.onClick 接收 MouseEvent，可 preventDefault 取消导航；禁用项阻止链接导航和宿主点击回调，投影内部控件的禁用由调用方管理。最后一项使用 aria-current="page"。超宽提示使用实时纯文本，不复制交互模板。to / replace / router 尚未接入，继续使用 href；Angular Router 整合保留在后续任务。</p>
 
       <h2 class="docs-section__title" id="breadcrumb-api">API</h2>
       <div class="api-table__scroll">

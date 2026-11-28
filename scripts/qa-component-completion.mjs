@@ -1508,6 +1508,86 @@ try {
   await evaluate(`(async()=>{${settle}})()`);
   const tabsPointerClose=await evaluate(`(()=>{const demo=ng.getComponent(document.querySelector('demo-tabs-list'));return {removes:demo.removes(),callbacks:demo.itemRemoves(),value:demo.lastRemove().value};})()`);
   assert.deepEqual(tabsPointerClose,{removes:2,callbacks:2,value:'keep'});
+  await page('/breadcrumb', 'demo-breadcrumb-collapse .collapse-options [aria-haspopup]');
+  const breadcrumb=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-breadcrumb-collapse'),demo=ng.getComponent(root),host=root.querySelector('.collapse-options'),component=ng.getComponent(host);
+    const popup=()=>ng.getComponent(host.querySelector('t-popup'));
+    const open=async()=>{popup().show();${settle}};
+    const close=async()=>{popup().hide();${settle}};
+    const panel=()=>document.getElementById(component.overflowId);
+    const visible=()=>[...host.querySelectorAll(':scope > t-breadcrumb-item')].filter(el=>getComputedStyle(el).display!=='none');
+    const initial={visible:visible().map(el=>el.querySelector('.t-breadcrumb__inner-text').textContent.trim()),hidden:component.collapsedItems().length,current:host.querySelector('[aria-current=page]').textContent.trim()};
+    const range=[];
+    for(const [max,before,after] of [[undefined,1,1],[0,1,1],[-1,1,1],[3,undefined,1],[3,0,1],[3,1,0],[3,3,2],[5,1,1],[Infinity,1,1],[3,NaN,1],[3,1.9,1.9]]){
+      demo.max.set(max);demo.before.set(before);demo.after.set(after);ng.applyChanges(demo);${settle}range.push(component.collapsedItems().length);
+    }
+    demo.max.set(3);demo.before.set(1);demo.after.set(1);ng.applyChanges(demo);${settle}await open();
+    const link=panel().querySelector('a[href]');const attrs={target:link.target,rel:link.rel};
+    const event=new MouseEvent('click',{bubbles:true,cancelable:true});link.dispatchEvent(event);${settle}
+    const click={callbacks:demo.clicks(),cancelled:event.defaultPrevented};
+    const disabled=panel().querySelector('[aria-disabled=true]'),disabledEvent=new MouseEvent('click',{bubbles:true,cancelable:true});disabled.dispatchEvent(disabledEvent);${settle}
+    const disabledStable=demo.clicks()===1&&!disabled.hasAttribute('href')&&disabledEvent.defaultPrevented;
+    const original=link.closest('t-breadcrumb-item');await close();await open();const sameHost=panel().querySelector('a[href]').closest('t-breadcrumb-item')===original;
+    const trigger=host.querySelector('[aria-haspopup]');trigger.focus();trigger.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true,cancelable:true}));${settle}
+    const firstFocus=document.activeElement===panel().querySelector('a[href]');
+    document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true,cancelable:true}));${settle}
+    const endFocus=document.activeElement===panel().querySelectorAll('a[href]')[1];
+    document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));${settle}
+    const escaped=!popup().isVisible()&&document.activeElement===trigger;
+    demo.custom.set(true);demo.separator.set('>');ng.applyChanges(demo);${settle}
+    const custom=host.querySelector('.custom-ellipsis').textContent.replace(/\s+/g,' ').trim();
+    await open();demo.before.set(2);ng.applyChanges(demo);${settle}const dynamicClose=!popup().isVisible()&&component.collapsedItems().length===2;
+    demo.max.set(undefined);ng.applyChanges(demo);${settle}const restored=visible().length===5&&!host.querySelector('t-popup')&&original.parentElement===host;
+    const long=visible()[3],longText=long.querySelector('.t-breadcrumb__inner-text');
+    const narrow=longText.scrollWidth>longText.clientWidth;
+    const tooltip=ng.getComponent(long.querySelector('t-tooltip'));tooltip.show();${settle}
+    const tooltipText=document.querySelector('.t-tooltip:not(.t-popup--hidden)')?.textContent.trim();tooltip.hide();${settle}
+    demo.width.set('1000');ng.applyChanges(demo);${settle}${settle}const wide=!ng.getComponent(long).truncated();
+    const projectedHost=root.querySelector('.collapse-projected'),projected=ng.getComponent(projectedHost),projectedPopup=ng.getComponent(projectedHost.querySelector('t-popup'));
+    projectedPopup.show();${settle}const projectPanel=()=>document.getElementById(projected.overflowId);
+    const projectedOriginal=projectPanel().querySelector('[data-key="1"]'),counter=projectedOriginal.querySelector('.project-counter');
+    counter.click();${settle}projectedOriginal.querySelector('.t-breadcrumb--text-overflow').click();${settle}
+    projectPanel().querySelector('[data-key="2"] .t-breadcrumb--text-overflow').click();${settle}
+    const projectionEvents={count:demo.count(),clicks:demo.projectedClicks()};
+    demo.label.set('Live label');ng.applyChanges(demo);${settle}${settle}const live=projectedOriginal.querySelector('.project-label').textContent.includes('Live label');
+    projectedPopup.hide();${settle}projectedPopup.show();${settle}
+    const preserved=projectPanel().querySelector('[data-key="1"]')===projectedOriginal&&projectPanel().querySelector('[data-key="1"] .project-counter')===counter&&counter.textContent.includes('1');
+    demo.projected.set([1,2]);ng.applyChanges(demo);${settle}const removed=!root.querySelector('[data-key="3"]')&&!document.querySelector('[data-t-breadcrumb-overflow] [data-key="3"]');
+    projectedPopup.show();${settle}demo.projected.set([1]);ng.applyChanges(demo);${settle}const noCollapse=!projectedHost.querySelector('t-popup')&&projectedOriginal.parentElement===projectedHost;
+    const mixed=root.querySelector('.collapse-mixed'),mixedComponent=ng.getComponent(mixed),mixedPopup=ng.getComponent(mixed.querySelector('t-popup'));
+    mixedPopup.show();${settle}const mixedPanel=document.getElementById(mixedComponent.overflowId);
+    const mixedOrder=[...mixedPanel.querySelectorAll('t-breadcrumb-item')].map(el=>el.textContent.trim());mixedPopup.hide();${settle}
+    demo.projected.set([1,2,3]);ng.applyChanges(demo);${settle}ng.getComponent(projectedHost.querySelector('t-popup')).show();${settle}
+    const disposedId=projected.overflowId;demo.showProjected.set(false);ng.applyChanges(demo);${settle}
+    const disposed=!document.getElementById(disposedId)&&!root.querySelector('.collapse-projected');
+    return {initial,range,attrs,click,disabledStable,sameHost,firstFocus,endFocus,escaped,custom,dynamicClose,restored,narrow,tooltipText,wide,projectionEvents,live,preserved,removed,noCollapse,mixedOrder,disposed};
+  })()`);
+  assert.deepEqual(breadcrumb.initial,{visible:['首页','当前页面'],hidden:3,current:'当前页面'});
+  assert.deepEqual(breadcrumb.range,[0,0,0,0,0,0,0,0,0,0,3]);
+  assert.deepEqual(breadcrumb.attrs,{target:'_blank',rel:'noopener noreferrer'});assert.deepEqual(breadcrumb.click,{callbacks:1,cancelled:true});
+  for(const key of ['disabledStable','sameHost','firstFocus','endFocus','escaped','dynamicClose','restored','narrow','wide','live','preserved','removed','noCollapse','disposed']) assert.equal(breadcrumb[key],true,key);
+  assert.equal(breadcrumb.custom,'还有 3 项 >');assert.ok(breadcrumb.tooltipText.includes('超长路径'));
+  assert.deepEqual(breadcrumb.projectionEvents,{count:1,clicks:1});assert.deepEqual(breadcrumb.mixedOrder,['数据中间一','数据中间二']);
+  console.log('PASS Breadcrumb: collapse boundaries/context, combined sources, original hosts/events/state, dynamic restore/delete/destroy, native links/disabled, keyboard/Escape, live truncation tooltip');
+  const breadcrumbPointer=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-breadcrumb-collapse'),demo=ng.getComponent(root);demo.max.set(3);demo.before.set(1);demo.width.set('100');ng.applyChanges(demo);${settle}
+    const trigger=root.querySelector('.collapse-options [aria-haspopup]');trigger.scrollIntoView({block:'center',behavior:'instant'});${settle}
+    const rect=trigger.getBoundingClientRect();return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+  })()`);
+  for(const type of ['mousePressed','mouseReleased']) await send('Input.dispatchMouseEvent',{type,button:'left',clickCount:1,...breadcrumbPointer});
+  const breadcrumbLinkPointer=await evaluate(`(async()=>{${settle}
+    const component=ng.getComponent(document.querySelector('demo-breadcrumb-collapse .collapse-options'));
+    const link=document.getElementById(component.overflowId)?.querySelector('a[href]');if(!link)throw new Error('Breadcrumb trigger did not open');
+    const rect=link.getBoundingClientRect();return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+  })()`);
+  for(const type of ['mousePressed','mouseReleased']) await send('Input.dispatchMouseEvent',{type,button:'left',clickCount:1,...breadcrumbLinkPointer});
+  await evaluate(`(async()=>{${settle}})()`);
+  for(const type of ['mousePressed','mouseReleased']) await send('Input.dispatchMouseEvent',{type,button:'left',clickCount:1,x:5,y:5});
+  const breadcrumbPointerResult=await evaluate(`(async()=>{${settle}
+    const root=document.querySelector('demo-breadcrumb-collapse'),demo=ng.getComponent(root),popup=ng.getComponent(root.querySelector('.collapse-options t-popup'));
+    return {clicks:demo.clicks(),closed:!popup.isVisible()};
+  })()`);
+  assert.deepEqual(breadcrumbPointerResult,{clicks:2,closed:true});
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

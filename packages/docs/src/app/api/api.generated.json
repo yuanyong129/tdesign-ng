@@ -902,6 +902,42 @@
       "file": "packages/ng-components/src/components/breadcrumb/breadcrumb.component.ts",
       "inputs": [
         {
+          "name": "ellipsis",
+          "type": "BreadcrumbContent",
+          "default": "undefined",
+          "required": false,
+          "zh": "折叠处的内容，模板上下文包含 items 和 separator",
+          "en": "Collapse trigger content, with items and separator in template context",
+          "values": []
+        },
+        {
+          "name": "itemsBeforeCollapse",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "折叠前保留的项目数，必须与后置数量同时为正数",
+          "en": "Number of items before the collapse, both counts must be positive",
+          "values": []
+        },
+        {
+          "name": "itemsAfterCollapse",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "折叠后保留的项目数",
+          "en": "Number of items after the collapse",
+          "values": []
+        },
+        {
+          "name": "maxItems",
+          "type": "number | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "超过该数量时折叠，未设置或非正数不折叠",
+          "en": "Collapse when item count exceeds this positive threshold",
+          "values": []
+        },
+        {
           "name": "maxItemWidth",
           "type": "string | undefined",
           "default": "undefined",

@@ -1,14 +1,23 @@
 import { NgTemplateOutlet } from '@angular/common';
+import { DomPortal } from '@angular/cdk/portal';
+import { TTooltip } from '../tooltip/tooltip.component';
+import { isTemplateContent } from '../../_utils/content';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  ElementRef,
   InjectionToken,
   TemplateRef,
   ViewEncapsulation,
   booleanAttribute,
+  afterRenderEffect,
   computed,
   inject,
   input,
+  signal,
+  untracked,
+  viewChild,
   type Signal,
 } from '@angular/core';
 import type { Content } from '../../_utils/content';
@@ -53,7 +62,7 @@ function toCssLength(value: string | undefined): string | null {
 @Component({
   selector: 't-breadcrumb-item',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, TTooltip],
   template: `
     <!-- 富文本属性统一渲染入口：模板走 ngTemplateOutlet，其余按文本输出（等价于上游的 renderTNodeJSX）。 -->
     <ng-template #renderNode let-value>
@@ -64,19 +73,24 @@ function toCssLength(value: string | undefined): string | null {
       }
     </ng-template>
 
+    <t-tooltip [content]="textValue()" [disabled]="!truncated()" destroyOnClose>
     <a
       class="t-breadcrumb--text-overflow"
       [class.t-link]="isLink()"
       [class.t-is-disabled]="disabled()"
       [attr.href]="isLink() ? href() : null"
       [attr.target]="target() ?? null"
+      [attr.rel]="target() === '_blank' ? 'noopener noreferrer' : null"
+      [attr.aria-disabled]="disabled() || null"
+      [attr.aria-current]="current() ? 'page' : null"
+      (click)="handleContentClick($event)"
     >
       <span class="t-breadcrumb__inner" [style]="innerStyle()">
         @if (icon()) {
           <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: icon() }" />
         }
-        <span class="t-breadcrumb__inner-text">
-          @if (content()) {
+        <span #labelText class="t-breadcrumb__inner-text">
+          @if (content() !== undefined) {
             <ng-container *ngTemplateOutlet="renderNode; context: { $implicit: content() }" />
           } @else {
             <ng-content />
@@ -84,9 +98,9 @@ function toCssLength(value: string | undefined): string | null {
         </span>
       </span>
     </a>
+    </t-tooltip>
 
-    <!-- 上游用 isTextEllipsis 判断是否截断后才把 text-overflow 切到 ellipsis；截断提示（Tooltip）本期不做，恒为 clip。 -->
-    <span class="t-breadcrumb__separator" [style]="separatorStyle()">
+    <span class="t-breadcrumb__separator" [style.text-overflow]="truncated() ? 'ellipsis' : 'clip'" [style.display]="current() ? 'none' : null" aria-hidden="true">
       @if (separatorTemplate(); as template) {
         <ng-container *ngTemplateOutlet="template" />
       } @else if (separatorText()) {
@@ -102,9 +116,57 @@ function toCssLength(value: string | undefined): string | null {
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'classes()',
+    '[class.t-breadcrumb__item--collapsed]': 'collapsed()',
+    '[class.t-is-current]': 'current()',
+    '[style.order]': 'itemOrder()',
+    '(click)': 'handleContentClick($event)',
   },
 })
 export class TBreadcrumbItem {
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  readonly collapsePortal = new DomPortal(this.element);
+  protected readonly collapsed = signal(false);
+  protected readonly current = signal(false);
+  protected readonly itemOrder = signal<number | null>(null);
+  readonly textValue = signal('');
+  protected readonly truncated = signal(false);
+  private readonly labelText = viewChild<ElementRef<HTMLElement>>('labelText');
+  private readonly tooltip = viewChild(TTooltip);
+
+  closeTooltip(): void { this.tooltip()?.hide(); }
+
+  constructor() {
+    afterRenderEffect((cleanup) => {
+      const element = this.labelText()?.nativeElement;
+      if (!element) return;
+      const measure = () => {
+        this.textValue.set(element.textContent?.trim() ?? '');
+        this.truncated.set(element.scrollWidth > element.clientWidth + 1);
+      };
+      untracked(measure);
+      const resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(measure);
+      const mutation = typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(measure);
+      resize?.observe(element);
+      mutation?.observe(element, { childList: true, subtree: true, characterData: true });
+      cleanup(() => { resize?.disconnect(); mutation?.disconnect(); });
+    });
+    inject(DestroyRef).onDestroy(() => {
+      if (!this.collapsePortal.isAttached) return;
+      this.collapsePortal.detach();
+      const element = this.element.nativeElement;
+      element.parentNode?.removeChild(element);
+    });
+  }
+
+  /** 内部布局状态；移动原宿主而非复制投影。 */
+  setBreadcrumbState(collapsed: boolean, order: number | null, current: boolean): void {
+    this.collapsed.set(collapsed); this.itemOrder.set(order); this.current.set(current);
+  }
+
+  protected handleContentClick(event: MouseEvent): void {
+    if (!this.disabled()) return;
+    event.preventDefault(); event.stopPropagation();
+  }
   /** 面包屑内容，未设置时使用投影内容。 @zh 面包屑内容 @en content */
   readonly content = input<BreadcrumbContent>(undefined);
 
@@ -137,9 +199,6 @@ export class TBreadcrumbItem {
     'max-width': toCssLength(this.maxWidth() || this.host?.maxItemWidth() || '120') ?? '',
   }));
 
-  /** 上游恒给分隔符写内联 `text-overflow`；截断检测未实现，取未截断分支的 `clip`。 */
-  protected readonly separatorStyle = computed<Record<string, string>>(() => ({ 'text-overflow': 'clip' }));
-
   /** 是否有父容器；没有父容器时上游的默认分隔符是空串。 */
   protected readonly hasHost = computed(() => this.host !== null);
 
@@ -149,7 +208,7 @@ export class TBreadcrumbItem {
   /** 分隔符是模板时交给 `*ngTemplateOutlet`。 */
   protected readonly separatorTemplate = computed(() => {
     const separator = this.separatorValue();
-    return separator instanceof TemplateRef ? separator : null;
+    return isTemplateContent(separator) ? separator : null;
   });
 
   /** 分隔符是文本时直接输出。 */
@@ -160,6 +219,6 @@ export class TBreadcrumbItem {
 
   /** 判断一个取值是不是模板，模板用 `*ngTemplateOutlet` 渲染，其余按文本渲染。 */
   protected asTemplate(value: BreadcrumbContent): TemplateRef<unknown> | null {
-    return value instanceof TemplateRef ? value : null;
+    return isTemplateContent(value) ? value : null;
   }
 }
