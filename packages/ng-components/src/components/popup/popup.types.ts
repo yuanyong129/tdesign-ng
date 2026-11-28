@@ -60,6 +60,13 @@ export function flipPlacement(placement: PopupPlacement): PopupPlacement {
 /** 与 TDesign `ClassName` 同形的类名入参。 */
 export type PopupClassNames = string | string[] | Record<string, boolean> | null;
 
+/** CSS 样式对象；数字使用 Angular NgStyle 的默认语义，可用 height.px 等带单位键。 */
+export type PopupStyle = Record<string, string | number | null | undefined>;
+export type PopupStyleInput = PopupStyle | ((triggerElement: HTMLElement, popupElement: HTMLElement) => PopupStyle);
+/** 原生滚动事件；上游类型标为 WheelEvent，运行时实际来自 scroll。 */
+export interface PopupScrollEvent { e: Event; }
+export interface PopupVisibleChangeEvent extends PopupVisibleChangeContext { visible: boolean; }
+
 /**
  * 弹层透传选项：组件把上游的 `popupProps` 收敛成这个形状，再交给 `t-popup`。
  *

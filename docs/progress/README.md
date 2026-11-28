@@ -6,9 +6,9 @@
 | --- | --- |
 | 组件目录 | 73 |
 | 上游属性 | 1576 |
-| 已对齐 | 1076 |
-| 覆盖率 | 68.3% |
-| 深度债 | 207 项 |
+| 已对齐 | 1079 |
+| 覆盖率 | 68.5% |
+| 深度债 | 203 项 |
 | 零债务组件 | 47 / 73 |
 
 状态图例：✅ 无债务；🚧 有深度债（D1 表格与选择线 / D2 录入与反馈 / D3 其余）；⚠️ 有未登记缺失。
@@ -22,7 +22,6 @@
 | [级联选择 Cascader](cascader.md) | `cascader` | 53 | 22 | 41.5% | 25 | 0 | 0 | 0 | 7 | 🚧 |
 | [树选择 TreeSelect](tree-select.md) | `tree-select` | 44 | 20 | 45.5% | 16 | 0 | 0 | 0 | 6 | 🚧 |
 | [日期选择 DatePicker](date-picker.md) | `date-picker` | 44 | 22 | 50.0% | 19 | 0 | 0 | 0 | 11 | 🚧 |
-| [弹出层 Popup](popup.md) | `popup` | 24 | 12 | 50.0% | 0 | 7 | 0 | 0 | 5 | 🚧 |
 | [日期范围 DateRangePicker](date-range-picker.md) | `date-range-picker` | 44 | 23 | 52.3% | 18 | 0 | 0 | 0 | 5 | 🚧 |
 | [输入框 Input](input.md) | `input` | 46 | 26 | 56.5% | 0 | 0 | 0 | 0 | 10 | ✅ |
 | [上传 Upload](upload.md) | `upload` | 63 | 36 | 57.1% | 0 | 7 | 3 | 0 | 3 | 🚧 |
@@ -33,6 +32,7 @@
 | [穿梭框 Transfer](transfer.md) | `transfer` | 26 | 16 | 61.5% | 4 | 4 | 2 | 0 | 3 | 🚧 |
 | [文本域 Textarea](textarea.md) | `textarea` | 21 | 13 | 61.9% | 0 | 0 | 0 | 0 | 7 | ✅ |
 | [全局提示 Message](message.md) | `message` | 8 | 5 | 62.5% | 0 | 0 | 1 | 0 | 3 | 🚧 |
+| [弹出层 Popup](popup.md) | `popup` | 24 | 15 | 62.5% | 0 | 3 | 0 | 0 | 6 | 🚧 |
 | [通知 Notification](notification.md) | `notification` | 11 | 7 | 63.6% | 0 | 0 | 1 | 0 | 3 | 🚧 |
 | [自动补全 AutoComplete](auto-complete.md) | `auto-complete` | 32 | 21 | 65.6% | 1 | 0 | 0 | 0 | 4 | 🚧 |
 | [分割线 Divider](divider.md) | `divider` | 6 | 4 | 66.7% | 0 | 0 | 0 | 0 | 4 | ✅ |

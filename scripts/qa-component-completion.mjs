@@ -1714,6 +1714,67 @@ try {
   assert.equal(statisticState.negativePlaces,'0');assert.equal(statisticState.cappedPlaces,'0.00000010000000000000');assert.equal(statisticState.invalidPlaces,'0.0000001');assert.equal(statisticState.formatted,'1_234.50');
   assert.deepEqual(statisticState.formatMid,{raw:1157.34,text:'2315'});
   console.log('PASS Statistic: real automatic animation, manual/restart/quartic interpolation, stale cancellation/retarget/disable/dispose, loading, invalid/equal/nonfinite values, precision/scientific formatting, reduced motion/no rAF');
+  await page('/popup', 'demo-popup-lifecycle .lifecycle-controlled button');
+  const popupState=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-popup-lifecycle'),demo=ng.getComponent(root),controlled=demo.controlled(),defaults=demo.defaults(),focus=demo.focus();
+    const pause=ms=>new Promise(r=>setTimeout(r,ms));const apply=async()=>{ng.applyChanges(demo);${settle}};
+    const initial={controlled:controlled.isVisible(),defaults:defaults.isVisible(),proposals:demo.proposals(),defaultEvents:demo.defaultEvents()};
+    defaults.hide();defaults.hide();${settle}demo.initial.set(false);await apply();demo.initial.set(true);await apply();
+    const defaultOnce={visible:defaults.isVisible(),events:demo.defaultEvents()};
+    demo.acceptChanges.set(false);await apply();controlled.show();${settle}const rejectedOpen={visible:controlled.isVisible(),value:demo.visible(),proposals:demo.proposals(),source:demo.source()};
+    demo.visible.set(true);await apply();const programOpen={visible:controlled.isVisible(),proposals:demo.proposals()};
+    controlled.hide();${settle}const rejectedClose={visible:controlled.isVisible(),value:demo.visible(),proposals:demo.proposals()};
+    demo.acceptChanges.set(true);await apply();controlled.hide();${settle}controlled.hide();${settle}
+    const acceptedClose={visible:controlled.isVisible(),value:demo.visible(),proposals:demo.proposals()};
+    controlled.show();${settle}controlled.show();${settle}const acceptedOpen={visible:controlled.isVisible(),value:demo.visible(),proposals:demo.proposals()};
+    let overlay=controlled.getOverlay(),content=overlay.querySelector('.t-popup__content');const originalContent=content;
+    const styles={custom:getComputedStyle(overlay).getPropertyValue('--popup-demo'),radius:overlay.style.borderRadius,minWidth:content.style.minWidth,maxHeight:content.style.maxHeight,overflow:content.style.overflow};
+    const callbacks=[];demo.rootStyle.set((trigger,panel)=>{callbacks.push({tag:trigger.tagName,content:panel.classList.contains('t-popup__content')});return {backgroundColor:'rgb(1, 2, 3)'}});
+    demo.innerStyle.set({'height.px':80,overflow:'auto'});await apply();controlled.update();${settle}
+    const changedStyles={removed:!overlay.style.borderRadius&&!getComputedStyle(overlay).getPropertyValue('--popup-demo').trim(),background:overlay.style.backgroundColor,height:content.style.height,maxHeight:content.style.maxHeight};
+    let nativeScrolls=0;content.addEventListener('scroll',()=>nativeScrolls++);
+    content.scrollTop=30;content.dispatchEvent(new Event('scroll'));${settle}
+    content.scrollTop=content.scrollHeight;content.dispatchEvent(new Event('scroll'));content.dispatchEvent(new Event('scroll'));await pause(130);${settle}
+    const scrolled={scrolls:demo.scrolls(),bottoms:demo.bottoms(),native:nativeScrolls};
+    content.dispatchEvent(new Event('scroll'));controlled.hide();${settle}await pause(130);const closedDebounce=demo.bottoms()===1;
+    controlled.show();${settle}const retained=controlled.getOverlay().querySelector('.t-popup__content')===originalContent;
+    demo.destroy.set(true);await apply();controlled.hide();${settle}const detached=controlled.getOverlay()===null;
+    controlled.show();${settle}const recreated=controlled.getOverlay().querySelector('.t-popup__content')!==originalContent;
+    const beforeDisabled=demo.proposals();demo.disabled.set(true);await apply();controlled.show();defaults.show();${settle}
+    const disabled=!controlled.isVisible()&&!defaults.isVisible()&&demo.visible()&&demo.proposals()===beforeDisabled;
+    demo.disabled.set(false);await apply();const reenabled=controlled.isVisible();
+    controlled.hide();defaults.hide();${settle}
+    demo.delay.set([80,80]);demo.trigger.set('hover');await apply();const defaultHost=root.querySelector('.lifecycle-default');
+    defaultHost.dispatchEvent(new MouseEvent('mouseenter'));demo.disabled.set(true);await apply();await pause(110);const cancelledShow=!defaults.isVisible();
+    demo.disabled.set(false);await apply();defaultHost.dispatchEvent(new MouseEvent('mouseenter'));await pause(100);${settle}const delayedShow=defaults.isVisible();
+    defaultHost.dispatchEvent(new MouseEvent('mouseleave'));demo.trigger.set('click');await apply();await pause(100);const triggerCancelsHide=defaults.isVisible();defaults.hide();${settle}
+    demo.delay.set(0);await apply();const focusInput=root.querySelector('.focus-trigger');focusInput.focus();${settle}
+    const focusButton=document.querySelector('.lifecycle-focus-popup .focus-panel');focusButton.focus();${settle}const ownFocus=focus.isVisible();
+    root.querySelector('.lifecycle-outside').focus();${settle}const leftFocus=!focus.isVisible();
+    const empty=demo.empty();empty.show();${settle}const emptyHidden=!empty.isVisible();demo.emptyContent.set('Loaded');await apply();
+    const loadedContent=empty.isVisible()&&empty.getOverlay().textContent.includes('Loaded');demo.emptyContent.set('');await apply();
+    const emptied=!empty.isVisible();empty.hide();${settle}
+    const originalAdd=document.addEventListener,originalRemove=document.removeEventListener;let adds=0,removes=0;
+    document.addEventListener=function(type,listener,...args){if(type==='pointerdown'||type==='keydown')adds++;return originalAdd.call(this,type,listener,...args)};
+    document.removeEventListener=function(type,listener,...args){if(type==='pointerdown'||type==='keydown')removes++;return originalRemove.call(this,type,listener,...args)};
+    let disposed=false,listeners=false;
+    try {
+      demo.temporary.set(true);await apply();const tempHost=root.querySelector('.lifecycle-temporary'),temp=ng.getComponent(tempHost);temp.hide();tempHost.dispatchEvent(new MouseEvent('mouseenter'));
+      demo.temporary.set(false);await apply();const atDestroy=adds;await pause(110);temp.show();temp.hide();
+      disposed=!document.querySelector('.lifecycle-temporary-popup')&&adds===atDestroy;listeners=removes>=adds&&adds>=2;
+    } finally {document.addEventListener=originalAdd;document.removeEventListener=originalRemove;}
+    return {initial,defaultOnce,rejectedOpen,programOpen,rejectedClose,acceptedClose,acceptedOpen,styles,callbacks,changedStyles,scrolled,closedDebounce,retained,detached,recreated,disabled,reenabled,cancelledShow,delayedShow,triggerCancelsHide,ownFocus,leftFocus,emptyHidden,loadedContent,emptied,disposed,listeners};
+  })()`);
+  assert.deepEqual(popupState.initial,{controlled:false,defaults:true,proposals:0,defaultEvents:0});
+  assert.deepEqual(popupState.defaultOnce,{visible:false,events:1});assert.deepEqual(popupState.rejectedOpen,{visible:false,value:false,proposals:1,source:'api'});
+  assert.deepEqual(popupState.programOpen,{visible:true,proposals:1});assert.deepEqual(popupState.rejectedClose,{visible:true,value:true,proposals:2});
+  assert.deepEqual(popupState.acceptedClose,{visible:false,value:false,proposals:3});assert.deepEqual(popupState.acceptedOpen,{visible:true,value:true,proposals:4});
+  assert.deepEqual(popupState.styles,{custom:'ready',radius:'8px',minWidth:'180px',maxHeight:'120px',overflow:'auto'});
+  assert.ok(popupState.callbacks.length>0&&popupState.callbacks.every(context=>context.tag==='BUTTON'&&context.content));
+  assert.deepEqual(popupState.changedStyles,{removed:true,background:'rgb(1, 2, 3)',height:'80px',maxHeight:''});
+  assert.equal(popupState.scrolled.scrolls,popupState.scrolled.native);assert.ok(popupState.scrolled.scrolls>=3);assert.equal(popupState.scrolled.bottoms,1);
+  for(const key of ['closedDebounce','retained','detached','recreated','disabled','reenabled','cancelledShow','delayedShow','triggerCancelsHide','ownFocus','leftFocus','emptyHidden','loadedContent','emptied','disposed','listeners']) assert.equal(popupState[key],true,key);
+  console.log('PASS Popup: default once/controlled proposals, context/no duplicate notifications, style functions/replacement, scroll/debounce, destroy/retain, disable/delay cancellation, own focus, listener/disposal cleanup');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

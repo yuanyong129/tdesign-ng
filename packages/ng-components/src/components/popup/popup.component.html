@@ -3,11 +3,12 @@
 <ng-template #overlayTemplate>
   <div
     [class]="popupClasses()"
+    [ngStyle]="rootStyle()"
     [attr.data-popper-placement]="popperPlacement()"
     [style.z-index]="zIndex() ?? null"
     (click)="handleOverlayClick($event)"
   >
-    <div [class]="contentClasses()">
+    <div [class]="contentClasses()" [ngStyle]="innerStyle()" (scroll)="handleScroll($event)">
       @if (content()) {
         {{ content() }}
       }

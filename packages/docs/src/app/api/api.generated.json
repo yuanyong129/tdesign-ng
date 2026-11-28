@@ -7163,6 +7163,33 @@
           "values": []
         },
         {
+          "name": "defaultVisible",
+          "type": "boolean",
+          "default": "false",
+          "required": false,
+          "zh": "默认展开状态，仅首次初始化读取",
+          "en": "Default visibility, read only once",
+          "values": []
+        },
+        {
+          "name": "overlayStyle",
+          "type": "PopupStyleInput | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层根节点样式或接收触发器及内容节点的样式函数",
+          "en": "Root popup styles or a function receiving trigger and content elements",
+          "values": []
+        },
+        {
+          "name": "overlayInnerStyle",
+          "type": "PopupStyleInput | undefined",
+          "default": "undefined",
+          "required": false,
+          "zh": "弹层内容节点样式或样式函数",
+          "en": "Content element styles or a style function",
+          "values": []
+        },
+        {
           "name": "zIndex",
           "type": "number | undefined",
           "default": "undefined",
@@ -7178,6 +7205,24 @@
           "type": "boolean",
           "zh": "展开状态变化，用于双向绑定",
           "en": "Visible change event, used for two-way binding"
+        },
+        {
+          "name": "visibleChangeContext",
+          "type": "PopupVisibleChangeEvent",
+          "zh": "展开提案及其触发上下文",
+          "en": "Visibility proposal and its trigger context"
+        },
+        {
+          "name": "scroll",
+          "type": "PopupScrollEvent",
+          "zh": "内容节点滚动",
+          "en": "Content element scroll"
+        },
+        {
+          "name": "scrollToBottom",
+          "type": "PopupScrollEvent",
+          "zh": "内容滚动到底，100ms 去抖",
+          "en": "Content reached bottom, debounced by 100ms"
         },
         {
           "name": "overlayClick",

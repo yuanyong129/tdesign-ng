@@ -277,3 +277,14 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归通过，missing 0 / extra 0。新增覆盖真实自动播放落点、手动起点/中间缓出值/精确结束、重复启动和已取消旧回调、负数下降、新目标/配置切换/自动关闭取消、加载切换、无配置/起止相同/非法时长与非有限值、销毁后回调和调用、科学计数精度、非法小数位保护、自定义分组及逐帧 format 优先、减少动态效果和无 rAF 环境。可控帧调度仅作用于独立测试页面中的动画回调，并保留 Angular 原有调度；真实播放另行验证。Statistic 页面 issues / badResources 为空，截图已检查；生成文件稳定后重跑最终回归通过。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 800.20 kB）。
 
 **接续任务**：第 4 轮 Popup → Loading → Message / Notification；先核实 Popup 受控/默认显隐、挂载、样式和生命周期的真实缺口，再推进上层反馈组件。
+
+### 2026-11-28：第 4 轮 Popup 显隐与生命周期首批
+
+- **真实默认值与受控**：新增 defaultVisible，复用 createControllableState 仅初始化一次，纠正此前把受控 visible 当作默认值等价映射的记录。用户触发和 show / hide / toggle 在受控下只发修改提案，拒绝后保持实际显隐；程序输入同步不输出 visibleChange，重复同值操作不重复通知。保留布尔 visibleChange 双向绑定，新增 Angular 专有 visibleChangeContext({ visible, trigger, e })，保留本库现有 hover / click / focus / api / outside / escape 等来源字符串，不伪造完全相同的 Vue 回调参数。
+- **生命周期修复**：渲染就绪后再挂载 CDK 浮层；动态禁用关闭实际显示、取消延迟且阻止打开，但不修改请求的受控/非受控状态，解除禁用后按当前请求恢复。触发模式/延迟变化取消旧计时，关闭取消底部回调并清理指针状态，销毁移除文档监听器、延迟任务和 Overlay；销毁后实例方法不再创建浮层。文档事件使用宿主 ownerDocument。focus 触发的输入→本面板不误关，面板→外部补焦点离开处理。
+- **样式与查询**：新增 overlayStyle / overlayInnerStyle（对象或函数），分别绑定 .t-popup / .t-popup__content，NgStyle 替换会删除旧属性；函数接收解析后的真实触发节点与内容节点，每次打开、配置变化或 update() 时重新计算。支持 NgStyle 的带单位键，不宣称数字值自动等同上游任意 Styles。新增 getOverlay()、getOverlayState() 和 update()，仍使用原 CDK 定位，不提供伪造的 getPopper() 实例；复合组件 PopupOptions 保持既有白名单，不自动承诺新样式已透传。
+- **滚动与空态**：内容节点真实 scroll 输出 { e: Event }，依据锁定上游运行时修正类型声明中 WheelEvent 的误导；滚到底仅在有可滚动溢出时 100ms 去抖，重复到底事件合并、离开底部/关闭/销毁取消。hideEmptyPopup 在请求显示但文本为空时隐藏实际浮层并移除外部监听，内容到达后按请求显示；文本清空重新隐藏，不把默认箭头当内容。
+- **生成进度与余项**：新增 1 个 demo，总数 339 → 340；对齐 1076 → 1079（68.5%）、真实债务 207 → 203，零债务目录仍为 47/73。债务减少是两项样式与两项滚动事件实际实现；defaultVisible 原先被列为映射，本批补齐真实行为。保留 attach / triggerElement / popperOptions 三项债务，嵌套焦点栈、完整 SSR / 水合仍待后续，第 4 轮及 M2 尚未完成。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。覆盖默认值仅初始化/受控优先、拒绝开关/程序同步/重复通知、上下文、样式函数节点与动态属性清理、原生滚动输出次数与原事件一致/到底去抖/关闭取消、关闭保留与销毁、禁用恢复/延迟取消/触发方式变化、面板内外焦点、动态空文本显隐、销毁后计时器/文档监听清理及实例方法无效。Popup / SelectInput / AutoComplete / Breadcrumb 页面 issues / badResources 均为空，Popup 截图已检查。页面探针会复用已有 CDP 页面，最终按交互回归→页面探针串行运行通过。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.67 kB）。
+
+**接续任务**：Popup 挂载点 / 独立触发元素 / 定位配置评估 → Loading → Message / Notification，按共享能力逐批验收。

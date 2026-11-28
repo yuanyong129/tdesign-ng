@@ -1,5 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { NgStyle } from '@angular/common';
+import { createControllableState } from '../../_utils/controllable-state';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -9,6 +11,7 @@ import {
   ViewContainerRef,
   ViewEncapsulation,
   booleanAttribute,
+  afterNextRender,
   computed,
   effect,
   inject,
@@ -24,6 +27,10 @@ import {
   PopupPlacement,
   PopupTrigger,
   PopupVisibleChangeContext,
+  PopupStyle,
+  PopupStyleInput,
+  PopupScrollEvent,
+  PopupVisibleChangeEvent,
 } from './popup.types';
 
 function classList(value: string | string[] | Record<string, boolean> | null | undefined): string[] {
@@ -41,6 +48,7 @@ function classList(value: string | string[] | Record<string, boolean> | null | u
 @Component({
   selector: 't-popup',
   standalone: true,
+  imports: [NgStyle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './popup.component.html',
@@ -102,11 +110,24 @@ export class TPopup {
   /** @zh 受控的展开状态 @en Controlled visible state @defaultValue undefined */
   readonly visible = input<boolean | undefined>();
 
+  /** @zh 默认展开状态，仅首次初始化读取 @en Default visibility, read only once @defaultValue false */
+  readonly defaultVisible = input(false, { transform: booleanAttribute });
+  /** @zh 弹层根节点样式或接收触发器及内容节点的样式函数 @en Root popup styles or a function receiving trigger and content elements @defaultValue undefined */
+  readonly overlayStyle = input<PopupStyleInput | undefined>(undefined);
+  /** @zh 弹层内容节点样式或样式函数 @en Content element styles or a style function @defaultValue undefined */
+  readonly overlayInnerStyle = input<PopupStyleInput | undefined>(undefined);
+
   /** @zh 弹层层级 @en The z-index of the popup @defaultValue undefined */
   readonly zIndex = input<number | undefined>();
 
   /** @zh 展开状态变化，用于双向绑定 @en Visible change event, used for two-way binding */
   readonly visibleChange = output<boolean>();
+  /** @zh 展开提案及其触发上下文 @en Visibility proposal and its trigger context */
+  readonly visibleChangeContext = output<PopupVisibleChangeEvent>();
+  /** @zh 内容节点滚动 @en Content element scroll */
+  readonly scroll = output<PopupScrollEvent>();
+  /** @zh 内容滚动到底，100ms 去抖 @en Content reached bottom, debounced by 100ms */
+  readonly scrollToBottom = output<PopupScrollEvent>();
 
   /** @zh 点击弹层内容 @en Emitted when the popup content is clicked */
   readonly overlayClick = output<MouseEvent>();
@@ -114,6 +135,12 @@ export class TPopup {
   protected readonly innerVisible = signal(false);
   protected readonly popperPlacement = signal('top');
   protected readonly panelHidden = signal(false);
+  protected readonly rootStyle = signal<PopupStyle>({});
+  protected readonly innerStyle = signal<PopupStyle>({});
+  private readonly state = createControllableState(this.visible, () => this.defaultVisible());
+  private readonly ready = signal(false);
+  private destroyed = false;
+  private bottomTimer: ReturnType<typeof setTimeout> | null = null;
 
   private overlayRef: OverlayRef | null = null;
   private connector: PopupConnector | null = null;
@@ -129,6 +156,9 @@ export class TPopup {
   private readonly panelLeave = (event: MouseEvent) => {
     this.pointerInPanel = false;
     if (this.trigger() === 'hover') this.scheduleHide({ e: event, trigger: 'hover' });
+  };
+  private readonly panelFocusOut = (event: FocusEvent) => {
+    if (this.trigger() === 'focus' && !this.containsTarget(event.relatedTarget)) this.close({ e: event, trigger: 'focus' });
   };
 
   protected readonly popupClasses = computed(() =>
@@ -153,17 +183,24 @@ export class TPopup {
   );
 
   constructor() {
+    afterNextRender(() => this.ready.set(true));
     effect(() => {
-      const visible = this.visible();
-      if (visible === undefined) return;
+      const visible = this.state.current(), disabled = this.disabled(), ready = this.ready();
       untracked(() => {
-        if (visible === this.innerVisible()) return;
-        if (visible) {
-          this.open({ trigger: 'controlled' });
-        } else {
-          this.close({ trigger: 'controlled' });
-        }
+        if (!ready) return;
+        if (visible && !disabled) this.renderOpen();
+        else this.renderClose();
       });
+    });
+
+    effect(() => {
+      this.trigger(); this.delay();
+      untracked(() => this.clearTimers());
+    });
+
+    effect(() => {
+      this.overlayStyle(); this.overlayInnerStyle(); this.content(); this.hideEmptyPopup();
+      untracked(() => { if (this.ready() && this.state.current() && !this.disabled()) this.renderOpen(); });
     });
 
     effect(() => {
@@ -177,7 +214,10 @@ export class TPopup {
     });
 
     this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
       this.clearTimers();
+      this.clearBottomTimer();
+      this.unbindOutsideListeners();
       this.overlayRef?.dispose();
       this.overlayRef = null;
     });
@@ -194,6 +234,34 @@ export class TPopup {
   /** 收起弹层。 */
   hide(): void {
     this.close({ trigger: 'api' });
+  }
+
+  /** 当前弹层根节点；关闭保留模式仍可读取，未挂载或已销毁返回 null。 */
+  getOverlay(): HTMLElement | null { return this.overlayRef?.overlayElement.querySelector('.t-popup') ?? null; }
+  getOverlayState(): { hover: boolean } { return { hover: this.pointerInPanel }; }
+  /** 更新样式函数和位置，可在异步内容改变后调用。 */
+  update(): void {
+    if (this.destroyed || !this.overlayRef?.hasAttached()) return;
+    const root = this.getOverlay(), content = root?.querySelector<HTMLElement>('.t-popup__content');
+    if (!root || !content) return;
+    const host = this.hostRef.nativeElement;
+    const trigger = resolveAnchor((host.firstElementChild as HTMLElement | null) ?? host);
+    const resolve = (style: PopupStyleInput | undefined) => typeof style === 'function' ? style(trigger, content) : style ?? {};
+    this.rootStyle.set({ ...resolve(this.overlayStyle()) });
+    this.innerStyle.set({ ...resolve(this.overlayInnerStyle()) });
+    this.applyPosition(); this.overlayRef.updatePosition();
+  }
+
+  protected handleScroll(event: Event): void {
+    if (!this.innerVisible() || this.destroyed) return;
+    this.scroll.emit({ e: event });
+    this.clearBottomTimer();
+    const target = event.target as HTMLElement;
+    if (target.scrollHeight <= target.clientHeight || Math.abs(target.scrollTop + target.clientHeight - target.scrollHeight) >= 1) return;
+    this.bottomTimer = setTimeout(() => {
+      this.bottomTimer = null;
+      if (this.innerVisible() && !this.destroyed && Math.abs(target.scrollTop + target.clientHeight - target.scrollHeight) < 1) this.scrollToBottom.emit({ e: event });
+    }, 100);
   }
 
   /** 切换展开状态。 */
@@ -267,7 +335,7 @@ export class TPopup {
     if (this.hostRef.nativeElement.contains(target) || this.overlayRef?.overlayElement.contains(target)) return;
     const ignoreSelector = this.ignoreOutsideSelector();
     if (ignoreSelector && target instanceof Element && target.closest(ignoreSelector)) return;
-    this.close({ trigger: 'outside' });
+    this.close({ e: event as MouseEvent, trigger: 'outside' });
   };
 
   private readonly handleDocumentKeydown = (event: KeyboardEvent) => {
@@ -277,6 +345,7 @@ export class TPopup {
   };
 
   private scheduleShow(context: PopupVisibleChangeContext): void {
+    if (this.destroyed || this.disabled()) return;
     this.clearHideTimer();
     const delay = this.showDelay();
     if (delay <= 0) {
@@ -310,7 +379,23 @@ export class TPopup {
   }
 
   private open(context: PopupVisibleChangeContext): void {
-    if (this.disabled()) return;
+    if (this.destroyed || this.disabled()) return;
+    this.clearTimers();
+    this.requestVisible(true, context);
+  }
+
+  private requestVisible(visible: boolean, context: PopupVisibleChangeContext): void {
+    if (this.destroyed || visible === this.state.current()) return;
+    this.state.set(visible);
+    this.visibleChange.emit(visible);
+    this.visibleChangeContext.emit({ visible, ...context });
+    if (this.visible() === undefined && this.ready()) {
+      if (visible) this.renderOpen(); else this.renderClose();
+    }
+  }
+
+  private renderOpen(): void {
+    if (this.destroyed || this.disabled()) return;
     this.clearTimers();
 
     if (!this.overlayRef) {
@@ -320,6 +405,7 @@ export class TPopup {
       });
       this.overlayRef.overlayElement.addEventListener('mouseenter', this.panelEnter);
       this.overlayRef.overlayElement.addEventListener('mouseleave', this.panelLeave);
+      this.overlayRef.overlayElement.addEventListener('focusout', this.panelFocusOut);
     }
 
     if (!this.overlayRef.hasAttached()) {
@@ -329,23 +415,30 @@ export class TPopup {
     this.panelHidden.set(false);
     this.applyPosition();
     this.overlayRef.updatePosition();
-    this.bindOutsideListeners();
 
     if (this.hideEmptyPopup() && !this.hasContent()) {
       this.panelHidden.set(true);
       this.innerVisible.set(false);
+      this.unbindOutsideListeners();
       return;
     }
 
     this.innerVisible.set(true);
-    this.visibleChange.emit(true);
+    this.bindOutsideListeners();
+    this.update();
   }
 
-  private close(_context: PopupVisibleChangeContext): void {
+  private close(context: PopupVisibleChangeContext): void {
     this.clearTimers();
+    this.requestVisible(false, context);
+  }
+
+  private renderClose(): void {
+    this.clearTimers();
+    this.clearBottomTimer();
+    this.pointerInPanel = false;
     this.innerVisible.set(false);
     this.unbindOutsideListeners();
-    this.visibleChange.emit(false);
 
     if (!this.overlayRef) return;
     if (this.destroyOnClose()) {
@@ -379,13 +472,18 @@ export class TPopup {
   }
 
   private bindOutsideListeners(): void {
-    document.addEventListener('pointerdown', this.handleDocumentPointerDown);
-    document.addEventListener('keydown', this.handleDocumentKeydown);
+    this.hostRef.nativeElement.ownerDocument.addEventListener('pointerdown', this.handleDocumentPointerDown);
+    this.hostRef.nativeElement.ownerDocument.addEventListener('keydown', this.handleDocumentKeydown);
   }
 
   private unbindOutsideListeners(): void {
-    document.removeEventListener('pointerdown', this.handleDocumentPointerDown);
-    document.removeEventListener('keydown', this.handleDocumentKeydown);
+    this.hostRef.nativeElement.ownerDocument.removeEventListener('pointerdown', this.handleDocumentPointerDown);
+    this.hostRef.nativeElement.ownerDocument.removeEventListener('keydown', this.handleDocumentKeydown);
+  }
+
+  private clearBottomTimer(): void {
+    if (this.bottomTimer !== null) clearTimeout(this.bottomTimer);
+    this.bottomTimer = null;
   }
 
   private clearShowTimer(): void {
