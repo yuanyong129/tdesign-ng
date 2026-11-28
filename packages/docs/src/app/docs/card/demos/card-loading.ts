@@ -10,9 +10,9 @@ import type { SwitchValue } from '@tdesign-ng/components';
       style="width: 380px"
       [loading]="loading"
       title="卡片标题"
-      description="打开开关后，卡片主体切换为加载态。"
+      description="打开开关后，在卡片主体上显示加载遮罩。"
     >
-      卡片内容在加载结束后显示，加载态由加载组件呈现。
+      卡片内容保持可见，加载遮罩由 Loading 组件覆盖在主体上。
     </t-card>
 
     <p class="demo-hint">

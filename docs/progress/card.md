@@ -16,7 +16,7 @@
 | 深度债 | 0（D1 0 / D2 0 / D3 0） |
 | Angular 惯用映射 | 2（插槽 / 双向绑定 / 事件名，不计债） |
 | 未登记缺失 | 0 |
-| 文档示例 | 4 个 |
+| 文档示例 | 5 个 |
 
 ## 组件明细
 
@@ -43,8 +43,8 @@
 | `headerStyle` | CardStyles | undefined | 卡片头部区域的样式 |
 | `headerBordered` | boolean | false | 卡片头部是否显示下边框 |
 | `hoverShadow` | boolean | false | 鼠标悬浮时是否显示阴影 |
-| `loading` | boolean | false | 是否显示加载态 |
-| `loadingProps` | LoadingOptions \| undefined | undefined | 加载组件配置，支持当前 LoadingOptions 中的属性，加载状态由 loading 决定 |
+| `loading` | CardLoading | false | 加载状态；布尔值显示主体遮罩，模板替换卡片可见内容 |
+| `loadingProps` | CardLoadingOptions \| undefined | undefined | 默认加载的配置，支持文字、尺寸、延迟、遮罩、全屏和图标；显式 loading 决定状态，不接收 attach/content/loading |
 | `shadow` | boolean | false | 是否显示卡片阴影 |
 | `size` | CardSize | 'medium' | 卡片尺寸 |
 | `status` | string \| undefined | undefined | 卡片状态 |
@@ -63,5 +63,6 @@
 
 - `packages/docs/src/app/docs/card/demos/card-basic.ts`
 - `packages/docs/src/app/docs/card/demos/card-cover.ts`
+- `packages/docs/src/app/docs/card/demos/card-loading-content.ts`
 - `packages/docs/src/app/docs/card/demos/card-loading-props.ts`
 - `packages/docs/src/app/docs/card/demos/card-loading.ts`

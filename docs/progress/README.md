@@ -78,7 +78,7 @@
 | [Dropdown 下拉菜单](dropdown.md) | `dropdown` | 21 | 19 | 90.5% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [QRCode 二维码](qrcode.md) | `qrcode` | 12 | 11 | 91.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [Timeline 时间轴](timeline.md) | `timeline` | 12 | 11 | 91.7% | 0 | 0 | 0 | 0 | 3 | ✅ |
-| [Card 卡片](card.md) | `card` | 25 | 23 | 92.0% | 0 | 0 | 0 | 0 | 4 | ✅ |
+| [Card 卡片](card.md) | `card` | 25 | 23 | 92.0% | 0 | 0 | 0 | 0 | 5 | ✅ |
 | [Loading 加载](loading.md) | `loading` | 13 | 12 | 92.3% | 0 | 0 | 0 | 0 | 3 | ✅ |
 | [Descriptions 描述](descriptions.md) | `descriptions` | 15 | 14 | 93.3% | 0 | 0 | 0 | 0 | 4 | ✅ |
 | [Swiper 轮播框](swiper.md) | `swiper` | 15 | 14 | 93.3% | 0 | 0 | 0 | 0 | 3 | ✅ |

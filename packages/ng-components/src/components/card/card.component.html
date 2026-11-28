@@ -7,6 +7,8 @@
   }
 </ng-template>
 
+<!-- Normal sections stay mounted while a custom loading template replaces their visible presentation. -->
+<div [style.display]="customLoading() ? 'none' : 'contents'">
 @if (hasHeader()) {
   <div [class]="headerClasses()" [style]="headerStyle()">
     @if (header()) {
@@ -60,20 +62,16 @@
   </div>
 }
 
-<!-- 投影槽必须常驻：初始 loading=false 时也要先创建内容才能判断是否为空。 -->
-<div [class]="bodyClasses()" [style]="bodyStyle()" [style.display]="loading() || hasContent() ? null : 'none'">
-  @if (loading()) {
-    <!-- 加载态交给 t-loading 渲染，卡片不自带任何加载视觉（上游同样用 Loading 组件包住主体）。 -->
-    <t-loading [loading]="loading()" [text]="loadingProps()?.text" [size]="loadingProps()?.size ?? 'medium'"
+<t-loading [style.display]="isLoading() || hasContent() ? 'block' : 'none'"
+      [loading]="isLoading() && !customLoading()" [text]="loadingProps()?.text" [size]="loadingProps()?.size ?? 'medium'"
       [inheritColor]="loadingProps()?.inheritColor ?? false" [delay]="loadingProps()?.delay ?? 0"
       [fullscreen]="loadingProps()?.fullscreen ?? false" [showOverlay]="loadingProps()?.showOverlay ?? true"
-      [preventScrollThrough]="loadingProps()?.preventScrollThrough ?? true" [zIndex]="loadingProps()?.zIndex" />
-  }
-  <!-- 投影内容常驻在主体里，加载态只隐藏不改结构，保留内容实例与状态。 -->
-  <div #bodyInner [style.display]="loading() ? 'none' : null">
+      [preventScrollThrough]="loadingProps()?.preventScrollThrough ?? true" [zIndex]="loadingProps()?.zIndex"
+      [indicator]="loadingProps()?.indicator ?? true">
+  <div #bodyInner [class]="bodyClasses()" [style]="bodyStyle()">
     <ng-content />
   </div>
-</div>
+</t-loading>
 
 @if (hasFooter()) {
   <div [class]="footerClasses()" [style]="footerStyle()">
@@ -87,3 +85,5 @@
     }
   </div>
 }
+</div>
+@if (customLoading(); as template) { <ng-container [ngTemplateOutlet]="template" /> }

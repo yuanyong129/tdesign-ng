@@ -260,13 +260,13 @@ try {
     const card = root.querySelector('t-card');
     card.querySelector('button').click(); ${settle}
     demo.loading.set(true); ng.applyChanges(demo); ${settle}
-    const hidden = card.querySelector('.t-card__body > div').style.display;
+    const hidden = getComputedStyle(card.querySelector('.t-card__body')).display;
     const delayed = !card.querySelector('.t-loading');
     await new Promise(resolve => setTimeout(resolve, 600)); ${settle}
     const configured = !!card.querySelector('.t-loading.t-size-l.t-loading--inherit-color') && card.textContent.includes('读取中');
     demo.loading.set(false); ng.applyChanges(demo); ${settle}
     const preserved = card.querySelector('button').textContent.includes('1');
-    const visible = card.querySelector('.t-card__body > div').style.display;
+    const visible = getComputedStyle(card.querySelector('.t-card__body')).display;
     demo.firstFullscreen.set(true); demo.secondFullscreen.set(true); ng.applyChanges(demo); ${settle}
     const lockedWithTwo = document.body.classList.contains('t-loading--lock');
     // 创建并销毁卡片内的行内 Loading，不应释放两层全屏 Loading 的锁。
@@ -285,9 +285,9 @@ try {
     return {hidden, delayed, configured, preserved, visible, lockedWithTwo, lockedWithOne, released,
       externalLockPreserved, staleLoader:!!card.querySelector('.t-loading')};
   })()`);
-  assert.equal(cardLoading.hidden, 'none'); assert.equal(cardLoading.delayed, true);
+  assert.equal(cardLoading.hidden, 'flow-root'); assert.equal(cardLoading.delayed, true);
   assert.equal(cardLoading.configured, true); assert.equal(cardLoading.preserved, true);
-  assert.equal(cardLoading.visible, ''); assert.equal(cardLoading.lockedWithTwo, true);
+  assert.equal(cardLoading.visible, 'flow-root'); assert.equal(cardLoading.lockedWithTwo, true);
   assert.equal(cardLoading.lockedWithOne, true); assert.equal(cardLoading.released, true);
   assert.equal(cardLoading.externalLockPreserved, true); assert.equal(cardLoading.staleLoader, false);
   console.log('PASS Card.loadingProps/Loading: delay, retained content, cancelled timers, multiple/external scroll locks');
@@ -2006,6 +2006,44 @@ try {
     for(const [key,value] of Object.entries(attachment))assert.equal(value,true,kind+' attachment '+key);
     console.log('PASS '+kind+' attachment: resolved-node grouping, placement/zIndex/edge-distance isolation, style/defaults, live internal controls, invalid targets, service ownership, exact lease release after external removal/replacement, full view cleanup');
   }
+  await page('/card','demo-card-loading-content .card-business-input input');
+  const cardContent=await evaluate(`(async()=>{
+    const root=document.querySelector('demo-card-loading-content'),demo=ng.getComponent(root),host=root.querySelector('.card-loading-business'),card=ng.getComponent(host);
+    const apply=async()=>{ng.applyChanges(demo);${settle}},wait=async(ms)=>{await new Promise(r=>setTimeout(r,ms));${settle}};
+    const body=host.querySelector('.t-card__body'),loader=host.querySelector('t-loading'),input=host.querySelector('.card-business-input input'),button=host.querySelector('.card-business-counter button');
+    root.scrollIntoView({block:'center',behavior:'instant'});input.value='draft';input.dispatchEvent(new Event('input',{bubbles:true}));button.click();await apply();input.focus();${settle}
+    const height=host.getBoundingClientRect().height;demo.loading.set(true);await apply();
+    const overlay=host.querySelector('.t-loading--full'),rect=overlay.getBoundingClientRect(),bodyRect=body.getBoundingClientRect();
+    const wrapped=!!overlay&&overlay.classList.contains('t-loading__overlay')&&Math.abs(rect.width-bodyRect.width)<2&&Math.abs(rect.height-bodyRect.height)<2&&Math.abs(rect.top-bodyRect.top)<2&&Math.abs(host.getBoundingClientRect().height-height)<2;
+    const preserved=host.querySelector('.card-business-input input')===input&&host.querySelector('.card-business-counter button')===button&&input.value==='draft'&&demo.count()===1&&document.activeElement===input&&getComputedStyle(body).display==='flow-root'&&host.getAttribute('aria-busy')==='true';
+    host.querySelector('.card-footer-action button').click();host.querySelector('.card-header-action button').click();await apply();const outerControls=demo.footerCount()===1&&demo.actionCount()===1;
+    demo.options.set({indicator:demo.indicator(),text:demo.text(),size:'30px',zIndex:80});await apply();demo.label.set('Live card');await apply();
+    const templates=!!host.querySelector('.card-indicator')&&host.querySelector('.card-loading-text').textContent==='Live card'&&getComputedStyle(host.querySelector('.t-loading')).fontSize==='30px'&&host.querySelector('.t-loading').style.zIndex==='80';
+    demo.options.set({indicator:false,text:'label',showOverlay:false,loading:false,content:'replace',attach:document.body});await apply();
+    const whitelist=!!host.querySelector('.t-loading--full')&&!host.querySelector('.t-loading__overlay')&&!host.querySelector('t-loading svg')&&host.querySelector('.card-business-input input')===input&&!host.textContent.includes('replace');
+    demo.loading.set(false);demo.options.set({loading:true});await apply();const explicitState=!host.querySelector('.t-loading')&&host.getAttribute('aria-busy')===null;
+    demo.options.set({delay:500});demo.loading.set(true);await apply();const delayed=!host.querySelector('.t-loading')&&getComputedStyle(body).display==='flow-root';demo.loading.set(false);await apply();await wait(550);const cancelled=!host.querySelector('.t-loading');
+    demo.options.set({fullscreen:true,delay:0});demo.loading.set(true);await apply();const full=!!host.querySelector('.t-loading__fullscreen')&&document.body.classList.contains('t-loading--lock');
+    demo.loading.set(demo.custom());await apply();const custom=!!host.querySelector('.custom-card-loading')&&!host.classList.contains('t-card')&&getComputedStyle(host.querySelector('.t-card__header').parentElement).display==='none'&&!host.querySelector('.t-loading')&&!document.body.classList.contains('t-loading--lock');
+    host.querySelector('.custom-card-action button').click();demo.label.set('Custom live');await apply();const customLive=demo.customCount()===1&&host.querySelector('.custom-card-loading').textContent.includes('Custom live');
+    const customNode=host.querySelector('.custom-card-loading');demo.loading.set(false);await apply();const restored=host.classList.contains('t-card')&&!customNode.isConnected&&host.querySelector('.t-card__body')===body&&host.querySelector('t-loading')===loader&&host.querySelector('.card-business-input input')===input&&input.value==='draft';
+    demo.options.set({});demo.headerValue.set(demo.header());await apply();host.querySelector('.card-custom-header button').click();await apply();const header=demo.headerCount()===1&&!host.querySelector('.t-card__title')&&!!host.querySelector('.t-card__header');
+    demo.headerValue.set(undefined);demo.theme.set('poster2');await apply();const poster2=!!host.querySelector('.t-card__footer .card-header-action')&&!host.querySelector('.t-card__header .card-header-action');
+    demo.theme.set('poster1');await apply();const poster1=!!host.querySelector('.t-card__header .card-header-action')&&!host.querySelector('.t-card__footer .card-header-action');
+    demo.bodyClass.set('updated-body');demo.bodyStyle.set({padding:'12px',backgroundColor:'rgb(1, 2, 3)'});demo.headerStyle.set({padding:'10px'});demo.footerStyle.set('padding: 14px');await apply();
+    const styles=body.classList.contains('updated-body')&&!body.classList.contains('card-demo-body')&&body.style.padding==='12px'&&body.style.backgroundColor==='rgb(1, 2, 3)'&&host.querySelector('.t-card__header').style.padding==='10px'&&host.querySelector('.t-card__footer').style.padding==='14px';
+    demo.bodyStyle.set({padding:'16px'});await apply();const clearedStyles=body.style.backgroundColor==='';
+    const dynamic=root.querySelector('.card-dynamic-content'),dynamicLoader=dynamic.querySelector('t-loading'),dynamicBody=dynamic.querySelector('.t-card__body');
+    const initiallyEmpty=getComputedStyle(dynamicLoader).display==='none';demo.dynamicShown.set(true);await apply();const inserted=getComputedStyle(dynamicLoader).display!=='none'&&!!dynamic.querySelector('.card-dynamic-action button');
+    demo.dynamicShown.set(false);await apply();const removed=getComputedStyle(dynamicLoader).display==='none';demo.dynamicText.set('async text');await apply();const textShown=getComputedStyle(dynamicLoader).display!=='none';demo.dynamicText.set('   ');await apply();const whitespace=getComputedStyle(dynamicLoader).display==='none'&&dynamic.querySelector('.t-card__body')===dynamicBody;
+    // Loading an empty body still has a visible area, without reviving whitespace as business content.
+    demo.dynamicLoading.set(true);await apply();const emptyLoading=!!dynamic.querySelector('.t-loading--full')&&getComputedStyle(dynamicLoader).display!=='none';demo.dynamicLoading.set(false);await apply();
+    demo.options.set({delay:500,fullscreen:true});demo.loading.set(true);await apply();const savedLoader=ng.getComponent(loader);demo.mounted.set(false);await apply();await wait(550);savedLoader.update();const disposed=!host.isConnected&&!document.body.classList.contains('t-loading--lock')&&!document.querySelector('.card-loading-business .t-loading');
+    demo.mounted.set(true);demo.loading.set(demo.custom());await apply();const replacement=root.querySelector('.card-loading-business');const replacementTemplate=replacement.querySelector('.custom-card-loading');demo.mounted.set(false);await apply();const customDisposed=!replacementTemplate.isConnected;
+    return {wrapped,preserved,outerControls,templates,whitelist,explicitState,delayed,cancelled,full,custom,customLive,restored,header,poster2,poster1,styles,clearedStyles,initiallyEmpty,inserted,removed,textShown,whitespace,emptyLoading,disposed,customDisposed};
+  })()`);
+  for(const [key,value] of Object.entries(cardContent))assert.equal(value,true,'Card '+key);
+  console.log('PASS Card: wrapped overlay/geometry, business identity/draft/focus, custom loading replacement/lifecycle, indicator/text/size, whitelist/explicit state, delay/fullscreen cleanup, dynamic empty/text content, header/footer/poster themes and style replacement');
   assert.deepEqual(failures, [], 'Browser exceptions or failed resources');
   console.log('All component completion interaction checks passed.');
 } finally {

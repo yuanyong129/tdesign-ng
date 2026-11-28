@@ -43,19 +43,19 @@
 
 第 8 轮中可视窗口、树拖拽、表格能力分别交付，避免一次引入多个复杂状态机。若 Table 的残余项只是模板或事件，移到相应早期轮次完成，不因组件名而全部后置。
 
-### Card 的补完位置（2026-11-28 复核）
+### Card 的补完位置（2026-11-28 已完成复核批次）
 
-Card 属于第 2 轮 Button/Card 的 loadingProps 批次，已完成当时的配置白名单、投影常驻和加载状态保留回归；当前生成进度为 23/25 属性对齐，content / default 映射 ng-content，登记债务为 0。这是属性名层面的统计，不代表 loading 的联合类型与所有组合场景都已验收。
+Card 属于第 2 轮 Button/Card 的 loadingProps 批次，当时完成配置白名单和投影常驻；第 4 轮共享 Loading 完善后，本次继续补齐前批核实的行为缺口。当前生成进度仍为 23/25 属性对齐，content / default 映射 ng-content，登记债务为 0；属性数不变，本批扩展已有输入的联合类型与组合行为。
 
-本次对照锁定上游类型与实现，明确在第 4 轮 Message / Notification 挂载批次后、Dialog 前安排一次 Card 复核：
+本批位于第 4 轮 Message / Notification 挂载批次后、Dialog 前，已实现下列项目，验证结果见第 7 节最新执行记录：
 
-1. 补 loading 的自定义模板分支；当前只有 boolean，上游还支持 TNode，Angular 使用 TemplateRef 对应。
-2. 主体投影动态创建、删除、文本变化时重新判断空态；当前 afterNextRender 只检测一次，hasContent 只会置 true。
-3. 对齐共享 Loading 的包裹/遮罩和延迟行为；当前加载时隐藏主体并单独显示图标，上游通过 Loading 包裹主体。验证主体实例、输入草稿和焦点，不为了遮罩重建业务内容。
-4. 核实 Card.loadingProps 中 indicator 等共享能力的实际接入范围，定义 Card 专属白名单与显式 loading 优先级；不盲目透传会替换业务内容的 content 等字段。
-5. 增加使用 TButton / TInput 的演示，并回归自定义 header/footer/actions、poster 主题、空内容及动态样式组合。SSR / 水合仍按贯穿任务单独验收。
+1. CardLoading 支持 boolean / TemplateRef；模板替换整张卡片的可见内容，正常区块常驻隐藏，模板关闭时销毁其视图。
+2. 使用渲染后查询和 MutationObserver 识别主体元素/非空文本的动态增删与清空，并在销毁时断开观察。
+3. TLoading 常驻包裹主体，默认加载不隐藏或重建业务内容；遮罩覆盖主体 padding，延迟取消及全屏锁交给共享 Loading 管理。
+4. CardLoadingOptions 在原白名单上增加 indicator；显式 loading 决定状态，不接收 attach / content / loading，自定义加载模板不消费默认 Loading 配置。
+5. 新增使用 TButton / TInput 的演示，回归业务草稿/焦点、header/footer/actions、poster 主题、空内容及动态样式。完整 SSR / 水合仍按贯穿任务单独验收。
 
-以上为行为复核清单，尚未实施；其缺口未被现有按属性名统计的 progress 表表达，实施时同步源码、类型、生成文档与验证记录，不以新增这段计划计作功能完成。
+本批不增加组件属性对齐数量，源码、类型和生成文档同步更新。自定义模板替换时的焦点管理由调用方负责，普通遮罩也不自动禁用业务控件；不将本批完成等同于完整发布验收。接续 Dialog → Drawer → ImageViewer。
 
 ## 4. 贯穿各轮的质量任务
 
@@ -355,3 +355,13 @@ node scripts/qa-component-completion.mjs
 - **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、最终文档站生产构建、全部既有与新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增覆盖选择器/元素/函数解析后同目标复用、默认配置挂载/样式、不同目标/placement/zIndex（含 0 与非有限值）分组、Notification 四角边距隔离、Message 位移及 style 优先级、CSS 文本/对象/变量、模板中 TButton/TInput 的事件/原节点/草稿保留、非法/跨文档/内部目标/抛错函数回退、函数每次创建解析、其他服务所有权、作用域销毁释放挂载容器、外部移除容器及替换目标后旧记录精确释放、全部视图恢复。真实计时重启测试扩大时长余量，避免并行构建负载让短计时器先于断言到期，稳定后的最终回归通过。Message / Notification / Card / Loading 页面 issues / badResources 为空，新增演示截图已检查。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.55 kB）。
 
 **接续任务**：Card 共享 Loading 复核 → Dialog → Drawer → ImageViewer；先按第 3 节清单补 Card，再进入对话框生命周期与焦点。
+
+### 2026-11-28：第 4 轮 Card 加载模板、动态主体与遮罩组合
+
+- **加载模板**：公开 CardLoading（boolean / TemplateRef）并保留静态布尔属性转换。布尔加载使用共享 TLoading 包裹主体；自定义模板立即替换整卡可见结构，隐藏但不销毁原头部/封面/主体/底部，移除组件自身的卡片样式类，保留调用方宿主样式。关闭/替换模板销毁模板视图，恢复正常卡片沿用原业务实例。模板模式不消费默认加载的 delay / fullscreen，焦点与高度由调用方管理，不承诺模板切换时自动恢复焦点。
+- **默认遮罩与业务状态**：TLoading 与主体槽常驻，取消原先加载时隐藏主体、只显示图标的结构；遮罩覆盖主体及 padding，普通加载切换不重建或移动业务节点，不改变卡片高度，保留输入草稿和原焦点。头部和底部仍可操作，宿主 aria-busy 反映加载请求；默认遮罩不替代业务禁用或键盘焦点策略。delay、showOverlay、fullscreen、滚动锁及销毁清理交给共享 Loading。
+- **动态主体与白名单**：用 afterRenderEffect 初始化探针并用所属文档的 MutationObserver 观察子节点及文本，元素或非空文本才显示未加载主体，动态清空恢复隐藏，空主体加载仍显示加载区域，销毁断开观察。CardLoadingOptions 在原 LoadingOptions 上增加 indicator，text 支持模板，size 支持 CSS 尺寸；明确排除 attach / content / loading，避免业务投影被配置替换，显式 loading 保持决定权。Button 的 LoadingOptions 不扩展。富内容模板判断复用共享工具。
+- **示例和生成进度**：新增使用 TButton / TInput 的操作示例，包含默认/模板加载、动态图标与文本、元素/纯文字主体和主题切换；Card 示例 4 → 5，总数 347 → 348。Card 仍为 23/25 输入属性加两项 ng-content 映射，整体 1085/1576（68.8%）、深度债 195、零登记债务目录 51/73 不变；本批补已有属性类型与行为，不虚增属性对齐数量。计划第 3 节 Card 复核清单已更新，完整 SSR / 水合和跨弹层验收仍待后续。
+- **验证结果**：`pnpm verify:session`、`pnpm verify`、完整 `pnpm build`、最终文档站生产构建、全部前批及新增交互回归、`pnpm check:progress`、`git diff --check` 通过，missing 0 / extra 0。新增实测遮罩与主体含 padding 的矩形误差小于 2px、加载切换不改变卡片高度、业务节点/草稿/焦点保留、头尾可操作、自定义模板动态事件及销毁/恢复原实例、模板模式释放默认全屏锁、图标/文字模板及 CSS 尺寸、showOverlay=false、配置白名单与显式状态优先级、延迟关闭/销毁取消、动态插入/删除元素及文本/空白、空主体加载、自定义 header 与 poster1/poster2 操作区、动态 class/style 替换和旧样式删除。Card / Loading / Button / Message / Notification 页面 issues / badResources 为空，Card 截图已检查；旧加载演示文案同步改为内容保持可见。生成文件触发开发服务重载后，待稳定运行最终回归通过。保留既有 footer slot、Browserslist、qrcode CommonJS 及首包预算告警（约 805.55 kB）。
+
+**接续任务**：Dialog → Drawer → ImageViewer，先核实 Dialog 显隐、关闭钩子、挂载、焦点与滚动锁的真实缺口，再分批实施。

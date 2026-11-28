@@ -5,17 +5,17 @@ import {
   ElementRef,
   TemplateRef,
   ViewEncapsulation,
-  afterNextRender,
+  afterRenderEffect,
   booleanAttribute,
   computed,
-  inject,
   input,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { TLoading } from '../loading/loading.component';
-import type { LoadingOptions } from '../loading/loading.types';
-import type { Content } from '../../_utils/content';
+import type { LoadingContent, LoadingOptions } from '../loading/loading.types';
+import { isTemplateContent, type Content } from '../../_utils/content';
 
 /** 卡片尺寸。 */
 export const CARD_SIZES = ['medium', 'small'] as const;
@@ -27,14 +27,14 @@ export type CardTheme = (typeof CARD_THEMES)[number];
 
 /** 卡片富文本属性：字符串按文本渲染，`TemplateRef` 交给 `*ngTemplateOutlet` 渲染。 */
 export type CardContent = Content;
+export type CardLoading = boolean | TemplateRef<unknown>;
+/** Card owns its business content and loading state; only these Loading options are forwarded. */
+export interface CardLoadingOptions extends LoadingOptions {
+  indicator?: boolean | LoadingContent;
+}
 
 /** 卡片区块的内联样式，与上游 `Styles` 对齐，支持字符串或样式对象。 */
 export type CardStyles = Record<string, string | number> | string | undefined;
-
-/**
- * 卡片里由组件自身渲染的顶层区块，判断投影内容时用于把自有节点排除掉。
- */
-const CARD_OWN_CLASSES = ['t-card__header', 't-card__cover', 't-card__body', 't-card__footer'] as const;
 
 /**
  * 卡片。
@@ -51,6 +51,7 @@ const CARD_OWN_CLASSES = ['t-card__header', 't-card__cover', 't-card__body', 't-
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'classes()',
+    '[attr.aria-busy]': 'isLoading() ? "true" : null',
   },
 })
 export class TCard {
@@ -99,11 +100,13 @@ export class TCard {
   /** 鼠标悬浮时是否显示阴影。 @zh 鼠标悬浮时是否显示阴影 @en hover shadow @defaultValue false */
   readonly hoverShadow = input(false, { transform: booleanAttribute });
 
-  /** 是否显示加载态，加载态下卡片主体显示 t-loading。 @zh 是否显示加载态 @en loading @defaultValue false */
-  readonly loading = input(false, { transform: booleanAttribute });
+  /** @zh 加载状态；布尔值显示主体遮罩，模板替换卡片可见内容 @en Loading state, boolean for body overlay or template replacing visible card content @defaultValue false */
+  readonly loading = input<CardLoading, CardLoading | string | null | undefined>(false, {
+    transform: value => isTemplateContent(value) ? value : booleanAttribute(value),
+  });
 
-  /** @zh 加载组件配置，支持当前 LoadingOptions 中的属性，加载状态由 loading 决定 @en Loading options supported by TLoading; the loading input controls the state @defaultValue undefined */
-  readonly loadingProps = input<LoadingOptions | undefined>(undefined);
+  /** @zh 默认加载的配置，支持文字、尺寸、延迟、遮罩、全屏和图标；显式 loading 决定状态，不接收 attach/content/loading @en Default loading options including indicator; the explicit loading input owns state, attach/content/loading are excluded @defaultValue undefined */
+  readonly loadingProps = input<CardLoadingOptions | undefined>(undefined);
 
   /** 是否显示卡片阴影。 @zh 是否显示卡片阴影 @en shadow @defaultValue false */
   readonly shadow = input(false, { transform: booleanAttribute });
@@ -123,10 +126,12 @@ export class TCard {
   /** 卡片标题。 @zh 卡片标题 @en title */
   readonly title = input<CardContent>(undefined);
 
-  private readonly hostEl = inject<ElementRef<HTMLElement>>(ElementRef);
-
-  /** 主体内层容器，加载态时用来隐藏投影内容，同时作为判断投影内容是否存在的探针。 */
+  /** Permanent business content probe; overlay visibility never recreates these nodes. */
   private readonly bodyInner = viewChild<ElementRef<HTMLElement>>('bodyInner');
+  protected readonly isLoading = computed(() => !!this.loading());
+  protected readonly customLoading = computed(() => {
+    const loading = this.loading(); return isTemplateContent(loading) ? loading : null;
+  });
 
   /** 卡片主体里是否真的有投影内容，决定要不要渲染 `.t-card__body`（对齐上游按 children 判断的行为）。 */
   protected readonly hasContent = signal(false);
@@ -148,7 +153,7 @@ export class TCard {
   /** 上游：footer 存在，或 poster2 主题下存在操作区时渲染底部。 */
   protected readonly hasFooter = computed(() => !!this.footer() || (!!this.actions() && this.isPoster2()));
 
-  protected readonly classes = computed(() =>
+  protected readonly classes = computed(() => this.customLoading() ? '' :
     this.mergeClasses(
       't-card',
       this.size() === 'small' ? 't-size-s' : '',
@@ -174,44 +179,26 @@ export class TCard {
 
   /** 加载态的视觉由 t-loading 提供（上游同样用 Loading 组件），组件本身不写任何加载态样式。 */
   constructor() {
-    // 首次渲染后再判断投影内容：模板里无法静态得知 <ng-content> 是否为空（同 t-divider 的处理方式）。
-    afterNextRender(() => this.detectContent());
+    afterRenderEffect(cleanup => {
+      const element = this.bodyInner()?.nativeElement;
+      if (!element) return;
+      const measure = () => this.hasContent.set(Array.from(element.childNodes)
+        .some(node => node.nodeType === 1 || node.nodeType === 3 && !!node.textContent?.trim()));
+      untracked(measure);
+      const Observer = element.ownerDocument.defaultView?.MutationObserver;
+      const observer = Observer ? new Observer(measure) : undefined;
+      observer?.observe(element, { childList: true, characterData: true, subtree: true });
+      cleanup(() => observer?.disconnect());
+    });
   }
 
   /** 判断一个取值是不是模板，模板用 `*ngTemplateOutlet` 渲染，其余按文本渲染。 */
   protected asTemplate(value: CardContent): TemplateRef<unknown> | null {
-    return value instanceof TemplateRef ? value : null;
+    return isTemplateContent(value) ? value : null;
   }
 
   private mergeClasses(...classes: Array<string | undefined | false>): string {
     return classes.filter((item): item is string => !!item).join(' ');
   }
 
-  /**
-   * 判断宿主里有没有投影内容。
-   *
-   * 上游按 `children` 是否存在决定要不要渲染 `.t-card__body`。第一次渲染时主体还没渲染，
-   * 没有投影过来的内容会留在宿主元素上，所以宿主直属节点和主体内层都要看一遍。
-   */
-  private detectContent(): void {
-    if (this.hasProjectedNode(this.bodyInner()?.nativeElement) || this.hasProjectedNode(this.hostEl.nativeElement)) {
-      this.hasContent.set(true);
-    }
-  }
-
-  private hasProjectedNode(parent: HTMLElement | undefined): boolean {
-    if (!parent) {
-      return false;
-    }
-    return Array.from(parent.childNodes).some((node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return !!node.textContent?.trim();
-      }
-      if (node.nodeType !== Node.ELEMENT_NODE) {
-        return false;
-      }
-      const element = node as HTMLElement;
-      return !CARD_OWN_CLASSES.some((className) => element.classList.contains(className));
-    });
-  }
 }

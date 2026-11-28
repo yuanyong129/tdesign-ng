@@ -1530,20 +1530,20 @@
         },
         {
           "name": "loading",
-          "type": "boolean",
+          "type": "CardLoading",
           "default": "false",
           "required": false,
-          "zh": "是否显示加载态",
-          "en": "loading",
+          "zh": "加载状态；布尔值显示主体遮罩，模板替换卡片可见内容",
+          "en": "Loading state, boolean for body overlay or template replacing visible card content",
           "values": []
         },
         {
           "name": "loadingProps",
-          "type": "LoadingOptions | undefined",
+          "type": "CardLoadingOptions | undefined",
           "default": "undefined",
           "required": false,
-          "zh": "加载组件配置，支持当前 LoadingOptions 中的属性，加载状态由 loading 决定",
-          "en": "Loading options supported by TLoading; the loading input controls the state",
+          "zh": "默认加载的配置，支持文字、尺寸、延迟、遮罩、全屏和图标；显式 loading 决定状态，不接收 attach/content/loading",
+          "en": "Default loading options including indicator; the explicit loading input owns state, attach/content/loading are excluded",
           "values": []
         },
         {
