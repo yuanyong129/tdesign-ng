@@ -9,7 +9,7 @@ import { DemoConfigProviderBase } from './demos/config-provider-base';
   imports: [ApiTable, DemoBlock, PageNav, DemoConfigProviderBase],
   template: `
     <article class="docs-page">
-      <h1 class="docs-page__title">全局配置 ConfigProvider</h1>
+      <h1 class="docs-page__title">全局特性配置</h1>
       <p class="docs-page__lead">
         全局配置用于批量修改组件内的文案与行为，包裹在组件树外层即可对整个子树生效。
       </p>
