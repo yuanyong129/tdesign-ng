@@ -12,6 +12,7 @@ import { filter } from 'rxjs';
 import { DocsSearch } from './docs/docs-search';
 import { DocsToc } from './docs/docs-toc';
 import { DOCS_NAV, groupNav } from './docs/nav';
+import { version } from '../../../ng-components/package.json';
 
 type Theme = 'light' | 'dark';
 
@@ -60,7 +61,7 @@ function isMacPlatform(): boolean {
         </svg>
         <span class="docs-brand__name">TDesign</span>
         <span class="docs-brand__sub">Angular</span>
-        <span class="docs-brand__badge">pre-alpha v0.0.0</span>
+        <span class="docs-brand__badge">pre-alpha v{{ version }}</span>
       </a>
 
       <button type="button" class="docs-search-trigger" aria-label="搜索文档" (click)="searchOpen.set(true)">
@@ -228,7 +229,7 @@ function isMacPlatform(): boolean {
             <span class="docs-footer__sep">·</span>
             <span>基于 TDesign 设计规范构建</span>
             <span class="docs-footer__spacer"></span>
-            <span class="docs-footer__badge">pre-alpha v0.0.0</span>
+            <span class="docs-footer__badge">pre-alpha v{{ version }}</span>
           </div>
         </footer>
       </div>
@@ -790,6 +791,7 @@ function isMacPlatform(): boolean {
   `,
 })
 export class AppComponent {
+  protected readonly version = version;
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
